@@ -1,0 +1,6 @@
+.vscode/
+bin/
+.idea
+*.exe
+cfg.json
+g/g.go

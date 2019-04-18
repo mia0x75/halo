@@ -1,0 +1,206 @@
+# .gqlgen.yml example
+#
+# Refer to https://gqlgen.com/config/
+# for detailed .gqlgen.yml documentation.
+
+schema:
+- gqlapi/schema.graphql
+
+exec:
+  filename: gqlapi/generated.go
+  package: gqlapi
+
+model:
+  filename: gqlapi/models.go
+  package: gqlapi
+
+resolver:
+  filename: resolvers/resolver.go
+  package: resolvers
+  type: Resolver
+
+# Tell gqlgen about any existing models you want to reuse for
+# graphql. These normally come from the db or a remote api.
+models:
+  Avatar:
+    model: github.com/mia0x75/halo/models.Avatar
+
+  Comment:
+    model: github.com/mia0x75/halo/models.Comment
+
+  Cron:
+    model: github.com/mia0x75/halo/models.Cron
+
+  Glossary:
+    model: github.com/mia0x75/halo/models.Glossary
+
+  Cluster:
+    model: github.com/mia0x75/halo/models.Cluster
+
+  Log:
+    model: github.com/mia0x75/halo/models.Log
+
+  Option:
+    model: github.com/mia0x75/halo/models.Option
+
+  Query:
+    model: github.com/mia0x75/halo/models.Query
+
+  Edge:
+    model: github.com/mia0x75/halo/models.Edge
+
+  Role:
+    model: github.com/mia0x75/halo/models.Role
+
+  Rule:
+    model: github.com/mia0x75/halo/models.Rule
+
+  Statement:
+    model: github.com/mia0x75/halo/models.Statement
+
+  Ticket:
+    model: github.com/mia0x75/halo/models.Ticket
+
+  User:
+    model: github.com/mia0x75/halo/models.User
+
+  Statistic:
+    model: github.com/mia0x75/halo/models.Statistic
+
+  CPUStats:
+    model: github.com/akhenakh/statgo.CPUStats
+
+  HostInfos:
+    model: github.com/akhenakh/statgo.HostInfos
+
+  ProcessStats:
+    model: github.com/akhenakh/statgo.ProcessStats
+
+  MemStats:
+    model: github.com/akhenakh/statgo.MemStats
+
+  Int8:
+    model: github.com/mia0x75/halo/gqlapi.Int8
+
+  UInt8:
+    model: github.com/mia0x75/halo/gqlapi.UInt8
+
+  Int16:
+    model: github.com/mia0x75/halo/gqlapi.Int16
+
+  UInt16:
+    model: github.com/mia0x75/halo/gqlapi.UInt16
+
+  UInt:
+    model: github.com/mia0x75/halo/gqlapi.UInt
+
+  Int32:
+    model: github.com/mia0x75/halo/gqlapi.Int32
+
+  UInt32:
+    model: github.com/mia0x75/halo/gqlapi.UInt32
+
+  Int64:
+    model: github.com/mia0x75/halo/gqlapi.Int64
+
+  UInt64:
+    model: github.com/mia0x75/halo/gqlapi.UInt64
+
+  CreateTicketInput:
+    model: github.com/mia0x75/halo/models.CreateTicketInput
+  
+  UpdateTicketInput:
+    model: github.com/mia0x75/halo/models.UpdateTicketInput
+  
+  PatchTicketStatusInput:
+    model: github.com/mia0x75/halo/models.PatchTicketStatusInput
+  
+  CreateCommentInput:
+    model: github.com/mia0x75/halo/models.CreateCommentInput
+  
+  CreateUserInput:
+    model: github.com/mia0x75/halo/models.CreateUserInput
+  
+  UpdateUserInput:
+    model: github.com/mia0x75/halo/models.UpdateUserInput
+  
+  PatchPasswordInput:
+    model: github.com/mia0x75/halo/models.PatchPasswordInput
+  
+  PatchEmailInput:
+    model: github.com/mia0x75/halo/models.PatchEmailInput
+  
+  GrantRolesInput:
+    model: github.com/mia0x75/halo/models.GrantRolesInput
+  
+  GrantClustersInput:
+    model: github.com/mia0x75/halo/models.GrantClustersInput
+
+  RevokeRolesInput:
+    model: github.com/mia0x75/halo/models.RevokeRolesInput
+
+  RevokeClustersInput:
+    model: github.com/mia0x75/halo/models.RevokeClustersInput
+  
+  GrantReviewersInput:
+    model: github.com/mia0x75/halo/models.GrantReviewersInput
+
+  RevokeReviewersInput:
+    model: github.com/mia0x75/halo/models.RevokeReviewersInput
+
+  UserRegisterInput:
+    model: github.com/mia0x75/halo/models.UserRegisterInput
+  
+  UserLoginInput:
+    model: github.com/mia0x75/halo/models.UserLoginInput
+    
+  CreateClusterInput:
+    model: github.com/mia0x75/halo/models.CreateClusterInput
+  
+  UpdateClusterInput:
+    model: github.com/mia0x75/halo/models.UpdateClusterInput
+
+  PatchClusterStatusInput:
+    model: github.com/mia0x75/halo/models.PatchClusterStatusInput
+
+  ValidateConnectionInput:
+    model: github.com/mia0x75/halo/models.ValidateConnectionInput
+  
+  ValidatePatternInput:
+    model: github.com/mia0x75/halo/models.ValidatePatternInput
+  
+  PatchOptionValueInput:
+    model: github.com/mia0x75/halo/models.PatchOptionValueInput
+  
+  CreateQueryInput:
+    model: github.com/mia0x75/halo/models.CreateQueryInput
+  
+  PatchRuleValuesInput:
+    model: github.com/mia0x75/halo/models.PatchRuleValuesInput
+  
+  PatchRuleBitwiseInput:
+    model: github.com/mia0x75/halo/models.PatchRuleBitwiseInput
+
+  PatchUserStatusInput:
+    model: github.com/mia0x75/halo/models.PatchUserStatusInput
+
+  UpdateProfileInput:
+    model: github.com/mia0x75/halo/models.UpdateProfileInput
+  
+  SoarQueryInput:
+    model: github.com/mia0x75/halo/models.SoarQueryInput
+
+  ScheduleTicketInput:
+    model: github.com/mia0x75/halo/models.ScheduleTicketInput
+
+  ActivateInput:
+    model: github.com/mia0x75/halo/models.ActivateInput
+
+  LostPasswdInput:
+    model: github.com/mia0x75/halo/models.LostPasswdInput
+
+  ResetPasswdInput:
+    model: github.com/mia0x75/halo/models.ResetPasswdInput
+
+  ResendActivationMailInput:
+    model: github.com/mia0x75/halo/models.ResendActivationMailInput

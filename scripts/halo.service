@@ -1,0 +1,18 @@
+[Unit]
+Description=MariaDB Change Management Service
+After=syslog.target network.target
+
+[Service]
+PIDFile=/var/run/halo.pid
+ExecStartPre=/bin/rm -f /var/run/halo.pid
+ExecStart=/bin/halo
+Restart=on-failure
+PrivateTmp=true
+LimitNOFILE=64000
+TimeoutStartSec=180
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=halo
+
+[Install]
+WantedBy=multi-user.target

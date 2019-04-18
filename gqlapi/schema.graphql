@@ -1,0 +1,2923 @@
+# 人口
+
+"""
+系统入口
+"""
+schema {
+	query:        QueryRoot
+	mutation:     MutationRoot
+	subscription: SubscriptionRoot
+}
+
+# Directive定义
+
+"""
+用户权限管理
+"""
+directive @auth(
+	"""
+	权限要求
+	"""
+	requires: [RoleEnum!]!
+) on QUERY | MUTATION | FIELD_DEFINITION | SUBSCRIPTION
+
+"""
+把GraphQL中定义的Enum的枚举值从String类型适配到Int类型
+"""
+directive @enumInt(
+	"""
+	枚举值对应的整数值
+	"""
+	value: Int!
+) on ENUM_VALUE
+
+"""
+把源字符串转成大写
+"""
+directive @upper on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+"""
+把源字符串转成小写
+"""
+directive @lower on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+"""
+把UNIX_TIMESTAMP转化成日期时间字符串
+"""
+directive @timestamp(
+	"""
+	日期格式
+	"""
+	format: String! = "yyyy-MM-dd"
+) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+"""
+把普通字段用md5算法转成UUID
+"""
+directive @uuid(
+	# 新生成的属性名称，默认UUID
+	name: String = "UUID"
+	# 计算UUID属性相关的属性
+	from: [String] = ["id"]
+) on OBJECT
+
+"""
+日期格式转换
+"""
+directive @date(
+	"""
+	日期格式
+	"""
+	format: String! = "yyyy-MM-dd"
+) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+"""
+字符串长度限制
+"""
+directive @length(
+	"""
+	允许的最大长度
+	"""
+	max: Int!
+) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+"""
+数字范围限制
+"""
+directive @range(
+	"""
+	最小值
+	"""
+	begin: Int!,
+	"""
+	最大值
+	"""
+	end: Int!
+) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+"""
+字符串正则匹配限制
+"""
+directive @matches(
+	"""
+	需要匹配的正则表达式
+	"""
+	pattern: String!
+) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+"""
+字符串去首尾空格
+"""
+directive @trim on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+"""
+属性改名
+"""
+directive @rename(
+	"""
+	输入字符串
+	"""
+	to: String!
+) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+union Searchable = User | Ticket | Cluster
+
+# 枚举定义
+
+"""
+关联表类型描述
+"""
+enum EdgeEnum {
+	"""
+	用户到审核的多对多关系
+	"""
+	USER_TO_REVIEWER @enumInt(value: 1)
+
+	"""
+	用户到角色的多对多关系
+	"""
+	USER_TO_ROLE     @enumInt(value: 2)
+
+	"""
+	用户到群集的多对多关系
+	"""
+	USER_TO_CLUSTER  @enumInt(value: 3)
+}
+
+"""
+角色定义
+"""
+enum RoleEnum {
+	"""
+	管理员
+	"""
+	ADMIN     @enumInt(value: 1)
+	"""
+	工单审核人
+	"""
+	REVIEWER  @enumInt(value: 2)
+	"""
+	开发者
+	"""
+	DEVELOPER @enumInt(value: 3)
+	"""
+	普通用户
+	"""
+	USER      @enumInt(value: 4)
+	"""
+	访客
+	"""
+	GUEST     @enumInt(value: 5)
+}
+
+"""
+性别定义
+"""
+enum GenderEnum {
+	"""
+	无
+	"""
+	NA     @enumInt(value: -1)
+	"""
+	男
+	"""
+	MALE   @enumInt(value: 1)
+	"""
+	女
+	"""
+	FEMALE @enumInt(value: 0)
+}
+
+# 工单保存成功，等待系统审核
+#   => 系统审核不通过，需要修改后重新提交 -> ... 提交人编辑 -> 重新走流程
+#   => 系统审核有警告
+#   => 系统审核通过，等待人工审核
+#     => 人工审核不通过，需要重修修改后提交 -> ... 提交人编辑 -> 重新走流程
+#     => 人工审核有问题，等待协商解决
+#     => 人工审核通过，等待上线执行
+#       => 上线执行完成，订单关闭
+#       => 上线执行失败，请转到工单详情进一步了解
+enum TicketStatusEnum {
+	"""
+	工单保存成功，等待系统审核
+	"""
+	WAITING_FOR_VLD  @enumInt(value: 1)
+
+	"""
+	系统审核不通过，一条或者多条语句违反规则限制，需要修改后重新提交
+	"""
+	VLD_FAILURE      @enumInt(value: 2)
+
+	"""
+	系统审核不通过，但部分或全部语句存在警告
+	"""
+	VLD_WARNING      @enumInt(value: 3)
+
+	"""
+	系统审核通过，等待人工审核
+	"""
+	WAITING_FOR_MRV  @enumInt(value: 4)
+
+	"""
+	人工审核不通过，需要修改后重新提交
+	"""
+	MRV_FAILURE      @enumInt(value: 5)
+
+	"""
+	人工审核通过，等待上线执行
+	"""
+	LGTM             @enumInt(value: 6)
+
+	"""
+	上线执行完成
+	"""
+	DONE             @enumInt(value: 7)
+
+	"""
+	上线执行失败，部分或全部未执行
+	"""
+	EXEC_FAILURE     @enumInt(value: 8)
+
+	"""
+	发起人主动关闭不需要执行
+	"""
+	CLOSED           @enumInt(value: 9)
+}
+
+enum UserStatusEnum {
+	"""
+	正常
+	"""
+	NORMAL  @enumInt(value: 1)
+
+	"""
+	禁用
+	"""
+	BLOCKED @enumInt(value: 2)
+
+	"""
+	等待管理员审核
+	"""
+	PENDING @enumInt(value: 3)
+}
+
+enum ClusterStatusEnum {
+	"""
+	正常
+	"""
+	NORMAL   @enumInt(value: 1)
+
+	"""
+	禁用
+	"""
+	DISABLED @enumInt(value: 2)
+}
+
+enum QueryTypeEnum {
+	"""
+	数据查询
+	"""
+	QUERY
+
+	"""
+	查询分析
+	"""
+	ANALYZE
+
+	"""
+	查询重写
+	"""
+	REWRITE
+}
+
+"""
+接口定义
+"""
+interface Node {
+	"""
+	创建时间
+	"""
+	CreateAt: UInt!
+	"""
+	最后一次修改时间
+	"""
+	UpdateAt: UInt
+}
+
+"""
+翻页信息
+"""
+type PageInfo {
+	"""
+	是否可以向前翻页
+	"""
+	hasNextPage:     Boolean!
+
+	"""
+	是否可以向后翻页
+	"""
+	hasPreviousPage: Boolean!
+
+	"""
+	向前翻页时的光标
+	"""
+	startCursor:     ID!
+
+	"""
+	向后翻页时的光标
+	"""
+	endCursor:       ID!
+}
+
+type Avatar implements Node {
+	"""
+	头像UUID
+	"""
+	UUID:     ID!
+
+	"""
+	头像地址
+	"""
+	URL:      String! @length(max: 100)
+
+	"""
+	记录创建时间
+	"""
+	CreateAt: UInt!
+
+	"""
+	记录最近一次修改时间
+	"""
+	UpdateAt: UInt
+}
+
+"""
+计划任务信息
+"""
+type Cron implements Node {
+	"""
+	计划任务UUID
+	"""
+	UUID:      ID!
+
+	"""
+	名称
+	"""
+	Name:      String! @length(max: 100)
+
+	"""
+	外部命令
+	"""
+	Cmd:      String!
+
+	"""
+	执行参数
+	"""
+	Params:    String
+
+	"""
+	执行间隔
+	"""
+	Interval:  String
+
+	"""
+	执行耗时
+	"""
+	Duration:  String
+
+	"""
+	最后一次执行时间
+	"""
+	LastRun:   String
+
+	"""
+	下一次执行时间
+	"""
+	NextRun:   String
+
+	"""
+	是否周期性
+	"""
+	Recurrent: UInt8!
+
+	"""
+	执行状态
+	"""
+	Status: String!
+
+	"""
+	记录创建时间
+	"""
+	CreateAt:  UInt!
+
+	"""
+	记录最近一次修改时间
+	"""
+	UpdateAt:  UInt
+}
+
+type CronConnection {
+	"""
+	分页信息
+	"""
+	pageInfo:   PageInfo!
+
+	"""
+	记录信息
+	"""
+	edges:      [CronEdge!]
+
+	"""
+	记录总数
+	"""
+	totalCount: Int!
+}
+
+type CronEdge {
+	"""
+	端
+	"""
+	node:   Cron
+
+	"""
+	分页时使用的光标
+	"""
+	cursor: ID!
+}
+
+"""
+审核意见建议说明
+"""
+type Comment implements Node {
+	"""
+	意见UUID
+	"""
+	UUID:    ID!
+
+	"""
+	具体内容
+	"""
+	Content:  String! @length(max: 255)
+
+	"""
+	发起人
+	"""
+	User:     User!
+
+	"""
+	关联的工单
+	"""
+	Ticket:   Ticket!
+
+	"""
+	记录创建时间
+	"""
+	CreateAt: UInt!
+
+	"""
+	记录最近一次修改时间
+	"""
+	UpdateAt: UInt
+}
+
+type CommentConnection {
+	"""
+	分页信息
+	"""
+	pageInfo:   PageInfo!
+
+	"""
+	记录信息
+	"""
+	edges:      [CommentEdge!]
+
+	"""
+	记录总数
+	"""
+	totalCount: Int!
+}
+
+type CommentEdge {
+	"""
+	端
+	"""
+	node:   Comment
+
+	"""
+	分页时使用的光标
+	"""
+	cursor: ID!
+}
+
+"""
+数据字典
+"""
+type Glossary implements Node {
+	"""
+	词条的UUID
+	"""
+	UUID:        ID!
+
+	"""
+	词条分组
+	"""
+	Group:       String! @length(max: 50)
+
+	"""
+	词条数字取值
+	"""
+	Key:         UInt!    @range(begin: 1, end: 255)
+
+	"""
+	词条的名称
+	"""
+	Value:       String! @length(max: 75)
+
+	"""
+	词条的描述
+	"""
+	Description: String! @length(max: 255)
+
+	"""
+	记录创建时间
+	"""
+	CreateAt:    UInt!
+
+	"""
+	记录最近一次修改时间
+	"""
+	UpdateAt:    UInt
+}
+
+"""
+群集，此处仅处理主服务器
+"""
+type Cluster implements Node {
+	"""
+	群集的UUID
+	"""
+	UUID:     ID!
+
+	"""
+	群集的主机名称，唯一
+	"""
+	Host:     String! @length(max: 75)
+
+	"""
+	群集的主机别名，唯一
+	"""
+	Alias:    String! @length(max: 75)
+
+	"""
+	群集的IP地址，唯一，默认使用IP地址进行连接
+	"""
+	IP:       String! @matches(pattern: "^(\\d{1,3}\\.){3}\\d{1,3}$")
+
+	"""
+	群集的端口号
+	"""
+	Port:     UInt16! @range(begin: 0, end: 65535)
+
+	"""
+	群集连接的用户名
+	"""
+	User:     String! @length(max: 75)
+
+	"""
+	群集的状态
+	"""
+	Status:   UInt8!  @range(begin: 0, end: 255) @matches(pattern: "^(1|2)$")
+
+	"""
+	记录创建时间
+	"""
+	CreateAt: UInt!
+
+	"""
+	记录最近一次修改时间
+	"""
+	UpdateAt: UInt
+}
+
+type ClusterConnection {
+	"""
+	分页信息
+	"""
+	pageInfo:   PageInfo!
+
+	"""
+	记录信息
+	"""
+	edges:      [ClusterEdge!]
+
+	"""
+	记录总数
+	"""
+	totalCount: Int!
+}
+
+type ClusterEdge {
+	"""
+	端
+	"""
+	node:   Cluster
+
+	"""
+	分页时使用的光标
+	"""
+	cursor: ID!
+}
+
+"""
+操作日志
+"""
+type Log {
+	"""
+	日志ID
+	"""
+	UUID:      ID!
+
+	"""
+	日志自增ID
+	"""
+	LogID:     Int!
+
+	"""
+	日志关联的用户
+	"""
+	User:      User!
+
+	"""
+	日志内容
+	"""
+	Operation: String!
+
+	"""
+	日志记录的时间
+	"""
+	CreateAt:  UInt!
+}
+
+type LogConnection {
+	"""
+	分页信息
+	"""
+	pageInfo:   PageInfo!
+
+	"""
+	记录信息
+	"""
+	edges:      [LogEdge!]
+
+	"""
+	记录总数
+	"""
+	totalCount: Int!
+}
+
+type LogEdge {
+	"""
+	端
+	"""
+	node:   Log
+
+	"""
+	分页时使用的光标
+	"""
+	cursor: ID!
+}
+
+"""
+系统选项
+"""
+type Option implements Node {
+	"""
+	系统选项的UUID
+	"""
+	UUID:        ID!
+
+	"""
+	系统选项的名称
+	"""
+	Name:        String! @length(max: 50)
+
+	"""
+	系统选项的当前取值
+	"""
+	Value:       String! @length(max: 75)
+
+	"""
+	分别是：0 - 只读 和 1 - 读写。
+	"""
+	Writable:    UInt8!  @range(begin: 0, end: 255) @matches(pattern: "^(0|1)$")
+
+	"""
+	系统选项的描述，用于页面展示
+	"""
+	Description: String! @length(max: 75)
+
+	"""
+	页面展示时使用的控件类型
+	"""
+	Element:     String! @length(max: 75)
+
+	"""
+	记录创建时间
+	"""
+	CreateAt:    UInt!
+
+	"""
+	记录最近一次修改时间
+	"""
+	UpdateAt:    UInt
+}
+
+"""
+历史数据查询
+"""
+type Query implements Node {
+	"""
+	数据查询的UUID
+	"""
+	UUID:     ID!
+
+	"""
+	查询类型
+	"""
+	Type:    UInt8!
+
+	"""
+	数据查询的管理群集
+	"""
+	Cluster: Cluster!
+
+	"""
+	数据查询的具体数据库
+	"""
+	Database: String! @length(max: 75)
+
+	"""
+	数据查询使用的具体语句
+	"""
+	Content:  String! @length(max: 65535)
+
+	"""
+	数据查询的执行计划
+	"""
+	Plan:     String! @length(max: 65535)
+
+	"""
+	数据查询的发起人
+	"""
+	User:     User!
+
+	"""
+	记录创建时间
+	"""
+	CreateAt: UInt!
+
+	"""
+	记录最近一次修改时间
+	"""
+	UpdateAt: UInt
+}
+
+type QueryConnection {
+	"""
+	分页信息
+	"""
+	pageInfo:   PageInfo!
+
+	"""
+	记录信息
+	"""
+	edges:      [QueryEdge!]
+
+	"""
+	记录总数
+	"""
+	totalCount: Int!
+}
+
+type QueryEdge {
+	"""
+	端
+	"""
+	node:   Query
+
+	"""
+	分页时使用的光标
+	"""
+	cursor: ID!
+}
+
+"""
+系统角色
+"""
+type Role implements Node {
+	"""
+	角色的UUID
+	"""
+	UUID:        ID!
+
+	"""
+	角色的名字
+	"""
+	Name:        String! @length(max: 75)
+
+	"""
+	角色的描述
+	"""
+	Description: String! @length(max: 75)
+
+	"""
+	角色关联的用户
+	"""
+	Users(
+		"""
+		Returns the elements in the list that come after the specified cursor.
+		"""
+		after: String
+
+		"""
+		Returns the elements in the list that come before the specified cursor.
+		"""
+		before: String
+
+		"""
+		Returns the first _n_ elements from the list.
+		"""
+		first: Int
+
+		"""
+		Returns the last _n_ elements from the list.
+		"""
+		last: Int
+	): UserConnection
+
+	"""
+	记录创建时间
+	"""
+	CreateAt:    UInt!
+
+	"""
+	记录最近一次修改时间
+	"""
+	UpdateAt:    UInt
+}
+
+"""
+审核规则
+"""
+type Rule implements Node {
+	"""
+	规则UUID
+	"""
+	UUID:        ID!
+
+	"""
+	规则名称，此处是一个编码
+	"""
+	Name:        String!  @length(max: 75)
+
+	"""
+	规则分组
+	"""
+	Group:       UInt8!   @range(begin: 1, end: 255)
+
+	"""
+	规则描述，用于界面展示
+	"""
+	Description: String!  @length(max: 75)
+
+	"""
+	规则的严重级别，分别是警告和错误，警告可以被忽略进而审核执行，错误则必须修正之后才可以被审核执行
+	"""
+	VldrGroup:    UInt16!   @range(begin: 1000, end: 9999) @matches(pattern: "^(\\d{4}$")
+
+	"""
+	规则当前的设定值，部分规则需要，比如允许的存储引擎
+	"""
+	Values:      String!  @length(max: 75)
+
+	"""
+	用低三位表达规则的状态，分别是：读/写/执行，默认高位永远是1。
+	"""
+	Bitwise:     UInt8!   @range(begin: 0, end: 255) @matches(pattern: "^(4|5|6|7)$")
+
+	"""
+	规则对应的处理函数
+	"""
+	Func:        String!  @length(max: 75)
+
+	"""
+	规则验证不通过时，需要给出的提示信息，可能带有占位符
+	"""
+	Message:     String!  @length(max: 75)
+
+	"""
+	界面展示使用的控件及参数
+	"""
+	Element:     String!  @length(max: 75)
+
+	"""
+	记录创建时间
+	"""
+	CreateAt:    UInt!
+
+	"""
+	记录最近一次修改时间
+	"""
+	UpdateAt:    UInt
+}
+
+type CPUStats {
+	User:      Float!
+	Kernel:    Float!
+	Idle:      Float!
+	IOWait:    Float!
+	Swap:      Float!
+	Nice:      Float!
+	LoadMin1:  Float!
+	LoadMin5:  Float!
+	LoadMin15: Float!
+#	Period time.Duration
+#	TimeTaken time.Time
+}
+
+type HostInfos {
+	OSName:    String!
+	OSRelease: String!
+	OSVersion: String!
+	Platform:  String!
+	HostName:  String!
+	NCPUs:     Int!
+	MaxCPUs:   Int!
+	BitWidth:  Int!
+#	uptime    time.Time
+#	systime   time.Time
+}
+
+type ProcessStats {
+	"""
+	The total number of processes
+	"""
+	Total:    Int!
+
+	"""
+	The number of running processes
+	"""
+	Running:  Int!
+
+	"""
+	The number of sleeping processes
+	"""
+	Sleeping: Int!
+
+	"""
+	The number of stopped processes
+	"""
+	Stopped:  Int!
+
+	"""
+	The number of zombie processes
+	"""
+	Zombie:   Int!
+}
+
+type MemStats {
+	"""
+	The total amount of real memory in bytes
+	"""
+	Total:     Int!
+
+	"""
+	Theount of real memory in bytes.
+	"""
+	Free:      Int!
+
+	"""
+	The used amount of real memory in bytes
+	"""
+	Used:      Int!
+
+	"""
+	The amount of real memory in bytes used for caching
+	"""
+	Cache:     Int!
+
+	"""
+	The total swap space in bytes.
+	"""
+	SwapTotal: Int!
+
+	"""
+	The used swap in bytes
+	"""
+	SwapUsed:  Int!
+
+	"""
+	The free swap in bytes
+	"""
+	SwapFree:  Int!
+}
+
+type Environments {
+	CPUStats:     CPUStats!
+	HostInfos:    HostInfos!
+	ProcessStats: ProcessStats!
+	MemStats:     MemStats!
+}
+
+"""
+工单分解后的语句集
+"""
+type Statement implements Node {
+	"""
+	语句的UUID
+	"""
+	UUID:         ID!
+
+	"""
+	语句的顺序ID
+	"""
+	Sequence:     UInt16!  @range(begin: 1, end: 65535)
+
+	"""
+	语句的具体内容
+	"""
+	Content:      String! @length(max: 65535)
+
+	"""
+	语句的类型，这个有抽象语法树决定
+	"""
+	Type:         UInt8   @range(begin: 1, end: 255)
+
+	"""
+	语句的审核状态
+	"""
+	Status:       UInt8!  @range(begin: 1, end: 255)
+
+	"""
+	语句分析报告
+	"""
+	Report:       String  @length(max: 65535)
+
+	"""
+	DML语句的执行计划
+	"""
+	Plan:         String
+
+	"""
+	语句关联的工单
+	"""
+	Ticket:       Ticket!
+
+	"""
+	在服务器正确执行后影响的行数
+	"""
+	RowsAffected: UInt
+
+	"""
+	记录创建时间
+	"""
+	CreateAt:     UInt!
+
+	"""
+	记录最近一次修改时间
+	"""
+	UpdateAt:     UInt
+}
+
+type StatementConnection {
+	"""
+	分页信息
+	"""
+	pageInfo:   PageInfo!
+
+	"""
+	记录信息
+	"""
+	edges:      [StatementEdge!]
+
+	"""
+	记录总数
+	"""
+	totalCount: Int!
+}
+
+type StatementEdge {
+	"""
+	端
+	"""
+	node:   Statement
+
+	"""
+	分页时使用的光标
+	"""
+	cursor: ID!
+}
+
+"""
+系统统计信息
+"""
+type Statistic implements Node {
+	"""
+	统计的UUID
+	"""
+	UUID:     ID!
+
+	"""
+	分组
+	"""
+	Group:    String!
+
+	"""
+	统计的名称
+	"""
+	Key:      String! @length(max: 50)
+
+	"""
+	统计的值
+	"""
+	Value:    Float!
+
+	"""
+	记录创建时间
+	"""
+	CreateAt: UInt!
+
+	"""
+	记录最近一次修改时间
+	"""
+	UpdateAt: UInt
+}
+
+"""
+变更工单
+"""
+type Ticket implements Node {
+	"""
+	变更工单的UUID
+	"""
+	UUID:     ID!
+
+	"""
+	变更工单需要应用到的群集
+	"""
+	Cluster: Cluster!
+
+	"""
+	变更工单需要应用到的数据库
+	"""
+	Database: String! @length(max: 75)
+
+	"""
+	变更工单的主题
+	"""
+	Subject:  String! @length(max: 75)
+
+	"""
+	变更工单的内容
+	"""
+	Content:  String! @length(max: 65535)
+
+	"""
+	变更工单的审核状态
+	"""
+	Status:   UInt8!  @range(begin: 1, end: 255)
+
+	"""
+	变更工单的发起人
+	"""
+	User:     User!
+
+	"""
+	变更工单的审核人
+	"""
+	Reviewer: User!
+
+	"""
+	变更工单的关联分解的语句
+	"""
+	Statements(
+		"""
+		Returns the elements in the list that come after the specified cursor.
+		"""
+		after: String
+
+		"""
+		Returns the elements in the list that come before the specified cursor.
+		"""
+		before: String
+
+		"""
+		Returns the first _n_ elements from the list.
+		"""
+		first: Int
+
+		"""
+		Returns the last _n_ elements from the list.
+		"""
+		last: Int
+	): StatementConnection!
+
+	"""
+	变更工单的审核意见建议
+	"""
+	Comments(
+		"""
+		Returns the elements in the list that come after the specified cursor.
+		"""
+		after: String
+
+		"""
+		Returns the elements in the list that come before the specified cursor.
+		"""
+		before: String
+
+		"""
+		Returns the first _n_ elements from the list.
+		"""
+		first: Int
+
+		"""
+		Returns the last _n_ elements from the list.
+		"""
+		last: Int
+	):   CommentConnection
+
+	"""
+	记录创建时间
+	"""
+	CreateAt: UInt!
+
+	"""
+	记录最近一次修改时间
+	"""
+	UpdateAt: UInt
+}
+
+type TicketConnection {
+	"""
+	分页信息
+	"""
+	pageInfo:   PageInfo!
+	"""
+	记录信息
+	"""
+	edges:      [TicketEdge!]
+	"""
+	记录总数
+	"""
+	totalCount: Int!
+}
+
+type TicketEdge {
+	"""
+	端
+	"""
+	node:   Ticket
+
+	"""
+	分页时使用的光标
+	"""
+	cursor: ID!
+}
+
+"""
+用户信息
+"""
+type User implements Node {
+	"""
+	用户的UUID
+	"""
+	UUID:       ID!
+
+	"""
+	用户的电子邮件地址，用于登录
+	"""
+	Email:      String! @length(max: 75)
+
+	"""
+	用户的当前状态
+	"""
+	Status:     UInt8!  @range(begin: 1, end: 255) @matches(pattern: "^(1|2|3)$")
+
+	"""
+	用户的真实姓名
+	"""
+	Name:       String  @length(max: 10)
+
+	"""
+	用户电话号码
+	"""
+	Phone:      UInt64
+
+	"""
+	用户的头像
+	"""
+	Avatar:     Avatar!
+
+	"""
+	用户关联的角色
+	"""
+	Roles:      [Role]
+
+	"""
+	用户的关联审核人
+	"""
+	Reviewers:  [User]
+
+	"""
+	用户维度的统计信息
+	"""
+	Statistics: [Statistic]
+
+	"""
+	用户的关联群集
+	"""
+	Clusters(
+		"""
+		Returns the elements in the list that come after the specified cursor.
+		"""
+		after: String
+
+		"""
+		Returns the elements in the list that come before the specified cursor.
+		"""
+		before: String
+
+		"""
+		Returns the first _n_ elements from the list.
+		"""
+		first: Int
+
+		"""
+		Returns the last _n_ elements from the list.
+		"""
+		last: Int
+	): ClusterConnection
+
+	"""
+	用户的关联工单
+	"""
+	Tickets(
+		"""
+		Returns the elements in the list that come after the specified cursor.
+		"""
+		after: String
+
+		"""
+		Returns the elements in the list that come before the specified cursor.
+		"""
+		before: String
+
+		"""
+		Returns the first _n_ elements from the list.
+		"""
+		first: Int
+
+		"""
+		Returns the last _n_ elements from the list.
+		"""
+		last: Int
+	):   TicketConnection
+
+	"""
+	用户的关联查询
+	"""
+	Queries(
+		"""
+		Returns the elements in the list that come after the specified cursor.
+		"""
+		after: String
+
+		"""
+		Returns the elements in the list that come before the specified cursor.
+		"""
+		before: String
+
+		"""
+		Returns the first _n_ elements from the list.
+		"""
+		first: Int
+
+		"""
+		Returns the last _n_ elements from the list.
+		"""
+		last: Int
+	):   QueryConnection
+
+	"""
+	记录创建时间
+	"""
+	CreateAt:   UInt!
+
+	"""
+	记录最近一次修改时间
+	"""
+	UpdateAt:   UInt
+}
+
+"""
+用户连接定义
+"""
+type UserConnection {
+	"""
+	分页信息
+	"""
+	pageInfo:   PageInfo!
+
+	"""
+	记录信息
+	"""
+	edges:      [UserEdge!]
+
+	"""
+	记录总数
+	"""
+	totalCount: Int!
+}
+
+"""
+连接中用户的端
+"""
+type UserEdge {
+	"""
+	端
+	"""
+	node:   User
+
+	"""
+	分页时使用的光标
+	"""
+	cursor: ID!
+}
+
+"""
+用户登录后返回当前用户信息和令牌
+"""
+type LoginPayload {
+	"""
+	用户信息
+	"""
+	Me:    User!
+
+	"""
+	登录令牌
+	"""
+	Token: String!
+}
+
+"""
+数据库信息
+"""
+type Database {
+	"""
+	名称
+	"""
+	Name:    String!
+
+	"""
+	字符集
+	"""
+	Charset: String!
+
+	"""
+	排序规则
+	"""
+	Collate: String!
+}
+
+"""
+数据查询入口
+"""
+type QueryRoot {
+	"""
+	根据群集编码查看群集记录
+	"""
+	cluster (
+		"""
+		群集编码
+		"""
+		id: ID!
+	): Cluster @auth(requires: [USER, ADMIN])
+
+	"""
+	浏览所有群集记录
+	"""
+	clusters (
+		"""
+		Returns the elements in the list that come after the specified cursor.
+		"""
+		after: String
+
+		"""
+		Returns the elements in the list that come before the specified cursor.
+		"""
+		before: String
+
+		"""
+		Returns the first _n_ elements from the list.
+		"""
+		first: Int
+
+		"""
+		Returns the last _n_ elements from the list.
+		"""
+		last: Int
+	): ClusterConnection @auth(requires: [ADMIN])
+
+	"""
+	群集记录查找
+	"""
+	clusterSearch (
+		"""
+		Lucene查询语法
+		"""
+		search: String!
+
+		"""
+		Returns the elements in the list that come after the specified cursor.
+		"""
+		after: String
+
+		"""
+		Returns the elements in the list that come before the specified cursor.
+		"""
+		before: String
+
+		"""
+		Returns the first _n_ elements from the list.
+		"""
+		first: Int
+
+		"""
+		Returns the last _n_ elements from the list.
+		"""
+		last: Int
+	): ClusterConnection @auth(requires: [ADMIN])
+
+	"""
+	浏览所有操作日志
+	"""
+	logs (
+		"""
+		Returns the elements in the list that come after the specified cursor.
+		"""
+		after: String
+
+		"""
+		Returns the elements in the list that come before the specified cursor.
+		"""
+		before: String
+
+		"""
+		Returns the first _n_ elements from the list.
+		"""
+		first: Int
+
+		"""
+		Returns the last _n_ elements from the list.
+		"""
+		last: Int
+	): LogConnection @auth(requires: [ADMIN])
+
+	"""
+	当前登录用户信息
+	"""
+	me: User! @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	浏览所有系统选项
+	"""
+	options: [Option] @auth(requires: [ADMIN])
+
+	"""
+	查看某一个系统选项
+	"""
+	option(
+		"""
+		检索编码
+		"""
+		id: ID!
+	): Option
+
+	"""
+	根据检索编码查看检索记录
+	"""
+	query (
+		"""
+		检索编码
+		"""
+		id: ID!
+	): Query @auth(requires: [DEVELOPER])
+
+	"""
+	浏览所有检索记录
+	"""
+	queries (
+		"""
+		Returns the elements in the list that come after the specified cursor.
+		"""
+		after: String
+
+		"""
+		Returns the elements in the list that come before the specified cursor.
+		"""
+		before: String
+
+		"""
+		Returns the first _n_ elements from the list.
+		"""
+		first: Int
+
+		"""
+		Returns the last _n_ elements from the list.
+		"""
+		last: Int
+	): QueryConnection @auth(requires: [DEVELOPER, ADMIN])
+
+	"""
+	检索记录查找
+	"""
+	querySearch (
+		"""
+		Lucene查询语法
+		"""
+		search: String!
+
+		"""
+		Returns the elements in the list that come after the specified cursor.
+		"""
+		after: String
+
+		"""
+		Returns the elements in the list that come before the specified cursor.
+		"""
+		before: String
+
+		"""
+		Returns the first _n_ elements from the list.
+		"""
+		first: Int
+
+		"""
+		Returns the last _n_ elements from the list.
+		"""
+		last: Int
+	): QueryConnection @auth(requires: [DEVELOPER, ADMIN])
+
+	"""
+	根据工单编码查看工单记录
+	"""
+	ticket (
+		"""
+		工单编码
+		"""
+		id: ID!
+	): Ticket @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	浏览所有工单记录
+	"""
+	tickets (
+		"""
+		Returns the elements in the list that come after the specified cursor.
+		"""
+		after: String
+
+		"""
+		Returns the elements in the list that come before the specified cursor.
+		"""
+		before: String
+
+		"""
+		Returns the first _n_ elements from the list.
+		"""
+		first: Int
+
+		"""
+		Returns the last _n_ elements from the list.
+		"""
+		last: Int
+	): TicketConnection @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	工单记录查找
+	"""
+	ticketSearch (
+		"""
+		Lucene查询语法
+		"""
+		search: String!
+
+		"""
+		Returns the elements in the list that come after the specified cursor.
+		"""
+		after: String
+
+		"""
+		Returns the elements in the list that come before the specified cursor.
+		"""
+		before: String
+
+		"""
+		Returns the first _n_ elements from the list.
+		"""
+		first: Int
+
+		"""
+		Returns the last _n_ elements from the list.
+		"""
+		last: Int
+	): TicketConnection @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	根据用户编码查看用户记录
+	"""
+	user(
+		"""
+		用户编码
+		"""
+		id: ID!
+	): User @auth(requires: [ADMIN])
+
+	"""
+	浏览所有用户记录
+	"""
+	users (
+		"""
+		Returns the elements in the list that come after the specified cursor.
+		"""
+		after: String
+
+		"""
+		Returns the elements in the list that come before the specified cursor.
+		"""
+		before: String
+
+		"""
+		Returns the first _n_ elements from the list.
+		"""
+		first: Int
+
+		"""
+		Returns the last _n_ elements from the list.
+		"""
+		last: Int
+	): UserConnection @auth(requires: [ADMIN])
+
+	"""
+	用户记录查找
+	"""
+	userSearch (
+		"""
+		Lucene查询语法
+		"""
+		search: String!
+
+		"""
+		Returns the elements in the list that come after the specified cursor.
+		"""
+		after: String
+
+		"""
+		Returns the elements in the list that come before the specified cursor.
+		"""
+		before: String
+
+		"""
+		Returns the first _n_ elements from the list.
+		"""
+		first: Int
+
+		"""
+		Returns the last _n_ elements from the list.
+		"""
+		last: Int
+	): UserConnection @auth(requires: [ADMIN])
+
+	"""
+	返回所有的用户头像列表
+	"""
+	avatars: [Avatar] @auth(requires: [GUEST, USER, DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	返回某一指定的规则信息
+	"""
+	rule(
+		"""
+		规则UUID
+		"""
+		id: ID!
+	):Rule @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	返回所有的规则列表
+	"""
+	rules: [Rule] @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	返回某一指定的角色信息
+	"""
+	role(
+		"""
+		角色UUID
+		"""
+		id: ID!
+	):Role @auth(requires: [GUEST, USER, DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	返回所有的角色信息
+	"""
+	roles: [Role] @auth(requires: [GUEST, USER, DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	根据类别返回全部的字典信息
+	"""
+	glossaries (
+		"""
+		字典类别列表
+		"""
+		groups: [String!]!
+	): [Glossary] @auth(requires: [GUEST, USER, DEVELOPER, REVIEWER, ADMIN])
+
+	cron (
+		id: ID!
+	): Cron @auth(requires: [DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	浏览所有计划任务
+	"""
+	crons (
+		"""
+		Returns the elements in the list that come after the specified cursor.
+		"""
+		after: String
+
+		"""
+		Returns the elements in the list that come before the specified cursor.
+		"""
+		before: String
+
+		"""
+		Returns the first _n_ elements from the list.
+		"""
+		first: Int
+
+		"""
+		Returns the last _n_ elements from the list.
+		"""
+		last: Int
+	): CronConnection @auth(requires: [DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	查看等待执行的任务列表
+	"""
+	tasks: [Cron] @auth(requires: [DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	查看群集上的数据库列表
+	"""
+	databases(
+		"""
+		群集的UUID
+		"""
+		ClusterUUID: String!
+	): [Database!] @auth(requires: [DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	获取统计信息
+	"""
+	statistics(
+		"""
+		分组列表
+		"""
+		Groups: [String!]!
+	): [Statistic]
+
+	"""
+	服务器当前信息
+	"""
+	environments: Environments
+
+	metadata(
+		"""
+		群集的UUID
+		"""
+		ClusterUUID: String!
+
+		"""
+		具体的数据库
+		"""
+		database: String!
+	): String! @auth(requires: [DEVELOPER, REVIEWER, ADMIN])
+}
+
+"""
+创建用户
+"""
+input CreateUserInput {
+	"""
+	用户邮箱
+	"""
+	Email:         String!  @length(max: 75)
+
+	"""
+	用户密码
+	"""
+	Password:      String! @length(max: 25)
+
+	"""
+	用户名
+	"""
+	Name:          String! @length(max: 15)
+
+	"""
+	用户电话号码
+	"""
+	Phone:         UInt64
+
+	"""
+	角色id列表 
+	"""
+	RoleUUIDs:     [String!]!
+
+	"""
+	群集id列表
+	"""
+	ClusterUUIDs: [String!]!
+
+	"""
+	审核人id列表
+	"""
+	ReviewerUUIDs: [String!]!
+
+	"""
+	用户头像id
+	"""
+	AvatarUUID:    String!
+
+	"""
+	新建的用户的状态
+	"""
+	Status:        UInt8 @range(begin: 1, end: 255) @matches(pattern: "^(1|2|3)$")
+}
+
+"""
+更新用户信息
+"""
+input UpdateUserInput {
+	"""
+	用户id
+	"""
+	UserUUID:	ID! 
+
+	"""
+	用户邮箱
+	"""
+	Email:      String! @length(max: 75)
+
+	"""
+	用户密码
+	"""
+	Password:   String! @length(max: 25) 
+
+	"""
+	用户状态
+	"""
+	Status:     UInt8   @range(begin: 1, end: 255) @matches(pattern: "^(1|2|3)$")
+
+	"""
+	用户名
+	"""
+	Name:       String!
+
+	"""
+	用户电话号码
+	"""
+	Phone:      UInt64
+
+	"""
+	用户头像
+	"""
+	AvatarUUID: String!
+}
+
+"""
+更改用户密码
+"""
+input PatchPasswordInput {
+	"""
+	旧密码
+	"""
+	OldPassword: String! @length(max: 25)
+
+	"""
+	新密码
+	"""
+	NewPassword: String! @length(max: 25)
+}
+
+"""
+更改用户邮箱
+"""
+input PatchEmailInput {
+	"""
+	新的邮箱账号
+	"""
+	NewEmail: String! @length(max: 75)
+}
+
+"""
+用户更新个人信息，后续考虑增加一些附加信息
+"""
+input UpdateProfileInput {
+	"""
+	头像
+	"""
+	AvatarUUID: String!
+
+	"""
+	真实姓名
+	"""
+	Name:       String!
+
+	"""
+	手机号码
+	"""
+	Phone:       UInt64
+}
+
+"""
+给用户授予角色
+"""
+input GrantRolesInput {
+	"""
+	用户UUID
+	"""
+	UserUUID: ID!
+
+	"""
+	角色id列表
+	"""
+	RoleUUIDs: [String!]!
+}
+
+"""
+回收用户角色
+"""
+input RevokeRolesInput {
+	"""
+	用户UUID
+	"""
+	UserUUID:  ID!
+
+	"""
+	回收的角色UUID列表
+	"""
+	RoleUUIDs: [String!]!
+}
+
+"""
+给用户增加审核人
+"""
+input GrantReviewersInput {
+	"""
+	用户UUID
+	"""
+	UserUUID:      ID!
+
+	"""
+	审核人UUID列表
+	"""
+	ReviewerUUIDs: [String!]!
+}
+
+"""
+用户注册
+"""
+input UserRegisterInput {
+	"""
+	用户邮箱
+	"""
+	Email:    String! @length(max: 75)
+
+	"""
+	用户密码
+	"""
+	Password: String! @length(max: 25)
+}
+
+"""
+用户登陆
+"""
+input UserLoginInput {
+	"""
+	登陆邮箱
+	"""
+	Email:    String! @length(max: 75)
+
+	"""
+	登陆密码
+	"""
+	Password: String! @length(max: 25)
+}
+
+"""
+管理员更改用户状态
+"""
+input PatchUserStatusInput {
+	"""
+	用户UUID
+	"""
+	UserUUID: ID!
+
+	"""
+	用户状态
+	"""
+	Status:   UInt8! @range(begin: 1, end: 255) @matches(pattern: "^(1|2|3)$")
+}
+
+"""
+更改审核规则的值
+"""
+input PatchRuleValuesInput {
+	"""
+	规则UUID
+	"""
+	RuleUUID: ID!
+
+	"""
+	规则的值
+	"""
+	Values:   String! @length(max: 150)
+}
+
+"""
+启用关闭审核规则
+"""
+input PatchRuleBitwiseInput {
+	"""
+	规则UUID
+	"""
+	RuleUUID: ID!
+
+	"""
+	规则是否启用true |false
+	"""
+	Enabled:  String! @matches(pattern: "^(true|false)$")
+}
+
+"""
+创建群集
+"""
+input CreateClusterInput {
+	"""
+	主机名
+	"""
+	Host:     String! @length(max: 75)
+
+	"""
+	主机IP地址
+	"""
+	IP:       String! @matches(pattern: "^(\\d{1,3}\\.){3}\\d{1,3}$")
+
+	"""
+	主机端口
+	"""
+	Port:     UInt16! @range(begin: 0, end: 65535)
+
+	"""
+	群集别名
+	"""
+	Alias:    String! @length(max: 75)
+
+	"""
+	连接群集的账户
+	"""
+	User:     String! @length(max: 40)
+
+	"""
+	连接群集的密码
+	"""
+	Password: String! @length(max: 40)
+
+	"""
+	群集状态（禁用|正常）
+	"""
+	Status:   UInt8!  @matches(pattern: "^(1|2|3)$")
+}
+
+"""
+更改群集信息
+"""
+input UpdateClusterInput {
+	"""
+	群集UUID
+	"""
+	ClusterUUID: ID!
+
+	"""
+	主机名
+	"""
+	Host:         String! @length(max: 75)
+
+	"""
+	主机IP地址
+	"""
+	IP:           String! @matches(pattern: "^(\\d{1,3}\\.){3}\\d{1,3}$")
+
+	"""
+	端口
+	"""
+	Port:         UInt16! @range(begin: 0, end: 65535)
+
+	"""
+	别名
+	"""
+	Alias:        String! @length(max: 75)
+
+	"""
+	连接群集的账户
+	"""
+	User:         String! @length(max: 40)
+
+	"""
+	群集状态(禁用|正常)
+	"""
+	Status:       UInt8!  @matches(pattern: "^(1|2)$")
+
+	"""
+	连接群集的密码
+	"""
+	Password:     String! @length(max: 40)
+}
+
+"""
+修改群集的状态
+"""
+input PatchClusterStatusInput {
+	"""
+	群集UUID
+	"""
+	ClusterUUID: ID!
+
+	"""
+	群集状态(禁用|正常)
+	"""
+	Status:       UInt8! @matches(pattern: "^(1|2|3)$")
+}
+
+"""
+创建工单
+"""
+input CreateTicketInput {
+	"""
+	工单提交的目标群集
+	"""
+	ClusterUUID: String!
+
+	"""
+	工单要执行在的数据库名
+	"""
+	Database:     String! @length(max: 50)
+
+	"""
+	工单主题
+	"""
+	Subject:      String! @length(max: 75)
+
+	"""
+	工单内容
+	"""
+	Content:      String! @length(max: 65535)
+
+	"""
+	工单审核人
+	"""
+	ReviewerUUID: String!
+}
+
+"""
+编辑工单
+"""
+input UpdateTicketInput {
+	"""
+	工单UUID
+	"""
+	TicketUUID:   ID!
+
+	"""
+	工单提交的目标群集
+	"""
+	ClusterUUID: String!
+
+	"""
+	数据库名
+	"""
+	Database:     String! @length(max: 50)
+
+	"""
+	工单主题
+	"""
+	Subject:      String! @length(max: 75)
+
+	"""
+	工单内容
+	"""
+	Content:      String! @length(max: 65535)
+
+	"""
+	工单审核人
+	"""
+	ReviewerUUID: String!   
+}
+
+"""
+修改工单状态
+"""
+input PatchTicketStatusInput {
+	"""
+	工单UUID
+	"""
+	TicketUUID: ID!
+
+	"""
+	工单状态
+	"""
+	Status:     String!
+}
+
+"""
+评论工单
+"""
+input CreateCommentInput {
+	"""
+	工单UUID
+	"""
+	TicketUUID: String!
+
+	"""
+	评论内容
+	"""
+	Content:    String!
+}
+
+"""
+数据库连接
+"""
+input ValidateConnectionInput {
+	"""
+	数据库IP
+	"""
+	IP:       String! @matches(pattern: "^(\\d{1,3}\\.){3}\\d{1,3}$") 
+
+	"""
+	数据库端口
+	"""
+	Port:     UInt16! @range(begin: 0, end: 65535)
+
+	"""
+	连接账户
+	"""
+	User:     String! @length(max: 40)
+
+	"""
+	连接密码
+	"""
+	Password: String! @length(max: 40)
+}
+
+"""
+验证正册表达式
+"""
+input ValidatePatternInput {
+	"""
+	表达式内容
+	"""
+	Pattern: String! @length(max: 255)
+}
+
+"""
+修改系统选项
+"""
+input PatchOptionValueInput {
+	"""
+	系统选项UUID
+	"""
+	OptionUUID: ID!
+
+	"""
+	选项值
+	"""
+	Value:      String! @length(max: 40)
+}
+
+"""
+创建一个查询
+"""
+input CreateQueryInput {
+	"""
+	群集UUID
+	"""
+	ClusterUUID: String!
+
+	"""
+	查询的数据库名
+	"""
+	Database:     String! @length(max: 50)
+
+	"""
+	查询sql
+	"""
+	Content:      String!  @length(max: 65535)
+}
+
+"""
+授予用户群集，用户可在发起工单到该群集
+"""
+input GrantClustersInput {
+	"""
+	用户UUID
+	"""
+	UserUUID:      ID!
+
+	"""
+	群集UUID列表
+	"""
+	ClusterUUIDs: [String!]!
+}
+
+"""
+收回用户群集，取消用户在该群集上创建工单的权限
+"""
+input RevokeClustersInput {
+	"""
+	用户UUID
+	"""
+	UserUUID:      ID!
+
+	"""
+	即将收回的群集UUID列表
+	"""
+	ClusterUUIDs: [String!]!
+}
+
+"""
+收回用户的审核人
+"""
+input RevokeReviewersInput {
+	"""
+	用户UUID
+	"""
+	UserUUID:      ID!
+
+	"""
+	即将收回的审核人UUID列表
+	"""
+	ReviewerUUIDs: [String!]!
+}
+
+"""
+查询分析重写
+"""
+input SoarQueryInput {
+	"""
+	群集UUID
+	"""
+	ClusterUUID: String!
+
+	"""
+	查询的数据库名
+	"""
+	Database:     String! @length(max: 50)
+
+	"""
+	查询sql
+	"""
+	Content:      String!  @length(max: 65535)
+}
+
+"""
+预约执行工单
+"""
+input ScheduleTicketInput {
+	"""
+	工单UUID
+	"""
+	TicketUUID: ID!
+
+	"""
+	预约事件
+	"""
+	Schedule:   String!
+}
+
+input ActivateInput {
+	Code: String! # 这个解密出来Email和ExpireDate
+}
+
+input LostPasswdInput {
+	Email: String!
+}
+
+input ResetPasswdInput {
+	Code:     String! # 这个解密出来Email和ExpireDate
+	Password: String!
+}
+
+input ResendActivationMailInput {
+	Email: String!
+}
+
+"""
+数据修改入口
+"""
+type MutationRoot {
+	"""
+	用户注册
+	"""
+	register(
+		"""
+		注册信息
+		"""
+		input: UserRegisterInput!
+	): User!
+
+	"""
+	用户登录
+	"""
+	login(
+		"""
+		登录信息
+		"""
+		input: UserLoginInput!
+	): LoginPayload
+
+	"""
+	用户登出
+	"""
+	logout: Boolean! @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	用户获取个人信息
+	"""
+	updateProfile(
+		"""
+		更新信息
+		"""
+		input: UpdateProfileInput!
+	): User @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	用户自行更新密码
+	"""
+	updatePassword(
+		"""
+		新旧密码信息
+		"""
+		input: PatchPasswordInput!
+	): Boolean! @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	用户自行更新登录账号
+	"""
+	updateEmail(
+		"""
+		新旧邮件地址信息
+		"""
+		input: PatchEmailInput!
+	): Boolean! @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	关联用户到审核人
+	"""
+	grantReviewers(
+		"""
+		即将关联的审核人
+		"""
+		input: GrantReviewersInput!
+	): Boolean! @auth(requires: [ADMIN])
+
+	"""
+	收回用户到审核人
+	"""
+	revokeReviewers(
+		"""
+		即将收回的审核人
+		"""
+		input: RevokeReviewersInput!
+	): Boolean! @auth(requires: [ADMIN])
+
+	"""
+	关联用户到群集
+	"""
+	grantClusters(
+		"""
+		即将关联的群集
+		"""
+		input: GrantClustersInput!
+	): Boolean! @auth(requires: [ADMIN])
+
+	"""
+	收回用户到群集
+	"""
+	revokeClusters(
+		"""
+		即将收回的群集
+		"""
+		input: RevokeClustersInput!
+	): Boolean! @auth(requires: [ADMIN])
+
+	"""
+	关联用户到角色
+	"""
+	grantRoles(
+		"""
+		即将关联的角色
+		"""
+		input: GrantRolesInput!
+	): Boolean! @auth(requires: [ADMIN])
+
+	"""
+	收回用户到角色
+	"""
+	revokeRoles(
+		"""
+		即将收回的角色
+		"""
+		input: RevokeRolesInput!
+	): Boolean! @auth(requires: [ADMIN])
+
+	"""
+	在后台有管理员直接创建用户
+	"""
+	createUser(
+		"""
+		创建用户需要的信息
+		"""
+		input: CreateUserInput!
+	): User @auth(requires: [ADMIN])
+
+	"""
+	在后台有管理员直接更新用户
+	"""
+	updateUser(
+		"""
+		更新用户需要的信息
+		"""
+		input: UpdateUserInput!
+	): User @auth(requires: [ADMIN])
+
+	"""
+	在后台有管理员直接调整用户状态
+	"""
+	patchUserStatus(
+		"""
+		用户状态信息
+		"""
+		input:PatchUserStatusInput!
+	): Boolean! @auth(requires: [ADMIN])
+
+	"""
+	管理员创建群集
+	"""
+	createCluster(
+		"""
+		新建群集信息
+		"""
+		input: CreateClusterInput!
+	): Cluster @auth(requires: [ADMIN])
+
+	"""
+	管理员修改群集
+	"""
+	updateCluster(
+		"""
+		现有群集信息
+		"""
+		input: UpdateClusterInput!
+	): Cluster @auth(requires: [ADMIN])
+
+	"""
+	管理员删除群集，如果没有任何工单产生
+	"""
+	removeCluster(
+		"""
+		群集唯一标识符
+		"""
+		id: ID!
+	): Boolean! @auth(requires: [ADMIN])
+
+	"""
+	修改群集状态
+	"""
+	patchClusterStatus(
+		"""
+		群集及状态值
+		"""
+		input: PatchClusterStatusInput!
+	): Boolean! @auth(requires:[ADMIN])
+
+	"""
+	开发创建新工单  
+	"""
+	createTicket(
+		"""
+		新建工单信息
+		"""
+		input: CreateTicketInput!
+	): Ticket @auth(requires: [DEVELOPER])
+
+	"""
+	开发修改已存在工单
+	"""
+	updateTicket(
+		"""
+		现有工单信息
+		"""
+		input: UpdateTicketInput!
+	): Ticket @auth(requires: [DEVELOPER])
+
+	"""
+	开发删除工单，如果工单状态允许删除
+	"""
+	removeTicket(
+		"""
+		工单唯一标识符
+		"""
+		id: ID!
+	): Boolean! @auth(requires: [DEVELOPER, ADMIN])
+
+	"""
+	修改工单状态
+	"""
+	patchTicketStatus(
+		"""
+		工单唯一标识符、状态
+		"""
+		input:PatchTicketStatusInput!
+	): Boolean! @auth(requires: [DEVELOPER, ADMIN])
+
+	"""
+	立刻执行一个工单
+	"""
+	executeTicket(
+		"""
+		工单唯一标识符
+		"""
+		id: ID!
+	): Boolean! @auth(requires: [REVIEWER])
+
+	"""
+	预约执行一个工单
+	TODO: 需要返回任务信息
+	"""
+	scheduleTicket(
+		"""
+		预约信息
+		"""
+		input: ScheduleTicketInput!
+	): Cron @auth(requires: [REVIEWER])
+
+	"""
+	取消已预约执行的工单，并关闭
+	"""
+	cancelCron(
+		"""
+		工单唯一标识符
+		"""
+		id: ID!
+	): Boolean! @auth(requires: [REVIEWER, ADMIN])
+
+	"""
+	工单的开发或者审核人添加审核意见
+	"""
+	createComment(
+		"""
+		新建审核意见信息
+		"""
+		input: CreateCommentInput!
+	): Comment @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	管理员修改规则的值
+	"""
+	patchOptionValues(
+		"""
+		修改后的规则值
+		"""
+		input: PatchOptionValueInput!
+	): Boolean! @auth(requires: [ADMIN])
+
+	"""
+	管理员修改规则的值
+	"""
+	patchRuleValues(
+		"""
+		修改后的规则值
+		"""
+		input: PatchRuleValuesInput!
+	): Boolean! @auth(requires: [ADMIN])
+
+	"""
+	管理员关闭或者启用规则
+	"""
+	patchRuleBitwise(
+		"""
+		是否允许规则执行
+		"""
+		input:PatchRuleBitwiseInput!
+	): Boolean! @auth(requires: [ADMIN])
+
+	"""
+	开发查询数据库
+	"""
+	createQuery(
+		"""
+		新建查询信息
+		"""
+		input: CreateQueryInput!
+	): String! @auth(requires: [DEVELOPER])
+
+	"""
+	查询分析及优化建议
+	"""
+	analyzeQuery(
+		"""
+		待分析优化的查询
+		"""
+		input: SoarQueryInput!
+	): String! @auth(requires: [DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	根据规则重写查询语句
+	"""
+	rewriteQuery(
+		"""
+		待重写的查询语句
+		"""
+		input: SoarQueryInput!
+	): String! @auth(requires: [DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	用户激活
+	"""
+	activate(
+		input: ActivateInput!
+	): ActivatePayload
+
+	"""
+	忘记密码
+	"""
+	lostPasswd(
+		input: LostPasswdInput!
+	): Boolean!
+
+	"""
+	重置密码
+	"""
+	resetPasswd(
+		input: ResetPasswdInput!
+	): Boolean!
+
+	"""
+	重置密码
+	"""
+	resendActivationMail(
+		input: ActivateInput! # 原来的激活码，解开反序列化断言后，重新设置过期时间
+	): Boolean!
+}
+# }}} TODO:
+
+type ActivatePayload {
+	Email: String!
+}
+
+type TicketStatusChangePayload {
+	TicketUUID: String!
+	Message:    String!
+}
+
+"""
+消息订阅入口
+"""
+type SubscriptionRoot {
+	ticketStatusChanged: TicketStatusChangePayload!
+}
+
+scalar Int8
+scalar UInt8
+scalar Int16
+scalar UInt16
+scalar UInt
+scalar Int32
+scalar UInt32
+scalar Int64
+scalar UInt64
+scalar Timestamp
+scalar DateTime
+# scalar UUID @matches(pattern: "^(?i)[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$")
