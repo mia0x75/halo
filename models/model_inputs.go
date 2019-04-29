@@ -1,5 +1,13 @@
 package models
 
+// UpdateTemplateInput GraphQL API交互所需要的结构体
+type UpdateTemplateInput struct {
+	TemplateUUID string `valid:"required,length(36|36)"   gqlgen:"TemplateUUID"` //
+	Subject      string `valid:"required,length(1|100)"   gqlgen:"Subject"`      //
+	Body         string `valid:"required,length(1|65535)" gqlgen:"Body"`         //
+	Description  string `valid:"required,length(1|50)" gqlgen:"Description"`     //
+}
+
 // CreateTicketInput GraphQL API交互所需要的结构体
 type CreateTicketInput struct {
 	ClusterUUID  string `valid:"required,length(36|36)"   gqlgen:"ClusterUUID"`  //

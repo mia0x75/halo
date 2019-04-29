@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/mia0x75/parser/ast"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/mia0x75/halo/models"
 )
@@ -27,14 +28,10 @@ func (v *InsertVldr) Enabled() bool {
 	return true
 }
 
-// SetContext 在不同的规则组之间共享信息，这个可能暂时没用
-func (v *InsertVldr) SetContext(ctx Context) {
-}
-
 // Validate 规则组的审核入口
 func (v *InsertVldr) Validate(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for _, s := range v.stmts {
+	for _, s := range v.Ctx.Stmts {
 		// 该方法不能放到结构体vldr是因为，反射时找不到子类的方法
 		node := s.StmtNode
 		if id, ok := node.(*ast.InsertStmt); !ok {
@@ -42,8 +39,9 @@ func (v *InsertVldr) Validate(wg *sync.WaitGroup) {
 			continue
 		} else {
 			v.id = id
+			v.Walk(v.id)
 		}
-		for _, r := range v.rules {
+		for _, r := range v.Rules {
 			if r.Bitwise&1 != 1 {
 				continue
 			}
@@ -52,9 +50,10 @@ func (v *InsertVldr) Validate(wg *sync.WaitGroup) {
 	}
 }
 
-// InsertExplicitColumnRequired 是否要求显式列申明
+// ExplicitColumnRequired 是否要求显式列申明
 // RULE: INS-L2-001
-func (v *InsertVldr) InsertExplicitColumnRequired(s *models.Statement, r *models.Rule) {
+func (v *InsertVldr) ExplicitColumnRequired(s *models.Statement, r *models.Rule) {
+	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	if v.id.IsReplace {
 		return
 	}
@@ -68,9 +67,10 @@ func (v *InsertVldr) InsertExplicitColumnRequired(s *models.Statement, r *models
 	}
 }
 
-// InsertUsingSelectEnabled 是否允许INSERT...SELECT
+// UsingSelectNotAllowed 是否允许INSERT...SELECT
 // RULE: INS-L2-002
-func (v *InsertVldr) InsertUsingSelectEnabled(s *models.Statement, r *models.Rule) {
+func (v *InsertVldr) UsingSelectNotAllowed(s *models.Statement, r *models.Rule) {
+	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	if v.id.IsReplace {
 		return
 	}
@@ -84,9 +84,10 @@ func (v *InsertVldr) InsertUsingSelectEnabled(s *models.Statement, r *models.Rul
 	}
 }
 
-// InsertRowsLimit 单语句允许操作的最大行数
+// RowsLimit 单语句允许操作的最大行数
 // RULE: INS-L2-004
-func (v *InsertVldr) InsertRowsLimit(s *models.Statement, r *models.Rule) {
+func (v *InsertVldr) RowsLimit(s *models.Statement, r *models.Rule) {
+	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	thredhold, err := strconv.Atoi(r.Values)
 	if err != nil {
 		return
@@ -100,9 +101,10 @@ func (v *InsertVldr) InsertRowsLimit(s *models.Statement, r *models.Rule) {
 	}
 }
 
-// InsertColumnValueMatch 列类型、值是否匹配
+// ColumnValueMatch 列类型、值是否匹配
 // RULE: INS-L2-005
-func (v *InsertVldr) InsertColumnValueMatch(s *models.Statement, r *models.Rule) {
+func (v *InsertVldr) ColumnValueMatch(s *models.Statement, r *models.Rule) {
+	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	columnNum := len(v.id.Columns)
 	for _, list := range v.id.Lists {
 		if len(list) != columnNum {
@@ -115,24 +117,51 @@ func (v *InsertVldr) InsertColumnValueMatch(s *models.Statement, r *models.Rule)
 	}
 }
 
-// InsertTargetDatabaseExists 目标库是否存在
+// TargetDatabaseDoesNotExist 目标库是否存在
 // RULE: INS-L3-001
-func (v *InsertVldr) InsertTargetDatabaseExists(s *models.Statement, r *models.Rule) {
+func (v *InsertVldr) TargetDatabaseDoesNotExist(s *models.Statement, r *models.Rule) {
+	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+	for _, ti := range v.Vi {
+		if v.DatabaseInfo(ti.Database) == nil {
+			c := &models.Clause{
+				Description: fmt.Sprintf(r.Message, ti.Database),
+				Level:       r.Level,
+			}
+			s.Violations.Append(c)
+		}
+	}
 }
 
-// InsertTargetTableExists 目标表是否存在
+// TargetTableDoesNotExist 目标表是否存在
 // RULE: INS-L3-002
-func (v *InsertVldr) InsertTargetTableExists(s *models.Statement, r *models.Rule) {
+func (v *InsertVldr) TargetTableDoesNotExist(s *models.Statement, r *models.Rule) {
+	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+	for _, ti := range v.Vi {
+		if ti.Table == nil {
+			continue
+		}
+		if v.TableInfo(ti.Database, ti.Table.Name) == nil {
+			c := &models.Clause{
+				Description: fmt.Sprintf(r.Message, fmt.Sprintf("`%s`.`%s`", ti.Database, ti.Table.Name)),
+				Level:       r.Level,
+			}
+			s.Violations.Append(c)
+		}
+	}
 }
 
-// InsertTargetColumnExists 目标列是否存在
+// TargetColumnDoesNotExist 目标列是否存在
 // RULE: INS-L3-003
-func (v *InsertVldr) InsertTargetColumnExists(s *models.Statement, r *models.Rule) {
+func (v *InsertVldr) TargetColumnDoesNotExist(s *models.Statement, r *models.Rule) {
+	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+	// TODO:
 }
 
-// InsertValueForNotNullColumnRequired 非空列是否有值
+// ValueForNotNullColumnRequired 非空列是否有值
 // RULE: INS-L3-004
-func (v *InsertVldr) InsertValueForNotNullColumnRequired(s *models.Statement, r *models.Rule) {
+func (v *InsertVldr) ValueForNotNullColumnRequired(s *models.Statement, r *models.Rule) {
+	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+	// TODO:
 }
 
 // ReplaceVldr 插入数据语句相关的审核规则
@@ -152,14 +181,10 @@ func (v *ReplaceVldr) Enabled() bool {
 	return true
 }
 
-// SetContext 在不同的规则组之间共享信息，这个可能暂时没用
-func (v *ReplaceVldr) SetContext(ctx Context) {
-}
-
 // Validate 规则组的审核入口
 func (v *ReplaceVldr) Validate(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for _, s := range v.stmts {
+	for _, s := range v.Ctx.Stmts {
 		// 该方法不能放到结构体vldr是因为，反射时找不到子类的方法
 		node := s.StmtNode
 		if id, ok := node.(*ast.InsertStmt); !ok {
@@ -168,7 +193,7 @@ func (v *ReplaceVldr) Validate(wg *sync.WaitGroup) {
 		} else {
 			v.id = id
 		}
-		for _, r := range v.rules {
+		for _, r := range v.Rules {
 			if r.Bitwise&1 != 1 {
 				continue
 			}

@@ -58,6 +58,9 @@ models:
   Statement:
     model: github.com/mia0x75/halo/models.Statement
 
+  Template:
+    model: github.com/mia0x75/halo/models.Template
+
   Ticket:
     model: github.com/mia0x75/halo/models.Ticket
 
@@ -105,6 +108,9 @@ models:
 
   UInt64:
     model: github.com/mia0x75/halo/gqlapi.UInt64
+
+  UpdateTemplateInput:
+    model: github.com/mia0x75/halo/models.UpdateTemplateInput
 
   CreateTicketInput:
     model: github.com/mia0x75/halo/models.CreateTicketInput

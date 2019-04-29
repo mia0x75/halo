@@ -102,3 +102,8 @@ func init() {
 func Fire(topic string, args interface{}) {
 	go ee.Emit(topic, args)
 }
+
+// FireSync 触发事件
+func FireSync(topic string, args interface{}) {
+	ee.Emit(topic, args)
+}

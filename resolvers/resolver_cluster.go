@@ -246,7 +246,7 @@ L:
 			break L
 		}
 
-		tables := []*core.Table{}
+		tables := map[string][]*core.Table{}
 		if tables, err = cluster.Metadata(database, passwd); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
@@ -254,7 +254,7 @@ L:
 		}
 
 		var bs []byte
-		bs, err = json.Marshal(cluster.Repack(tables))
+		bs, err = json.Marshal(cluster.Repack(tables[database]))
 		if err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())

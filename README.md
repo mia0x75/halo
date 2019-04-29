@@ -127,14 +127,15 @@ CREATE TABLE `t1` (`id` INT) CHARSET = 'utf8mb4' COLLATE = 'utf8mb4_unicode_ci';
 
 邮件通知：
 
-![mail](https://s2.ax1x.com/2019/04/18/ESIYvV.png)
+![mail-1](https://s2.ax1x.com/2019/04/18/ESIYvV.png)
+![mail-2](https://s2.ax1x.com/2019/04/19/EpOma6.png)
 
 
 * [ ] 数据备份
 * [x] 任务调度
 * [x] 事件处理
 * [x] 终端程序
-* [ ] 单元测试
+* [x] 单元测试
 * [ ] Gh-ost整合
 * [ ] 用户界面
   * [ ] 数据查询(SOAR整合)

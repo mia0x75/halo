@@ -37,6 +37,9 @@ func Init() {
 	log.Info("[I] #8 Statistics...")
 	StatisticsMap.Init()
 
+	log.Info("[I] #9 Templates...")
+	TemplatesMap.Init()
+
 	log.Info("[I] cache done")
 
 	LoopInit()
@@ -59,6 +62,7 @@ func LoopInit() {
 			ClustersMap.Init()
 			OptionsMap.Init()
 			RulesMap.Init()
+			TemplatesMap.Init()
 		}
 	}()
 }

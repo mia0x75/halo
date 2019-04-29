@@ -21,43 +21,39 @@ func (v *EventCreateVldr) Enabled() bool {
 	return true
 }
 
-// SetContext 在不同的规则组之间共享信息，这个可能暂时没用
-func (v *EventCreateVldr) SetContext(ctx Context) {
-}
-
 // Validate 规则组的审核入口
 func (v *EventCreateVldr) Validate(wg *sync.WaitGroup) {
 	defer wg.Done()
 }
 
-// EventCreateEventNameQualified 事件名标识符规则
+// EventNameQualified 事件名标识符规则
 // RULE: CEV-L2-001
-func (v *EventCreateVldr) EventCreateEventNameQualified(s *models.Statement, r *models.Rule) {
+func (v *EventCreateVldr) EventNameQualified(s *models.Statement, r *models.Rule) {
 }
 
-// EventCreateEventNameLowerCaseRequired 事件名大小写规则
+// EventNameLowerCaseRequired 事件名大小写规则
 // RULE: CEV-L2-002
-func (v *EventCreateVldr) EventCreateEventNameLowerCaseRequired(s *models.Statement, r *models.Rule) {
+func (v *EventCreateVldr) EventNameLowerCaseRequired(s *models.Statement, r *models.Rule) {
 }
 
-// EventCreateEventNameMaxLength 事件名长度规则
+// EventNameMaxLength 事件名长度规则
 // RULE: CEV-L2-003
-func (v *EventCreateVldr) EventCreateEventNameMaxLength(s *models.Statement, r *models.Rule) {
+func (v *EventCreateVldr) EventNameMaxLength(s *models.Statement, r *models.Rule) {
 }
 
-// EventCreateEventNamePrefixRequired 事件名前缀规则
+// EventNamePrefixRequired 事件名前缀规则
 // RULE: CEV-L2-004
-func (v *EventCreateVldr) EventCreateEventNamePrefixRequired(s *models.Statement, r *models.Rule) {
+func (v *EventCreateVldr) EventNamePrefixRequired(s *models.Statement, r *models.Rule) {
 }
 
-// EventCreateTargetDatabaseExists 目标库是否存在
+// TargetDatabaseDoesNotExist 目标库是否存在
 // RULE: CEV-L3-001
-func (v *EventCreateVldr) EventCreateTargetDatabaseExists(s *models.Statement, r *models.Rule) {
+func (v *EventCreateVldr) TargetDatabaseDoesNotExist(s *models.Statement, r *models.Rule) {
 }
 
-// EventCreateTargetEventExists 目标事件是否存在
+// TargetEventDoesNotExist 目标事件是否存在
 // RULE: CEV-L3-002
-func (v *EventCreateVldr) EventCreateTargetEventExists(s *models.Statement, r *models.Rule) {
+func (v *EventCreateVldr) TargetEventDoesNotExist(s *models.Statement, r *models.Rule) {
 }
 
 // EventAlterVldr 修改事件语句相关的审核规则
@@ -75,23 +71,19 @@ func (v *EventAlterVldr) Enabled() bool {
 	return true
 }
 
-// SetContext 在不同的规则组之间共享信息，这个可能暂时没用
-func (v *EventAlterVldr) SetContext(ctx Context) {
-}
-
 // Validate 规则组的审核入口
 func (v *EventAlterVldr) Validate(wg *sync.WaitGroup) {
 	defer wg.Done()
 }
 
-// EventAlterTargetDatabaseExists 目标库是否存在
+// TargetDatabaseDoesNotExist 目标库是否存在
 // RULE: MEV-L3-001
-func (v *EventAlterVldr) EventAlterTargetDatabaseExists(s *models.Statement, r *models.Rule) {
+func (v *EventAlterVldr) TargetDatabaseDoesNotExist(s *models.Statement, r *models.Rule) {
 }
 
-// EventAlterTargetEventExists 目标事件是否存在
+// TargetEventDoesNotExist 目标事件是否存在
 // RULE: MEV-L3-002
-func (v *EventAlterVldr) EventAlterTargetEventExists(s *models.Statement, r *models.Rule) {
+func (v *EventAlterVldr) TargetEventDoesNotExist(s *models.Statement, r *models.Rule) {
 }
 
 // EventDropVldr 删除事件语句相关的审核规则
@@ -109,21 +101,17 @@ func (v *EventDropVldr) Enabled() bool {
 	return true
 }
 
-// SetContext 在不同的规则组之间共享信息，这个可能暂时没用
-func (v *EventDropVldr) SetContext(ctx Context) {
-}
-
 // Validate 规则组的审核入口
 func (v *EventDropVldr) Validate(wg *sync.WaitGroup) {
 	defer wg.Done()
 }
 
-// EventDropTargetDatabaseExists 目标库是否存在
+// TargetDatabaseDoesNotExist 目标库是否存在
 // RULE: DEV-L3-001
-func (v *EventDropVldr) EventDropTargetDatabaseExists(s *models.Statement, r *models.Rule) {
+func (v *EventDropVldr) TargetDatabaseDoesNotExist(s *models.Statement, r *models.Rule) {
 }
 
-// EventDropTargetEventExists 目标事件是否存在
+// TargetEventDoesNotExist 目标事件是否存在
 // RULE: DEV-L3-002
-func (v *EventDropVldr) EventDropTargetEventExists(s *models.Statement, r *models.Rule) {
+func (v *EventDropVldr) TargetEventDoesNotExist(s *models.Statement, r *models.Rule) {
 }

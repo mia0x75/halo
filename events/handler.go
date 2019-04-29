@@ -8,6 +8,7 @@ import (
 	"net/mail"
 	"net/smtp"
 	"net/textproto"
+	"text/template"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -16,10 +17,6 @@ import (
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/models"
-)
-
-var (
-	agent = caches.UsersMap.Lookup("00000000-0000-0000-0000-000000000000")
 )
 
 // 事件列表
@@ -77,10 +74,11 @@ func TicketCreatedLogWriter(e *Event) {
 // TicketCreatedMailSender 创建工单的邮件通知
 func TicketCreatedMailSender(e *Event) {
 	if args, ok := e.Args.(*TicketCreatedArgs); ok {
+		subject, body := renderer(g.TplTicketCreated, args)
 		MailSender(MailSendArgs{
 			To:      mail.Address{Name: args.User.Name, Address: args.User.Email},
-			Subject: fmt.Sprintf("工单〔%s〕创建成功通知", args.Ticket.Subject),
-			Body:    "-EOF-",
+			Subject: subject,
+			Body:    body,
 		})
 	}
 }
@@ -118,10 +116,11 @@ func TicketUpdatedLogWriter(e *Event) {
 // TicketUpdatedMailSender 更新工单的邮件通知
 func TicketUpdatedMailSender(e *Event) {
 	if args, ok := e.Args.(*TicketUpdatedArgs); ok {
+		subject, body := renderer(g.TplTicketUpdated, args)
 		MailSender(MailSendArgs{
 			To:      mail.Address{Name: args.User.Name, Address: args.User.Email},
-			Subject: fmt.Sprintf("工单〔%s〕更新成功通知", args.Ticket.Subject),
-			Body:    "-EOF-",
+			Subject: subject,
+			Body:    body,
 		})
 	}
 }
@@ -143,10 +142,13 @@ func TicketRemovedLogWriter(e *Event) {
 // TicketRemovedMailSender 删除工单的邮件通知
 func TicketRemovedMailSender(e *Event) {
 	if args, ok := e.Args.(*TicketRemovedArgs); ok {
+		// 这个用于邮件模版的时间显示
+		args.Ticket.UpdateAt = uint(time.Now().UTC().Unix())
+		subject, body := renderer(g.TplTicketRemoved, args)
 		MailSender(MailSendArgs{
 			To:      mail.Address{Name: args.User.Name, Address: args.User.Email},
-			Subject: fmt.Sprintf("工单〔%s〕删除成功通知", args.Ticket.Subject),
-			Body:    "-EOF-",
+			Subject: subject,
+			Body:    body,
 		})
 	}
 }
@@ -176,6 +178,10 @@ type TicketExecutedArgs struct {
 // TicketExecutedLogWriter 工单执行成功的日志记录
 func TicketExecutedLogWriter(e *Event) {
 	if args, ok := e.Args.(*TicketExecutedArgs); ok {
+		agent := &models.User{}
+		if _, err := g.Engine.Where("`uuid` = ?", "00000000-0000-0000-0000-000000000000").Get(agent); err != nil {
+			return
+		}
 		LogWriter(agent.UserID, fmt.Sprintf("用户(uuid=%s)执行工单(uuid=%s)成功。\n", agent.UUID, args.Ticket.UUID))
 	}
 }
@@ -183,17 +189,16 @@ func TicketExecutedLogWriter(e *Event) {
 // TicketExecutedMailSender 工单执行成功的邮件通知
 func TicketExecutedMailSender(e *Event) {
 	if args, ok := e.Args.(*TicketExecutedArgs); ok {
-		users := caches.UsersMap.Filter(func(elem *models.User) bool {
-			if elem.UserID == args.Ticket.UserID || elem.UserID == args.Ticket.ReviewerID {
-				return true
-			}
-			return false
-		})
+		users := []models.User{}
+		if err := g.Engine.In("user_id", args.Ticket.UserID, args.Ticket.ReviewerID).Find(&users); err != nil {
+			return
+		}
+		subject, body := renderer(g.TplTicketExecuted, args)
 		for _, user := range users {
 			MailSender(MailSendArgs{
 				To:      mail.Address{Name: user.Name, Address: user.Email},
-				Subject: fmt.Sprintf("工单〔%s〕执行成功通知", args.Ticket.Subject),
-				Body:    "-EOF-",
+				Subject: subject,
+				Body:    body,
 			})
 		}
 	}
@@ -208,6 +213,10 @@ type TicketFailedArgs struct {
 // TicketFailedLogWriter 工单执行失败的日志记录
 func TicketFailedLogWriter(e *Event) {
 	if args, ok := e.Args.(*TicketFailedArgs); ok {
+		agent := &models.User{}
+		if _, err := g.Engine.Where("`uuid` = ?", "00000000-0000-0000-0000-000000000000").Get(agent); err != nil {
+			return
+		}
 		LogWriter(agent.UserID, fmt.Sprintf("用户(uuid=%s)执行工单(uuid=%s)失败。\n", agent.UUID, args.Ticket.UUID))
 	}
 }
@@ -215,17 +224,16 @@ func TicketFailedLogWriter(e *Event) {
 // TicketFailedMailSender 工单执行失败的邮件通知
 func TicketFailedMailSender(e *Event) {
 	if args, ok := e.Args.(*TicketFailedArgs); ok {
-		users := caches.UsersMap.Filter(func(elem *models.User) bool {
-			if elem.UserID == args.Ticket.UserID || elem.UserID == args.Ticket.ReviewerID {
-				return true
-			}
-			return false
-		})
+		users := []models.User{}
+		if err := g.Engine.In("user_id", args.Ticket.UserID, args.Ticket.ReviewerID).Find(&users); err != nil {
+			return
+		}
+		subject, body := renderer(g.TplTicketFailed, args)
 		for _, user := range users {
 			MailSender(MailSendArgs{
 				To:      mail.Address{Name: user.Name, Address: user.Email},
-				Subject: fmt.Sprintf("工单〔%s〕执行失败通知", args.Ticket.Subject),
-				Body:    "-EOF-",
+				Subject: subject,
+				Body:    body,
 			})
 		}
 	}
@@ -233,15 +241,16 @@ func TicketFailedMailSender(e *Event) {
 
 // TicketScheduledArgs 工单预约成功事件参数
 type TicketScheduledArgs struct {
-	User     models.User
-	Ticket   models.Ticket
-	Schedule time.Time
+	User    models.User
+	Ticket  models.Ticket
+	Cluster models.Cluster
+	Cron    models.Cron
 }
 
 // TicketScheduledLogWriter 工单预约成功的日志记录
 func TicketScheduledLogWriter(e *Event) {
 	if args, ok := e.Args.(*TicketScheduledArgs); ok {
-		LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)在预约工单(uuid=%s)成功，预约时间(time=%v)。\n", args.User.UUID, args.Ticket.UUID, args.Schedule))
+		LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)在预约工单(uuid=%s)成功，预约时间(time=%v)。\n", args.User.UUID, args.Ticket.UUID, args.Cron.NextRun))
 	}
 }
 
@@ -254,11 +263,12 @@ func TicketScheduledMailSender(e *Event) {
 			}
 			return false
 		})
+		subject, body := renderer(g.TplTicketScheduled, args)
 		for _, user := range users {
 			MailSender(MailSendArgs{
 				To:      mail.Address{Name: user.Name, Address: user.Email},
-				Subject: fmt.Sprintf("工单〔%s〕预约成功通知", args.Ticket.Subject),
-				Body:    "-EOF-",
+				Subject: subject,
+				Body:    body,
 			})
 		}
 	}
@@ -266,9 +276,9 @@ func TicketScheduledMailSender(e *Event) {
 
 // TicketStatusPatchedArgs 工单状态更新成功事件参数
 type TicketStatusPatchedArgs struct {
-	User   models.User
-	Ticket models.Ticket
-	Status string
+	User    models.User
+	Ticket  models.Ticket
+	Cluster models.Cluster
 }
 
 // TicketStatusPatchedLogWriter 工单状态更新成功日志记录
@@ -287,11 +297,23 @@ func TicketStatusPatchedMailSender(e *Event) {
 			}
 			return false
 		})
+		var subject, body string
+		switch args.Ticket.Status {
+		case gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumClosed]:
+			users = []*models.User{&args.User}
+			subject, body = renderer(g.TplTicketClosed, args)
+		case gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumMrvFailure]:
+			subject, body = renderer(g.TplTicketMrvFailure, args)
+		case gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumLgtm]:
+			subject, body = renderer(g.TplTicketLgtm, args)
+		default:
+			return
+		}
 		for _, user := range users {
 			MailSender(MailSendArgs{
 				To:      mail.Address{Name: user.Name, Address: user.Email},
-				Subject: fmt.Sprintf("工单〔%s〕状态变更通知", args.Ticket.Subject),
-				Body:    "-EOF-",
+				Subject: subject,
+				Body:    body,
 			})
 		}
 	}
@@ -399,10 +421,11 @@ func UserRegisteredLogWriter(e *Event) {
 // UserRegisteredMailSender 用户注册的邮件通知（激活）
 func UserRegisteredMailSender(e *Event) {
 	if args, ok := e.Args.(*UserRegisteredArgs); ok {
+		subject, body := renderer(g.TplUserRegistered, args)
 		MailSender(MailSendArgs{
 			To:      mail.Address{Name: args.User.Name, Address: args.User.Email},
-			Subject: "账号激活",
-			Body:    "-EOF-",
+			Subject: subject,
+			Body:    body,
 		})
 	}
 }
@@ -456,10 +479,11 @@ func PasswordUpdatedLogWriter(e *Event) {
 // PasswordUpdatedMailSender 密码更新邮件通知
 func PasswordUpdatedMailSender(e *Event) {
 	if args, ok := e.Args.(*PasswordUpdatedArgs); ok {
+		subject, body := renderer(g.TplPasswordUpdated, args)
 		MailSender(MailSendArgs{
 			To:      mail.Address{Name: args.User.Name, Address: args.User.Email},
-			Subject: "密码修改成功",
-			Body:    "-EOF-",
+			Subject: subject,
+			Body:    body,
 		})
 	}
 }
@@ -480,11 +504,12 @@ func EmailUpdatedLogWriter(e *Event) {
 // EmailUpdatedMailSender 账号更新邮件通知
 func EmailUpdatedMailSender(e *Event) {
 	if args, ok := e.Args.(*EmailUpdatedArgs); ok {
+		subject, body := renderer(g.TplEmailUpdated, args)
 		// TODO: 把新Email和当前时间加密后，放在验证邮件中
 		MailSender(MailSendArgs{
 			To:      mail.Address{Name: args.User.Name, Address: args.Email},
-			Subject: "账号修改验证",
-			Body:    "-EOF-",
+			Subject: subject,
+			Body:    body,
 		})
 	}
 }
@@ -504,10 +529,11 @@ func ProfileUpdatedLogWriter(e *Event) {
 // ProfileUpdatedMailSender 用户信息更新邮件通知
 func ProfileUpdatedMailSender(e *Event) {
 	if args, ok := e.Args.(*ProfileUpdatedArgs); ok {
+		subject, body := renderer(g.TplProfileUpdated, args)
 		MailSender(MailSendArgs{
 			To:      mail.Address{Name: args.User.Name, Address: args.User.Email},
-			Subject: "用户资料修改成功",
-			Body:    "-EOF-",
+			Subject: subject,
+			Body:    body,
 		})
 	}
 }
@@ -540,10 +566,11 @@ func UserCreatedLogWriter(e *Event) {
 // UserCreatedMailSender 用户创建成功邮件通知
 func UserCreatedMailSender(e *Event) {
 	if args, ok := e.Args.(*UserCreatedArgs); ok {
+		subject, body := renderer(g.TplUserCreated, args)
 		MailSender(MailSendArgs{
 			To:      mail.Address{Name: args.User.Name, Address: args.User.Email},
-			Subject: "用户创建成功",
-			Body:    "-EOF-",
+			Subject: subject,
+			Body:    body,
 		})
 	}
 }
@@ -657,11 +684,12 @@ func CommentCreatedMailSender(e *Event) {
 			}
 			return false
 		})
+		subject, body := renderer(g.TplCommentCreated, args)
 		for _, user := range users {
 			MailSender(MailSendArgs{
 				To:      mail.Address{Name: user.Name, Address: user.Email},
-				Subject: fmt.Sprintf("工单〔%s〕新增审核意见通知", args.Ticket.Subject),
-				Body:    "-EOF-",
+				Subject: subject,
+				Body:    body,
 			})
 		}
 	}
@@ -690,11 +718,12 @@ func CronCancelledMailSender(e *Event) {
 			}
 			return false
 		})
+		subject, body := renderer(g.TplCronCancelled, args)
 		for _, user := range users {
 			MailSender(MailSendArgs{
 				To:      mail.Address{Name: user.Name, Address: user.Email},
-				Subject: fmt.Sprintf("工单〔%s〕取消执行通知", args.Ticket.Subject),
-				Body:    "-EOF-",
+				Subject: subject,
+				Body:    body,
 			})
 		}
 	}
@@ -896,6 +925,10 @@ type MailSendArgs struct {
 
 // MailSender 邮件发送
 func MailSender(args MailSendArgs) {
+	if !g.Config().Mail.Enabled {
+		return
+	}
+
 	defer func() {
 		if err := recover(); err != nil {
 			if e, ok := err.(error); ok {
@@ -905,15 +938,15 @@ func MailSender(args MailSendArgs) {
 			}
 		}
 	}()
-	// TODO:
-	from := mail.Address{Name: "系统用户", Address: "m18482034953_1@163.com"}
+
+	from := mail.Address{Name: "系统用户", Address: g.Config().Mail.User}
 	to := args.To
 
 	// set headers for html email
 	header := textproto.MIMEHeader{}
 	header.Set(textproto.CanonicalMIMEHeaderKey("from"), fmt.Sprintf("%s <%s>", from.Name, from.Address))
 	header.Set(textproto.CanonicalMIMEHeaderKey("to"), fmt.Sprintf("%s <%s>", to.Name, to.Address))
-	header.Set(textproto.CanonicalMIMEHeaderKey("content-type"), "text/html; charset=UTF-8")
+	header.Set(textproto.CanonicalMIMEHeaderKey("content-type"), "text/plain; charset=UTF-8")
 	header.Set(textproto.CanonicalMIMEHeaderKey("mime-version"), "1.0")
 	header.Set(textproto.CanonicalMIMEHeaderKey("subject"), args.Subject)
 
@@ -928,12 +961,11 @@ func MailSender(args MailSendArgs) {
 	// write body
 	buffer.WriteString(fmt.Sprintf("\r\n%s", args.Body))
 
-	// TODO:
 	// Connect to the SMTP Server
-	servername := "smtp.163.com:465"
+	servername := g.Config().Mail.Addr
 
 	host, _, _ := net.SplitHostPort(servername)
-	auth := smtp.PlainAuth("", "m18482034953_1@163.com", "mg8a0h7", host)
+	auth := smtp.PlainAuth("", g.Config().Mail.User, g.Config().Mail.Password, host)
 
 	// TLS config
 	tlsconfig := &tls.Config{
@@ -985,4 +1017,30 @@ func MailSender(args MailSendArgs) {
 	}
 
 	c.Quit()
+}
+
+func renderer(id g.Template, data interface{}) (string, string) {
+	tpl := caches.TemplatesMap.Any(func(elem *models.Template) bool {
+		if elem.UUID == string(id) {
+			return true
+		}
+		return false
+	})
+	if tpl == nil {
+		return "", ""
+	}
+	fmap := template.FuncMap{
+		"formatDate": formatDate,
+	}
+	tplSubject := template.Must(template.New("subject").Parse(tpl.Subject))
+	tplBody := template.Must(template.New("body").Funcs(fmap).Parse(tpl.Body))
+	subject := new(bytes.Buffer)
+	body := new(bytes.Buffer)
+	tplSubject.Execute(subject, data)
+	tplBody.Execute(body, data)
+	return subject.String(), body.String()
+}
+
+func formatDate(ts uint) string {
+	return time.Unix(int64(ts), 0).Format("2006-01-02 15:04:05")
 }

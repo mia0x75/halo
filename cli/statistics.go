@@ -7,9 +7,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/spf13/cobra"
+
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/models"
-	"github.com/spf13/cobra"
 )
 
 // statisticsCmd represents the statistics command
@@ -47,7 +48,7 @@ func statistics(cmd *cobra.Command, args []string) {
 		}
 		if tds.UUID == "" {
 			tds.Group = "tickets-daily"
-			tds.Key = d
+			tds.Key = today
 			tds.Value = 0
 			if _, err = g.Engine.Insert(tds); err != nil {
 				break
@@ -58,7 +59,7 @@ func statistics(cmd *cobra.Command, args []string) {
 		}
 		if qds.UUID == "" {
 			qds.Group = "queries-daily"
-			qds.Key = d
+			qds.Key = today
 			qds.Value = 0
 			if _, err = g.Engine.Insert(qds); err != nil {
 				break

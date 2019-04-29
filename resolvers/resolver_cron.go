@@ -13,15 +13,37 @@ import (
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/models"
+	"github.com/mia0x75/halo/tools"
 )
 
 // CancelCron 取消一个预约（工单关闭）
 func (r *mutationRootResolver) CancelCron(ctx context.Context, id string) (ok bool, err error) {
 	for {
-		// TODO: 实现取消作业
+		rc := gqlapi.ReturnCodeOK
+		s := crons.NewScheduler()
+		if err = s.Cancel(id); err != nil {
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+			break
+		}
 
+		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		cron := &models.Cron{}
+		ticket := &models.Ticket{}
+		if _, err = g.Engine.Where("`uuid` = ?", id).Get(cron); err != nil {
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+			break
+		}
+		if _, err = g.Engine.Where("`cron_id` = ?", cron.CronID).Get(ticket); err != nil {
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+			break
+		}
 		events.Fire(events.EventCronCancelled, &events.CronCancelledArgs{
-			// UserUUID: user.UUID,
+			User:   *credential.User,
+			Cron:   *cron,
+			Ticket: *ticket,
 		})
 
 		// 退出for循环
