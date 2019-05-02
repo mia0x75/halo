@@ -4097,7 +4097,7 @@ type Rule implements Node {
 	"""
 	规则的严重级别，分别是警告和错误，警告可以被忽略进而审核执行，错误则必须修正之后才可以被审核执行
 	"""
-	VldrGroup:    UInt16!   @range(begin: 1000, end: 9999) @matches(pattern: "^(\\d{4}$")
+	VldrGroup:    UInt16!   @range(begin: 1000, end: 9999) @matches(pattern: "^(\\d{4})$")
 
 	"""
 	规则当前的设定值，部分规则需要，比如允许的存储引擎
