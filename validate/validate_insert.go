@@ -101,9 +101,9 @@ func (v *InsertVldr) RowsLimit(s *models.Statement, r *models.Rule) {
 	}
 }
 
-// ColumnValueMatch 列类型、值是否匹配
+// ColumnsValuesMustMatch 列类型、值是否匹配
 // RULE: INS-L2-005
-func (v *InsertVldr) ColumnValueMatch(s *models.Statement, r *models.Rule) {
+func (v *InsertVldr) ColumnsValuesMustMatch(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	columnNum := len(v.id.Columns)
 	for _, list := range v.id.Lists {

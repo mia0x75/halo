@@ -102,9 +102,9 @@ func (v *UpdateVldr) TargetColumnDoesNotExist(s *models.Statement, r *models.Rul
 	// TODO:
 }
 
-// RowsLimit 允许单次更新的最大行数
+// MaxAllowedUpdateRows 允许单次更新的最大行数
 // RULE: UPD-L3-004
-func (v *UpdateVldr) RowsLimit(s *models.Statement, r *models.Rule) {
+func (v *UpdateVldr) MaxAllowedUpdateRows(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// TODO:
 }

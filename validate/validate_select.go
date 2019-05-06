@@ -74,9 +74,9 @@ func (v *SelectVldr) WithoutLimitNotAllowed(s *models.Statement, r *models.Rule)
 	}
 }
 
-// StarNotAllowed 禁止SELECT STAR
+// UseWildcardNotAllowed 禁止SELECT STAR
 // RULE: SEL-L2-003
-func (v *SelectVldr) StarNotAllowed(s *models.Statement, r *models.Rule) {
+func (v *SelectVldr) UseWildcardNotAllowed(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, field := range v.sd.Fields.Fields {
 		if field.WildCard != nil {
@@ -90,10 +90,17 @@ func (v *SelectVldr) StarNotAllowed(s *models.Statement, r *models.Rule) {
 	}
 }
 
-// ForUpdateNotAllowed 禁止SELECT FOR UPDATE
+// UseExplicitLockNotAllowed 禁止指定锁的类型
 // RULE: SEL-L2-004
-func (v *SelectVldr) ForUpdateNotAllowed(s *models.Statement, r *models.Rule) {
+func (v *SelectVldr) UseExplicitLockNotAllowed(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+	if v.sd.LockTp != ast.SelectLockNone {
+		c := &models.Clause{
+			Description: r.Message,
+			Level:       r.Level,
+		}
+		s.Violations.Append(c)
+	}
 }
 
 // TargetDatabaseDoesNotExist 目标数据库必须已存在
@@ -143,9 +150,9 @@ func (v *SelectVldr) TargetColumnDoesNotDoesNotExist(s *models.Statement, r *mod
 	}
 }
 
-// BlobOrTextNotAllowed 是否允许返回BLOB/TEXT列
+// ReturnBlobOrTextNotAllowed 是否允许返回BLOB/TEXT列
 // RULE: SEL-L3-004
-func (v *SelectVldr) BlobOrTextNotAllowed(s *models.Statement, r *models.Rule) {
+func (v *SelectVldr) ReturnBlobOrTextNotAllowed(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	fields := []*ast.SelectField{}
 	for _, field := range v.sd.Fields.Fields {

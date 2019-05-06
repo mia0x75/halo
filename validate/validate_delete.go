@@ -62,9 +62,9 @@ func (v *DeleteVldr) WithoutWhereNotAllowed(s *models.Statement, r *models.Rule)
 	}
 }
 
-// RowsLimit 单次删除的最大行数
+// MaxAllowedDeleteRows 单次删除的最大行数
 // RULE: DEL-L3-001
-func (v *DeleteVldr) RowsLimit(s *models.Statement, r *models.Rule) {
+func (v *DeleteVldr) MaxAllowedDeleteRows(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// TODO:
 }

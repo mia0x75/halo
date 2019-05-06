@@ -273,9 +273,9 @@ func (v *TableCreateVldr) TableCommentRequired(s *models.Statement, r *models.Ru
 	}
 }
 
-// CreateUseSelectNotAllowed 是否允许查询语句建表
+// CreateTableFromSelectNotAllowed 是否允许查询语句建表
 // RULE: CTB-L2-009
-func (v *TableCreateVldr) CreateUseSelectNotAllowed(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) CreateTableFromSelectNotAllowed(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// 规则允许执行，表示禁止新建表
 	if v.ct.Select == nil {
@@ -369,9 +369,9 @@ func (v *TableCreateVldr) ColumnNameDuplicate(s *models.Statement, r *models.Rul
 	}
 }
 
-// ColumnCountLimit 表允许的最大列数
+// MaxAllowedColumnCount 表允许的最大列数
 // RULE: CTB-L2-014
-func (v *TableCreateVldr) ColumnCountLimit(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) MaxAllowedColumnCount(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	tableName := v.ct.Table.Name.O
 	// 字段数量
@@ -679,9 +679,9 @@ func (v *TableCreateVldr) ColumnAutoIncMustPrimaryKey(s *models.Statement, r *mo
 	}
 }
 
-// TimestampColumnCountLimit 仅允许一个时间戳类型的列
+// MaxAllowedTimestampCount 仅允许一个时间戳类型的列
 // RULE: CTB-L2-024
-func (v *TableCreateVldr) TimestampColumnCountLimit(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) MaxAllowedTimestampCount(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	tableName := v.ct.Table.Name.O
 	count := 0
@@ -701,9 +701,9 @@ func (v *TableCreateVldr) TimestampColumnCountLimit(s *models.Statement, r *mode
 	}
 }
 
-// IndexMaxColumnLimit 单一索引最大列数
+// MaxAllowedIndexColumnCount 单一索引最大列数
 // RULE: CTB-L2-025
-func (v *TableCreateVldr) IndexMaxColumnLimit(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) MaxAllowedIndexColumnCount(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	threshold, _ := strconv.Atoi(r.Values)
 	for _, c := range v.ct.Constraints {
@@ -1210,9 +1210,9 @@ func (v *TableCreateVldr) ForeignKeyNamePrefixRequired(s *models.Statement, r *m
 	}
 }
 
-// IndexCountLimit 表中最多可建多少个索引
+// MaxAllowedIndexCount 表中最多可建多少个索引
 // RULE: CTB-L2-048
-func (v *TableCreateVldr) IndexCountLimit(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) MaxAllowedIndexCount(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	tableName := v.ct.Table.Name.O
 	count := 0
@@ -1255,9 +1255,9 @@ func (v *TableCreateVldr) IndexCountLimit(s *models.Statement, r *models.Rule) {
 	}
 }
 
-// UseLikeNotAllowed 禁止允许LIKE方式建表
+// CreateTableUseLikeNotAllowed 禁止允许LIKE方式建表
 // RULE: CTB-L2-049
-func (v *TableCreateVldr) UseLikeNotAllowed(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) CreateTableUseLikeNotAllowed(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// 规则允许执行，表示禁止新建表
 	if v.ct.ReferTable != nil {
@@ -1269,9 +1269,9 @@ func (v *TableCreateVldr) UseLikeNotAllowed(s *models.Statement, r *models.Rule)
 	}
 }
 
-// AutoIncColumnCountLimit 只允许一个自增列
+// AutoIncColumnDuplicate 只允许一个自增列
 // RULE: CTB-L2-050
-func (v *TableCreateVldr) AutoIncColumnCountLimit(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) AutoIncColumnDuplicate(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	count := 0
 	for _, col := range v.ct.Cols {
@@ -1291,9 +1291,9 @@ func (v *TableCreateVldr) AutoIncColumnCountLimit(s *models.Statement, r *models
 	}
 }
 
-// PrimaryKeyCountLimit 只允许一个主键
+// PrimaryKeyDuplicate 只允许一个主键
 // RULE: CTB-L2-051
-func (v *TableCreateVldr) PrimaryKeyCountLimit(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) PrimaryKeyDuplicate(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	count := 0
 	for _, col := range v.ct.Cols {
@@ -2682,9 +2682,9 @@ func (v *TableAlterVldr) FullTextIndexNamePrefixRequired(s *models.Statement, r 
 	}
 }
 
-// IndexMaxColumnLimit 单一索引最大列数
+// MaxAllowedIndexColumnCount 单一索引最大列数
 // RULE: MTB-L2-039
-func (v *TableAlterVldr) IndexMaxColumnLimit(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) MaxAllowedIndexColumnCount(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	threshold, err := strconv.Atoi(r.Values)
 	if err != nil {
@@ -2769,8 +2769,9 @@ func (v *TableAlterVldr) ColumnNameDuplicate(s *models.Statement, r *models.Rule
 	}
 }
 
-// ColumnCountLimit 列的数量是否超过阈值
-func (v *TableAlterVldr) ColumnCountLimit(s *models.Statement, r *models.Rule) {
+// MaxAllowedColumnCount 列的数量是否超过阈值
+// RULE: MTB-L3-006
+func (v *TableAlterVldr) MaxAllowedColumnCount(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// 字段数量
 	threshold, err := strconv.Atoi(r.Values)
@@ -3029,10 +3030,16 @@ func (v *TableAlterVldr) IndexOnBlobColumnNotAllowed(s *models.Statement, r *mod
 	}
 }
 
-// TimestampColumnCountLimit 添加修改列时位置限定列 存在性检查
-func (v *TableAlterVldr) TimestampColumnCountLimit(s *models.Statement, r *models.Rule) {
+// MaxAllowedTimestampCount 仅允许一个事件戳类型的列
+// RULE: MTB-L3-007
+func (v *TableAlterVldr) MaxAllowedTimestampCount(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+}
 
+// IndexOverlayNotAllowed 不允许索引覆盖
+// RULE: MTB-L3-007
+func (v *TableAlterVldr) IndexOverlayNotAllowed(s *models.Statement, r *models.Rule) {
+	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 }
 
 // TableRenameVldr 改名表语句相关的审核规则

@@ -50,9 +50,9 @@ func (v *IndexCreateVldr) Validate(wg *sync.WaitGroup) {
 	}
 }
 
-// IndexMaxColumnLimit 组合索引允许的最大列数
+// MaxAllowedIndexColumnCount 组合索引允许的最大列数
 // RULE: CIX-L2-001
-func (v *IndexCreateVldr) IndexMaxColumnLimit(s *models.Statement, r *models.Rule) {
+func (v *IndexCreateVldr) MaxAllowedIndexColumnCount(s *models.Statement, r *models.Rule) {
 	threshold, _ := strconv.Atoi(r.Values)
 	if threshold < len(v.ci.IndexColNames) {
 		c := &models.Clause{
@@ -120,9 +120,9 @@ func (v *IndexCreateVldr) IndexNamePrefixRequired(s *models.Statement, r *models
 	}
 }
 
-// DuplicateIndexColumn 组合索引中是否有重复列
+// IndexColumnDuplicate 组合索引中是否有重复列
 // RULE: CIX-L2-006
-func (v *IndexCreateVldr) DuplicateIndexColumn(s *models.Statement, r *models.Rule) {
+func (v *IndexCreateVldr) IndexColumnDuplicate(s *models.Statement, r *models.Rule) {
 	m := make(map[string]int)
 	for _, k := range v.ci.IndexColNames {
 		if _, ok := m[k.Column.Name.L]; ok {
@@ -189,9 +189,9 @@ func (v *IndexCreateVldr) TargetColumnDoesNotExist(s *models.Statement, r *model
 	}
 }
 
-// IndexOverlay 索引内容是否重复
+// IndexOverlayNotAllowed 索引内容是否重复
 // RULE: CIX-L3-004
-func (v *IndexCreateVldr) IndexOverlay(s *models.Statement, r *models.Rule) {
+func (v *IndexCreateVldr) IndexOverlayNotAllowed(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 }
 
@@ -212,9 +212,9 @@ func (v *IndexCreateVldr) IndexNameDuplicate(s *models.Statement, r *models.Rule
 	}
 }
 
-// IndexCountLimit 最多能建多少个索引
+// MaxAllowedIndexCount 最多能建多少个索引
 // RULE: CIX-L3-006
-func (v *IndexCreateVldr) IndexCountLimit(s *models.Statement, r *models.Rule) {
+func (v *IndexCreateVldr) MaxAllowedIndexCount(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.ci.Table.Schema.O, v.ci.Table.Name.O)
 	if ti == nil {
