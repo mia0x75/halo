@@ -3,6 +3,7 @@ package resolvers
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strconv"
 
 	"github.com/mia0x75/halo/caches"
@@ -105,6 +106,14 @@ func (r *mutationRootResolver) PatchRuleBitwise(ctx context.Context, input model
 
 // TestRegexp 测试正则表达式的有效性
 func (r *queryRootResolver) TestRegexp(ctx context.Context, input *models.ValidatePatternInput) (ok bool, err error) {
+	rc := gqlapi.ReturnCodeOK
+	if _, err = regexp.Compile(input.Pattern); err != nil {
+		// TODO: 处理rc
+		err = fmt.Errorf("错误代码: %s, 错误信息: `%s`不是一个有效的正则表达式。", rc, input.Pattern)
+		return
+	}
+	ok = true
+
 	return
 }
 

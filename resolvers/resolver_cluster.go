@@ -2,6 +2,7 @@ package resolvers
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -20,6 +21,29 @@ import (
 
 // TestCluster 测试群集的连接性
 func (r *queryRootResolver) TestCluster(ctx context.Context, input *models.ValidateConnectionInput) (ok bool, err error) {
+	for {
+		rc := gqlapi.ReturnCodeOK
+		const pattern = "%s:%s@tcp(%s:%d)/mysql?loc=Local&parseTime=true"
+		db := &sql.DB{}
+		addr := fmt.Sprintf(pattern, input.User, input.Password, input.IP, input.Port)
+
+		if db, err = sql.Open("mysql", addr); err != nil {
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: 连接参数不正确: %s", rc, err.Error())
+			break
+		}
+		if err = db.Ping(); err != nil {
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: 无法连接到目标群集: %s", rc, err.Error())
+			break
+		}
+		db.Close()
+
+		// 退出for循环
+		ok = true
+		break
+	}
+
 	return
 }
 
