@@ -18,7 +18,7 @@ require (
 	github.com/machinebox/graphql v0.2.2
 	github.com/matryer/is v1.2.0 // indirect
 	github.com/mia0x75/antlr v0.0.0-20190323140341-bf6915c3dd7b // indirect
-	github.com/mia0x75/parser v0.0.0-20190428094318-7e9228540ec5
+	github.com/mia0x75/parser v0.0.0-20190503015245-26d8edb95c53
 	github.com/mia0x75/yql v0.0.0-20190325023231-8a8982f46522
 	github.com/pingcap/check v0.0.0-20171206051426-1c287c953996 // indirect
 	github.com/pingcap/errors v0.11.0 // indirect

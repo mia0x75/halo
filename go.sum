@@ -107,6 +107,8 @@ github.com/mia0x75/antlr v0.0.0-20190323140341-bf6915c3dd7b h1:Y8tlewyYL1Oqv/7dl
 github.com/mia0x75/antlr v0.0.0-20190323140341-bf6915c3dd7b/go.mod h1:A2rVDF7RAiQkmnm3SkTt2hezKI51/+ax1m8PJxNWIiE=
 github.com/mia0x75/parser v0.0.0-20190428094318-7e9228540ec5 h1:7T+faNog2SX9NnLcgJ872vAbVQmqmRu72Y4TA213Itc=
 github.com/mia0x75/parser v0.0.0-20190428094318-7e9228540ec5/go.mod h1:yMzR3J9VI+sWwAVTGuYj3XoZy3P6ttJgoNGmtxy2wfQ=
+github.com/mia0x75/parser v0.0.0-20190503015245-26d8edb95c53 h1:dRD6zV6/EpZHDfR7mcFcjQVYhkziT8rQlhAO6BfkuYo=
+github.com/mia0x75/parser v0.0.0-20190503015245-26d8edb95c53/go.mod h1:yMzR3J9VI+sWwAVTGuYj3XoZy3P6ttJgoNGmtxy2wfQ=
 github.com/mia0x75/xorm-core v0.6.3 h1:/XXBZx6Ilo52fy3X61bIs7Aw0cVDaVhVqXRPpzJ3hIc=
 github.com/mia0x75/xorm-core v0.6.3/go.mod h1:bwPIfLdm/FzWgVUH8WPVlr+uJhscvNGFcaZKXsI3n2c=
 github.com/mia0x75/yql v0.0.0-20190325023231-8a8982f46522 h1:y7n6Ohs04+5x5nWDnMeUhRXs55z6LJxcRI72Q5Gv6tk=

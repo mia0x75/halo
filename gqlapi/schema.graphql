@@ -1994,6 +1994,26 @@ type QueryRoot {
 		"""
 		database: String!
 	): String! @auth(requires: [DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	测试数据库群集的连接性
+	"""
+	testCluster(
+		"""
+		连接信息
+		"""
+		input: ValidateConnectionInput
+	): Boolean! @auth(requires: [ADMIN])
+
+	"""
+	测试正则表达式的有效性
+	"""
+	testRegexp(
+		"""
+		正则表达式
+		"""
+		input: ValidatePatternInput
+	): Boolean! @auth(requires: [ADMIN])
 }
 
 """

@@ -18,6 +18,11 @@ import (
 	"github.com/mia0x75/halo/tools"
 )
 
+// TestCluster 测试群集的连接性
+func (r *queryRootResolver) TestCluster(ctx context.Context, input *models.ValidateConnectionInput) (ok bool, err error) {
+	return
+}
+
 // Databases 获取某一个群集的所有用户数据库
 func (r *queryRootResolver) Databases(ctx context.Context, clusterUUID string) (L []gqlapi.Database, err error) {
 L:

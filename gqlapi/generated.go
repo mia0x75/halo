@@ -351,6 +351,8 @@ type ComplexityRoot struct {
 		Statistics    func(childComplexity int, groups []string) int
 		Tasks         func(childComplexity int) int
 		Templates     func(childComplexity int) int
+		TestCluster   func(childComplexity int, input *models.ValidateConnectionInput) int
+		TestRegexp    func(childComplexity int, input *models.ValidatePatternInput) int
 		Ticket        func(childComplexity int, id string) int
 		TicketSearch  func(childComplexity int, search string, after *string, before *string, first *int, last *int) int
 		Tickets       func(childComplexity int, after *string, before *string, first *int, last *int) int
@@ -574,6 +576,8 @@ type QueryRootResolver interface {
 	Statistics(ctx context.Context, groups []string) ([]*models.Statistic, error)
 	Environments(ctx context.Context) (*Environments, error)
 	Metadata(ctx context.Context, clusterUUID string, database string) (string, error)
+	TestCluster(ctx context.Context, input *models.ValidateConnectionInput) (bool, error)
+	TestRegexp(ctx context.Context, input *models.ValidatePatternInput) (bool, error)
 }
 type RoleResolver interface {
 	Users(ctx context.Context, obj *models.Role, after *string, before *string, first *int, last *int) (*UserConnection, error)
@@ -2214,6 +2218,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.QueryRoot.Templates(childComplexity), true
+
+	case "QueryRoot.TestCluster":
+		if e.complexity.QueryRoot.TestCluster == nil {
+			break
+		}
+
+		args, err := ec.field_QueryRoot_testCluster_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.QueryRoot.TestCluster(childComplexity, args["input"].(*models.ValidateConnectionInput)), true
+
+	case "QueryRoot.TestRegexp":
+		if e.complexity.QueryRoot.TestRegexp == nil {
+			break
+		}
+
+		args, err := ec.field_QueryRoot_testRegexp_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.QueryRoot.TestRegexp(childComplexity, args["input"].(*models.ValidatePatternInput)), true
 
 	case "QueryRoot.Ticket":
 		if e.complexity.QueryRoot.Ticket == nil {
@@ -5164,6 +5192,26 @@ type QueryRoot {
 		"""
 		database: String!
 	): String! @auth(requires: [DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	测试数据库群集的连接性
+	"""
+	testCluster(
+		"""
+		连接信息
+		"""
+		input: ValidateConnectionInput
+	): Boolean! @auth(requires: [ADMIN])
+
+	"""
+	测试正则表达式的有效性
+	"""
+	testRegexp(
+		"""
+		正则表达式
+		"""
+		input: ValidatePatternInput
+	): Boolean! @auth(requires: [ADMIN])
 }
 
 """
@@ -7276,6 +7324,34 @@ func (ec *executionContext) field_QueryRoot_statistics_args(ctx context.Context,
 		}
 	}
 	args["Groups"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_QueryRoot_testCluster_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *models.ValidateConnectionInput
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalOValidateConnectionInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐValidateConnectionInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_QueryRoot_testRegexp_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *models.ValidatePatternInput
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalOValidatePatternInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐValidatePatternInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -13255,6 +13331,74 @@ func (ec *executionContext) _QueryRoot_metadata(ctx context.Context, field graph
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _QueryRoot_testCluster(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "QueryRoot",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_QueryRoot_testCluster_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.QueryRoot().TestCluster(rctx, args["input"].(*models.ValidateConnectionInput))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _QueryRoot_testRegexp(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "QueryRoot",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_QueryRoot_testRegexp_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.QueryRoot().TestRegexp(rctx, args["input"].(*models.ValidatePatternInput))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _QueryRoot___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -19816,6 +19960,34 @@ func (ec *executionContext) _QueryRoot(ctx context.Context, sel ast.SelectionSet
 				}
 				return res
 			})
+		case "testCluster":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._QueryRoot_testCluster(ctx, field)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
+		case "testRegexp":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._QueryRoot_testRegexp(ctx, field)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._QueryRoot___type(ctx, field)
 		case "__schema":
@@ -22669,6 +22841,30 @@ func (ec *executionContext) marshalOUserEdge2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋ
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) unmarshalOValidateConnectionInput2githubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐValidateConnectionInput(ctx context.Context, v interface{}) (models.ValidateConnectionInput, error) {
+	return ec.unmarshalInputValidateConnectionInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalOValidateConnectionInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐValidateConnectionInput(ctx context.Context, v interface{}) (*models.ValidateConnectionInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOValidateConnectionInput2githubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐValidateConnectionInput(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) unmarshalOValidatePatternInput2githubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐValidatePatternInput(ctx context.Context, v interface{}) (models.ValidatePatternInput, error) {
+	return ec.unmarshalInputValidatePatternInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalOValidatePatternInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐValidatePatternInput(ctx context.Context, v interface{}) (*models.ValidatePatternInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOValidatePatternInput2githubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐValidatePatternInput(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValue(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

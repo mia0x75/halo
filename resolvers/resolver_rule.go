@@ -103,6 +103,11 @@ func (r *mutationRootResolver) PatchRuleBitwise(ctx context.Context, input model
 	return
 }
 
+// TestRegexp 测试正则表达式的有效性
+func (r *queryRootResolver) TestRegexp(ctx context.Context, input *models.ValidatePatternInput) (ok bool, err error) {
+	return
+}
+
 // Rule 查看某一个具体的规则信息，好像目前用处不大
 func (r *queryRootResolver) Rule(ctx context.Context, id string) (rule *models.Rule, err error) {
 	rc := gqlapi.ReturnCodeOK
