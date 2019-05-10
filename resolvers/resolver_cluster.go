@@ -2,6 +2,7 @@ package resolvers
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -17,6 +18,34 @@ import (
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
 )
+
+// TestCluster 测试群集的连接性
+func (r *queryRootResolver) TestCluster(ctx context.Context, input *models.ValidateConnectionInput) (ok bool, err error) {
+	for {
+		rc := gqlapi.ReturnCodeOK
+		const pattern = "%s:%s@tcp(%s:%d)/mysql?loc=Local&parseTime=true"
+		db := &sql.DB{}
+		addr := fmt.Sprintf(pattern, input.User, input.Password, input.IP, input.Port)
+
+		if db, err = sql.Open("mysql", addr); err != nil {
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: 连接参数不正确: %s", rc, err.Error())
+			break
+		}
+		if err = db.Ping(); err != nil {
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: 无法连接到目标群集: %s", rc, err.Error())
+			break
+		}
+		db.Close()
+
+		// 退出for循环
+		ok = true
+		break
+	}
+
+	return
+}
 
 // Databases 获取某一个群集的所有用户数据库
 func (r *queryRootResolver) Databases(ctx context.Context, clusterUUID string) (L []gqlapi.Database, err error) {
@@ -246,7 +275,7 @@ L:
 			break L
 		}
 
-		tables := []*core.Table{}
+		tables := map[string][]*core.Table{}
 		if tables, err = cluster.Metadata(database, passwd); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
@@ -254,7 +283,7 @@ L:
 		}
 
 		var bs []byte
-		bs, err = json.Marshal(cluster.Repack(tables))
+		bs, err = json.Marshal(cluster.Repack(tables[database]))
 		if err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())

@@ -145,6 +145,40 @@ enum EdgeEnum {
 }
 
 """
+SQL语句抽象语法树类型枚举
+"""
+enum StatementTypeEnum {
+	ALTER_TABLE     @enumInt(value: 1)
+	ANALYZE_TABLE   @enumInt(value: 2)
+	BEGIN           @enumInt(value: 3)
+	COMMIT          @enumInt(value: 4)
+	CREATE_DATABASE @enumInt(value: 5)
+	CREATE_INDEX    @enumInt(value: 6)
+	CREATE_TABLE    @enumInt(value: 7)
+	CREATE_VIEW     @enumInt(value: 8)
+	CREATE_USER     @enumInt(value: 9)
+	DELETE          @enumInt(value: 10)
+	DROP_DATABASE   @enumInt(value: 11)
+	DROP_INDEX      @enumInt(value: 12)
+	DROP_TABLE      @enumInt(value: 13)
+	EXPLAIN         @enumInt(value: 14)
+	INSERT          @enumInt(value: 15)
+	LOAD_DATA       @enumInt(value: 16)
+	ROLLBACK        @enumInt(value: 17)
+	SELECT          @enumInt(value: 18)
+	SET             @enumInt(value: 19)
+	SHOW            @enumInt(value: 20)
+	TRUNCATE_TABLE  @enumInt(value: 21)
+	UPDATE          @enumInt(value: 22)
+	GRANT           @enumInt(value: 23)
+	REVOKE          @enumInt(value: 24)
+	DEALLOCATE      @enumInt(value: 25)
+	EXECUTE         @enumInt(value: 26)
+	PREPARE         @enumInt(value: 27)
+	USE             @enumInt(value: 28)
+}
+
+"""
 角色定义
 """
 enum RoleEnum {
@@ -893,7 +927,7 @@ type Rule implements Node {
 	"""
 	规则的严重级别，分别是警告和错误，警告可以被忽略进而审核执行，错误则必须修正之后才可以被审核执行
 	"""
-	VldrGroup:    UInt16!   @range(begin: 1000, end: 9999) @matches(pattern: "^(\\d{4}$")
+	VldrGroup:    UInt16!   @range(begin: 1000, end: 9999) @matches(pattern: "^(\\d{4})$")
 
 	"""
 	规则当前的设定值，部分规则需要，比如允许的存储引擎
@@ -1051,7 +1085,7 @@ type Statement implements Node {
 	"""
 	语句的类型，这个有抽象语法树决定
 	"""
-	Type:         UInt8   @range(begin: 1, end: 255)
+	TypeDesc:     String!
 
 	"""
 	语句的审核状态
@@ -1153,6 +1187,42 @@ type Statistic implements Node {
 	UpdateAt: UInt
 }
 
+
+"""
+邮件模板
+"""
+type Template implements Node {
+	"""
+	邮件模板的UUID
+	"""
+	UUID:     ID!
+
+	"""
+	邮件主题
+	"""
+	Subject:  String!
+
+	"""
+	邮件正文
+	"""
+	Body:     String!
+
+	"""
+	主题说明
+	"""
+	Description:  String!
+
+	"""
+	记录创建时间
+	"""
+	CreateAt: UInt!
+
+	"""
+	记录最近一次修改时间
+	"""
+	UpdateAt: UInt
+}
+
 """
 变更工单
 """
@@ -1196,6 +1266,11 @@ type Ticket implements Node {
 	变更工单的审核人
 	"""
 	Reviewer: User!
+
+	"""
+	执行预约信息
+	"""
+	Cron:     Cron
 
 	"""
 	变更工单的关联分解的语句
@@ -1670,6 +1745,11 @@ type QueryRoot {
 	): QueryConnection @auth(requires: [DEVELOPER, ADMIN])
 
 	"""
+	查看所有的邮件模板
+	"""
+	templates: [Template] @auth(requires: [ADMIN])
+
+	"""
 	根据工单编码查看工单记录
 	"""
 	ticket (
@@ -1914,6 +1994,26 @@ type QueryRoot {
 		"""
 		database: String!
 	): String! @auth(requires: [DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	测试数据库群集的连接性
+	"""
+	testCluster(
+		"""
+		连接信息
+		"""
+		input: ValidateConnectionInput
+	): Boolean! @auth(requires: [ADMIN])
+
+	"""
+	测试正则表达式的有效性
+	"""
+	testRegexp(
+		"""
+		正则表达式
+		"""
+		input: ValidatePatternInput
+	): Boolean! @auth(requires: [ADMIN])
 }
 
 """
@@ -2269,6 +2369,31 @@ input PatchClusterStatusInput {
 	群集状态(禁用|正常)
 	"""
 	Status:       UInt8! @matches(pattern: "^(1|2|3)$")
+}
+
+"""
+修改邮件模板
+"""
+input UpdateTemplateInput {
+	"""
+	模板名称
+	"""
+	TemplateUUID: ID!
+
+	"""
+	邮件主题
+	"""
+	Subject:      String!
+
+	"""
+	邮件正文
+	"""
+	Body:         String!
+
+	"""
+	主题说明
+	"""
+	Description:  String!
 }
 
 """
@@ -2721,6 +2846,16 @@ type MutationRoot {
 		"""
 		input: PatchClusterStatusInput!
 	): Boolean! @auth(requires:[ADMIN])
+
+	"""
+	修改邮件模板
+	"""
+	updateTemplate(
+		"""
+		邮件模板信息
+		"""
+		input: UpdateTemplateInput
+	): Template! @auth(requires:[ADMIN])
 
 	"""
 	开发创建新工单  

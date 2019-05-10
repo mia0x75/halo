@@ -706,258 +706,248 @@ COMMENT = '规则表'
 
 LOCK TABLES `mm_rules` WRITE;
 INSERT INTO `mm_rules` VALUES
-('e4b6f058-f8e3-469d-b754-ac754c9bd07e', 'CDB-L2-001', 10, '新建数据库时允许的字符集', 2, 100, 'in', '["utf8mb4","binary"]', 7, 'DatabaseCreateAvailableCharsets', '建库禁用字符集"%s"，请使用"%s"。', 'checkboxes/key=CHARsets', 1, 0, UNIX_TIMESTAMP()),
-('5126367e-19bf-4996-96eb-b92d51860acc', 'CDB-L2-002', 10, '新建数据库时允许的排序规则', 2, 100, 'none', '["utf8mb4_general_ci", "utf8mb4_bin", "utf8mb4_unicode_ci"]', 7, 'DatabaseCreateAvailableCollates', '建库禁用排序规则"%s"，请使用"%s"。', 'checkboxes/key=collates', 1, 0, UNIX_TIMESTAMP()),
-('8e549891-ace6-48ba-bab7-6c333851098f', 'CDB-L2-003', 10, '新建数据库时字符集与排序规则必须匹配', 2, 100, 'none', 'nil', 5, 'DatabaseCreateCharsetCollateMatch', '建库使用的字符集"%s"和排序规则"%s"不匹配，请查阅官方文档。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('439a8103-7664-48c8-ae3d-227deb057416', 'CDB-L2-004', 10, '库名规则', 2, 100, 'regexp', '^[a-zA-Z][_a-zA-Z0-9]*$', 7, 'DatabaseCreateDatabaseNameQualified', '库名"%s"需要满足正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('ce313eeb-aaa3-4ccc-ab52-6f8694bff63e', 'CDB-L2-005', 10, '库名必须小写', 2, 100, 'none', '^[_a-z0-9]+$', 7, 'DatabaseCreateDatabaseNameLowerCaseRequired', '库名"%s"中含有大写字母。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('5575b7a8-fda5-4c07-8fed-5457839334bb', 'CDB-L2-006', 10, '库名最大长度', 2, 100, 'lte', '15', 7, 'DatabaseCreateDatabaseNameMaxLength', '库名"%s"的长度超出了规则允许的上限，请控制在%d个字符以内。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('d8a0fad2-773a-49d7-b1b9-d1219158222b', 'CDB-L3-001', 10, '新建数据库时目标库必须不存在', 3, 100, 'none', 'nil', 4, 'DatabaseCreateTargetDatabaseExists', '目标库"%s"已存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('1abf3c57-d84d-4295-9cbe-4b95f9e3c9bc', 'DDB-L3-001', 10, '删除数据库时目标库必须已存在', 3, 102, 'none', 'nil', 4, 'DatabaseDropTargetDatabaseExists', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('78ab3a56-28dd-463d-b8dd-bcb1929d2314', 'MDB-L2-001', 10, '修改数据库时允许的字符集', 2, 101, 'in', '["utf8mb4"]', 7, 'DatabaseAlterAvailableCharsets', '改库禁用字符集"%s"，请使用"%s"。', 'checkboxes/key=CHARsets', 1, 0, UNIX_TIMESTAMP()),
-('a28e9a5d-2d26-433b-b4c6-fb68faa05daa', 'MDB-L2-002', 10, '修改数据库时允许的排序规则', 2, 101, 'in', '["utf8mb4_unicode_ci", "utf8mb4_general_ci", "utf8mb4_bin"]', 7, 'DatabaseAlterAvailableCollates', '改库禁用排序规则"%s"，请使用"%s"。', 'checkboxes/key=collates', 1, 0, UNIX_TIMESTAMP()),
-('3c10b2cc-ebfb-4bf6-8543-44a91506d86b', 'MDB-L2-003', 10, '修改数据库时字符集与排序规则必须匹配', 2, 101, 'none', 'nil', 5, 'DatabaseAlterCharsetCollateMatch', '改库使用的字符集"%s"和排序规则"%s"不匹配，请查阅官方文档。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('c370fd11-b92a-4619-a64a-2deae0873224', 'MDB-L3-001', 10, '修改数据库时目标库必须已存在', 3, 101, 'none', 'nil', 4, 'DatabaseAlterTargetDatabaseExists', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('2e7cbe13-90d3-472a-9da2-4594c8424df0', 'CTB-L2-001', 11, '允许的字符集', 2, 110, 'in', '["utf8mb4"]', 7, 'TableCreateAvailableCharsets', '建表禁用字符集"%s"，请使用"%s"。', 'checkboxes/key=CHARsets', 1, 0, UNIX_TIMESTAMP()),
-('5028dfe3-949d-4220-b9ae-a29d8a16de52', 'CTB-L2-002', 11, '允许的排序规则', 2, 110, 'in', '["utf8mb4_unicode_ci", "utf8mb4_general_ci", "utf8mb4_bin"]', 5, 'TableCreateAvailableCollates', '建表禁用排序规则"%s"，请使用"%s"。', 'checkboxes/key=collates', 1, 0, UNIX_TIMESTAMP()),
-('81b9dec9-3769-4dff-a29a-8739c3ac4ec9', 'CTB-L2-003', 11, '字符集与排序规则必须匹配', 2, 110, 'none', 'nil', 5, 'TableCreateTableCharsetCollateMatch', '建表使用的字符集"%s"和排序规则"%s"不匹配，请查阅官方文档。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('a6dd1817-a41f-4688-924f-df959ffbb2db', 'CTB-L2-004', 11, '允许的存储引擎', 2, 110, 'in', '["innodb", "tokudb", "rocksdb", "archive"]', 7, 'TableCreateAvailableEngines', '建表禁用存储引擎"%s"，请使用"%s"。', 'checkboxes/key=engines', 1, 0, UNIX_TIMESTAMP()),
-('0862861b-4328-49eb-86dc-07b15e0a2a6c', 'CTB-L2-005', 11, '表名规则', 2, 110, 'regexp', '^[a-zA-Z][_a-zA-Z0-9]*$', 5, 'TableCreateTableNameQualified', '表名"%s"需要满足正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('f77613a7-6f1c-48ff-8946-e725d5431e72', 'CTB-L2-006', 11, '表名必须小写', 2, 110, 'regexp', '^[_a-z0-9]+$', 5, 'TableCreateTableNameLowerCaseRequired', '表名"%s"含有大写字母。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('19630e1b-fee5-4afc-8fd1-28f43efb74c6', 'CTB-L2-007', 11, '表名最大长度', 2, 110, 'lte', '20', 7, 'TableCreateTableNameMaxLength', '表名"%s"的长度超出了规则允许的上限，请控制在%d个字符以内。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('335bd848-2027-4c66-b5b0-09f225f02bb9', 'CTB-L2-008', 11, '表必须有注释', 2, 110, 'none', 'nil', 7, 'TableCreateTableCommentRequired', '需要为表"%s"需要提供COMMENT注解。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('6f945479-4788-4bdb-b1e2-e21dc3b335d6', 'CTB-L2-009', 11, '禁止使用CREATE TABLE ... SELECT ...建表', 2, 110, 'none', 'nil', 5, 'TableCreateUseSelectEnabled', '禁止使用CREATE TABLE AS SELECT的方式建表。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('0b0e3799-7f6e-4a46-a054-7437b5485d06', 'CTB-L2-010', 11, '列名规则', 2, 110, 'regexp', '^[a-zA-Z][_a-zA-Z0-9]*$', 5, 'TableCreateColumnNameQualified', '列名"%s"需要满足正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('d99679c9-ffbf-48e6-9dc8-bb1a82d10ff6', 'CTB-L2-011', 11, '列名必须小写', 2, 110, 'regexp', '^[_a-z0-9]+$', 7, 'TableCreateColumnNameLowerCaseRequired', '列名"%s"中含有大写字母。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('86530dce-57e4-41b6-a296-0ccbec5036a3', 'CTB-L2-012', 11, '列名最大长度', 2, 110, 'lte', '20', 7, 'TableCreateColumnNameMaxLength', '列名"%s"的长度超出了规则允许的上限，请控制在%d个字符以内。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('97842c81-7b38-406b-a9a3-88244ea79271', 'CTB-L2-013', 11, '列名是否重复', 2, 110, 'none', 'nil', 5, 'TableCreateColumnNameDuplicate', '表"%s"中的定义了重复的列"%s"。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('2c98b6b7-0e0e-438e-8ccd-fa73fbcdbbea', 'CTB-L2-014', 11, '表允许的最大列数', 2, 110, 'lte', '25', 7, 'TableCreateColumnCountLimit', '表"%s"中定义%d个列，数量超出了规则允许的上限%d，请考虑拆分表。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('31ab4d7a-4243-4951-bf7e-ddbdbc03254f', 'CTB-L2-015', 11, '列禁用的数据类型', 2, 110, 'not-in', '["bit", "enum", "set", "double", "real", "float"]', 7, 'TableCreateColumnUnwantedTypes', '列"%s"使用了不期望的数据类型"%s"，请避免使用"%s"数据类型。', 'checkboxes/key=data-types', 1, 0, UNIX_TIMESTAMP()),
-('b14a529b-bbfc-4d9a-8c1a-067f99449e26', 'CTB-L2-016', 11, '列必须有注释', 2, 110, 'none', 'nil', 5, 'TableCreateColumnCommentRequired', '列"%s"需要提供COMMENT注解。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('95aa9816-ed7c-41a7-8f4f-6929757a92d8', 'CTB-L2-017', 11, '列允许的字符集', 2, 110, 'in', '["utf8mb4", "binary"]', 7, 'TableCreateColumnAvailableCharsets', '列"%s"禁用字符集"%s"，请使用"%s"。', 'checkboxes/key=CHARsets', 1, 0, UNIX_TIMESTAMP()),
-('858cabba-39f1-4c47-af8c-85c891605400', 'CTB-L2-018', 11, '列允许的排序规则', 2, 110, 'in', '["utf8mb4_unicode_ci", "utf8mb4_general_ci", "utf8mb4_bin", "binary"]', 7, 'TableCreateColumnAvailableCollates', '列"%s"禁用排序规则"%s"，请使用"%s"。', 'checkboxes/key=collates', 1, 0, UNIX_TIMESTAMP()),
-('55e72c3d-f0d2-45e9-bd3e-0c172ae6ad69', 'CTB-L2-019', 11, '列字符集与排序规则必须匹配', 2, 110, 'none', 'nil', 5, 'TableCreateColumnCharsetCollateMatch', '列"%s"使用的字符集"%s"和排序规则"%s"不匹配，请查阅官方文档。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('dba74873-c113-482a-8552-8d81dd640bd4', 'CTB-L2-020', 11, '非空列必须有默认值', 2, 110, 'none', 'nil', 5, 'TableCreateColumnNotNullWithDefaultRequired', '列"%s"不允许为空，但没有指定默认值。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('bc94e7f3-9e3e-48c7-b21b-85593b2c2af7', 'CTB-L2-021', 11, '自增列允许的数据类型', 2, 110, 'in', '["int", "bigint"]', 7, 'TableCreateColumnAutoIncAvailableTypes', '自增列"%s"禁用"%s"类型，请使用"%s"。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('d6894864-4d41-4930-b3fd-62da07588239', 'CTB-L2-022', 11, '自增列必须是无符号', 2, 110, 'none', 'nil', 7, 'TableCreateColumnAutoIncIsUnsigned', '自增列"%s"必须使用无符号的整数。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('526ac72c-55d4-484b-8bb2-88eda1e67d6c', 'CTB-L2-023', 11, '自增列必须是主键', 2, 110, 'none', 'nil', 5, 'TableCreateColumnAutoIncMustPrimaryKey', '自增列"%s"不是主键。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('84fcb061-af77-4a7f-8a0e-dfc166b2c531', 'CTB-L2-024', 11, '仅允许一个时间戳类型的列', 2, 110, 'none', 'nil', 7, 'TableCreateTimestampColumnCountLimit', '表"%s"中的定义了多个时间戳列，请改用DATETIME类型。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('0df017c0-d106-4df5-845c-bf50557d497f', 'CTB-L2-025', 11, '单一索引最大列数', 2, 110, 'lte', '3', 7, 'TableCreateIndexMaxColumnLimit', '索引"%s"索引的列数超出了规则允许的上限，请控制在%d个列以内。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('8d319516-890e-45f2-af90-8061b37e9a04', 'CTB-L2-026', 11, '必须有主键', 2, 110, 'none', 'nil', 5, 'TableCreatePrimaryKeyRequired', '必须为表指定一个主键。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('31e193df-bf11-4462-9558-c182eb8366e5', 'CTB-L2-027', 11, '主键是否显式命名', 2, 110, 'none', 'nil', 4, 'TableCreatePrimaryKeyNameExplicit', '主键没有提供名称。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('bedd8dfa-b325-451b-981a-a1cede6bc787', 'CTB-L2-028', 11, '主键名规则', 2, 110, 'regexp', '^[a-zA-Z][_a-zA-Z0-9]*$', 4, 'TableCreatePrimaryKeyNameQualified', '主键名"%s"需要满足正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('dee29598-1f59-4d5f-9881-ad16fa4038fd', 'CTB-L2-029', 11, '主键名必须小写', 2, 110, 'regexp', '^[_a-z0-9]+$', 4, 'TableCreatePrimryKeyLowerCaseRequired', '主键名"%s"含有大写字母。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('c47768d2-24b3-4e9c-9079-8ef39bbd0a53', 'CTB-L2-030', 11, '主键名最大长度', 2, 110, 'lte', '20', 4, 'TableCreatePrimryKeyMaxLength', '主键名"%s"的长度超出了规则允许的上限，请控制在%d个字符以内。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('bc1164e0-45ee-4d58-b4c5-cea244ebeb3f', 'CTB-L2-031', 11, '主键名前缀规则', 2, 110, 'regexp', '^pk_[_a-zA-Z0-9]+$', 4, 'TableCreatePrimryKeyPrefixRequired', '主键名"%s"需要满足前缀正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('7f7182f3-3da8-43c0-a43f-dbe44ccf0130', 'CTB-L2-032', 11, '索引必须命名', 2, 110, 'none', 'nil', 5, 'TableCreateIndexNameExplicit', '一个或多个索引没有提供索引名称。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('364f58af-29a8-4a49-a3ad-a35ea500352c', 'CTB-L2-033', 11, '索引名规则', 2, 110, 'regexp', '^[a-zA-Z][_a-zA-Z0-9]*$', 5, 'TableCreateIndexNameQualified', '索引名"%s"需要满足正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('1dccb327-2b34-4f3d-a900-9560a7b9cd3b', 'CTB-L2-034', 11, '索引名必须小写', 2, 110, 'regexp', '^[_a-z0-9]+$', 5, 'TableCreateIndexNameLowerCaseRequired', '索引名"%s"含有大写字母。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('0e51b2a9-b251-4a25-be86-7895285ad77a', 'CTB-L2-035', 11, '索引名最大长度', 2, 110, 'lte', '10', 7, 'TableCreateIndexNameMaxLength', '索引名"%s"的长度超出了规则允许的上限，请控制在%d个字符以内。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('abac99f7-ad0a-4d24-bdf4-00439e4abad6', 'CTB-L2-036', 11, '索引名前缀规则', 2, 110, 'regexp', '^index_[1-9][0-9]*$', 5, 'TableCreateIndexNamePrefixRequired', '索引名"%s"需要满足前缀正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('de701fa6-6ed4-4608-a95c-53087c43e177', 'CTB-L2-037', 11, '唯一索引必须命名', 2, 110, 'none', 'nil', 5, 'TableCreateUniqueNameExplicit', '一个或多个唯一索引没有提供索引名称。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('26d84e04-25e6-4865-b76b-00995ef56f81', 'CTB-L2-038', 11, '唯一索引索名规则', 2, 110, 'regexp', '^[a-zA-Z][_a-zA-Z0-9]*$', 5, 'TableCreateUniqueNameQualified', '唯一索引"%s"需要满足正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('3b07760f-c055-4d3c-b27a-d23077a0c768', 'CTB-L2-039', 11, '唯一索引名必须小写', 2, 110, 'regexp', '^[_a-z0-9]+$', 5, 'TableCreateUniqueNameLowerCaseRequired', '唯一索引"%s"含有大写字母。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('f9a615b4-cbaa-40a7-b6c2-28a0fc78a35e', 'CTB-L2-040', 11, '唯一索引名最大长度', 2, 110, 'lte', '10', 7, 'TableCreateUniqueNameMaxLength', '唯一索引"%s"的长度超出了规则允许的上限，请控制在%d个字符以内。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('8aab8c07-59d3-43d5-a74f-0005697955ee', 'CTB-L2-041', 11, '唯一索引名前缀规则', 2, 110, 'regexp', '^unique_[1-9][0-9]*$', 5, 'TableCreateUniqueNamePrefixRequired', '唯一索引"%s"需要满足前缀正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('30a7e9c3-0502-4793-9b88-fca8223efa90', 'CTB-L2-042', 11, '禁止外键', 2, 110, 'none', 'nil', 5, 'TableCreateForeignKeyEnabled', '禁止外键。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('8c599732-e3d0-432e-9396-4b4ed6b05479', 'CTB-L2-043', 11, '外键是否显式命名', 2, 110, 'none', 'nil', 5, 'TableCreateForeignKeyNameExplicit', '没有为外键指定名称。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('77708821-c945-4a6d-aa0d-84329b1b01fe', 'CTB-L2-044', 11, '外键名规则', 2, 110, 'regexp', '^[a-zA-Z][_a-zA-Z0-9]*$', 5, 'TableCreateForeignKeyNameQualified', '外键名"%s"需要满足正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('867fa702-b10f-482d-b1a2-a71d5be32f21', 'CTB-L2-045', 11, '外键名必须小写', 2, 110, 'regexp', '^[_a-z0-9]+$', 5, 'TableCreateForeignKeyNameLowerCaseRequired', '外键名"%s"含有大写字母。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('3c3052b4-fc6d-4976-98d1-e2a49ecd3927', 'CTB-L2-046', 11, '外键名最大长度', 2, 110, 'lte', '25', 5, 'TableCreateForeignKeyNameMaxLength', '外键名"%s"的长度超出了规则允许的上限，请控制在%d个字符以内。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('35207240-5094-4696-b209-1260865fde8a', 'CTB-L2-047', 11, '外键名前缀规则', 2, 110, 'regexp', '^fk_[_a-zA-Z0-9]+$', 5, 'TableCreateForeignKeyNamePrefixRequired', '外键名"%s"需要满足前缀正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('e5c85872-1cff-48c0-b705-0c61b04070b9', 'CTB-L2-048', 11, '表中最多可建多少个索引', 2, 110, 'lte', '5', 7, 'TableCreateIndexCountLimit', '表"%s"中定义了%d个索引，数量超过允许的阈值%d。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('7eedb2fb-5e26-41a7-baa7-8c37b8ef3170', 'CTB-L2-049', 11, '禁止使用CREATE TABLE ... LIKE ...建表', 2, 110, 'none', 'nil', 5, 'TableCreateUseLikeEnabled', '禁止使用CREATE TABLE LIKE的方式建表。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('5ace374b-0f35-4132-8941-44283bbc87c1', 'CTB-L2-050', 11, '仅允许定义一个自增列', 2, 110, 'nil', 'nil', 5, 'TableCreateAutoIncColumnCountLimit', '表"%s"中定义了多个自增列。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('b9dce6ba-5612-4bc4-afdb-730d7b15930a', 'CTB-L2-051', 11, '仅允许定义一个主键', 2, 110, 'nil', 'nil', 5, 'TableCreatePrimaryKeyCountLimit', '表"%s"中定义了多个主键。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('887cf290-2288-451a-be70-57394e23dde4', 'CTB-L3-001', 11, '目标库必须已存在', 3, 110, 'none', 'nil', 4, 'TableCreateTargetDatabaseExists', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('1e75c5a2-7bcc-42c4-ac3f-5a64ead5b25c', 'CTB-L3-002', 11, '目标表必须不存在', 3, 110, 'none', 'nil', 4, 'TableCreateTargetTableExists', '目标表"%s"已存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('b17d640a-16fd-4628-a845-d62cdb582884', 'MTB-L2-001', 12, '改表允许的字符集', 2, 120, 'in', '["utf8mb4"]', 7, 'TableAlterAvailableCharsets', '表禁用字符集"%s"，请使用"%s"。', 'checkboxes/key=CHARsets', 1, 0, UNIX_TIMESTAMP()),
-('11460f45-3517-42d6-91ec-5b36d041cf4e', 'MTB-L2-002', 12, '改表允许的校验规则', 2, 120, 'in', '["utf8mb4_unicode_ci", "utf8mb4_general_ci", "utf8mb4_bin"]', 7, 'TableAlterAvailableCollates', '表禁用排序规则"%s"，请使用"%s"。', 'checkboxes/key=collates', 1, 0, UNIX_TIMESTAMP()),
-('b4ae4473-9677-4db5-b2d4-7987fe904e88', 'MTB-L2-003', 12, '表的字符集与排序规则必须匹配', 2, 120, 'none', 'nil', 5, 'TableAlterCharsetCollateMatch', '表字符集"%s"和排序规则"%s"不匹配，请查阅官方文档。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('aee962c0-411e-4875-9291-d708473a1286', 'MTB-L2-004', 12, '改表允许的存储引擎', 2, 120, 'in', '["innodb", "tokudb", "rocksdb", "archive"]', 7, 'TableAlterAvailableEngines', '不支持的存储引擎"%s"，请使用"%s"。', 'checkboxes/key=engines', 1, 0, UNIX_TIMESTAMP()),
-('07ca1452-fa25-4e33-b2dd-6623215a018e', 'MTB-L2-005', 12, '列名必须符合命名规范', 2, 120, 'regexp', '^[a-zA-Z][_a-zA-Z0-9]*$', 5, 'TableAlterColumnNameQualified', '列名"%s"需要满足正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('8463928d-8d32-47fd-a882-efa93983ea3d', 'MTB-L2-006', 12, '列名必须小写', 2, 120, 'regexp', '^[_a-z0-9]+$', 7, 'TableAlterColumnNameLowerCaseRequired', '列名"%s"中含有除小写字母、数字和下划线以外的字符。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('d4a3a9c9-c16f-485a-a741-2c60ffda1b10', 'MTB-L2-007', 12, '列名最大长度', 2, 120, 'lte', '20', 7, 'TableAlterColumnNameMaxLength', '列名"%s"的长度超出了规则允许的上限，请控制在%d个字符以内。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('8ceb2794-a706-406d-859d-4d7fe67ed970', 'MTB-L2-008', 12, '列禁用的数据类型', 2, 120, 'not-in', '["bit", "enum", "set", "double", "real", "float"]', 7, 'TableAlterColumnUnwantedTypes', '列"%s"使用了不期望的数据类型"%s"，请避免使用"%s"数据类型。', 'checkboxes/key=data-types', 1, 0, UNIX_TIMESTAMP()),
-('f5b265d1-30c2-4c98-ab43-8876177c6ccb', 'MTB-L2-009', 12, '列必须有注释', 2, 120, 'none', 'nil', 5, 'TableAlterColumnCommentRequired', '列"%s"需要提供COMMENT注解。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('77130452-bf96-46f6-bb3e-8ce779d82dfc', 'MTB-L2-010', 12, '列允许的字符集', 2, 120, 'in', '["utf8mb4", "binary"]', 7, 'TableAlterColumnAvailableCharsets', '列"%s"禁用字符集"%s"，请使用"%s"。', 'checkboxes/key=CHARsets', 1, 0, UNIX_TIMESTAMP()),
-('d6401716-b714-42a9-b06c-10f515f69cde', 'MTB-L2-011', 12, '列允许的排序规则', 2, 120, 'in', '["utf8mb4_unicode_ci", "utf8mb4_general_ci", "utf8mb4_bin", "binary"]', 7, 'TableAlterColumnAvailableCollates', '列"%s"禁用排序规则"%s"，请使用"%s"。', 'checkboxes/key=collates', 1, 0, UNIX_TIMESTAMP()),
-('9c7f24ec-2d91-435f-b4ee-c31936670e6c', 'MTB-L2-012', 12, '列的字符集与排序规则必须匹配', 2, 120, 'none', 'nil', 5, 'TableAlterColumnCharsetCollateMatch', '列"%s"使用的字符集"%s"和排序规则"%s"不匹配，请查阅官方文档。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('76b8f1fd-7ebb-41fc-9b57-763e2590121d', 'MTB-L2-013', 12, '非空列必须有默认值', 2, 120, 'none', 'nil', 5, 'TableAlterColumnNotNullWithDefaultRequired', '列"%s"不允许为空，但没有指定默认值。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('90c0dece-d69c-4c56-a1a4-7824fe00fe22', 'MTB-L2-014', 12, '索引必须命名', 2, 120, 'none', 'nil', 7, 'TableAlterIndexNameExplicit', '一个或多个索引没有提供索引名称。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('a28f4d53-4c81-4b73-a8a9-2bb441bbfb4b', 'MTB-L2-015', 12, '索引名标识符必须满足规则', 2, 120, 'regexp', '^[a-zA-Z][_a-zA-Z0-9]*$', 7, 'TableAlterIndexNameQualified', '索引名"%s"需要满足正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('b462710c-af50-4c96-85de-e3e6ddb20f47', 'MTB-L2-016', 12, '索引名必须小写', 2, 120, 'regexp', '^[_a-z0-9]+$', 7, 'TableAlterIndexNameLowerCaseRequired', '索引名"%s"含有除小写字母、数字和下划线以外的字符。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('543b5732-8a6d-4690-a02b-f3c8055435c5', 'MTB-L2-017', 12, '索引名最大长度', 2, 120, 'lte', '10', 7, 'TableAlterIndexNameMaxLength', '索引名"%s"的长度超出了规则允许的上限，请控制在%d个字符以内。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('9f752e8b-df62-46b0-bae4-e2c6941f3d88', 'MTB-L2-018', 12, '索引名前缀规则', 2, 120, 'regexp', '^index_[1-9][0-9]*$', 7, 'TableAlterIndexNamePrefixRequired', '索引名"%s"需要满足前缀正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('1885389b-4a1b-475b-a37b-582670a908f8', 'MTB-L2-019', 12, '唯一索引必须命名', 2, 120, 'none', 'nil', 7, 'TableAlterUniqueNameExplicit', '一个或多个唯一索引没有提供索引名称。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('66dd81be-fd2c-4304-b782-86006c52fc5d', 'MTB-L2-020', 12, '唯一索引索名标识符必须符合规则', 2, 120, 'regexp', '^[a-zA-Z][_a-zA-Z0-9]*$', 7, 'TableAlterUniqueNameQualified', '唯一索引"%s"需要满足正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('b68ffe6e-8482-475b-afa4-90b26b44aeb4', 'MTB-L2-021', 12, '唯一索引名必须小写', 2, 120, 'regexp', '^[_a-z0-9]+$', 7, 'TableAlterUniqueNameLowerCaseRequired', '唯一索引"%s"含有除小写字母、数字和下划线以外的字符。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('9dbce3a5-46b7-4465-af71-e5b6291ebc7a', 'MTB-L2-022', 12, '唯一索引名不能超过最大长度', 2, 120, 'lte', '10', 7, 'TableAlterUniqueNameMaxLength', '唯一索引"%s"的长度超出了规则允许的上限，请控制在%d个字符以内。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('7d77c21e-e0c8-48c0-a115-fc460e820c2b', 'MTB-L2-023', 12, '唯一索引名前缀必须符合规则', 2, 120, 'regexp', '^unique_[1-9][0-9]*$', 7, 'TableAlterUniqueNamePrefixRequired', '唯一索引"%s"需要满足前缀正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('690b58b4-9be8-4560-ade6-be534a34120b', 'MTB-L2-024', 12, '禁止外键', 2, 120, 'none', 'nil', 7, 'TableAlterForeignKeyEnabled', '禁止外键。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('98436226-6cb8-4776-bc0b-6bb53ac8cfb4', 'MTB-L2-025', 12, '外键是否显式命名', 2, 120, 'none', 'nil', 5, 'TableAlterForeignKeyNameExplicit', '没有为外键指定名称。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('8ee524ec-2359-4a40-ad91-6c3716dc07b6', 'MTB-L2-026', 12, '外键名标识符规则', 2, 120, 'regexp', '^[a-zA-Z][_a-zA-Z0-9]*$', 5, 'TableAlterForeignKeyNameQualified', '外键名"%s"需要满足正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('b107886d-b28d-41c9-9268-81b6fd631c1a', 'MTB-L2-027', 12, '外键名必须小写', 2, 120, 'regexp', '^[_a-z0-9]+$', 5, 'TableAlterForeignKeyNameLowerCaseRequired', '外键名"%s"含有除小写字母、数字和下划线以外的字符。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('f3bfe2da-162e-46db-8be5-6e152a16696b', 'MTB-L2-028', 12, '外键名最大长度', 2, 120, 'lte', '25', 5, 'TableAlterForeignKeyNameMaxLength', '外键名"%s"的长度超出了规则允许的上限，请控制在%d个字符以内。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('9df7d265-a301-4fa4-9933-87fe3f0fcae2', 'MTB-L2-029', 12, '外键名前缀规则', 2, 120, 'regexp', '^fk_[_a-zA-Z0-9]+$', 5, 'TableAlterForeignKeyNamePrefixRequired', '外键名"%s"需要满足前缀正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('7024faae-3902-4af1-a849-55b09a7cd85a', 'MTB-L2-030', 12, '更名新表规则', 2, 120, 'regexp', '^[a-zA-Z][_a-zA-Z0-9]*$', 7, 'TableAlterNewTableNameQualified', '目标表"%s"需要满足正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('92ee30e7-d138-463e-873f-899fb2be4375', 'MTB-L2-031', 12, '更名新表必须小写', 2, 120, 'regexp', '^[_a-z0-9]+$', 7, 'TableAlterNewTableNameLowerCaseRequired', '目标表"%s"含有除小写字母、数字和下划线以外的字符。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('106db8a3-da54-423c-8104-ed92625f80f4', 'MTB-L2-032', 12, '更名新表最大长度', 2, 120, 'lte', '20', 7, 'TableAlterNewTableNameMaxLength', '目标表"%s"的长度超出了规则允许的上限，请控制在%d个字符以内。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('b9a1a81d-c328-48b9-8919-d47f14f50906', 'MTB-L2-033', 12, '禁用全文索引', 2, 120, 'none', 'nil', 7, 'TableAlterFullTextEnabled', '禁止使用全文索引。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('40375d77-dea4-410b-b8de-9fe4960a138d', 'MTB-L2-034', 12, '索引必须命名', 2, 120, 'none', 'nil', 7, 'TableAlterFullTextNameExplicit', '一个或多个全文索引没有提供索引名称。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('36d7aa62-fa25-4aa5-a7fa-afb15479b037', 'MTB-L2-035', 12, '索引名标识符规则', 2, 120, 'regexp', '^[a-zA-Z][_a-zA-Z0-9]*$', 7, 'TableAlterFullTextNameQualified', '全文索引"%s"需要满足正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('86dd974c-f6ca-475a-84c8-981d43f489ff', 'MTB-L2-036', 12, '索引名必须小写', 2, 120, 'regexp', '^[_a-z0-9]+$', 7, 'TableAlterFullTextNameLowerCaseRequired', '全文索引"%s"含有除小写字母、数字和下划线以外的字符。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('b928f242-aacd-41b9-8347-aa80ab679746', 'MTB-L2-037', 12, '索引名不能超过最大长度', 2, 120, 'lte', '10', 7, 'TableAlterFullTextNameMaxLength', '全文索引"%s"的长度超出了规则允许的上限，请控制在%d个字符以内。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('f754c334-32cf-4c4c-9c46-92a666d24192', 'MTB-L2-038', 12, '索引名前缀必须匹配规则', 2, 120, 'regexp', '^ft_[1-9][0-9]*$', 7, 'TableAlterFullTextNamePrefixRequired', '全文索引"%s"需要满足前缀正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('9280ff7c-ff2b-4c3e-bf6c-4886d49634d1', 'MTB-L2-039', 12, '单一索引最大列数', 2, 120, 'lte', '3', 7, 'TableAlterIndexMaxColumnLimit', '索引"%s"索引的列数超出了规则允许的上限，请控制在%d个列以内。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('768fb105-d609-4b7b-8ff9-0d3854cabfff', 'MTB-L3-001', 12, '目标库必须已存在', 3, 120, 'none', 'nil', 4, 'TableAlterEnabled', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('aa482f88-074c-45ab-97b9-81509bd4567f', 'MTB-L3-002', 12, '目标表必须已存在', 3, 120, 'none', 'nil', 4, 'TableAlterEnabled', '目标表"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('1651eb45-bc11-4aa9-81dc-ee34d4f0f861', 'MTB-L3-003', 12, '新增列时目标列必须不存在', 3, 120, 'none', 'nil', 4, 'TableAlterEnabled', '目标列"%s"已存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('cfe017e3-339a-45a5-b821-825d656b85e8', 'MTB-L3-004', 12, '位置标记列必须已存在', 3, 120, 'none', 'nil', 4, 'TableAlterEnabled', '位置标记列"%s"(BEFORE/AFTER)不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('a130f2c4-e6c0-4dbd-9e55-51af3cb2ecab', 'MTB-L3-005', 12, '列名是否重复', 2, 120, 'none', 'nil', 4, 'TableAlterColumnNameDuplicate', '表"%s"中的定义了重复的列"%s"。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('6677109a-5798-44b9-9f8e-597cce76f168', 'MTB-L3-006', 12, '表允许的最大列数', 2, 120, 'lte', '25', 6, 'TableAlterColumnCountLimit', '表"%s"中定义%d个列，数量超出了规则允许的上限%d，请考虑拆分表。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('5e179511-ae0a-4e55-abf6-23120adda97f', 'MTB-L3-007', 12, '仅允许一个时间戳类型的列', 2, 120, 'none', 'nil', 6, 'TableAlterTimestampColumnCountLimit', '表"%s"中的定义了多个时间戳列，请改用DATETIME类型。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('084397d9-86fd-415f-b37e-eaa44ba47be9', 'MTB-L3-008', 12, '删除列时目标列必须已存在', 3, 120, 'none', 'nil', 4, 'TableAlterEnabled', '目标列"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('6a336124-aea6-455e-bc67-a7eb685e80a8', 'MTB-L3-009', 12, '修改列时目标列必须已存在', 3, 120, 'none', 'nil', 4, 'TableAlterEnabled', '目标列"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('8541b5b4-66ab-4aed-a254-73ce37194b34', 'MTB-L3-010', 12, '修改列时目标列必须不存在', 3, 120, 'none', 'nil', 4, 'TableAlterEnabled', '目标列"%s"已存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('8600038b-f6ad-444c-a333-02eda47d75a5', 'MTB-L3-011', 12, '仅允许一个时间戳类型的列', 3, 120, 'none', 'nil', 4, 'TableAlterEnabled', '表"%s"中timestamp类型将超过最大限制"%d"。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('49251321-a0ae-428b-a743-026dc548a4ff', 'MTB-L3-012', 12, '列名是否重复', 2, 120, 'none', 'nil', 4, 'TableAlterColumnNameDuplicateForChg', '表"%s"中的定义了重复的列"%s"。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('b4fd2895-118e-4e80-b792-da47fdedcb20', 'MTB-L3-013', 12, '添加索引时索引必须不存在', 3, 120, 'none', 'nil', 4, 'TableAlterEnabled', '目标表"%s"上已存在索引"%s"。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('08fb5c7f-f4f9-490f-a3a6-a8c4c82bd1a1', 'MTB-L3-014', 12, '覆盖索引检查', 3, 120, 'none', 'nil', 4, 'TableAlterEnabled', '目标表"%s"上已存在索引"%s"。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('c49c27b8-5d1d-4675-a734-8670eee65d9b', 'MTB-L3-015', 12, '同名外键检查', 3, 120, 'none', 'nil', 4, 'TableAlterEnabled', '目标表"%s"上已存在外键"%s"。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('afcc5ed3-1e4c-47df-b837-b6f3e5dee543', 'MTB-L3-016', 12, '添加外键时外键必须不存在', 3, 120, 'none', 'nil', 4, 'TableAlterEnabled', '目标表"%s"上已存在外键"%s"。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('a21ea970-7e26-420d-95f3-e1621f9c5630', 'MTB-L3-017', 12, '启用禁用KEY时KEY必须已存在', 3, 120, 'none', 'nil', 4, 'TableAlterEnabled', '目标KEY"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('061df5d6-cd83-4b1a-abbe-9af10307e9dd', 'MTB-L3-018', 12, '删主键时主键必须存在', 3, 120, 'none', 'nil', 4, 'TableAlterEnabled', '目标表"%s"上未定义主键。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('964b019b-771d-4983-b7fa-25b089581323', 'MTB-L3-019', 12, '删索引时索引必须存在', 3, 120, 'none', 'nil', 4, 'TableAlterEnabled', '目标表"%s"上未定义索引"%s"。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('7012f584-f7d5-492e-8cd4-37834845558c', 'MTB-L3-020', 12, '删外键时外键必须存在', 3, 120, 'none', 'nil', 4, 'TableAlterEnabled', '目标表"%s"上未定义外键"%s"。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('2f2af8e5-2cf1-4ced-a1ec-a47c7c744178', 'MTB-L3-021', 12, '改名时目标表已存在', 3, 120, 'none', 'nil', 4, 'TableAlterEnabled', '目标表"%s"已存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('86df78a8-ce02-4b06-81c0-f56a7d99ae09', 'MTB-L3-022', 12, '全文索引必须不存在', 3, 120, 'none', 'nil', 4, 'TableAlterEnabled', '目标表"%s"上已存在全文索引"%s"。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('c74c9e43-4600-42f5-8711-9b2114917438', 'MTB-L3-023', 12, '删全文索引时索引必须存在', 3, 120, 'none', 'nil', 4, 'TableAlterEnabled', '目标表"%s"上未定义全文索引"%s"。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('a9aa23c7-f79e-4a79-b5b8-520341992474', 'MTB-L3-024', 12, '合并改表语句', 2, 120, 'none', 'nil', 4, 'TableAlterEnabled', '对同一个表"%s"的多条修改语句需要合并成一条语句。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('3ec2eaff-5471-405f-ab34-bc2158b8f884', 'RTB-L2-001', 13, '目标表跟源表是同一个表', 3, 130, 'none', 'nil', 5, 'TableRenameTablesIdentical', '源表"%s"和目标表"%s"相同。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('95c374ee-52a4-48f2-b24a-ac273e5e8f36', 'RTB-L2-002', 13, '目标表名规则', 2, 130, 'regexp', '^[a-zA-Z][_a-zA-Z0-9]*$', 5, 'TableRenameTargetTableNameQualified', '目标表名"%s"需要满足正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('7daae444-78ea-46ac-a7e9-18149c725545', 'RTB-L2-003', 13, '目标表名必须小写', 2, 130, 'none', '^[_a-z0-9]+$', 5, 'TableRenameTargetTableNameLowerCaseRequired', '目标表名"%s"含有大写字母。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('22e5db11-6afb-4e50-9fa1-c77c09dfb168', 'RTB-L2-004', 13, '目标表名最大长度', 2, 130, 'lte', '20', 7, 'TableRenameTargetTableNameMaxLength', '目标表名"%s"的长度超出了规则允许的上限，请控制在%d个字符以内。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('8e75b778-e6c5-4d34-9edd-03097a4450d2', 'RTB-L3-001', 13, '源库必须已存在', 3, 130, 'none', 'nil', 4, 'TableRenameSourceTableExists', '源库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('8a1a4f9b-35da-4ff0-9ee2-d190b54f2ba5', 'RTB-L3-002', 13, '源表必须已存在', 3, 130, 'none', 'nil', 4, 'TableRenameSourceDatabaseExists', '源表"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('bb56fcfd-736f-4033-aa6f-2ce9ea1108f8', 'RTB-L3-003', 13, '目标库必须已存在', 3, 130, 'none', 'nil', 4, 'TableRenameTargetTableExists', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('2affbef0-4856-4eb3-a9a7-a1bf74a531c2', 'RTB-L3-004', 13, '目标表必须不存在', 3, 130, 'none', 'nil', 4, 'TableRenameTargetDatabaseExists', '目标表"%s"已存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('da2d4fd4-af73-4cbf-9b83-ca32d5594396', 'DTB-L3-001', 14, '目标库必须已存在', 3, 140, 'none', 'nil', 4, 'TableDropSourceDatabaseExists', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('a2d5b7ec-0fda-42f9-9fea-71687a3066f7', 'DTB-L3-002', 14, '目标表必须已存在', 3, 140, 'none', 'nil', 4, 'TableDropSourceTableExists', '目标表"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('2221dc67-94c6-4a3d-a3b5-638a3d02b70a', 'CIX-L2-001', 15, '组合索引允许的最大列数', 2, 150, 'lte', '3', 7, 'IndexCreateIndexMaxColumnLimit', '索引"%s"中索引列数量超过允许的阈值%d。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('0076aae4-6196-4f0d-bfb3-37df11fd45ed', 'CIX-L2-002', 15, '索引名规则', 2, 150, 'regexp', '^[a-zA-Z][_a-zA-Z0-9]*$', 5, 'IndexCreateIndexNameQualified', '索引名"%s"需要满足正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('a316aa97-534b-4c9d-a881-278b9b7bdbdf', 'CIX-L2-003', 15, '索引名必须小写', 2, 150, 'regexp', '^[_a-z0-9]+$', 5, 'IndexCreateIndexNameLowerCaseRequired', '索引名"%s"含有大写字母。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('71db9655-eeb1-4be3-8c0a-67cef0709b38', 'CIX-L2-004', 15, '索引名最大长度', 2, 150, 'lte', '10', 5, 'IndexCreateIndexNameMaxLength', '索引名"%s"的长度超出了规则允许的上限，请控制在%d个字符以内。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('6d676a9c-90a5-4c9c-81e6-00ec8e5ab350', 'CIX-L2-005', 15, '索引名前缀规则', 2, 150, 'regexp', '^index_[1-9][0-9]*$', 5, 'IndexCreateIndexNamePrefixRequired', '索引名"%s"需要满足前缀正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('47ee8f95-9d48-4a4c-a917-c4679d5fe4f0', 'CIX-L2-006', 15, '组合索引中是否有重复列', 2, 150, 'none', 'nil', 5, 'IndexCreateDuplicateIndexColumn', '索引"%s"中索引了重复的列。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('034b0bcd-e246-4ade-9ab0-35522b5382f9', 'CIX-L3-001', 15, '目标库必须已存在', 3, 150, 'none', 'nil', 4, 'IndexCreateTargetDatabaseExists', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('2d222b20-a4a5-44c4-b7aa-4cda28a46369', 'CIX-L3-002', 15, '目标表必须已存在', 3, 150, 'none', 'nil', 4, 'IndexCreateTargetTableExists', '目标表"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('22b1f933-bce4-4d20-9b6f-7a0282c453c1', 'CIX-L3-003', 15, '索引列必须已存在', 3, 150, 'none', 'nil', 4, 'IndexCreateTargetColumnExists', '目标索引"%s"已存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('2e301212-02af-4b84-955f-3178812ded5a', 'CIX-L3-004', 15, '索引内容是否重复', 3, 150, 'none', 'nil', 4, 'IndexCreateTargetIndexExists', '索引"%s"在已有索引"%s"相同或者存在覆盖关系。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('57f92fe9-3540-4541-a53c-0487db7c0702', 'CIX-L3-005', 15, '索引名是否重复', 3, 150, 'none', 'nil', 4, 'IndexCreateTargetNameExists', '索引名"%s"在表"%s"已经存在，请使用另外一个索引名称。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('6f69fd99-4d89-4c6f-b8ce-1b9dd437e687', 'CIX-L3-006', 15, '最多能建多少个索引', 3, 150, 'lte', '5', 6, 'IndexCreateIndexCountLimit', '索引数量超过允许的阈值%d。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('9525f4ff-efa2-4b09-a5af-ab3cc3deb24c', 'CIX-L3-007', 15, '禁止在BLOB/TEXT列上建索引', 2, 150, 'none', 'nil', 4, 'IndexCreateIndexBlobColumnEnabled', '禁止在BLOB/TEXT类型的列上建立索引。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('43181c58-4cba-4209-99ad-4534c38e455a', 'RIX-L3-001', 15, '目标库必须已存在', 1, 151, 'none', 'nil', 4, 'IndexDropTargetDatabaseExists', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('342f0510-6e41-4b63-871e-b0c7ae95715e', 'RIX-L3-002', 15, '目标表必须已存在', 1, 151, 'none', 'nil', 4, 'IndexDropTargetTableExists', '目标表"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('6df03432-6248-4ff6-af35-04bd678e8812', 'RIX-L3-003', 15, '目标索引必须已存在', 1, 151, 'none', 'nil', 4, 'IndexDropTargetIndexExists', '目标索引"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('ed326131-edce-456a-a19e-1fdece47060e', 'DEL-L2-001', 16, '禁止没有WHERE的删除', 2, 163, 'none', 'nil', 5, 'DeleteWithoutWhereEnabled', '禁止没有WHERE从句的DELETE语句。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('de3855f6-b835-49eb-89ff-bf854c515a02', 'DEL-L3-001', 16, '单次删除的最大行数', 3, 163, 'lte', '1000', 6, 'DeleteRowsLimit', '单条DELETE语句不得操作超过%d条记录。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('7ebccfe3-6ad7-4c83-b7a4-9cbfa12e35db', 'DEL-L3-002', 16, '目标库必须已存在', 3, 163, 'none', 'nil', 4, 'DeleteTargetDatabaseExists', 'DELETE语句中指定的库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('0b5dbb5e-8223-42a0-bb76-a31ed16bf537', 'DEL-L3-003', 16, '目标表必须已存在', 3, 163, 'none', 'nil', 4, 'DeleteTargetTableExists', 'DELETE语句中指定的表"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('36b9693f-26e1-47b0-8ebb-e26f6ae9d5fa', 'DEL-L3-004', 16, '条件过滤列必须已存在', 3, 163, 'none', 'nil', 4, 'DeleteFilterColumnExists', 'DELETE语句中条件限定列"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('4a5c2e53-1b50-43ce-954b-ce2d60eeeed7', 'INS-L2-001', 16, 'INSERT时强制显式列申明', 2, 160, 'none', 'nil', 5, 'InsertExplicitColumnRequired', '禁止没有显式提供列列表的INSERT语句。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('6454269e-fff7-4f75-857f-f06bbf1f3a73', 'INS-L2-002', 16, '禁止INSERT...SELECT', 2, 160, 'none', 'nil', 7, 'InsertUsingSelectEnabled', '禁止INSERT ... SELECT ...语句。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('16d0a0b4-3525-449c-965a-673bd290efc7', 'INS-L2-004', 16, 'INSERT时单语句允许操作的最大行数', 2, 160, 'lte', '10000', 7, 'InsertRowsLimit', '单条INSERT语句不得操作超过%d条记录。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('ab221728-8c92-4019-92e4-4cf0fc57941b', 'INS-L2-005', 16, 'INSERT时列类型、值是否匹配', 2, 160, 'none', 'nil', 5, 'InsertColumnValueMatch', 'INSERT语句的列数量和值数量不匹配。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('d37860b1-d9d6-4c4f-9af6-7e93dd33c312', 'INS-L3-001', 16, 'INSERT时目标库必须已存在', 3, 160, 'none', 'nil', 4, 'InsertTargetDatabaseExists', 'INSERT语句中指定的库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('75d3d38e-b32b-438c-b01c-761fff3b6786', 'INS-L3-002', 16, 'INSERT时目标表必须已存在', 3, 160, 'none', 'nil', 4, 'InsertTargetTableExists', 'INSERT语句中指定的表"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('355540e6-733a-4b83-88e7-e04e838fa8c2', 'INS-L3-003', 16, 'INSERT时目标列必须已存在', 3, 160, 'none', 'nil', 4, 'InsertTargetColumnExists', 'INSERT语句中插入的列"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('9f6cae35-89b7-46ae-ae5c-a7962f473e44', 'INS-L3-004', 16, 'INSERT时非空列是否有值', 3, 160, 'none', 'nil', 4, 'InsertValueForNotNullColumnRequired', 'INSERT语句没有为非空列"%s"提供值。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('f3578823-a5c8-4cdf-be09-55fc899d6875', 'RPL-L2-001', 16, 'REPLACE时强制显式列申明', 2, 161, 'none', 'nil', 5, 'ReplaceExplicitColumnRequired', '禁止没有显式提供列列表的REPLACE语句。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('41b437f0-eca7-46c3-9935-69c2bcacae70', 'RPL-L2-002', 16, '禁止REPLACE...SELECT', 2, 161, 'none', 'nil', 5, 'ReplaceUsingSelectEnabled', '禁止REPLACE ... SELECT ...语句。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('3901b27f-3fd6-429a-92f3-cbfb327aec6e', 'RPL-L2-004', 16, 'REPLACE时单语句允许操作的最大行数', 2, 161, 'lte', '1000', 7, 'ReplaceRowsLimit', '单条REPLACE语句不得操作超过%d条记录。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('eaaa918c-611f-467c-9c65-03ff4124a998', 'RPL-L2-005', 16, 'REPLACE时列类型、值是否匹配', 2, 161, 'none', 'nil', 5, 'ReplaceColumnValueMatch', 'REPLACE语句的列数量和值数量不匹配。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('5679453f-d160-4f0a-860f-5f6f5c50d505', 'RPL-L3-001', 16, 'REPLACE时目标库必须已存在', 3, 161, 'none', 'nil', 4, 'ReplaceTargetDatabaseExists', 'REPLACE语句中指定的库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('612b1902-88c1-46e2-b139-5fec2b74c692', 'RPL-L3-002', 16, 'REPLACE时目标表必须已存在', 3, 161, 'none', 'nil', 4, 'ReplaceTargetTableExists', 'REPLACE语句中指定的表"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('d54e672f-e360-4789-bd2d-5ca5f14fdf5a', 'RPL-L3-003', 16, 'REPLACE时目标列必须已存在', 3, 161, 'none', 'nil', 4, 'ReplaceTargetColumnExists', 'REPLACE语句中替换的列"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('68b029cc-8fff-4da7-8a3e-62b124b779a3', 'RPL-L3-004', 16, 'REPLACE时非空列是否有值', 3, 161, 'none', 'nil', 4, 'ReplaceValueForNotNullColumnRequired', 'REPLACE语句没有为非空列"%s"提供值。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('67fa90a8-5df6-479c-bfd4-11ab0bb9fa8b', 'UPD-L2-001', 16, '禁止没有WHERE的更新', 3, 162, 'none', 'nil', 5, 'UpdateWithoutWhereEnabled', '禁止没有WHERE从句的UPDATE语句。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('022dbea9-af6f-44cb-b0ae-3f4712a014c8', 'UPD-L3-001', 16, '目标库必须已存在', 3, 162, 'none', 'nil', 4, 'UpdateTargetDatabaseExists', 'UPDATE语句中指定的库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('749e0a05-843b-4c8e-8d5c-6ef252b261ad', 'UPD-L3-002', 16, '目标表必须已存在', 3, 162, 'none', 'nil', 4, 'UpdateTargetTableExists', 'UPDATE语句中指定的表"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('bdf11d37-9534-4553-826d-15d3b08f1059', 'UPD-L3-003', 16, '目标列必须已存在', 3, 162, 'none', 'nil', 4, 'UpdateTargetColumnExists', 'UPDATE语句中更新的列"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('a75a4aed-8dde-467c-b85b-5b962a8afa70', 'UPD-L3-004', 16, '条件限定列必须已存在', 3, 162, 'none', 'nil', 4, 'UpdateFilterColumnExists', 'UPDATE语句中条件限定列"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('a72f3d07-7512-46bb-a442-8a505610a72e', 'UPD-L3-005', 16, '允许单次更新的最大行数', 3, 162, 'lte', '1000', 6, 'UpdateRowsLimit', '单条UPDATE语句不得操作超过%d条记录。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('1b163a6b-633b-4285-978f-fefd0af3fb9c', 'SEL-L2-001', 17, '禁止没有WHERE的查询', 2, 170, 'none', 'nil', 5, 'SelectWithoutWhereEnabled', '禁止没有WHERE从句的查询语句。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('f9d57f6c-2ad0-4bb6-a4f8-a56fbff3cb65', 'SEL-L2-002', 17, '禁止没有LIMIT的查询', 2, 170, 'none', 'nil', 7, 'SelectWithoutLimitEnabled', '禁止没有LIMIT从句的查询语句。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('b44f75af-51f0-48f5-8d1c-b8f8b1eb225d', 'SEL-L2-003', 17, '禁止SELECT STAR', 2, 170, 'none', 'nil', 7, 'SelectStarEnabled', '禁止SELECT *操作，需要显式指定需要查询的列。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('e1018221-684c-49f0-baf4-2ea77c80fd3d', 'SEL-L2-004', 17, '禁止SELECT FOR UPDATE', 2, 170, 'none', 'nil', 5, 'SelectForUpdateEnabled', '禁止SELECT FOR UPDATE操作。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('bbd20e8b-4eeb-4467-a481-75bde843913f', 'SEL-L3-001', 17, '目标数据库必须已存在', 3, 170, 'none', 'nil', 4, 'SelectTargetDatabaseExists', 'SELECT语句中指定的库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('2430a63b-67c1-48f6-8b34-a4f1161a63b1', 'SEL-L3-002', 17, '目标表必须已存在', 3, 170, 'none', 'nil', 4, 'SelectTargetTableExists', 'SELECT语句中指定的表"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('90f2b354-19c5-4d4d-be3f-8361ecbe968d', 'SEL-L3-003', 17, '目标列必须已存在', 3, 170, 'none', 'nil', 4, 'SelectTargetColumnExists', 'SELECT语句中返回的列"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('d59e3dad-cf02-41b6-a306-987e1e07814e', 'SEL-L3-004', 17, '是否允许返回BLOB/TEXT列', 3, 170, 'none', 'nil', 4, 'SelectBlobOrTextEnabled', '查询语句中指的列"%s"是BLOB/TEXT类型。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('83120116-cd38-4872-935a-7164fc97e68e', 'SEL-L3-005', 17, '条件过滤列必须已存在', 3, 170, 'none', 'nil', 4, 'SelectFilterColumnExists', 'SELECT语句中条件限定列"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('217771f6-c3de-4956-8656-2fd8e482f5b7', 'CVW-L2-001', 18, '新建视图时视图名规则', 2, 180, 'regexp', '^[a-zA-Z][_a-zA-Z0-9]*$', 5, 'ViewCreateViewNameQualified', '视图名"%s"需要满足正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('8d9a1c43-325a-47ac-9891-c1155697da3a', 'CVW-L2-002', 18, '新建视图时视图名必须小写', 2, 180, 'regexp', '^[_a-z0-9]+$', 5, 'ViewCreateViewNameLowerCaseRequired', '视图名"%s"含有大写字母。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('19f69c74-7f29-4eba-8131-dbc5992ae3c4', 'CVW-L2-003', 18, '新建视图时视图名最大长度', 2, 180, 'lte', '25', 7, 'ViewCreateViewNameMaxLength', '视图名"%s"的长度超出了规则允许的上限，请控制在%d个字符以内。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('a776c690-8576-4664-ab29-5db0885960b3', 'CVW-L2-004', 18, '新建视图时视图名前缀规则', 2, 180, 'regexp', '^vw_[_a-zA-Z0-9]+$', 7, 'ViewCreateViewNamePrefixRequired', '视图名"%s"需要满足前缀正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('dff7c8a6-f9db-4d86-9c7f-df8b1614a307', 'CVW-L3-001', 18, '新建视图时目标库必须已存在', 3, 180, 'none', 'nil', 4, 'ViewCreateTargetDatabaseExists', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('5fba8576-d5fb-4135-9dc2-d01578ebfb9c', 'CVW-L3-002', 18, '新建视图时目标视图必须不存在', 3, 180, 'none', 'nil', 4, 'ViewCreateTargetViewExists', '目标视图"%s"已存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('4b1e7450-4662-4d47-948f-7e6d61f9d1f3', 'DVW-L3-001', 18, '删除视图时目标库必须已存在', 3, 182, 'none', 'nil', 4, 'ViewDropTargetDatabaseExists', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('fe4af9de-5292-45a5-82e3-16348b1a9da1', 'DVW-L3-002', 18, '删除视图时目标视图必须已存在', 3, 182, 'none', 'nil', 4, 'ViewDropTargetViewExists', '目标视图"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('2da54955-a029-4ae5-8535-f77bb461973d', 'MVW-L3-001', 18, '修改视图时目标库必须已存在', 3, 181, 'none', 'nil', 4, 'ViewAlterTargetDatabaseExists', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('50edc670-7d6e-4c6f-92f0-24539074404b', 'MVW-L3-002', 18, '修改视图时目标视图必须已存在', 3, 181, 'none', 'nil', 4, 'ViewAlterTargetViewExists', '目标视图"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('3a2fc192-febc-4ba5-84d4-ed95b963fdfc', 'CFU-L2-001', 19, '新建函数时函数名规则', 2, 190, 'regexp', '^[a-zA-Z][_a-zA-Z0-9]*$', 7, 'FuncCreateFuncNameQuilified', '函数名"%s"需要满足正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('33004fce-753f-4a77-b552-e0cf7bbe4636', 'CFU-L2-002', 19, '新建函数时函数名必须小写', 2, 190, 'regexp', '^[_a-z0-9]+$', 7, 'FuncCreateFuncNameLowerCaseRequired', '函数名"%s"含有大写字母。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('a924afeb-8def-4443-ab2a-d8d429e5dd49', 'CFU-L2-003', 19, '新建函数时函数名最大长度', 2, 190, 'lte', '25', 7, 'FuncCreateFuncNameMaxLength', '函数名"%s"的长度超出了规则允许的上限，请控制在%d个字符以内。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('0a74e7bd-c21d-421e-af12-874a60bc61f2', 'CFU-L2-004', 19, '新建函数时函数名前缀规则', 2, 190, 'regexp', '^fn_[_a-zA-Z0-9]+$', 7, 'FuncCreateFuncNamePrefixRequired', '函数名"%s"需要满足前缀正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('5069d187-8cb1-41b9-8876-14e017daf992', 'CFU-L3-001', 19, '新建函数时目标库必须已存在', 3, 190, 'none', 'nil', 4, 'FuncCreateTargetDatabaseExists', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('b134e0b3-a6e5-4404-b845-c3f86712fcb9', 'CFU-L3-002', 19, '新建函数时目标函数必须不存在', 3, 190, 'none', 'nil', 4, 'FuncCreateTargetFuncExists', '目标函数"%s"已存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('dfaf91bb-7353-4af6-b88c-3a6f04ad6ab8', 'DFU-L3-001', 19, '删除函数时目标库必须已存在', 3, 192, 'none', 'nil', 4, 'FuncDropTargetDatabaseExists', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('e8f789bd-cf1f-4b3e-aa2e-3359979f5485', 'DFU-L3-002', 19, '删除函数时目标函数必须已存在', 3, 192, 'none', 'nil', 4, 'FuncDropTargetFuncExists', '目标函数"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('d3ed9d76-9825-44f3-af9c-b61b9f704e43', 'MFU-L3-001', 19, '修改函数时目标库必须已存在', 3, 191, 'none', 'nil', 4, 'FuncAlterTargetDatabaseExists', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('ddec411d-9b2c-427b-965e-86e65d7edfce', 'MFU-L3-002', 19, '修改函数时目标函数必须已存在', 3, 191, 'none', 'nil', 4, 'FuncAlterTargetFuncExists', '目标函数"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('56661395-36fc-4cdc-9346-8cb4608f6f44', 'CTG-L2-001', 20, '新建触发器时触发器名规则', 2, 200, 'regexp', '^[a-zA-Z][_a-zA-Z0-9]*$', 5, 'TriggerCreateTriggerNameQualified', '触发器名"%s"需要满足正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('0d99687d-810f-4f08-aa28-9738ea29eadc', 'CTG-L2-002', 20, '新建触发器时触发器名必须小写', 2, 200, 'regexp', '^[_a-z0-9]+$', 7, 'TriggerCreateTriggerNameLowerCaseRequired', '触发器名"%s"含有大写字母。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('73120f74-fdf3-4230-8f31-3f27e7571005', 'CTG-L2-003', 20, '新建触发器时触发器名最大长度', 2, 200, 'lte', '25', 7, 'TriggerCreateTriggerNameMaxLength', '触发器名"%s"的长度超出了规则允许的上限，请控制在%d个字符以内。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('447e8fe4-4583-4986-ab11-d62ece063b7b', 'CTG-L2-004', 20, '新建触发器时触发器名前缀规则', 2, 200, 'regexp', '^tg_[_a-zA-Z0-9]+$', 5, 'TriggerCreateTriggerPrefixRequired', '触发器名"%s"需要满足前缀正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('27849545-075f-4fb6-8d47-f947c9894dac', 'CTG-L3-001', 20, '新建触发器时目标库必须已存在', 2, 200, 'none', 'nil', 4, 'TriggerCreateTargetDatabaseExists', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('35a926d4-f842-4c91-a109-a22327114c52', 'CTG-L3-002', 20, '新建触发器时目标表必须已存在', 2, 200, 'none', 'nil', 4, 'TriggerCreateTargetTableExists', '目标表"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('f2fabd72-4453-45ac-badf-105f46b6f00a', 'CTG-L3-003', 20, '新建触发器时目标触发器必须不存在', 2, 200, 'none', 'nil', 4, 'TriggerCreateTargetTriggerExists', '目标触发器"%s"已存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('f9e45bbe-528d-4ab3-b6dd-4f79749fc12b', 'DTG-L3-001', 20, '删除触发器时目标库必须已存在', 3, 202, 'none', 'nil', 4, 'TriggerDropTargetDatabaseExists', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('d55a27c3-0501-4e73-8d6f-c850bbab411e', 'DTG-L3-002', 20, '删除触发器时目标表必须已存在', 3, 202, 'none', 'nil', 4, 'TriggerDropTargetTableExists', '目标表"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('6607f3d3-74c3-4894-b590-2cb073e983d3', 'DTG-L3-003', 20, '删除触发器时目标触发器必须已存在', 3, 202, 'none', 'nil', 4, 'TriggerDropTargetTriggerExists', '目标触发器"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('e6cbd545-643c-40c2-b2d9-924ef0f2691e', 'MTG-L3-001', 20, '修改触发器时目标库必须已存在', 3, 201, 'none', 'nil', 4, 'TriggerAlterTargetDatabaseExists', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('10f58b5f-33ed-4ca6-b2af-ad2e01cf360b', 'MTG-L3-002', 20, '修改触发器时目标表必须已存在', 3, 201, 'none', 'nil', 4, 'TriggerAlterTargetTableExists', '目标表"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('7dbfe6fb-e4eb-460d-af51-0427cfe4a600', 'MTG-L3-003', 20, '修改触发器时目标触发器必须已存在', 3, 201, 'none', 'nil', 4, 'TriggerAlterTargetTriggerExists', '目标触发器"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('c8cf9058-f788-48d7-9d87-44201fd574a4', 'CEV-L2-001', 21, '创建事件时事件名规则', 2, 210, 'regexp', '^[a-zA-Z][_a-zA-Z0-9]*$', 5, 'EventCreateEventNameQualified', '事件名"%s"需要满足正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('bf0dc49f-6c6e-40a8-a716-872ebf3bbd71', 'CEV-L2-002', 21, '创建事件时事件名必须小写', 2, 210, 'regexp', '^[_a-z0-9]+$', 5, 'EventCreateEventNameLowerCaseRequired', '事件名"%s"含有大写字母。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('8e4484d1-be13-4307-8293-870407428de9', 'CEV-L2-003', 21, '创建事件时事件名最大长度', 2, 210, 'lte', '25', 7, 'EventCreateEventNameMaxLength', '事件名"%s"的长度超出了规则允许的上限，请控制在%d个字符以内。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('1f67c0d5-86ca-4f9e-95f6-ba6075b4eefc', 'CEV-L2-004', 21, '创建事件时事件名前缀规则', 2, 210, 'regexp', '^ev_[_a-zA-Z0-9]+$', 5, 'EventCreateEventNamePrefixRequired', '事件名"%s"需要满足前缀正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('65fe735f-306c-463e-90d7-30c293d352b7', 'CEV-L3-001', 21, '创建事件时目标库必须已存在', 3, 210, 'none', 'nil', 4, 'EventCreateTargetDatabaseExists', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('23dd98bc-685a-413f-a63f-61485bc392cc', 'CEV-L3-002', 21, '创建事件时目标事件必须已存在', 3, 210, 'none', 'nil', 4, 'EventCreateTargetEventExists', '目标事件"%s"已存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('3f2405f2-4fde-40b3-825f-16cb29dea9b9', 'DEV-L3-001', 21, '删除事件时目标库必须已存在', 3, 212, 'none', 'nil', 4, 'EventDropTargetDatabaseExists', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('7d46d4bf-6085-401f-9939-63a5120017ad', 'DEV-L3-002', 21, '删除事件时目标事件必须已存在', 3, 212, 'none', 'nil', 4, 'EventDropTargetEventExists', '目标事件"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('d29700b0-1588-4034-aba9-1c2dbc92be05', 'MEV-L3-001', 21, '修改事件时目标库必须已存在', 3, 211, 'none', 'nil', 4, 'EventAlterTargetDatabaseExists', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('65003024-7556-4812-b2f6-8aceb77aa052', 'MEV-L3-002', 21, '修改事件时目标事件必须已存在', 3, 211, 'none', 'nil', 4, 'EventAlterTargetEventExists', '目标事件"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('157bdbad-8862-4497-91aa-83827badae02', 'CSP-L2-001', 22, '新建存储过程时存储过程名规则', 2, 220, 'regexp', '^[a-zA-Z][_a-zA-Z0-9]*$', 5, 'ProcCreateProcNameQualified', '存储过程名"%s"需要满足正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('6e82df00-56bf-44e3-adec-fb08bf4d5f3e', 'CSP-L2-002', 22, '新建存储过程时存储过程名必须小写', 2, 220, 'regexp', '^[_a-z0-9]+$', 5, 'ProcCreateProcNameLowerCaseRequired', '存储过程名"%s"含有大写字母。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('a4055ee1-caf6-4a72-828e-abea01123af2', 'CSP-L2-003', 22, '新建存储过程时存储过程名最大长度', 2, 220, 'lte', '25', 5, 'ProcCreateProcNameMaxLength', '存储过程名"%s"的长度超出了规则允许的上限，请控制在%d个字符以内。', 'number', 1, 0, UNIX_TIMESTAMP()),
-('150f0a36-d1e9-42b1-a30e-4b5e4b2edd71', 'CSP-L2-004', 22, '新建存储过程时存储过程名前缀规则', 2, 220, 'regexp', '^sp_[_a-zA-Z0-9]+$', 5, 'ProcCreateProcNamePrefixRequired', '存储过程名"%s"需要满足前缀正则"%s"。', 'regexp', 1, 0, UNIX_TIMESTAMP()),
-('b467ce86-779c-41e6-9079-50b2c9ff3676', 'CSP-L3-001', 22, '新建存储过程时目标库必须已存在', 3, 220, 'none', 'nil', 4, 'ProcCreateTargetDatabaseExists', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('60f6be7b-0115-4e9a-bf30-79be2a7c2c00', 'CSP-L3-002', 22, '新建存储过程时目标存储过程必须不存在', 3, 220, 'none', 'nil', 4, 'ProcCreateTargetProcExists', '目标存储过程"%s"已存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('bafb9ff1-cafb-4178-98c9-823ecd8f6600', 'DSP-L3-001', 22, '删除存储过程时目标库必须已存在', 3, 222, 'none', 'nil', 4, 'ProcDropTargetDatabaseExists', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('4d627159-45a5-47d9-8942-153b49ac795f', 'DSP-L3-002', 22, '删除存储过程时目标存储过程必须已存在', 3, 222, 'none', 'nil', 4, 'ProcDropTargetProcExists', '目标存储过程"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('841f30ac-bd86-4088-a958-c0bf2e7d26fd', 'MSP-L3-001', 22, '修改存储过程时目标库必须已存在', 3, 221, 'none', 'nil', 4, 'ProcAlterTargetDatabaseExists', '目标库"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('a46eb708-2fdb-495a-8303-ebe72781c875', 'MSP-L3-002', 22, '修改存储过程时目标存储过程必须已存在', 3, 221, 'none', 'nil', 4, 'ProcAlterTargetProcExists', '目标存储过程"%s"不存在。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('ddcee0ba-b76c-4037-8ea8-49616c381f8f', 'MSC-L1-001', 23, '禁止LOCK TABLE', 1, 230, 'none', 'nil', 5, 'LockTableProhibited', '禁止LOCK TABLE。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('f64e59c8-327e-4d77-9b60-be99d6978421', 'MSC-L1-002', 23, '禁止FLUSH TABLE', 1, 230, 'none', 'nil', 5, 'FlushTableProhibited', '禁止FLUSH操作。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('21194aaf-b646-4817-a30d-39e6d1c655b5', 'MSC-L1-003', 23, '禁止TRUNCATE TABLE', 1, 230, 'none', 'nil', 5, 'TruncateTableProhibited', '禁止TRUNCATE TABLE。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('f377fbd7-4256-4807-af22-8f8b69d5f6a5', 'MSC-L1-004', 23, '对同一个表/库的操作需要合并', 1, 230, 'none', 'nil', 5, 'MergeRequired', '对同一个对象"%s"的多个操作需要合并。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('364f7fb1-e5b8-4308-8166-7849b9e6a08a', 'MSC-L1-005', 23, '禁止PURGE LOG', 1, 230, 'none', 'nil', 5, 'PurgeLogsProhibited', '禁止PURGE LOGS。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('e2e2492e-f0fa-4593-a72b-2a9187bd2005', 'MSC-L1-006', 23, '禁止UNLOCK TABLE', 1, 230, 'none', 'nil', 5, 'UnlockTableProhibited', '禁止UNLOCK TABLES。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('6d4bce85-5608-4b1a-a810-36a5db17435d', 'MSC-L1-007', 23, '禁止KILL', 1, 230, 'none', 'nil', 5, 'KillProhibited', '禁止KILL。', 'none', 1, 0, UNIX_TIMESTAMP()),
-('404354d1-9592-45d9-9f06-81740c5ad3c3', 'MSC-L1-008', 23, '禁止同时出现DDL、DML', 1, 230, 'none', 'nil', 5, 'SplitRequired', '禁止在一个工单中同时出现DML和DDL操作，请分开多个工单提交。', 'none', 1, 0, UNIX_TIMESTAMP());
+('CDB-L2-001','e4b6f058-f8e3-469d-b754-ac754c9bd07e',10,'新建数据库时允许的字符集',2,100,'in','[\"utf8mb4\",\"binary\"]',7,'AvailableCharsets','建库禁用字符集\"%s\"，请使用\"%s\"。','checkboxes/key=charsets',4,0,UNIX_TIMESTAMP()),
+('CDB-L2-002','5126367e-19bf-4996-96eb-b92d51860acc',10,'新建数据库时允许的排序规则',2,100,'none','[\"utf8mb4_general_ci\", \"utf8mb4_bin\", \"utf8mb4_unicode_ci\"]',7,'AvailableCollates','建库禁用排序规则\"%s\"，请使用\"%s\"。','checkboxes/key=collates',1,0,UNIX_TIMESTAMP()),
+('CDB-L2-003','8e549891-ace6-48ba-bab7-6c333851098f',10,'新建数据库时字符集与排序规则必须匹配',2,100,'none','nil',5,'CharsetCollateMustMatch','建库使用的字符集\"%s\"和排序规则\"%s\"不匹配，请查阅官方文档。','none',1,0,UNIX_TIMESTAMP()),
+('CDB-L2-004','439a8103-7664-48c8-ae3d-227deb057416',10,'库名规则',2,100,'regexp','^[a-zA-Z][_a-zA-Z0-9]*$',7,'DatabaseNameQualified','库名\"%s\"需要满足正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CDB-L2-005','ce313eeb-aaa3-4ccc-ab52-6f8694bff63e',10,'库名必须小写',2,100,'none','^[_a-z0-9]+$',7,'DatabaseNameLowerCaseRequired','库名\"%s\"中含有大写字母。','none',1,0,UNIX_TIMESTAMP()),
+('CDB-L2-006','5575b7a8-fda5-4c07-8fed-5457839334bb',10,'库名最大长度',2,100,'lte','15',7,'DatabaseNameMaxLength','库名\"%s\"的长度超出了规则允许的上限，请控制在%d个字符以内。','number',1,0,UNIX_TIMESTAMP()),
+('CDB-L2-007','d8a0fad2-773a-49d7-b1b9-d1219158222b',10,'新建数据库时目标库必须不存在',1,100,'none','nil',5,'TargetDatabaseDoesNotExist','目标库\"%s\"已存在。','none',1,0,UNIX_TIMESTAMP()),
+('CEV-L2-001','c8cf9058-f788-48d7-9d87-44201fd574a4',21,'创建事件时事件名规则',2,210,'regexp','^[a-zA-Z][_a-zA-Z0-9]*$',5,'EventNameQualified','事件名\"%s\"需要满足正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CEV-L2-002','bf0dc49f-6c6e-40a8-a716-872ebf3bbd71',21,'创建事件时事件名必须小写',2,210,'regexp','^[_a-z0-9]+$',5,'EventNameLowerCaseRequired','事件名\"%s\"含有大写字母。','none',1,0,UNIX_TIMESTAMP()),
+('CEV-L2-003','8e4484d1-be13-4307-8293-870407428de9',21,'创建事件时事件名最大长度',2,210,'lte','25',7,'EventNameMaxLength','事件名\"%s\"的长度超出了规则允许的上限，请控制在%d个字符以内。','number',1,0,UNIX_TIMESTAMP()),
+('CEV-L2-004','1f67c0d5-86ca-4f9e-95f6-ba6075b4eefc',21,'创建事件时事件名前缀规则',2,210,'regexp','^ev_[_a-zA-Z0-9]+$',5,'EventNamePrefixRequired','事件名\"%s\"需要满足前缀正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CEV-L3-001','65fe735f-306c-463e-90d7-30c293d352b7',21,'创建事件时目标库必须已存在',1,210,'none','nil',4,'TargetDatabaseDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('CEV-L3-002','23dd98bc-685a-413f-a63f-61485bc392cc',21,'创建事件时目标事件必须已存在',1,210,'none','nil',4,'TargetEventDoesNotExist','目标事件\"%s\"已存在。','none',1,0,UNIX_TIMESTAMP()),
+('CFU-L2-001','3a2fc192-febc-4ba5-84d4-ed95b963fdfc',19,'新建函数时函数名规则',2,190,'regexp','^[a-zA-Z][_a-zA-Z0-9]*$',7,'FuncNameQuilified','函数名\"%s\"需要满足正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CFU-L2-002','33004fce-753f-4a77-b552-e0cf7bbe4636',19,'新建函数时函数名必须小写',2,190,'regexp','^[_a-z0-9]+$',7,'FuncNameLowerCaseRequired','函数名\"%s\"含有大写字母。','none',1,0,UNIX_TIMESTAMP()),
+('CFU-L2-003','a924afeb-8def-4443-ab2a-d8d429e5dd49',19,'新建函数时函数名最大长度',2,190,'lte','25',7,'FuncNameMaxLength','函数名\"%s\"的长度超出了规则允许的上限，请控制在%d个字符以内。','number',1,0,UNIX_TIMESTAMP()),
+('CFU-L2-004','0a74e7bd-c21d-421e-af12-874a60bc61f2',19,'新建函数时函数名前缀规则',2,190,'regexp','^fn_[_a-zA-Z0-9]+$',7,'FuncNamePrefixRequired','函数名\"%s\"需要满足前缀正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CFU-L3-001','5069d187-8cb1-41b9-8876-14e017daf992',19,'新建函数时目标库必须已存在',1,190,'none','nil',4,'TargetDatabaseDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('CFU-L3-002','b134e0b3-a6e5-4404-b845-c3f86712fcb9',19,'新建函数时目标函数必须不存在',1,190,'none','nil',4,'TargetFuncDoesNotExist','目标函数\"%s\"已存在。','none',1,0,UNIX_TIMESTAMP()),
+('CIX-L2-001','2221dc67-94c6-4a3d-a3b5-638a3d02b70a',15,'组合索引允许的最大列数',2,150,'lte','3',7,'MaxAllowedIndexColumnCount','索引\"%s\"中索引列数量超过允许的阈值%d。','number',1,0,UNIX_TIMESTAMP()),
+('CIX-L2-002','0076aae4-6196-4f0d-bfb3-37df11fd45ed',15,'索引名规则',2,150,'regexp','^[a-zA-Z][_a-zA-Z0-9]*$',5,'IndexNameQualified','索引名\"%s\"需要满足正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CIX-L2-003','a316aa97-534b-4c9d-a881-278b9b7bdbdf',15,'索引名必须小写',2,150,'regexp','^[_a-z0-9]+$',5,'IndexNameLowerCaseRequired','索引名\"%s\"含有大写字母。','none',1,0,UNIX_TIMESTAMP()),
+('CIX-L2-004','71db9655-eeb1-4be3-8c0a-67cef0709b38',15,'索引名最大长度',2,150,'lte','10',5,'IndexNameMaxLength','索引名\"%s\"的长度超出了规则允许的上限，请控制在%d个字符以内。','number',1,0,UNIX_TIMESTAMP()),
+('CIX-L2-005','6d676a9c-90a5-4c9c-81e6-00ec8e5ab350',15,'索引名前缀规则',2,150,'regexp','^index_[1-9][0-9]*$',5,'IndexNamePrefixRequired','索引名\"%s\"需要满足前缀正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CIX-L2-006','47ee8f95-9d48-4a4c-a917-c4679d5fe4f0',15,'组合索引中是否有重复列',2,150,'none','nil',5,'IndexColumnDuplicate','索引\"%s\"中索引了重复的列。','none',1,0,UNIX_TIMESTAMP()),
+('CIX-L3-001','034b0bcd-e246-4ade-9ab0-35522b5382f9',15,'目标库必须已存在',1,150,'none','nil',5,'TargetDatabaseDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('CIX-L3-002','2d222b20-a4a5-44c4-b7aa-4cda28a46369',15,'目标表必须已存在',1,150,'none','nil',5,'TargetTableDoesNotExist','目标表\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('CIX-L3-003','22b1f933-bce4-4d20-9b6f-7a0282c453c1',15,'索引列必须已存在',1,150,'none','nil',5,'TargetColumnDoesNotExist','目标列\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('CIX-L3-004','2e301212-02af-4b84-955f-3178812ded5a',15,'索引内容是否重复',1,150,'none','nil',4,'IndexOverlayNotAllowed','索引\"%s\"在已有索引\"%s\"相同或者存在覆盖关系。','none',1,0,UNIX_TIMESTAMP()),
+('CIX-L3-005','57f92fe9-3540-4541-a53c-0487db7c0702',15,'索引名是否重复',1,150,'none','nil',5,'IndexNameDuplicate','索引名\"%s\"在表\"%s\"已经存在，请使用另外一个索引名称。','none',1,0,UNIX_TIMESTAMP()),
+('CIX-L3-006','6f69fd99-4d89-4c6f-b8ce-1b9dd437e687',15,'最多能建多少个索引',1,150,'lte','5',6,'MaxAllowedIndexCount','索引数量超过允许的阈值%d。','number',1,0,UNIX_TIMESTAMP()),
+('CIX-L3-007','9525f4ff-efa2-4b09-a5af-ab3cc3deb24c',15,'禁止在BLOB/TEXT列上建索引',2,150,'none','nil',7,'IndexOnBlobColumnNotAllowed','禁止在BLOB/TEXT类型的列\"%s\"上建立索引。','none',1,0,UNIX_TIMESTAMP()),
+('CSP-L2-001','157bdbad-8862-4497-91aa-83827badae02',22,'新建存储过程时存储过程名规则',2,220,'regexp','^[a-zA-Z][_a-zA-Z0-9]*$',5,'ProcNameQualified','存储过程名\"%s\"需要满足正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CSP-L2-002','6e82df00-56bf-44e3-adec-fb08bf4d5f3e',22,'新建存储过程时存储过程名必须小写',2,220,'regexp','^[_a-z0-9]+$',5,'ProcNameLowerCaseRequired','存储过程名\"%s\"含有大写字母。','none',1,0,UNIX_TIMESTAMP()),
+('CSP-L2-003','a4055ee1-caf6-4a72-828e-abea01123af2',22,'新建存储过程时存储过程名最大长度',2,220,'lte','25',5,'ProcNameMaxLength','存储过程名\"%s\"的长度超出了规则允许的上限，请控制在%d个字符以内。','number',1,0,UNIX_TIMESTAMP()),
+('CSP-L2-004','150f0a36-d1e9-42b1-a30e-4b5e4b2edd71',22,'新建存储过程时存储过程名前缀规则',2,220,'regexp','^sp_[_a-zA-Z0-9]+$',5,'ProcNamePrefixRequired','存储过程名\"%s\"需要满足前缀正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CSP-L3-001','b467ce86-779c-41e6-9079-50b2c9ff3676',22,'新建存储过程时目标库必须已存在',1,220,'none','nil',4,'TargetDatabaseDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('CSP-L3-002','60f6be7b-0115-4e9a-bf30-79be2a7c2c00',22,'新建存储过程时目标存储过程必须不存在',1,220,'none','nil',4,'TargetProcDoesNotExist','目标存储过程\"%s\"已存在。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-001','2e7cbe13-90d3-472a-9da2-4594c8424df0',11,'允许的字符集',2,110,'in','[\"utf8mb4\"]',7,'AvailableCharsets','建表禁用字符集\"%s\"，请使用\"%s\"。','checkboxes/key=charsets',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-002','5028dfe3-949d-4220-b9ae-a29d8a16de52',11,'允许的排序规则',2,110,'in','[\"utf8mb4_unicode_ci\", \"utf8mb4_general_ci\", \"utf8mb4_bin\"]',5,'AvailableCollates','建表禁用排序规则\"%s\"，请使用\"%s\"。','checkboxes/key=collates',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-003','81b9dec9-3769-4dff-a29a-8739c3ac4ec9',11,'字符集与排序规则必须匹配',2,110,'none','nil',5,'TableCharsetCollateMustMatch','建表使用的字符集\"%s\"和排序规则\"%s\"不匹配，请查阅官方文档。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-004','a6dd1817-a41f-4688-924f-df959ffbb2db',11,'允许的存储引擎',2,110,'in','[\"innodb\", \"tokudb\", \"rocksdb\", \"archive\"]',7,'AvailableEngines','建表禁用存储引擎\"%s\"，请使用\"%s\"。','checkboxes/key=engines',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-005','0862861b-4328-49eb-86dc-07b15e0a2a6c',11,'表名规则',2,110,'regexp','^[a-zA-Z][_a-zA-Z0-9]*$',5,'TableNameQualified','表名\"%s\"需要满足正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-006','f77613a7-6f1c-48ff-8946-e725d5431e72',11,'表名必须小写',2,110,'regexp','^[_a-z0-9]+$',5,'TableNameLowerCaseRequired','表名\"%s\"含有大写字母。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-007','19630e1b-fee5-4afc-8fd1-28f43efb74c6',11,'表名最大长度',2,110,'lte','20',7,'TableNameMaxLength','表名\"%s\"的长度超出了规则允许的上限，请控制在%d个字符以内。','number',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-008','335bd848-2027-4c66-b5b0-09f225f02bb9',11,'表必须有注释',2,110,'none','nil',7,'TableCommentRequired','需要为表\"%s\"需要提供COMMENT注解。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-009','6f945479-4788-4bdb-b1e2-e21dc3b335d6',11,'禁止使用CREATE TABLE ... SELECT ...建表',2,110,'none','nil',5,'CreateTableFromSelectNotAllowed','禁止使用CREATE TABLE AS SELECT的方式建表。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-010','0b0e3799-7f6e-4a46-a054-7437b5485d06',11,'列名规则',2,110,'regexp','^[a-zA-Z][_a-zA-Z0-9]*$',5,'ColumnNameQualified','列名\"%s\"需要满足正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-011','d99679c9-ffbf-48e6-9dc8-bb1a82d10ff6',11,'列名必须小写',2,110,'regexp','^[_a-z0-9]+$',7,'ColumnNameLowerCaseRequired','列名\"%s\"中含有大写字母。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-012','86530dce-57e4-41b6-a296-0ccbec5036a3',11,'列名最大长度',2,110,'lte','20',7,'ColumnNameMaxLength','列名\"%s\"的长度超出了规则允许的上限，请控制在%d个字符以内。','number',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-013','97842c81-7b38-406b-a9a3-88244ea79271',11,'列名是否重复',2,110,'none','nil',5,'ColumnNameDuplicate','表\"%s\"中的定义了重复的列\"%s\"。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-014','2c98b6b7-0e0e-438e-8ccd-fa73fbcdbbea',11,'表允许的最大列数',2,110,'lte','25',7,'MaxAllowedColumnCount','表\"%s\"中定义%d个列，数量超出了规则允许的上限%d，请考虑拆分表。','number',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-015','31ab4d7a-4243-4951-bf7e-ddbdbc03254f',11,'列禁用的数据类型',2,110,'not-in','[\"bit\", \"enum\", \"set\", \"double\", \"real\", \"float\"]',7,'ColumnTypesDoesNotExpect','列\"%s\"使用了不期望的数据类型\"%s\"，请避免使用\"%s\"数据类型。','checkboxes/key=data-types',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-016','b14a529b-bbfc-4d9a-8c1a-067f99449e26',11,'列必须有注释',2,110,'none','nil',5,'ColumnCommentRequired','列\"%s\"需要提供COMMENT注解。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-017','95aa9816-ed7c-41a7-8f4f-6929757a92d8',11,'列允许的字符集',2,110,'in','[\"utf8mb4\", \"binary\"]',7,'ColumnAvailableCharsets','列\"%s\"禁用字符集\"%s\"，请使用\"%s\"。','checkboxes/key=charsets',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-018','858cabba-39f1-4c47-af8c-85c891605400',11,'列允许的排序规则',2,110,'in','[\"utf8mb4_unicode_ci\", \"utf8mb4_general_ci\", \"utf8mb4_bin\", \"binary\"]',7,'ColumnAvailableCollates','列\"%s\"禁用排序规则\"%s\"，请使用\"%s\"。','checkboxes/key=collates',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-019','55e72c3d-f0d2-45e9-bd3e-0c172ae6ad69',11,'列字符集与排序规则必须匹配',2,110,'none','nil',5,'ColumnCharsetCollateMustMatch','列\"%s\"使用的字符集\"%s\"和排序规则\"%s\"不匹配，请查阅官方文档。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-020','dba74873-c113-482a-8552-8d81dd640bd4',11,'非空列必须有默认值',2,110,'none','nil',5,'ColumnNotNullWithDefaultRequired','列\"%s\"不允许为空，但没有指定默认值。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-021','bc94e7f3-9e3e-48c7-b21b-85593b2c2af7',11,'自增列允许的数据类型',2,110,'in','[\"int\", \"bigint\"]',7,'ColumnAutoIncAvailableTypes','自增列\"%s\"禁用\"%s\"类型，请使用\"%s\"。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-022','d6894864-4d41-4930-b3fd-62da07588239',11,'自增列必须是无符号',2,110,'none','nil',7,'ColumnAutoIncUnsignedRequired','自增列\"%s\"必须使用无符号的整数。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-023','526ac72c-55d4-484b-8bb2-88eda1e67d6c',11,'自增列必须是主键',2,110,'none','nil',5,'ColumnAutoIncMustPrimaryKey','自增列\"%s\"不是主键。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-024','84fcb061-af77-4a7f-8a0e-dfc166b2c531',11,'仅允许一个时间戳类型的列',2,110,'none','nil',7,'MaxAllowedTimestampCount','表\"%s\"中的定义了多个时间戳列，请改用DATETIME类型。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-025','0df017c0-d106-4df5-845c-bf50557d497f',11,'单一索引最大列数',2,110,'lte','3',7,'MaxAllowedIndexColumnCount','索引\"%s\"索引的列数超出了规则允许的上限，请控制在%d个列以内。','number',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-026','8d319516-890e-45f2-af90-8061b37e9a04',11,'必须有主键',2,110,'none','nil',5,'PrimaryKeyRequired','必须为表指定一个主键。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-027','31e193df-bf11-4462-9558-c182eb8366e5',11,'主键是否显式命名',2,110,'none','nil',4,'PrimaryKeyNameExplicit','主键没有提供名称。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-028','bedd8dfa-b325-451b-981a-a1cede6bc787',11,'主键名规则',2,110,'regexp','^[a-zA-Z][_a-zA-Z0-9]*$',4,'PrimaryKeyNameQualified','主键名\"%s\"需要满足正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-029','dee29598-1f59-4d5f-9881-ad16fa4038fd',11,'主键名必须小写',2,110,'regexp','^[_a-z0-9]+$',4,'PrimryKeyLowerCaseRequired','主键名\"%s\"含有大写字母。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-030','c47768d2-24b3-4e9c-9079-8ef39bbd0a53',11,'主键名最大长度',2,110,'lte','20',4,'PrimryKeyMaxLength','主键名\"%s\"的长度超出了规则允许的上限，请控制在%d个字符以内。','number',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-031','bc1164e0-45ee-4d58-b4c5-cea244ebeb3f',11,'主键名前缀规则',2,110,'regexp','^pk_[_a-zA-Z0-9]+$',4,'PrimryKeyPrefixRequired','主键名\"%s\"需要满足前缀正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-032','7f7182f3-3da8-43c0-a43f-dbe44ccf0130',11,'索引必须命名',2,110,'none','nil',5,'IndexNameExplicit','一个或多个索引没有提供索引名称。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-033','364f58af-29a8-4a49-a3ad-a35ea500352c',11,'索引名规则',2,110,'regexp','^[a-zA-Z][_a-zA-Z0-9]*$',5,'IndexNameQualified','索引名\"%s\"需要满足正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-034','1dccb327-2b34-4f3d-a900-9560a7b9cd3b',11,'索引名必须小写',2,110,'regexp','^[_a-z0-9]+$',5,'IndexNameLowerCaseRequired','索引名\"%s\"含有大写字母。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-035','0e51b2a9-b251-4a25-be86-7895285ad77a',11,'索引名最大长度',2,110,'lte','10',7,'IndexNameMaxLength','索引名\"%s\"的长度超出了规则允许的上限，请控制在%d个字符以内。','number',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-036','abac99f7-ad0a-4d24-bdf4-00439e4abad6',11,'索引名前缀规则',2,110,'regexp','^index_[1-9][0-9]*$',5,'IndexNamePrefixRequired','索引名\"%s\"需要满足前缀正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-037','de701fa6-6ed4-4608-a95c-53087c43e177',11,'唯一索引必须命名',2,110,'none','nil',5,'UniqueNameExplicit','一个或多个唯一索引没有提供索引名称。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-038','26d84e04-25e6-4865-b76b-00995ef56f81',11,'唯一索引索名规则',2,110,'regexp','^[a-zA-Z][_a-zA-Z0-9]*$',5,'UniqueNameQualified','唯一索引\"%s\"需要满足正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-039','3b07760f-c055-4d3c-b27a-d23077a0c768',11,'唯一索引名必须小写',2,110,'regexp','^[_a-z0-9]+$',5,'UniqueNameLowerCaseRequired','唯一索引\"%s\"含有大写字母。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-040','f9a615b4-cbaa-40a7-b6c2-28a0fc78a35e',11,'唯一索引名最大长度',2,110,'lte','10',7,'UniqueNameMaxLength','唯一索引\"%s\"的长度超出了规则允许的上限，请控制在%d个字符以内。','number',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-041','8aab8c07-59d3-43d5-a74f-0005697955ee',11,'唯一索引名前缀规则',2,110,'regexp','^unique_[1-9][0-9]*$',5,'UniqueNamePrefixRequired','唯一索引\"%s\"需要满足前缀正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-042','30a7e9c3-0502-4793-9b88-fca8223efa90',11,'禁止外键',2,110,'none','nil',5,'ForeignKeyNotAllowed','禁止外键。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-043','8c599732-e3d0-432e-9396-4b4ed6b05479',11,'外键是否显式命名',2,110,'none','nil',5,'ForeignKeyNameExplicit','没有为外键指定名称。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-044','77708821-c945-4a6d-aa0d-84329b1b01fe',11,'外键名规则',2,110,'regexp','^[a-zA-Z][_a-zA-Z0-9]*$',5,'ForeignKeyNameQualified','外键名\"%s\"需要满足正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-045','867fa702-b10f-482d-b1a2-a71d5be32f21',11,'外键名必须小写',2,110,'regexp','^[_a-z0-9]+$',5,'ForeignKeyNameLowerCaseRequired','外键名\"%s\"含有大写字母。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-046','3c3052b4-fc6d-4976-98d1-e2a49ecd3927',11,'外键名最大长度',2,110,'lte','25',5,'ForeignKeyNameMaxLength','外键名\"%s\"的长度超出了规则允许的上限，请控制在%d个字符以内。','number',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-047','35207240-5094-4696-b209-1260865fde8a',11,'外键名前缀规则',2,110,'regexp','^fk_[_a-zA-Z0-9]+$',5,'ForeignKeyNamePrefixRequired','外键名\"%s\"需要满足前缀正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-048','e5c85872-1cff-48c0-b705-0c61b04070b9',11,'表中最多可建多少个索引',2,110,'lte','5',7,'MaxAllowedIndexCount','表\"%s\"中定义了%d个索引，数量超过允许的阈值%d。','number',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-049','7eedb2fb-5e26-41a7-baa7-8c37b8ef3170',11,'禁止使用CREATE TABLE ... LIKE ...建表',2,110,'none','nil',5,'CreateTableUseLikeNotAllowed','禁止使用CREATE TABLE LIKE的方式建表。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-050','5ace374b-0f35-4132-8941-44283bbc87c1',11,'仅允许定义一个自增列',2,110,'nil','nil',5,'AutoIncColumnDuplicate','表\"%s\"中定义了多个自增列。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L2-051','b9dce6ba-5612-4bc4-afdb-730d7b15930a',11,'仅允许定义一个主键',2,110,'nil','nil',5,'PrimaryKeyDuplicate','表\"%s\"中定义了多个主键。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L3-001','887cf290-2288-451a-be70-57394e23dde4',11,'目标库必须已存在',1,110,'none','nil',5,'TargetDatabaseDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('CTB-L3-002','1e75c5a2-7bcc-42c4-ac3f-5a64ead5b25c',11,'目标表必须不存在',1,110,'none','nil',5,'TargetTableDoesNotExist','目标表\"%s\"已存在。','none',1,0,UNIX_TIMESTAMP()),
+('CTG-L2-001','56661395-36fc-4cdc-9346-8cb4608f6f44',20,'新建触发器时触发器名规则',2,200,'regexp','^[a-zA-Z][_a-zA-Z0-9]*$',5,'TriggerNameQualified','触发器名\"%s\"需要满足正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CTG-L2-002','0d99687d-810f-4f08-aa28-9738ea29eadc',20,'新建触发器时触发器名必须小写',2,200,'regexp','^[_a-z0-9]+$',7,'TriggerNameLowerCaseRequired','触发器名\"%s\"含有大写字母。','none',1,0,UNIX_TIMESTAMP()),
+('CTG-L2-003','73120f74-fdf3-4230-8f31-3f27e7571005',20,'新建触发器时触发器名最大长度',2,200,'lte','25',7,'TriggerNameMaxLength','触发器名\"%s\"的长度超出了规则允许的上限，请控制在%d个字符以内。','number',1,0,UNIX_TIMESTAMP()),
+('CTG-L2-004','447e8fe4-4583-4986-ab11-d62ece063b7b',20,'新建触发器时触发器名前缀规则',2,200,'regexp','^tg_[_a-zA-Z0-9]+$',5,'TriggerPrefixRequired','触发器名\"%s\"需要满足前缀正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CTG-L3-001','27849545-075f-4fb6-8d47-f947c9894dac',20,'新建触发器时目标库必须已存在',2,200,'none','nil',4,'TargetDatabaseDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('CTG-L3-002','35a926d4-f842-4c91-a109-a22327114c52',20,'新建触发器时目标表必须已存在',2,200,'none','nil',4,'TargetTableDoesNotExist','目标表\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('CTG-L3-003','f2fabd72-4453-45ac-badf-105f46b6f00a',20,'新建触发器时目标触发器必须不存在',2,200,'none','nil',4,'TargetTriggerDoesNotExist','目标触发器\"%s\"已存在。','none',1,0,UNIX_TIMESTAMP()),
+('CVW-L2-001','217771f6-c3de-4956-8656-2fd8e482f5b7',18,'新建视图时视图名规则',2,180,'regexp','^[a-zA-Z][_a-zA-Z0-9]*$',5,'ViewNameQualified','视图名\"%s\"需要满足正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CVW-L2-002','8d9a1c43-325a-47ac-9891-c1155697da3a',18,'新建视图时视图名必须小写',2,180,'regexp','^[_a-z0-9]+$',5,'ViewNameLowerCaseRequired','视图名\"%s\"含有大写字母。','none',1,0,UNIX_TIMESTAMP()),
+('CVW-L2-003','19f69c74-7f29-4eba-8131-dbc5992ae3c4',18,'新建视图时视图名最大长度',2,180,'lte','25',7,'ViewNameMaxLength','视图名\"%s\"的长度超出了规则允许的上限，请控制在%d个字符以内。','number',1,0,UNIX_TIMESTAMP()),
+('CVW-L2-004','a776c690-8576-4664-ab29-5db0885960b3',18,'新建视图时视图名前缀规则',2,180,'regexp','^vw_[_a-zA-Z0-9]+$',7,'ViewNamePrefixRequired','视图名\"%s\"需要满足前缀正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('CVW-L3-001','dff7c8a6-f9db-4d86-9c7f-df8b1614a307',18,'新建视图时目标库必须已存在',1,180,'none','nil',4,'TargetDatabaseDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('CVW-L3-002','5fba8576-d5fb-4135-9dc2-d01578ebfb9c',18,'新建视图时目标视图必须不存在',1,180,'none','nil',4,'TargetViewDoesNotExist','目标视图\"%s\"已存在。','none',1,0,UNIX_TIMESTAMP()),
+('DDB-L2-001','1abf3c57-d84d-4295-9cbe-4b95f9e3c9bc',10,'删除数据库时目标库必须已存在',1,102,'none','nil',5,'TargetDatabaseDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('DEL-L2-001','ed326131-edce-456a-a19e-1fdece47060e',16,'禁止没有WHERE的删除',2,163,'none','nil',5,'WithoutWhereNotAllowed','禁止没有WHERE从句的DELETE语句。','none',1,0,UNIX_TIMESTAMP()),
+('DEL-L3-001','de3855f6-b835-49eb-89ff-bf854c515a02',16,'单次删除的最大行数',1,163,'lte','1000',5,'MaxAllowedDeleteRows','单条DELETE语句不得操作超过%d条记录。','number',1,0,UNIX_TIMESTAMP()),
+('DEL-L3-002','7ebccfe3-6ad7-4c83-b7a4-9cbfa12e35db',16,'目标库必须已存在',1,163,'none','nil',5,'TargetDatabaseDoesNotExist','DELETE语句中指定的库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('DEL-L3-003','0b5dbb5e-8223-42a0-bb76-a31ed16bf537',16,'目标表必须已存在',1,163,'none','nil',5,'TargetTableDoesNotDoesNotExist','DELETE语句中指定的表\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('DEL-L3-004','36b9693f-26e1-47b0-8ebb-e26f6ae9d5fa',16,'条件过滤列必须已存在',1,163,'none','nil',4,'TargetColumnDoesNotDoesNotExist','DELETE语句中条件限定列\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('DEV-L3-001','3f2405f2-4fde-40b3-825f-16cb29dea9b9',21,'删除事件时目标库必须已存在',1,212,'none','nil',4,'TargetDatabaseDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('DEV-L3-002','7d46d4bf-6085-401f-9939-63a5120017ad',21,'删除事件时目标事件必须已存在',1,212,'none','nil',4,'TargetEventDoesNotExist','目标事件\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('DFU-L3-001','dfaf91bb-7353-4af6-b88c-3a6f04ad6ab8',19,'删除函数时目标库必须已存在',1,192,'none','nil',4,'TargetDatabaseDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('DFU-L3-002','e8f789bd-cf1f-4b3e-aa2e-3359979f5485',19,'删除函数时目标函数必须已存在',1,192,'none','nil',4,'TargetFuncDoesNotExist','目标函数\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('DSP-L3-001','bafb9ff1-cafb-4178-98c9-823ecd8f6600',22,'删除存储过程时目标库必须已存在',1,222,'none','nil',4,'TargetDatabaseDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('DSP-L3-002','4d627159-45a5-47d9-8942-153b49ac795f',22,'删除存储过程时目标存储过程必须已存在',1,222,'none','nil',4,'TargetProcDoesNotExist','目标存储过程\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('DTB-L3-001','da2d4fd4-af73-4cbf-9b83-ca32d5594396',14,'目标库必须已存在',1,140,'none','nil',5,'TableDropTargetDatabaseDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('DTB-L3-002','a2d5b7ec-0fda-42f9-9fea-71687a3066f7',14,'目标表必须已存在',1,140,'none','nil',5,'TableDropTargetTableDoesNotExist','目标表\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('DTG-L3-001','f9e45bbe-528d-4ab3-b6dd-4f79749fc12b',20,'删除触发器时目标库必须已存在',1,202,'none','nil',4,'TargetDatabaseDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('DTG-L3-002','d55a27c3-0501-4e73-8d6f-c850bbab411e',20,'删除触发器时目标表必须已存在',1,202,'none','nil',4,'TargetTableDoesNotExist','目标表\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('DTG-L3-003','6607f3d3-74c3-4894-b590-2cb073e983d3',20,'删除触发器时目标触发器必须已存在',1,202,'none','nil',4,'TargetTriggerDoesNotExist','目标触发器\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('DVW-L3-001','4b1e7450-4662-4d47-948f-7e6d61f9d1f3',18,'删除视图时目标库必须已存在',1,182,'none','nil',4,'TargetDatabaseDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('DVW-L3-002','fe4af9de-5292-45a5-82e3-16348b1a9da1',18,'删除视图时目标视图必须已存在',1,182,'none','nil',4,'TargetViewDoesNotExist','目标视图\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('INS-L2-001','4a5c2e53-1b50-43ce-954b-ce2d60eeeed7',16,'INSERT时强制显式列申明',2,160,'none','nil',5,'ExplicitColumnRequired','禁止没有显式提供列列表的INSERT语句。','none',1,0,UNIX_TIMESTAMP()),
+('INS-L2-002','6454269e-fff7-4f75-857f-f06bbf1f3a73',16,'禁止INSERT...SELECT',2,160,'none','nil',7,'UsingSelectNotAllowed','禁止INSERT ... SELECT ...语句。','none',1,0,UNIX_TIMESTAMP()),
+('INS-L2-005','ab221728-8c92-4019-92e4-4cf0fc57941b',16,'INSERT时列类型、值是否匹配',2,160,'none','nil',5,'ColumnsValuesMustMatch','INSERT语句的列数量和值数量不匹配。','none',1,0,UNIX_TIMESTAMP()),
+('INS-L3-001','d37860b1-d9d6-4c4f-9af6-7e93dd33c312',16,'INSERT时目标库必须已存在',1,160,'none','nil',5,'TargetDatabaseDoesNotExist','INSERT语句中指定的库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('INS-L3-002','75d3d38e-b32b-438c-b01c-761fff3b6786',16,'INSERT时目标表必须已存在',1,160,'none','nil',5,'TargetTableDoesNotExist','INSERT语句中指定的表\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('INS-L3-003','355540e6-733a-4b83-88e7-e04e838fa8c2',16,'INSERT时目标列必须已存在',1,160,'none','nil',4,'TargetColumnDoesNotExist','INSERT语句中插入的列\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('INS-L3-004','9f6cae35-89b7-46ae-ae5c-a7962f473e44',16,'INSERT时非空列是否有值',1,160,'none','nil',4,'ValueForNotNullColumnRequired','INSERT语句没有为非空列\"%s\"提供值。','none',1,0,UNIX_TIMESTAMP()),
+('MDB-L2-001','78ab3a56-28dd-463d-b8dd-bcb1929d2314',10,'修改数据库时允许的字符集',2,101,'in','[\"utf8mb4\"]',7,'AvailableCharsets','改库禁用字符集\"%s\"，请使用\"%s\"。','checkboxes/key=charsets',1,0,UNIX_TIMESTAMP()),
+('MDB-L2-002','a28e9a5d-2d26-433b-b4c6-fb68faa05daa',10,'修改数据库时允许的排序规则',2,101,'in','[\"utf8mb4_unicode_ci\", \"utf8mb4_general_ci\", \"utf8mb4_bin\"]',7,'AvailableCollates','改库禁用排序规则\"%s\"，请使用\"%s\"。','checkboxes/key=collates',1,0,UNIX_TIMESTAMP()),
+('MDB-L2-003','3c10b2cc-ebfb-4bf6-8543-44a91506d86b',10,'修改数据库时字符集与排序规则必须匹配',2,101,'none','nil',5,'CharsetCollateMustMatch','改库使用的字符集\"%s\"和排序规则\"%s\"不匹配，请查阅官方文档。','none',1,0,UNIX_TIMESTAMP()),
+('MDB-L2-004','c370fd11-b92a-4619-a64a-2deae0873224',10,'修改数据库时目标库必须已存在',1,101,'none','nil',5,'TargetDatabaseDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('MEV-L3-001','d29700b0-1588-4034-aba9-1c2dbc92be05',21,'修改事件时目标库必须已存在',1,211,'none','nil',4,'TargetDatabaseDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('MEV-L3-002','65003024-7556-4812-b2f6-8aceb77aa052',21,'修改事件时目标事件必须已存在',1,211,'none','nil',4,'TargetEventDoesNotExist','目标事件\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('MFU-L3-001','d3ed9d76-9825-44f3-af9c-b61b9f704e43',19,'修改函数时目标库必须已存在',1,191,'none','nil',4,'TargetDatabaseDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('MFU-L3-002','ddec411d-9b2c-427b-965e-86e65d7edfce',19,'修改函数时目标函数必须已存在',1,191,'none','nil',4,'TargetFuncDoesNotExist','目标函数\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('MSC-L1-001','ddcee0ba-b76c-4037-8ea8-49616c381f8f',23,'禁止LOCK TABLE',1,230,'none','nil',5,'LockTableProhibited','禁止LOCK TABLE。','none',1,0,UNIX_TIMESTAMP()),
+('MSC-L1-002','f64e59c8-327e-4d77-9b60-be99d6978421',23,'禁止FLUSH TABLE',1,230,'none','nil',5,'FlushTableProhibited','禁止FLUSH操作。','none',1,0,UNIX_TIMESTAMP()),
+('MSC-L1-003','21194aaf-b646-4817-a30d-39e6d1c655b5',23,'禁止TRUNCATE TABLE',1,230,'none','nil',5,'TruncateTableProhibited','禁止TRUNCATE TABLE。','none',1,0,UNIX_TIMESTAMP()),
+('MSC-L1-004','f377fbd7-4256-4807-af22-8f8b69d5f6a5',23,'对同一个表/库的操作需要合并',1,230,'none','nil',5,'MergeRequired','对同一个对象\"%s\"的多个操作需要合并。','none',1,0,UNIX_TIMESTAMP()),
+('MSC-L1-005','364f7fb1-e5b8-4308-8166-7849b9e6a08a',23,'禁止PURGE LOG',1,230,'none','nil',5,'PurgeLogsProhibited','禁止PURGE LOGS。','none',1,0,UNIX_TIMESTAMP()),
+('MSC-L1-006','e2e2492e-f0fa-4593-a72b-2a9187bd2005',23,'禁止UNLOCK TABLE',1,230,'none','nil',5,'UnlockTableProhibited','禁止UNLOCK TABLES。','none',1,0,UNIX_TIMESTAMP()),
+('MSC-L1-007','6d4bce85-5608-4b1a-a810-36a5db17435d',23,'禁止KILL',1,230,'none','nil',5,'KillProhibited','禁止KILL。','none',1,0,UNIX_TIMESTAMP()),
+('MSC-L1-008','404354d1-9592-45d9-9f06-81740c5ad3c3',23,'禁止同时出现DDL、DML',1,230,'none','nil',5,'SplitRequired','禁止在一个工单中同时出现DML和DDL操作，请分开多个工单提交。','none',1,0,UNIX_TIMESTAMP()),
+('MSP-L3-001','841f30ac-bd86-4088-a958-c0bf2e7d26fd',22,'修改存储过程时目标库必须已存在',1,221,'none','nil',4,'TargetDatabaseDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('MSP-L3-002','a46eb708-2fdb-495a-8303-ebe72781c875',22,'修改存储过程时目标存储过程必须已存在',1,221,'none','nil',4,'TargetProcDoesNotExist','目标存储过程\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-001','b17d640a-16fd-4628-a845-d62cdb582884',12,'改表允许的字符集',2,120,'in','[\"utf8mb4\"]',7,'AvailableCharsets','表禁用字符集\"%s\"，请使用\"%s\"。','checkboxes/key=charsets',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-002','11460f45-3517-42d6-91ec-5b36d041cf4e',12,'改表允许的校验规则',2,120,'in','[\"utf8mb4_unicode_ci\", \"utf8mb4_general_ci\", \"utf8mb4_bin\"]',7,'AvailableCollates','表禁用排序规则\"%s\"，请使用\"%s\"。','checkboxes/key=collates',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-003','b4ae4473-9677-4db5-b2d4-7987fe904e88',12,'表的字符集与排序规则必须匹配',2,120,'none','nil',5,'TableCharsetCollateMustMatch','表字符集\"%s\"和排序规则\"%s\"不匹配，请查阅官方文档。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-004','aee962c0-411e-4875-9291-d708473a1286',12,'改表允许的存储引擎',2,120,'in','[\"innodb\", \"tokudb\", \"rocksdb\", \"archive\"]',7,'AvailableEngines','不支持的存储引擎\"%s\"，请使用\"%s\"。','checkboxes/key=engines',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-005','07ca1452-fa25-4e33-b2dd-6623215a018e',12,'列名必须符合命名规范',2,120,'regexp','^[a-zA-Z][_a-zA-Z0-9]*$',5,'ColumnNameQualified','列名\"%s\"需要满足正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-006','8463928d-8d32-47fd-a882-efa93983ea3d',12,'列名必须小写',2,120,'regexp','^[_a-z0-9]+$',7,'ColumnNameLowerCaseRequired','列名\"%s\"中含有除小写字母、数字和下划线以外的字符。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-007','d4a3a9c9-c16f-485a-a741-2c60ffda1b10',12,'列名最大长度',2,120,'lte','20',7,'ColumnNameMaxLength','列名\"%s\"的长度超出了规则允许的上限，请控制在%d个字符以内。','number',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-008','8ceb2794-a706-406d-859d-4d7fe67ed970',12,'列禁用的数据类型',2,120,'not-in','[\"bit\", \"enum\", \"set\", \"double\", \"real\", \"float\"]',7,'ColumnUnwantedTypes','列\"%s\"使用了不期望的数据类型\"%s\"，请避免使用\"%s\"数据类型。','checkboxes/key=data-types',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-009','f5b265d1-30c2-4c98-ab43-8876177c6ccb',12,'列必须有注释',2,120,'none','nil',5,'ColumnCommentRequired','列\"%s\"需要提供COMMENT注解。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-010','77130452-bf96-46f6-bb3e-8ce779d82dfc',12,'列允许的字符集',2,120,'in','[\"utf8mb4\", \"binary\"]',7,'ColumnAvailableCharsets','列\"%s\"禁用字符集\"%s\"，请使用\"%s\"。','checkboxes/key=charsets',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-011','d6401716-b714-42a9-b06c-10f515f69cde',12,'列允许的排序规则',2,120,'in','[\"utf8mb4_unicode_ci\", \"utf8mb4_general_ci\", \"utf8mb4_bin\", \"binary\"]',7,'ColumnAvailableCollates','列\"%s\"禁用排序规则\"%s\"，请使用\"%s\"。','checkboxes/key=collates',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-012','9c7f24ec-2d91-435f-b4ee-c31936670e6c',12,'列的字符集与排序规则必须匹配',2,120,'none','nil',5,'ColumnCharsetCollateMustMatch','列\"%s\"使用的字符集\"%s\"和排序规则\"%s\"不匹配，请查阅官方文档。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-013','76b8f1fd-7ebb-41fc-9b57-763e2590121d',12,'非空列必须有默认值',2,120,'none','nil',5,'ColumnNotNullWithDefaultRequired','列\"%s\"不允许为空，但没有指定默认值。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-014','90c0dece-d69c-4c56-a1a4-7824fe00fe22',12,'索引必须命名',2,120,'none','nil',7,'IndexNameExplicit','一个或多个索引没有提供索引名称。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-015','a28f4d53-4c81-4b73-a8a9-2bb441bbfb4b',12,'索引名标识符必须满足规则',2,120,'regexp','^[a-zA-Z][_a-zA-Z0-9]*$',7,'IndexNameQualified','索引名\"%s\"需要满足正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-016','b462710c-af50-4c96-85de-e3e6ddb20f47',12,'索引名必须小写',2,120,'regexp','^[_a-z0-9]+$',7,'IndexNameLowerCaseRequired','索引名\"%s\"含有除小写字母、数字和下划线以外的字符。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-017','543b5732-8a6d-4690-a02b-f3c8055435c5',12,'索引名最大长度',2,120,'lte','10',7,'IndexNameMaxLength','索引名\"%s\"的长度超出了规则允许的上限，请控制在%d个字符以内。','number',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-018','9f752e8b-df62-46b0-bae4-e2c6941f3d88',12,'索引名前缀规则',2,120,'regexp','^index_[1-9][0-9]*$',7,'IndexNamePrefixRequired','索引名\"%s\"需要满足前缀正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-019','1885389b-4a1b-475b-a37b-582670a908f8',12,'唯一索引必须命名',2,120,'none','nil',7,'UniqueNameExplicit','一个或多个唯一索引没有提供索引名称。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-020','66dd81be-fd2c-4304-b782-86006c52fc5d',12,'唯一索引索名标识符必须符合规则',2,120,'regexp','^[a-zA-Z][_a-zA-Z0-9]*$',7,'UniqueNameQualified','唯一索引\"%s\"需要满足正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-021','b68ffe6e-8482-475b-afa4-90b26b44aeb4',12,'唯一索引名必须小写',2,120,'regexp','^[_a-z0-9]+$',7,'UniqueNameLowerCaseRequired','唯一索引\"%s\"含有除小写字母、数字和下划线以外的字符。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-022','9dbce3a5-46b7-4465-af71-e5b6291ebc7a',12,'唯一索引名不能超过最大长度',2,120,'lte','10',7,'UniqueNameMaxLength','唯一索引\"%s\"的长度超出了规则允许的上限，请控制在%d个字符以内。','number',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-023','7d77c21e-e0c8-48c0-a115-fc460e820c2b',12,'唯一索引名前缀必须符合规则',2,120,'regexp','^unique_[1-9][0-9]*$',7,'UniqueNamePrefixRequired','唯一索引\"%s\"需要满足前缀正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-024','690b58b4-9be8-4560-ade6-be534a34120b',12,'禁止外键',2,120,'none','nil',7,'ForeignKeyNotAllowed','禁止外键。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-025','98436226-6cb8-4776-bc0b-6bb53ac8cfb4',12,'外键是否显式命名',2,120,'none','nil',5,'ForeignKeyNameExplicit','没有为外键指定名称。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-026','8ee524ec-2359-4a40-ad91-6c3716dc07b6',12,'外键名标识符规则',2,120,'regexp','^[a-zA-Z][_a-zA-Z0-9]*$',5,'ForeignKeyNameQualified','外键名\"%s\"需要满足正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-027','b107886d-b28d-41c9-9268-81b6fd631c1a',12,'外键名必须小写',2,120,'regexp','^[_a-z0-9]+$',5,'ForeignKeyNameLowerCaseRequired','外键名\"%s\"含有除小写字母、数字和下划线以外的字符。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-028','f3bfe2da-162e-46db-8be5-6e152a16696b',12,'外键名最大长度',2,120,'lte','25',5,'ForeignKeyNameMaxLength','外键名\"%s\"的长度超出了规则允许的上限，请控制在%d个字符以内。','number',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-029','9df7d265-a301-4fa4-9933-87fe3f0fcae2',12,'外键名前缀规则',2,120,'regexp','^fk_[_a-zA-Z0-9]+$',5,'ForeignKeyNamePrefixRequired','外键名\"%s\"需要满足前缀正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-030','7024faae-3902-4af1-a849-55b09a7cd85a',12,'更名新表规则',2,120,'regexp','^[a-zA-Z][_a-zA-Z0-9]*$',7,'NewTableNameQualified','目标表\"%s\"需要满足正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-031','92ee30e7-d138-463e-873f-899fb2be4375',12,'更名新表必须小写',2,120,'regexp','^[_a-z0-9]+$',7,'NewTableNameLowerCaseRequired','目标表\"%s\"含有除小写字母、数字和下划线以外的字符。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-032','106db8a3-da54-423c-8104-ed92625f80f4',12,'更名新表最大长度',2,120,'lte','20',7,'NewTableNameMaxLength','目标表\"%s\"的长度超出了规则允许的上限，请控制在%d个字符以内。','number',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-033','b9a1a81d-c328-48b9-8919-d47f14f50906',12,'禁用全文索引',2,120,'none','nil',7,'FullTextIndexNotAllowed','禁止使用全文索引。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-034','40375d77-dea4-410b-b8de-9fe4960a138d',12,'索引必须命名',2,120,'none','nil',7,'FullTextIndexNameExplicit','一个或多个全文索引没有提供索引名称。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-035','36d7aa62-fa25-4aa5-a7fa-afb15479b037',12,'索引名标识符规则',2,120,'regexp','^[a-zA-Z][_a-zA-Z0-9]*$',7,'FullTextIndexNameQualified','全文索引\"%s\"需要满足正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-036','86dd974c-f6ca-475a-84c8-981d43f489ff',12,'索引名必须小写',2,120,'regexp','^[_a-z0-9]+$',7,'FullTextIndexNameLowerCaseRequired','全文索引\"%s\"含有除小写字母、数字和下划线以外的字符。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-037','b928f242-aacd-41b9-8347-aa80ab679746',12,'索引名不能超过最大长度',2,120,'lte','10',7,'FullTextIndexNameMaxLength','全文索引\"%s\"的长度超出了规则允许的上限，请控制在%d个字符以内。','number',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-038','f754c334-32cf-4c4c-9c46-92a666d24192',12,'索引名前缀必须匹配规则',2,120,'regexp','^ft_[1-9][0-9]*$',7,'FullTextIndexNamePrefixRequired','全文索引\"%s\"需要满足前缀正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('MTB-L2-039','9280ff7c-ff2b-4c3e-bf6c-4886d49634d1',12,'单一索引最大列数',2,120,'lte','3',7,'MaxAllowedIndexColumnCount','索引\"%s\"索引的列数超出了规则允许的上限，请控制在%d个列以内。','number',1,0,UNIX_TIMESTAMP()),
+('MTB-L3-001','768fb105-d609-4b7b-8ff9-0d3854cabfff',12,'目标库必须已存在',1,120,'none','nil',5,'TargetDatabaseDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L3-002','aa482f88-074c-45ab-97b9-81509bd4567f',12,'目标表必须已存在',1,120,'none','nil',5,'TargetTableDoesNotExist','目标表\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L3-004','cfe017e3-339a-45a5-b821-825d656b85e8',12,'位置标记列必须已存在',1,120,'none','nil',5,'PositionColumnDoesNotExist','位置标记列\"%s\"(BEFORE/AFTER)不存在。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L3-005','a130f2c4-e6c0-4dbd-9e55-51af3cb2ecab',12,'列名是否重复',2,120,'none','nil',5,'ColumnNameDuplicate','表\"%s\"中的定义了重复的列\"%s\"。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L3-006','6677109a-5798-44b9-9f8e-597cce76f168',12,'表允许的最大列数',2,120,'lte','25',6,'MaxAllowedColumnCount','表\"%s\"中定义%d个列，数量超出了规则允许的上限%d，请考虑拆分表。','number',1,0,UNIX_TIMESTAMP()),
+('MTB-L3-007','5e179511-ae0a-4e55-abf6-23120adda97f',12,'仅允许一个时间戳类型的列',2,120,'none','nil',6,'MaxAllowedTimestampCount','表\"%s\"中的定义了多个时间戳列，请改用DATETIME类型。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L3-008','084397d9-86fd-415f-b37e-eaa44ba47be9',12,'删除列时目标列必须已存在',1,120,'none','nil',5,'ColumnNameDoesNotExist','目标列\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L3-013','b4fd2895-118e-4e80-b792-da47fdedcb20',12,'添加索引时索引必须不存在',1,120,'none','nil',5,'IndexNameDuplicate','索引名\"%s\"在表\"%s\"已经存在，请使用另外一个索引名称。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L3-014','08fb5c7f-f4f9-490f-a3a6-a8c4c82bd1a1',12,'覆盖索引检查',1,120,'none','nil',5,'IndexOverlayNotAllowed','目标表\"%s\"上已存在索引\"%s\"。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L3-015','c49c27b8-5d1d-4675-a734-8670eee65d9b',12,'同名外键检查',1,120,'none','nil',5,'IndexColumnDoesNotExist','目标表\"%s\"上已存在外键\"%s\"。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L3-016','afcc5ed3-1e4c-47df-b837-b6f3e5dee543',12,'添加外键时外键必须不存在',1,120,'none','nil',5,'IndexOnBlobColumnNotAllowed','目标表\"%s\"上已存在外键\"%s\"。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L3-017','a21ea970-7e26-420d-95f3-e1621f9c5630',12,'启用禁用KEY时KEY必须已存在',1,120,'none','nil',5,'IndexDoesNotExist','目标KEY\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L3-018','061df5d6-cd83-4b1a-abbe-9af10307e9dd',12,'删主键时主键必须存在',1,120,'none','nil',5,'PrimaryKeyDoesNotExist','目标表\"%s\"上未定义主键。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L3-020','7012f584-f7d5-492e-8cd4-37834845558c',12,'删外键时外键必须存在',1,120,'none','nil',5,'ForeignKeyDoesNotExist','目标表\"%s\"上未定义外键\"%s\"。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L3-021','2f2af8e5-2cf1-4ced-a1ec-a47c7c744178',12,'改名时目标表已存在',1,120,'none','nil',5,'TargetTableDuplicate','目标表\"%s\"已存在。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L3-022','86df78a8-ce02-4b06-81c0-f56a7d99ae09',12,'全文索引必须不存在',1,120,'none','nil',5,'FullTextIndexNameDuplicate','目标表\"%s\"上已存在全文索引\"%s\"。','none',1,0,UNIX_TIMESTAMP()),
+('MTB-L3-023','c74c9e43-4600-42f5-8711-9b2114917438',12,'删全文索引时索引必须存在',1,120,'none','nil',4,'FullTextIndexNameDoesNotExist','目标表\"%s\"上未定义全文索引\"%s\"。','none',1,0,UNIX_TIMESTAMP()),
+('MTG-L3-001','e6cbd545-643c-40c2-b2d9-924ef0f2691e',20,'修改触发器时目标库必须已存在',1,201,'none','nil',4,'TargetDatabaseDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('MTG-L3-002','10f58b5f-33ed-4ca6-b2af-ad2e01cf360b',20,'修改触发器时目标表必须已存在',1,201,'none','nil',4,'TargetTableDoesNotExist','目标表\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('MTG-L3-003','7dbfe6fb-e4eb-460d-af51-0427cfe4a600',20,'修改触发器时目标触发器必须已存在',1,201,'none','nil',4,'TargetTriggerDoesNotExist','目标触发器\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('MVW-L3-001','2da54955-a029-4ae5-8535-f77bb461973d',18,'修改视图时目标库必须已存在',1,181,'none','nil',4,'TargetDatabaseDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('MVW-L3-002','50edc670-7d6e-4c6f-92f0-24539074404b',18,'修改视图时目标视图必须已存在',1,181,'none','nil',4,'TargetViewDoesNotExist','目标视图\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('RIX-L3-001','43181c58-4cba-4209-99ad-4534c38e455a',15,'目标库必须已存在',1,151,'none','nil',5,'TargetDatabaseDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('RIX-L3-002','342f0510-6e41-4b63-871e-b0c7ae95715e',15,'目标表必须已存在',1,151,'none','nil',5,'TargetTableDoesNotExist','目标表\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('RIX-L3-003','6df03432-6248-4ff6-af35-04bd678e8812',15,'目标索引必须已存在',1,151,'none','nil',5,'TargetIndexDoesNotExist','目标索引\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('RPL-L2-001','f3578823-a5c8-4cdf-be09-55fc899d6875',16,'REPLACE时强制显式列申明',2,161,'none','nil',5,'ExplicitColumnRequired','禁止没有显式提供列列表的REPLACE语句。','none',1,0,UNIX_TIMESTAMP()),
+('RPL-L2-002','41b437f0-eca7-46c3-9935-69c2bcacae70',16,'禁止REPLACE...SELECT',2,161,'none','nil',5,'UsingSelectNotAllowed','禁止REPLACE ... SELECT ...语句。','none',1,0,UNIX_TIMESTAMP()),
+('RPL-L2-005','eaaa918c-611f-467c-9c65-03ff4124a998',16,'REPLACE时列类型、值是否匹配',2,161,'none','nil',5,'ColumnsValuesMustMatch','REPLACE语句的列数量和值数量不匹配。','none',1,0,UNIX_TIMESTAMP()),
+('RPL-L3-001','5679453f-d160-4f0a-860f-5f6f5c50d505',16,'REPLACE时目标库必须已存在',1,161,'none','nil',4,'TargetDatabaseDoesNotExist','REPLACE语句中指定的库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('RPL-L3-002','612b1902-88c1-46e2-b139-5fec2b74c692',16,'REPLACE时目标表必须已存在',1,161,'none','nil',4,'TargetTableDoesNotExist','REPLACE语句中指定的表\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('RPL-L3-003','d54e672f-e360-4789-bd2d-5ca5f14fdf5a',16,'REPLACE时目标列必须已存在',1,161,'none','nil',4,'TargetColumnDoesNotExist','REPLACE语句中替换的列\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('RPL-L3-004','68b029cc-8fff-4da7-8a3e-62b124b779a3',16,'REPLACE时非空列是否有值',1,161,'none','nil',4,'ValueForNotNullColumnRequired','REPLACE语句没有为非空列\"%s\"提供值。','none',1,0,UNIX_TIMESTAMP()),
+('RTB-L2-001','3ec2eaff-5471-405f-ab34-bc2158b8f884',13,'目标表跟源表是同一个表',1,130,'none','nil',5,'TablesIdentical','源表\"%s\"和目标表\"%s\"相同。','none',1,0,UNIX_TIMESTAMP()),
+('RTB-L2-002','95c374ee-52a4-48f2-b24a-ac273e5e8f36',13,'目标表名规则',2,130,'regexp','^[a-zA-Z][_a-zA-Z0-9]*$',5,'TargetTableNameQualified','目标表名\"%s\"需要满足正则\"%s\"。','regexp',1,0,UNIX_TIMESTAMP()),
+('RTB-L2-003','7daae444-78ea-46ac-a7e9-18149c725545',13,'目标表名必须小写',2,130,'none','^[_a-z0-9]+$',5,'TargetTableNameLowerCaseRequired','目标表名\"%s\"含有大写字母。','none',1,0,UNIX_TIMESTAMP()),
+('RTB-L2-004','22e5db11-6afb-4e50-9fa1-c77c09dfb168',13,'目标表名最大长度',2,130,'lte','20',7,'TargetTableNameMaxLength','目标表名\"%s\"的长度超出了规则允许的上限，请控制在%d个字符以内。','number',1,0,UNIX_TIMESTAMP()),
+('RTB-L3-001','8e75b778-e6c5-4d34-9edd-03097a4450d2',13,'源库必须已存在',1,130,'none','nil',4,'SourceTableDoesNotExist','源库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('RTB-L3-002','8a1a4f9b-35da-4ff0-9ee2-d190b54f2ba5',13,'源表必须已存在',1,130,'none','nil',4,'SourceDatabaseDoesNotExist','源表\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('RTB-L3-003','bb56fcfd-736f-4033-aa6f-2ce9ea1108f8',13,'目标库必须已存在',1,130,'none','nil',4,'TargetTableDoesNotExist','目标库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('RTB-L3-004','2affbef0-4856-4eb3-a9a7-a1bf74a531c2',13,'目标表必须不存在',1,130,'none','nil',4,'TargetDatabaseDoesNotExist','目标表\"%s\"已存在。','none',1,0,UNIX_TIMESTAMP()),
+('SEL-L2-001','1b163a6b-633b-4285-978f-fefd0af3fb9c',17,'禁止没有WHERE的查询',2,170,'none','nil',5,'WithoutWhereNotAllowed','禁止没有WHERE从句的查询语句。','none',1,0,UNIX_TIMESTAMP()),
+('SEL-L2-002','f9d57f6c-2ad0-4bb6-a4f8-a56fbff3cb65',17,'禁止没有LIMIT的查询',2,170,'none','nil',7,'WithoutLimitNotAllowed','禁止没有LIMIT从句的查询语句。','none',1,0,UNIX_TIMESTAMP()),
+('SEL-L2-003','b44f75af-51f0-48f5-8d1c-b8f8b1eb225d',17,'禁止SELECT STAR',2,170,'none','nil',7,'UseWildcardNotAllowed','禁止SELECT语句使用通配符，需要显式指定需要查询的列。','none',1,0,UNIX_TIMESTAMP()),
+('SEL-L2-004','e1018221-684c-49f0-baf4-2ea77c80fd3d',17,'禁止SELECT FOR UPDATE',2,170,'none','nil',5,'UseExplicitLockNotAllowed','禁止在SELECT语句中显示使用锁。','none',1,0,UNIX_TIMESTAMP()),
+('SEL-L3-001','bbd20e8b-4eeb-4467-a481-75bde843913f',17,'目标数据库必须已存在',1,170,'none','nil',5,'TargetDatabaseDoesNotExist','SELECT语句中指定的库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('SEL-L3-002','2430a63b-67c1-48f6-8b34-a4f1161a63b1',17,'目标表必须已存在',1,170,'none','nil',5,'TargetTableDoesNotExist','SELECT语句中指定的表\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('SEL-L3-003','90f2b354-19c5-4d4d-be3f-8361ecbe968d',17,'目标列必须已存在',1,170,'none','nil',4,'TargetColumnDoesNotDoesNotExist','SELECT语句中返回的列\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('SEL-L3-004','d59e3dad-cf02-41b6-a306-987e1e07814e',17,'是否允许返回BLOB/TEXT列',1,170,'none','nil',4,'ReturnBlobOrTextNotAllowed','查询语句中指的列\"%s\"是BLOB/TEXT类型。','none',1,0,UNIX_TIMESTAMP()),
+('UPD-L2-001','67fa90a8-5df6-479c-bfd4-11ab0bb9fa8b',16,'禁止没有WHERE的更新',1,162,'none','nil',5,'WithoutWhereNotAllowed','禁止没有WHERE从句的UPDATE语句。','none',1,0,UNIX_TIMESTAMP()),
+('UPD-L3-001','022dbea9-af6f-44cb-b0ae-3f4712a014c8',16,'目标库必须已存在',1,162,'none','nil',5,'TargetDatabaseDoesNotExist','UPDATE语句中指定的库\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('UPD-L3-002','749e0a05-843b-4c8e-8d5c-6ef252b261ad',16,'目标表必须已存在',1,162,'none','nil',5,'TargetTableDoesNotExist','UPDATE语句中指定的表\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('UPD-L3-003','bdf11d37-9534-4553-826d-15d3b08f1059',16,'目标列必须已存在',1,162,'none','nil',4,'TargetColumnDoesNotExist','UPDATE语句中更新的列\"%s\"不存在。','none',1,0,UNIX_TIMESTAMP()),
+('UPD-L3-005','a72f3d07-7512-46bb-a442-8a505610a72e',16,'允许单次更新的最大行数',1,162,'lte','1000',6,'MaxAllowedUpdateRows','单条UPDATE语句不得操作超过%d条记录。','number',1,0,UNIX_TIMESTAMP());
 UNLOCK TABLES;
+
 
 DROP TABLE IF EXISTS `mm_statements`;
 CREATE TABLE `mm_statements` (
@@ -1017,7 +1007,7 @@ CREATE TABLE `mm_statistics` (
   `uuid`         CHAR(36)
                  NOT NULL
                  COMMENT 'UUID',
-  `value`        DECIMAL(18,4)
+  `value`        DECIMAL(0,UNIX_TIMESTAMP())
                  NOT NULL
                  COMMENT '值',
   `version`      INT UNSIGNED
@@ -1069,6 +1059,8 @@ CREATE TABLE `mm_tickets` (
   `reviewer_id` INT UNSIGNED
                 NOT NULL
                 COMMENT '审核人',
+  `cron_id`     INT UNSIGNED
+                COMMENT '预约信息',
   `version`     INT UNSIGNED
                 NOT NULL
                 COMMENT '版本',
@@ -1080,6 +1072,7 @@ CREATE TABLE `mm_tickets` (
 
   PRIMARY KEY (`ticket_id`),
   UNIQUE KEY `unique_1` (`uuid`),
+  UNIQUE KEY `unique_2` (`cron_id`),
   KEY `index_1` (`user_id`),
   KEY `index_2` (`cluster_id`),
   KEY `index_3` (`reviewer_id`)
@@ -1144,4 +1137,259 @@ UPDATE `mm_users` SET `user_id` = 0;
 
 INSERT INTO `mm_users` VALUES
 (1,'e70e78bb-9d08-405d-a0ed-266ec703de19','root@163.com','$2a$10$QJT45HdMQIaEHPCNvqkKeeLZpggFEKKU5SdNl.c3hRSGVGbCcMogS',1,'root',0,1,3,0, UNIX_TIMESTAMP());
+UNLOCK TABLES;
+
+
+DROP TABLE IF EXISTS `mm_templates`;
+CREATE TABLE `mm_templates` (
+  `uuid`        CHAR(36)
+                NOT NULL
+                COMMENT 'UUID',
+  `subject`     CHAR(100)
+                NOT NULL
+                COMMENT '主题',
+  `body`        TEXT
+                NOT NULL
+                COMMENT '内容',
+  `description` VARCHAR(50)
+                NOT NULL
+                COMMENT '模板说明',
+  `version`     INT UNSIGNED
+                NOT NULL
+                COMMENT '版本',
+  `update_at`   INT UNSIGNED
+                COMMENT '修改时间',
+  `create_at`   INT UNSIGNED
+                NOT NULL
+                COMMENT '创建时间',
+
+  PRIMARY KEY (`uuid`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '邮件模板表'
+;
+
+LOCK TABLES `mm_templates` WRITE;
+# 工单创建成功
+INSERT INTO mm_templates VALUES ('b5c5ac9c-2071-4dd3-af5c-69ec149ee682', '工单〔{{.Ticket.Subject}}〕创建成功通知', '{{with .User -}}Dear {{.Name}},{{- end}}
+
+你于 {{ .Ticket.CreateAt | formatDate}} 成功创建了工单〔{{.Ticket.Subject}}〕，工单详情如下：
+
+工单编号：{{.Ticket.UUID}}
+工单主题：{{.Ticket.Subject}}
+目标群集：{{.Cluster.Host}}，{{.Cluster.IP}}，{{.Cluster.Port}}，{{.Cluster.Alias}}，
+目标库名：{{.Ticket.Database}}
+变更内容：{{.Ticket.Content}}
+
+Best Wishes,
+Halo Service', '工单创建成功后，通知到工单相关用户', 1, 0, UNIX_TIMESTAMP());
+
+# 工单修改成功
+INSERT INTO mm_templates VALUES ('5043d567-02ef-4f5e-be9a-13df9f5fde11', '工单〔{{.Ticket.Subject}}〕更新成功通知', '{{with .User -}}Dear {{.Name}},{{- end}}
+
+你于 {{ .Ticket.UpdateAt | formatDate}} 成功更新了工单〔{{.Ticket.Subject}}〕，工单详情如下：
+
+工单编号：{{.Ticket.UUID}}
+工单主题：{{.Ticket.Subject}}
+目标群集：{{.Cluster.Host}}，{{.Cluster.IP}}，{{.Cluster.Port}}，{{.Cluster.Alias}}，
+目标库名：{{.Ticket.Database}}
+变更内容：{{.Ticket.Content}}
+
+Best Wishes,
+Halo Service', '工单更新成功后，通知到工单相关用户', 1, 0, UNIX_TIMESTAMP());
+
+# 工单删除成功
+INSERT INTO mm_templates VALUES ('6e861f70-5d8c-4042-879c-9ca932fb792b', '工单〔{{.Ticket.Subject}}〕删除成功通知', '{{with .User -}}Dear {{.Name}},{{- end}}
+
+你于 {{ .Ticket.UpdateAt | formatDate}} 成功删除了工单〔{{.Ticket.Subject}}〕，工单详情如下：
+
+工单编号：{{.Ticket.UUID}}
+工单主题：{{.Ticket.Subject}}
+目标群集：{{.Cluster.Host}}，{{.Cluster.IP}}，{{.Cluster.Port}}，{{.Cluster.Alias}}，
+目标库名：{{.Ticket.Database}}
+变更内容：{{.Ticket.Content}}
+
+Best Wishes,
+Halo Service', '工单删除成功后，通知到工单相关用户', 1, 0, UNIX_TIMESTAMP());
+
+# 工单执行成功
+INSERT INTO mm_templates VALUES ('03714a3f-eafe-4836-8e85-d360ee29a70f', '工单〔{{.Ticket.Subject}}〕执行成功通知', '{{with .User -}}Dear {{.Name}},{{- end}}
+
+工单〔{{.Ticket.Subject}}〕于 {{ .Ticket.UpdateAt | formatDate}} 执行成功，工单详情如下：
+
+工单编号：{{.Ticket.UUID}}
+工单主题：{{.Ticket.Subject}}
+目标群集：{{.Cluster.Host}}，{{.Cluster.IP}}，{{.Cluster.Port}}，{{.Cluster.Alias}}，
+目标库名：{{.Ticket.Database}}
+变更内容：{{.Ticket.Content}}
+
+Best Wishes,
+Halo Service', '工单执行成功后，通知到工单相关用户', 1, 0, UNIX_TIMESTAMP());
+
+# 工单执行失败
+INSERT INTO mm_templates VALUES ('0a55142a-e336-4a97-b655-94ecac454da2', '工单〔{{.Ticket.Subject}}〕执行失败通知', '{{with .User -}}Dear {{.Name}},{{- end}}
+
+工单〔{{.Ticket.Subject}}〕于 {{ .Ticket.UpdateAt | formatDate}} 执行失败，工单详情如下：
+
+工单编号：{{.Ticket.UUID}}
+工单主题：{{.Ticket.Subject}}
+目标群集：{{.Cluster.Host}}，{{.Cluster.IP}}，{{.Cluster.Port}}，{{.Cluster.Alias}}，
+目标库名：{{.Ticket.Database}}
+变更内容：{{.Ticket.Content}}
+
+Best Wishes,
+Halo Service', '工单执行失败后，通知到工单相关用户', 1, 0, UNIX_TIMESTAMP());
+
+# 工单预约成功 - 0c7bf7ab-8e39-464e-b0b0-6a209842058a
+INSERT INTO mm_templates VALUES ('0c7bf7ab-8e39-464e-b0b0-6a209842058a', '工单〔{{.Ticket.Subject}}〕预约成功通知', '{{with .User -}}Dear {{.Name}},{{- end}}
+
+你于 {{ .Cron.CreateAt | formatDate}} 成功预约了工单〔{{.Ticket.Subject}}〕，工单详情如下：
+
+工单编号：{{.Ticket.UUID}}
+工单主题：{{.Ticket.Subject}}
+执行时间：{{.Cron.NextRun}}
+目标群集：{{.Cluster.Host}}，{{.Cluster.IP}}，{{.Cluster.Port}}，{{.Cluster.Alias}}，
+目标库名：{{.Ticket.Database}}
+变更内容：{{.Ticket.Content}}
+
+Best Wishes,
+Halo Service', '工单预约成功后，通知到工单相关用户', 1, 0, UNIX_TIMESTAMP());
+
+# 工单关闭成功 - 5a36648d-0c97-4aa5-b753-2872ea2e0ac6
+INSERT INTO mm_templates VALUES ('5a36648d-0c97-4aa5-b753-2872ea2e0ac6', '工单〔{{.Ticket.Subject}}〕关闭成功通知', '{{with .User -}}Dear {{.Name}},{{- end}}
+
+你于 {{ .Ticket.UpdateAt | formatDate}} 成功关闭了工单〔{{.Ticket.Subject}}〕，工单详情如下：
+
+工单编号：{{.Ticket.UUID}}
+工单主题：{{.Ticket.Subject}}
+目标群集：{{.Cluster.Host}}，{{.Cluster.IP}}，{{.Cluster.Port}}，{{.Cluster.Alias}}，
+目标库名：{{.Ticket.Database}}
+变更内容：{{.Ticket.Content}}
+
+Best Wishes,
+Halo Service', '工单关闭后，通知到工单相关用户', 1, 0, UNIX_TIMESTAMP());
+
+# 工单审核成功 - 33a3d82e-bb2b-4428-8c45-6a8e50c0ed0c
+INSERT INTO mm_templates VALUES ('33a3d82e-bb2b-4428-8c45-6a8e50c0ed0c', '工单〔{{.Ticket.Subject}}〕人工审核通过通知', '{{with .User -}}Dear {{.Name}},{{- end}}
+
+工单〔{{.Ticket.Subject}}〕于 {{ .Ticket.UpdateAt | formatDate}} 人工审核通过，等待预约执行，工单详情如下：
+
+工单编号：{{.Ticket.UUID}}
+工单主题：{{.Ticket.Subject}}
+目标群集：{{.Cluster.Host}}，{{.Cluster.IP}}，{{.Cluster.Port}}，{{.Cluster.Alias}}，
+目标库名：{{.Ticket.Database}}
+变更内容：{{.Ticket.Content}}
+
+Best Wishes,
+Halo Service', '工单关闭后，通知到工单相关用户', 1, 0, UNIX_TIMESTAMP());
+
+# 工单审核失败 - 9676f8e5-988c-4d5f-802b-a92f619a7ef0
+INSERT INTO mm_templates VALUES ('9676f8e5-988c-4d5f-802b-a92f619a7ef0', '工单〔{{.Ticket.Subject}}〕人工审核被拒通知', '{{with .User -}}Dear {{.Name}},{{- end}}
+
+工单〔{{.Ticket.Subject}}〕于 {{ .Ticket.UpdateAt | formatDate}} 人工审核不通过，工单详情如下：
+
+工单编号：{{.Ticket.UUID}}
+工单主题：{{.Ticket.Subject}}
+目标群集：{{.Cluster.Host}}，{{.Cluster.IP}}，{{.Cluster.Port}}，{{.Cluster.Alias}}，
+目标库名：{{.Ticket.Database}}
+变更内容：{{.Ticket.Content}}
+
+Best Wishes,
+Halo Service', '工单关闭后，通知到工单相关用户', 1, 0, UNIX_TIMESTAMP());
+
+# 用户注册成功 - 30f37d4f-2cfa-40f4-8b44-4b660f9c613d
+INSERT INTO mm_templates VALUES ('30f37d4f-2cfa-40f4-8b44-4b660f9c613d', '工单〔{{.Ticket.Subject}}〕预约成功通知', '{{with .User -}}Dear {{.Name}},{{- end}}
+
+你于 {{ .Ticket.CreateAt | formatDate}} 成功预约了工单〔{{.Ticket.Subject}}〕，工单详情如下：
+
+工单主题：{{.Ticket.Subject}}
+目标群集：{{.Cluster.Host}}，{{.Cluster.IP}}，{{.Cluster.Port}}，{{.Cluster.Alias}}，
+目标库名：{{.Ticket.Database}}
+变更内容：{{.Ticket.Content}}
+
+Best Wishes,
+Halo Service', '用户注册成功后，发送激活邮件', 1, 0, UNIX_TIMESTAMP());
+
+# 密码修改成功 - 69d05ebf-7626-433f-b906-cb69a596f78e
+INSERT INTO mm_templates VALUES ('69d05ebf-7626-433f-b906-cb69a596f78e', '工单〔{{.Ticket.Subject}}〕预约成功通知', '{{with .User -}}Dear {{.Name}},{{- end}}
+
+你于 {{ .Ticket.CreateAt | formatDate}} 成功预约了工单〔{{.Ticket.Subject}}〕，工单详情如下：
+
+工单主题：{{.Ticket.Subject}}
+目标群集：{{.Cluster.Host}}，{{.Cluster.IP}}，{{.Cluster.Port}}，{{.Cluster.Alias}}，
+目标库名：{{.Ticket.Database}}
+变更内容：{{.Ticket.Content}}
+
+Best Wishes,
+Halo Service', '密码修改成功后，通知该用户', 1, 0, UNIX_TIMESTAMP());
+
+# 账号修改成功 - aa5404c5-ce37-4e01-a41c-75833028e122
+INSERT INTO mm_templates VALUES ('aa5404c5-ce37-4e01-a41c-75833028e122', '工单〔{{.Ticket.Subject}}〕预约成功通知', '{{with .User -}}Dear {{.Name}},{{- end}}
+
+你于 {{ .Ticket.CreateAt | formatDate}} 成功预约了工单〔{{.Ticket.Subject}}〕，工单详情如下：
+
+工单主题：{{.Ticket.Subject}}
+目标群集：{{.Cluster.Host}}，{{.Cluster.IP}}，{{.Cluster.Port}}，{{.Cluster.Alias}}，
+目标库名：{{.Ticket.Database}}
+变更内容：{{.Ticket.Content}}
+
+Best Wishes,
+Halo Service', '用户修改了账号后，新邮件地址需要确认激活', 1, 0, UNIX_TIMESTAMP());
+
+# 用户修改成功 - 64c110cf-18d5-494c-917e-fc61322c98e0
+INSERT INTO mm_templates VALUES ('64c110cf-18d5-494c-917e-fc61322c98e0', '工单〔{{.Ticket.Subject}}〕预约成功通知', '{{with .User -}}Dear {{.Name}},{{- end}}
+
+你于 {{ .Ticket.CreateAt | formatDate}} 成功预约了工单〔{{.Ticket.Subject}}〕，工单详情如下：
+
+工单主题：{{.Ticket.Subject}}
+目标群集：{{.Cluster.Host}}，{{.Cluster.IP}}，{{.Cluster.Port}}，{{.Cluster.Alias}}，
+目标库名：{{.Ticket.Database}}
+变更内容：{{.Ticket.Content}}
+
+Best Wishes,
+Halo Service', '用户修改个人资料成功，通知该用户', 1, 0, UNIX_TIMESTAMP());
+
+# 用户创建成功 - 7de2bf1a-c03a-49d0-822a-a1dd1c98bdc1
+INSERT INTO mm_templates VALUES ('7de2bf1a-c03a-49d0-822a-a1dd1c98bdc1', '工单〔{{.Ticket.Subject}}〕预约成功通知', '{{with .User -}}Dear {{.Name}},{{- end}}
+
+你于 {{ .Ticket.UpdateAt | formatDate}} 成功预约了工单〔{{.Ticket.Subject}}〕，工单详情如下：
+
+工单主题：{{.Ticket.Subject}}
+目标群集：{{.Cluster.Host}}，{{.Cluster.IP}}，{{.Cluster.Port}}，{{.Cluster.Alias}}，
+目标库名：{{.Ticket.Database}}
+变更内容：{{.Ticket.Content}}
+
+Best Wishes,
+Halo Service', '管理员后台成功创建用户后，通知该用户账号已经准备', 1, 0, UNIX_TIMESTAMP());
+
+# 添加审核意见 - ac156eb3-9948-4e2f-997f-77fdeceb12ca
+INSERT INTO mm_templates VALUES ('ac156eb3-9948-4e2f-997f-77fdeceb12ca', '工单〔{{.Ticket.Subject}}〕预约成功通知', '{{with .User -}}Dear {{.Name}},{{- end}}
+
+你于 {{ .Ticket.UpdateAt | formatDate}} 成功预约了工单〔{{.Ticket.Subject}}〕，工单详情如下：
+
+工单编号：{{.Ticket.UUID}}
+工单主题：{{.Ticket.Subject}}
+目标群集：{{.Cluster.Host}}，{{.Cluster.IP}}，{{.Cluster.Port}}，{{.Cluster.Alias}}，
+目标库名：{{.Ticket.Database}}
+变更内容：{{.Ticket.Content}}
+
+Best Wishes,
+Halo Service', '新增审核意见后，通知工单相关用户', 1, 0, UNIX_TIMESTAMP());
+
+# 预约取消成功 - ff0a4c66-9356-498a-afff-40a4407d9d8a
+INSERT INTO mm_templates VALUES ('ff0a4c66-9356-498a-afff-40a4407d9d8a', '工单〔{{.Ticket.Subject}}〕预约成功通知', '{{with .User -}}Dear {{.Name}},{{- end}}
+
+你于 {{ .Ticket.CreateAt | formatDate}} 成功预约了工单〔{{.Ticket.Subject}}〕，工单详情如下：
+
+工单编号：{{.Ticket.UUID}}
+工单主题：{{.Ticket.Subject}}
+目标群集：{{.Cluster.Host}}，{{.Cluster.IP}}，{{.Cluster.Port}}，{{.Cluster.Alias}}，
+目标库名：{{.Ticket.Database}}
+变更内容：{{.Ticket.Content}}
+
+Best Wishes,
+Halo Service', '预约执行的工单被取消后，工单改为取消，同时通知工单相关用户', 1, 0, UNIX_TIMESTAMP());
+
 UNLOCK TABLES;

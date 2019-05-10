@@ -432,6 +432,100 @@ func (e RoleEnum) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// SQL语句抽象语法树类型枚举
+type StatementTypeEnum string
+
+const (
+	StatementTypeEnumAlterTable     StatementTypeEnum = "ALTER_TABLE"
+	StatementTypeEnumAnalyzeTable   StatementTypeEnum = "ANALYZE_TABLE"
+	StatementTypeEnumBegin          StatementTypeEnum = "BEGIN"
+	StatementTypeEnumCommit         StatementTypeEnum = "COMMIT"
+	StatementTypeEnumCreateDatabase StatementTypeEnum = "CREATE_DATABASE"
+	StatementTypeEnumCreateIndex    StatementTypeEnum = "CREATE_INDEX"
+	StatementTypeEnumCreateTable    StatementTypeEnum = "CREATE_TABLE"
+	StatementTypeEnumCreateView     StatementTypeEnum = "CREATE_VIEW"
+	StatementTypeEnumCreateUser     StatementTypeEnum = "CREATE_USER"
+	StatementTypeEnumDelete         StatementTypeEnum = "DELETE"
+	StatementTypeEnumDropDatabase   StatementTypeEnum = "DROP_DATABASE"
+	StatementTypeEnumDropIndex      StatementTypeEnum = "DROP_INDEX"
+	StatementTypeEnumDropTable      StatementTypeEnum = "DROP_TABLE"
+	StatementTypeEnumExplain        StatementTypeEnum = "EXPLAIN"
+	StatementTypeEnumInsert         StatementTypeEnum = "INSERT"
+	StatementTypeEnumLoadData       StatementTypeEnum = "LOAD_DATA"
+	StatementTypeEnumRollback       StatementTypeEnum = "ROLLBACK"
+	StatementTypeEnumSelect         StatementTypeEnum = "SELECT"
+	StatementTypeEnumSet            StatementTypeEnum = "SET"
+	StatementTypeEnumShow           StatementTypeEnum = "SHOW"
+	StatementTypeEnumTruncateTable  StatementTypeEnum = "TRUNCATE_TABLE"
+	StatementTypeEnumUpdate         StatementTypeEnum = "UPDATE"
+	StatementTypeEnumGrant          StatementTypeEnum = "GRANT"
+	StatementTypeEnumRevoke         StatementTypeEnum = "REVOKE"
+	StatementTypeEnumDeallocate     StatementTypeEnum = "DEALLOCATE"
+	StatementTypeEnumExecute        StatementTypeEnum = "EXECUTE"
+	StatementTypeEnumPrepare        StatementTypeEnum = "PREPARE"
+	StatementTypeEnumUse            StatementTypeEnum = "USE"
+)
+
+var AllStatementTypeEnum = []StatementTypeEnum{
+	StatementTypeEnumAlterTable,
+	StatementTypeEnumAnalyzeTable,
+	StatementTypeEnumBegin,
+	StatementTypeEnumCommit,
+	StatementTypeEnumCreateDatabase,
+	StatementTypeEnumCreateIndex,
+	StatementTypeEnumCreateTable,
+	StatementTypeEnumCreateView,
+	StatementTypeEnumCreateUser,
+	StatementTypeEnumDelete,
+	StatementTypeEnumDropDatabase,
+	StatementTypeEnumDropIndex,
+	StatementTypeEnumDropTable,
+	StatementTypeEnumExplain,
+	StatementTypeEnumInsert,
+	StatementTypeEnumLoadData,
+	StatementTypeEnumRollback,
+	StatementTypeEnumSelect,
+	StatementTypeEnumSet,
+	StatementTypeEnumShow,
+	StatementTypeEnumTruncateTable,
+	StatementTypeEnumUpdate,
+	StatementTypeEnumGrant,
+	StatementTypeEnumRevoke,
+	StatementTypeEnumDeallocate,
+	StatementTypeEnumExecute,
+	StatementTypeEnumPrepare,
+	StatementTypeEnumUse,
+}
+
+func (e StatementTypeEnum) IsValid() bool {
+	switch e {
+	case StatementTypeEnumAlterTable, StatementTypeEnumAnalyzeTable, StatementTypeEnumBegin, StatementTypeEnumCommit, StatementTypeEnumCreateDatabase, StatementTypeEnumCreateIndex, StatementTypeEnumCreateTable, StatementTypeEnumCreateView, StatementTypeEnumCreateUser, StatementTypeEnumDelete, StatementTypeEnumDropDatabase, StatementTypeEnumDropIndex, StatementTypeEnumDropTable, StatementTypeEnumExplain, StatementTypeEnumInsert, StatementTypeEnumLoadData, StatementTypeEnumRollback, StatementTypeEnumSelect, StatementTypeEnumSet, StatementTypeEnumShow, StatementTypeEnumTruncateTable, StatementTypeEnumUpdate, StatementTypeEnumGrant, StatementTypeEnumRevoke, StatementTypeEnumDeallocate, StatementTypeEnumExecute, StatementTypeEnumPrepare, StatementTypeEnumUse:
+		return true
+	}
+	return false
+}
+
+func (e StatementTypeEnum) String() string {
+	return string(e)
+}
+
+func (e *StatementTypeEnum) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = StatementTypeEnum(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid StatementTypeEnum", str)
+	}
+	return nil
+}
+
+func (e StatementTypeEnum) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type TicketStatusEnum string
 
 const (

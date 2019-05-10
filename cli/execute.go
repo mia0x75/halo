@@ -9,12 +9,13 @@ import (
 
 	"github.com/go-xorm/core"
 	"github.com/go-xorm/xorm"
+	"github.com/spf13/cobra"
+
 	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
-	"github.com/spf13/cobra"
 )
 
 // executeCmd represents the execute command
@@ -63,18 +64,31 @@ L:
 
 		ticket := &models.Ticket{}
 		if _, err = g.Engine.Where("`uuid` = ?", ticketUUID).Get(ticket); err != nil {
+			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", err.Error())
 			break
 		}
+
+		// 工单当前状态是LGTM才允许执行
+		if ticket.Status != gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumLgtm] {
+			err = fmt.Errorf("错误代码: 1500, 错误信息: 只有审核通过等待上线执行的工单才可以执行。")
+			break
+		}
+
 		stmts := []*models.Statement{}
 		if err = g.Engine.Where("`ticket_id` = ?", ticket.TicketID).Find(&stmts); err != nil {
+			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", err.Error())
 			break
 		}
+
 		cluster := &models.Cluster{}
 		if _, err = g.Engine.ID(ticket.ClusterID).Get(cluster); err != nil {
+			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", err.Error())
 			break
 		}
+
 		var engine *xorm.Engine
 		if engine, err = cluster.Connect(ticket.Database, passwd); err != nil {
+			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", err.Error())
 			break
 		}
 
@@ -85,9 +99,8 @@ L:
 				stmt.Status = gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumExecFailure]
 				stmt.Results = err.Error()
 				ticket.Status = gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumExecFailure]
-				buf.WriteString("\nexecute statement error")
-				buf.WriteString("\n")
 				buf.WriteString(stmt.Content)
+				err = fmt.Errorf("错误代码: 1500, 错误信息: %s", err.Error())
 				break
 			} else {
 				stmt.Status = gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumDone]
@@ -97,12 +110,12 @@ L:
 			}
 		}
 		if err != nil {
-			defer events.Fire(events.EventTicketFailed, &events.TicketFailedArgs{
+			events.FireSync(events.EventTicketFailed, &events.TicketFailedArgs{
 				Ticket:  *ticket,
 				Cluster: *cluster,
 			})
 		} else {
-			defer events.Fire(events.EventTicketExecuted, &events.TicketExecutedArgs{
+			events.FireSync(events.EventTicketExecuted, &events.TicketExecutedArgs{
 				Ticket:  *ticket,
 				Cluster: *cluster,
 			})
@@ -112,15 +125,18 @@ L:
 		defer session.Close()
 		if _, err = session.ID(ticket.TicketID).Update(ticket); err != nil {
 			session.Rollback()
-			break
+			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", err.Error())
+			break L
 		}
 		for _, stmt := range stmts {
 			if _, err := session.ID(core.PK{stmt.TicketID, stmt.Sequence}).Update(stmt); err != nil {
 				session.Rollback()
+				err = fmt.Errorf("错误代码: 1500, 错误信息: %s", err.Error())
 				break L
 			}
 		}
 		if err = session.Commit(); err != nil {
+			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", err.Error())
 			break
 		}
 

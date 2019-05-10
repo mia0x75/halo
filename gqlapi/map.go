@@ -22,6 +22,38 @@ var RoleEnumMap = map[RoleEnum]uint{
 	"GUEST":     5, // 访客
 }
 
+// StatementTypeEnumMap 语法类型枚举
+var StatementTypeEnumMap = map[StatementTypeEnum]uint8{
+	"ALTER_TABLE":     1,  //
+	"ANALYZE_TABLE":   2,  //
+	"BEGIN":           3,  //
+	"COMMIT":          4,  //
+	"CREATE_DATABASE": 5,  //
+	"CREATE_INDEX":    6,  //
+	"CREATE_TABLE":    7,  //
+	"CREATE_VIEW":     8,  //
+	"CREATE_USER":     9,  //
+	"DELETE":          10, //
+	"DROP_DATABASE":   11, //
+	"DROP_INDEX":      12, //
+	"DROP_TABLE":      13, //
+	"EXPLAIN":         14, //
+	"INSERT":          15, //
+	"LOAD_DATA":       16, //
+	"ROLLBACK":        17, //
+	"SELECT":          18, //
+	"SET":             19, //
+	"SHOW":            20, //
+	"TRUNCATE_TABLE":  21, //
+	"UPDATE":          22, //
+	"GRANT":           23, //
+	"REVOKE":          24, //
+	"DEALLOCATE":      25, //
+	"EXECUTE":         26, //
+	"PREPARE":         27, //
+	"USE":             28, //
+}
+
 // TicketStatusEnumMap 工单状态枚举转uint8
 var TicketStatusEnumMap = map[TicketStatusEnum]uint8{
 	"WAITING_FOR_VLD": 1, // 等待系统审核

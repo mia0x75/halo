@@ -272,6 +272,7 @@ type ComplexityRoot struct {
 		UpdateEmail          func(childComplexity int, input models.PatchEmailInput) int
 		UpdatePassword       func(childComplexity int, input models.PatchPasswordInput) int
 		UpdateProfile        func(childComplexity int, input models.UpdateProfileInput) int
+		UpdateTemplate       func(childComplexity int, input *models.UpdateTemplateInput) int
 		UpdateTicket         func(childComplexity int, input models.UpdateTicketInput) int
 		UpdateUser           func(childComplexity int, input models.UpdateUserInput) int
 	}
@@ -349,6 +350,9 @@ type ComplexityRoot struct {
 		Rules         func(childComplexity int) int
 		Statistics    func(childComplexity int, groups []string) int
 		Tasks         func(childComplexity int) int
+		Templates     func(childComplexity int) int
+		TestCluster   func(childComplexity int, input *models.ValidateConnectionInput) int
+		TestRegexp    func(childComplexity int, input *models.ValidatePatternInput) int
 		Ticket        func(childComplexity int, id string) int
 		TicketSearch  func(childComplexity int, search string, after *string, before *string, first *int, last *int) int
 		Tickets       func(childComplexity int, after *string, before *string, first *int, last *int) int
@@ -390,7 +394,7 @@ type ComplexityRoot struct {
 		Sequence     func(childComplexity int) int
 		Status       func(childComplexity int) int
 		Ticket       func(childComplexity int) int
-		Type         func(childComplexity int) int
+		TypeDesc     func(childComplexity int) int
 		UUID         func(childComplexity int) int
 		UpdateAt     func(childComplexity int) int
 	}
@@ -419,11 +423,21 @@ type ComplexityRoot struct {
 		TicketStatusChanged func(childComplexity int) int
 	}
 
+	Template struct {
+		Body        func(childComplexity int) int
+		CreateAt    func(childComplexity int) int
+		Description func(childComplexity int) int
+		Subject     func(childComplexity int) int
+		UUID        func(childComplexity int) int
+		UpdateAt    func(childComplexity int) int
+	}
+
 	Ticket struct {
 		Cluster    func(childComplexity int) int
 		Comments   func(childComplexity int, after *string, before *string, first *int, last *int) int
 		Content    func(childComplexity int) int
 		CreateAt   func(childComplexity int) int
+		Cron       func(childComplexity int) int
 		Database   func(childComplexity int) int
 		Reviewer   func(childComplexity int) int
 		Statements func(childComplexity int, after *string, before *string, first *int, last *int) int
@@ -506,6 +520,7 @@ type MutationRootResolver interface {
 	UpdateCluster(ctx context.Context, input models.UpdateClusterInput) (*models.Cluster, error)
 	RemoveCluster(ctx context.Context, id string) (bool, error)
 	PatchClusterStatus(ctx context.Context, input models.PatchClusterStatusInput) (bool, error)
+	UpdateTemplate(ctx context.Context, input *models.UpdateTemplateInput) (*models.Template, error)
 	CreateTicket(ctx context.Context, input models.CreateTicketInput) (*models.Ticket, error)
 	UpdateTicket(ctx context.Context, input models.UpdateTicketInput) (*models.Ticket, error)
 	RemoveTicket(ctx context.Context, id string) (bool, error)
@@ -541,6 +556,7 @@ type QueryRootResolver interface {
 	Query(ctx context.Context, id string) (*models.Query, error)
 	Queries(ctx context.Context, after *string, before *string, first *int, last *int) (*QueryConnection, error)
 	QuerySearch(ctx context.Context, search string, after *string, before *string, first *int, last *int) (*QueryConnection, error)
+	Templates(ctx context.Context) ([]*models.Template, error)
 	Ticket(ctx context.Context, id string) (*models.Ticket, error)
 	Tickets(ctx context.Context, after *string, before *string, first *int, last *int) (*TicketConnection, error)
 	TicketSearch(ctx context.Context, search string, after *string, before *string, first *int, last *int) (*TicketConnection, error)
@@ -560,11 +576,15 @@ type QueryRootResolver interface {
 	Statistics(ctx context.Context, groups []string) ([]*models.Statistic, error)
 	Environments(ctx context.Context) (*Environments, error)
 	Metadata(ctx context.Context, clusterUUID string, database string) (string, error)
+	TestCluster(ctx context.Context, input *models.ValidateConnectionInput) (bool, error)
+	TestRegexp(ctx context.Context, input *models.ValidatePatternInput) (bool, error)
 }
 type RoleResolver interface {
 	Users(ctx context.Context, obj *models.Role, after *string, before *string, first *int, last *int) (*UserConnection, error)
 }
 type StatementResolver interface {
+	TypeDesc(ctx context.Context, obj *models.Statement) (string, error)
+
 	Ticket(ctx context.Context, obj *models.Statement) (*models.Ticket, error)
 }
 type SubscriptionRootResolver interface {
@@ -575,6 +595,7 @@ type TicketResolver interface {
 
 	User(ctx context.Context, obj *models.Ticket) (*models.User, error)
 	Reviewer(ctx context.Context, obj *models.Ticket) (*models.User, error)
+	Cron(ctx context.Context, obj *models.Ticket) (*models.Cron, error)
 	Statements(ctx context.Context, obj *models.Ticket, after *string, before *string, first *int, last *int) (*StatementConnection, error)
 	Comments(ctx context.Context, obj *models.Ticket, after *string, before *string, first *int, last *int) (*CommentConnection, error)
 }
@@ -1697,6 +1718,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.MutationRoot.UpdateProfile(childComplexity, args["input"].(models.UpdateProfileInput)), true
 
+	case "MutationRoot.UpdateTemplate":
+		if e.complexity.MutationRoot.UpdateTemplate == nil {
+			break
+		}
+
+		args, err := ec.field_MutationRoot_updateTemplate_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.MutationRoot.UpdateTemplate(childComplexity, args["input"].(*models.UpdateTemplateInput)), true
+
 	case "MutationRoot.UpdateTicket":
 		if e.complexity.MutationRoot.UpdateTicket == nil {
 			break
@@ -2179,6 +2212,37 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.QueryRoot.Tasks(childComplexity), true
 
+	case "QueryRoot.Templates":
+		if e.complexity.QueryRoot.Templates == nil {
+			break
+		}
+
+		return e.complexity.QueryRoot.Templates(childComplexity), true
+
+	case "QueryRoot.TestCluster":
+		if e.complexity.QueryRoot.TestCluster == nil {
+			break
+		}
+
+		args, err := ec.field_QueryRoot_testCluster_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.QueryRoot.TestCluster(childComplexity, args["input"].(*models.ValidateConnectionInput)), true
+
+	case "QueryRoot.TestRegexp":
+		if e.complexity.QueryRoot.TestRegexp == nil {
+			break
+		}
+
+		args, err := ec.field_QueryRoot_testRegexp_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.QueryRoot.TestRegexp(childComplexity, args["input"].(*models.ValidatePatternInput)), true
+
 	case "QueryRoot.Ticket":
 		if e.complexity.QueryRoot.Ticket == nil {
 			break
@@ -2438,12 +2502,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Statement.Ticket(childComplexity), true
 
-	case "Statement.Type":
-		if e.complexity.Statement.Type == nil {
+	case "Statement.TypeDesc":
+		if e.complexity.Statement.TypeDesc == nil {
 			break
 		}
 
-		return e.complexity.Statement.Type(childComplexity), true
+		return e.complexity.Statement.TypeDesc(childComplexity), true
 
 	case "Statement.UUID":
 		if e.complexity.Statement.UUID == nil {
@@ -2543,6 +2607,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SubscriptionRoot.TicketStatusChanged(childComplexity), true
 
+	case "Template.Body":
+		if e.complexity.Template.Body == nil {
+			break
+		}
+
+		return e.complexity.Template.Body(childComplexity), true
+
+	case "Template.CreateAt":
+		if e.complexity.Template.CreateAt == nil {
+			break
+		}
+
+		return e.complexity.Template.CreateAt(childComplexity), true
+
+	case "Template.Description":
+		if e.complexity.Template.Description == nil {
+			break
+		}
+
+		return e.complexity.Template.Description(childComplexity), true
+
+	case "Template.Subject":
+		if e.complexity.Template.Subject == nil {
+			break
+		}
+
+		return e.complexity.Template.Subject(childComplexity), true
+
+	case "Template.UUID":
+		if e.complexity.Template.UUID == nil {
+			break
+		}
+
+		return e.complexity.Template.UUID(childComplexity), true
+
+	case "Template.UpdateAt":
+		if e.complexity.Template.UpdateAt == nil {
+			break
+		}
+
+		return e.complexity.Template.UpdateAt(childComplexity), true
+
 	case "Ticket.Cluster":
 		if e.complexity.Ticket.Cluster == nil {
 			break
@@ -2575,6 +2681,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Ticket.CreateAt(childComplexity), true
+
+	case "Ticket.Cron":
+		if e.complexity.Ticket.Cron == nil {
+			break
+		}
+
+		return e.complexity.Ticket.Cron(childComplexity), true
 
 	case "Ticket.Database":
 		if e.complexity.Ticket.Database == nil {
@@ -3227,6 +3340,40 @@ enum EdgeEnum {
 	用户到群集的多对多关系
 	"""
 	USER_TO_CLUSTER  @enumInt(value: 3)
+}
+
+"""
+SQL语句抽象语法树类型枚举
+"""
+enum StatementTypeEnum {
+	ALTER_TABLE     @enumInt(value: 1)
+	ANALYZE_TABLE   @enumInt(value: 2)
+	BEGIN           @enumInt(value: 3)
+	COMMIT          @enumInt(value: 4)
+	CREATE_DATABASE @enumInt(value: 5)
+	CREATE_INDEX    @enumInt(value: 6)
+	CREATE_TABLE    @enumInt(value: 7)
+	CREATE_VIEW     @enumInt(value: 8)
+	CREATE_USER     @enumInt(value: 9)
+	DELETE          @enumInt(value: 10)
+	DROP_DATABASE   @enumInt(value: 11)
+	DROP_INDEX      @enumInt(value: 12)
+	DROP_TABLE      @enumInt(value: 13)
+	EXPLAIN         @enumInt(value: 14)
+	INSERT          @enumInt(value: 15)
+	LOAD_DATA       @enumInt(value: 16)
+	ROLLBACK        @enumInt(value: 17)
+	SELECT          @enumInt(value: 18)
+	SET             @enumInt(value: 19)
+	SHOW            @enumInt(value: 20)
+	TRUNCATE_TABLE  @enumInt(value: 21)
+	UPDATE          @enumInt(value: 22)
+	GRANT           @enumInt(value: 23)
+	REVOKE          @enumInt(value: 24)
+	DEALLOCATE      @enumInt(value: 25)
+	EXECUTE         @enumInt(value: 26)
+	PREPARE         @enumInt(value: 27)
+	USE             @enumInt(value: 28)
 }
 
 """
@@ -3978,7 +4125,7 @@ type Rule implements Node {
 	"""
 	规则的严重级别，分别是警告和错误，警告可以被忽略进而审核执行，错误则必须修正之后才可以被审核执行
 	"""
-	VldrGroup:    UInt16!   @range(begin: 1000, end: 9999) @matches(pattern: "^(\\d{4}$")
+	VldrGroup:    UInt16!   @range(begin: 1000, end: 9999) @matches(pattern: "^(\\d{4})$")
 
 	"""
 	规则当前的设定值，部分规则需要，比如允许的存储引擎
@@ -4136,7 +4283,7 @@ type Statement implements Node {
 	"""
 	语句的类型，这个有抽象语法树决定
 	"""
-	Type:         UInt8   @range(begin: 1, end: 255)
+	TypeDesc:     String!
 
 	"""
 	语句的审核状态
@@ -4238,6 +4385,42 @@ type Statistic implements Node {
 	UpdateAt: UInt
 }
 
+
+"""
+邮件模板
+"""
+type Template implements Node {
+	"""
+	邮件模板的UUID
+	"""
+	UUID:     ID!
+
+	"""
+	邮件主题
+	"""
+	Subject:  String!
+
+	"""
+	邮件正文
+	"""
+	Body:     String!
+
+	"""
+	主题说明
+	"""
+	Description:  String!
+
+	"""
+	记录创建时间
+	"""
+	CreateAt: UInt!
+
+	"""
+	记录最近一次修改时间
+	"""
+	UpdateAt: UInt
+}
+
 """
 变更工单
 """
@@ -4281,6 +4464,11 @@ type Ticket implements Node {
 	变更工单的审核人
 	"""
 	Reviewer: User!
+
+	"""
+	执行预约信息
+	"""
+	Cron:     Cron
 
 	"""
 	变更工单的关联分解的语句
@@ -4755,6 +4943,11 @@ type QueryRoot {
 	): QueryConnection @auth(requires: [DEVELOPER, ADMIN])
 
 	"""
+	查看所有的邮件模板
+	"""
+	templates: [Template] @auth(requires: [ADMIN])
+
+	"""
 	根据工单编码查看工单记录
 	"""
 	ticket (
@@ -4999,6 +5192,26 @@ type QueryRoot {
 		"""
 		database: String!
 	): String! @auth(requires: [DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	测试数据库群集的连接性
+	"""
+	testCluster(
+		"""
+		连接信息
+		"""
+		input: ValidateConnectionInput
+	): Boolean! @auth(requires: [ADMIN])
+
+	"""
+	测试正则表达式的有效性
+	"""
+	testRegexp(
+		"""
+		正则表达式
+		"""
+		input: ValidatePatternInput
+	): Boolean! @auth(requires: [ADMIN])
 }
 
 """
@@ -5354,6 +5567,31 @@ input PatchClusterStatusInput {
 	群集状态(禁用|正常)
 	"""
 	Status:       UInt8! @matches(pattern: "^(1|2|3)$")
+}
+
+"""
+修改邮件模板
+"""
+input UpdateTemplateInput {
+	"""
+	模板名称
+	"""
+	TemplateUUID: ID!
+
+	"""
+	邮件主题
+	"""
+	Subject:      String!
+
+	"""
+	邮件正文
+	"""
+	Body:         String!
+
+	"""
+	主题说明
+	"""
+	Description:  String!
 }
 
 """
@@ -5806,6 +6044,16 @@ type MutationRoot {
 		"""
 		input: PatchClusterStatusInput!
 	): Boolean! @auth(requires:[ADMIN])
+
+	"""
+	修改邮件模板
+	"""
+	updateTemplate(
+		"""
+		邮件模板信息
+		"""
+		input: UpdateTemplateInput
+	): Template! @auth(requires:[ADMIN])
 
 	"""
 	开发创建新工单  
@@ -6631,6 +6879,20 @@ func (ec *executionContext) field_MutationRoot_updateProfile_args(ctx context.Co
 	return args, nil
 }
 
+func (ec *executionContext) field_MutationRoot_updateTemplate_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *models.UpdateTemplateInput
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalOUpdateTemplateInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐUpdateTemplateInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_MutationRoot_updateTicket_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -7062,6 +7324,34 @@ func (ec *executionContext) field_QueryRoot_statistics_args(ctx context.Context,
 		}
 	}
 	args["Groups"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_QueryRoot_testCluster_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *models.ValidateConnectionInput
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalOValidateConnectionInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐValidateConnectionInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_QueryRoot_testRegexp_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *models.ValidatePatternInput
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalOValidatePatternInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐValidatePatternInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -10707,6 +10997,40 @@ func (ec *executionContext) _MutationRoot_patchClusterStatus(ctx context.Context
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _MutationRoot_updateTemplate(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "MutationRoot",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_MutationRoot_updateTemplate_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.MutationRoot().UpdateTemplate(rctx, args["input"].(*models.UpdateTemplateInput))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.Template)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNTemplate2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐTemplate(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _MutationRoot_createTicket(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -12428,6 +12752,30 @@ func (ec *executionContext) _QueryRoot_querySearch(ctx context.Context, field gr
 	return ec.marshalOQueryConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐQueryConnection(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _QueryRoot_templates(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "QueryRoot",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.QueryRoot().Templates(rctx)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*models.Template)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOTemplate2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐTemplate(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _QueryRoot_ticket(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -12983,6 +13331,74 @@ func (ec *executionContext) _QueryRoot_metadata(ctx context.Context, field graph
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _QueryRoot_testCluster(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "QueryRoot",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_QueryRoot_testCluster_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.QueryRoot().TestCluster(rctx, args["input"].(*models.ValidateConnectionInput))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _QueryRoot_testRegexp(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "QueryRoot",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_QueryRoot_testRegexp_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.QueryRoot().TestRegexp(rctx, args["input"].(*models.ValidatePatternInput))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _QueryRoot___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
@@ -13605,28 +14021,31 @@ func (ec *executionContext) _Statement_Content(ctx context.Context, field graphq
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Statement_Type(ctx context.Context, field graphql.CollectedField, obj *models.Statement) graphql.Marshaler {
+func (ec *executionContext) _Statement_TypeDesc(ctx context.Context, field graphql.CollectedField, obj *models.Statement) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object:   "Statement",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Type, nil
+		return ec.resolvers.Statement().TypeDesc(rctx, obj)
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(uint8)
+	res := resTmp.(string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOUInt82uint8(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Statement_Status(ctx context.Context, field graphql.CollectedField, obj *models.Statement) graphql.Marshaler {
@@ -14122,6 +14541,165 @@ func (ec *executionContext) _SubscriptionRoot_ticketStatusChanged(ctx context.Co
 	}
 }
 
+func (ec *executionContext) _Template_UUID(ctx context.Context, field graphql.CollectedField, obj *models.Template) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Template",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UUID, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Template_Subject(ctx context.Context, field graphql.CollectedField, obj *models.Template) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Template",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Subject, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Template_Body(ctx context.Context, field graphql.CollectedField, obj *models.Template) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Template",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Body, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Template_Description(ctx context.Context, field graphql.CollectedField, obj *models.Template) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Template",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Template_CreateAt(ctx context.Context, field graphql.CollectedField, obj *models.Template) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Template",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreateAt, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(uint)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNUInt2uint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Template_UpdateAt(ctx context.Context, field graphql.CollectedField, obj *models.Template) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Template",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdateAt, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(uint)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOUInt2uint(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Ticket_UUID(ctx context.Context, field graphql.CollectedField, obj *models.Ticket) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -14336,6 +14914,30 @@ func (ec *executionContext) _Ticket_Reviewer(ctx context.Context, field graphql.
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Ticket_Cron(ctx context.Context, field graphql.CollectedField, obj *models.Ticket) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Ticket",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Ticket().Cron(rctx, obj)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*models.Cron)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOCron2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐCron(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Ticket_Statements(ctx context.Context, field graphql.CollectedField, obj *models.Ticket) graphql.Marshaler {
@@ -17108,6 +17710,42 @@ func (ec *executionContext) unmarshalInputUpdateProfileInput(ctx context.Context
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateTemplateInput(ctx context.Context, v interface{}) (models.UpdateTemplateInput, error) {
+	var it models.UpdateTemplateInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "TemplateUUID":
+			var err error
+			it.TemplateUUID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Subject":
+			var err error
+			it.Subject, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Body":
+			var err error
+			it.Body, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Description":
+			var err error
+			it.Description, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateTicketInput(ctx context.Context, v interface{}) (models.UpdateTicketInput, error) {
 	var it models.UpdateTicketInput
 	var asMap = v.(map[string]interface{})
@@ -17533,6 +18171,10 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 		return ec._Statistic(ctx, sel, &obj)
 	case *models.Statistic:
 		return ec._Statistic(ctx, sel, obj)
+	case models.Template:
+		return ec._Template(ctx, sel, &obj)
+	case *models.Template:
+		return ec._Template(ctx, sel, obj)
 	case models.Ticket:
 		return ec._Ticket(ctx, sel, &obj)
 	case *models.Ticket:
@@ -18583,6 +19225,11 @@ func (ec *executionContext) _MutationRoot(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "updateTemplate":
+			out.Values[i] = ec._MutationRoot_updateTemplate(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "createTicket":
 			out.Values[i] = ec._MutationRoot_createTicket(ctx, field)
 		case "updateTicket":
@@ -19090,6 +19737,17 @@ func (ec *executionContext) _QueryRoot(ctx context.Context, sel ast.SelectionSet
 				res = ec._QueryRoot_querySearch(ctx, field)
 				return res
 			})
+		case "templates":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._QueryRoot_templates(ctx, field)
+				return res
+			})
 		case "ticket":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -19302,6 +19960,34 @@ func (ec *executionContext) _QueryRoot(ctx context.Context, sel ast.SelectionSet
 				}
 				return res
 			})
+		case "testCluster":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._QueryRoot_testCluster(ctx, field)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
+		case "testRegexp":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._QueryRoot_testRegexp(ctx, field)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._QueryRoot___type(ctx, field)
 		case "__schema":
@@ -19477,8 +20163,20 @@ func (ec *executionContext) _Statement(ctx context.Context, sel ast.SelectionSet
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "Type":
-			out.Values[i] = ec._Statement_Type(ctx, field, obj)
+		case "TypeDesc":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Statement_TypeDesc(ctx, field, obj)
+				if res == graphql.Null {
+					invalid = true
+				}
+				return res
+			})
 		case "Status":
 			out.Values[i] = ec._Statement_Status(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -19654,6 +20352,55 @@ func (ec *executionContext) _SubscriptionRoot(ctx context.Context, sel ast.Selec
 	}
 }
 
+var templateImplementors = []string{"Template", "Node"}
+
+func (ec *executionContext) _Template(ctx context.Context, sel ast.SelectionSet, obj *models.Template) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, templateImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	invalid := false
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Template")
+		case "UUID":
+			out.Values[i] = ec._Template_UUID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "Subject":
+			out.Values[i] = ec._Template_Subject(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "Body":
+			out.Values[i] = ec._Template_Body(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "Description":
+			out.Values[i] = ec._Template_Description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "CreateAt":
+			out.Values[i] = ec._Template_CreateAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "UpdateAt":
+			out.Values[i] = ec._Template_UpdateAt(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
 var ticketImplementors = []string{"Ticket", "Searchable", "Node"}
 
 func (ec *executionContext) _Ticket(ctx context.Context, sel ast.SelectionSet, obj *models.Ticket) graphql.Marshaler {
@@ -19730,6 +20477,17 @@ func (ec *executionContext) _Ticket(ctx context.Context, sel ast.SelectionSet, o
 				if res == graphql.Null {
 					invalid = true
 				}
+				return res
+			})
+		case "Cron":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Ticket_Cron(ctx, field, obj)
 				return res
 			})
 		case "Statements":
@@ -20625,6 +21383,20 @@ func (ec *executionContext) marshalNString2ᚕstring(ctx context.Context, sel as
 	}
 
 	return ret
+}
+
+func (ec *executionContext) marshalNTemplate2githubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐTemplate(ctx context.Context, sel ast.SelectionSet, v models.Template) graphql.Marshaler {
+	return ec._Template(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNTemplate2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐTemplate(ctx context.Context, sel ast.SelectionSet, v *models.Template) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Template(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNTicket2githubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐTicket(ctx context.Context, sel ast.SelectionSet, v models.Ticket) graphql.Marshaler {
@@ -21820,6 +22592,57 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return ec.marshalOString2string(ctx, sel, *v)
 }
 
+func (ec *executionContext) marshalOTemplate2githubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐTemplate(ctx context.Context, sel ast.SelectionSet, v models.Template) graphql.Marshaler {
+	return ec._Template(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOTemplate2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐTemplate(ctx context.Context, sel ast.SelectionSet, v []*models.Template) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOTemplate2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐTemplate(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOTemplate2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐTemplate(ctx context.Context, sel ast.SelectionSet, v *models.Template) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Template(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalOTicket2githubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐTicket(ctx context.Context, sel ast.SelectionSet, v models.Ticket) graphql.Marshaler {
 	return ec._Ticket(ctx, sel, &v)
 }
@@ -21904,6 +22727,18 @@ func (ec *executionContext) unmarshalOUInt82uint8(ctx context.Context, v interfa
 
 func (ec *executionContext) marshalOUInt82uint8(ctx context.Context, sel ast.SelectionSet, v uint8) graphql.Marshaler {
 	return MarshalUInt8(v)
+}
+
+func (ec *executionContext) unmarshalOUpdateTemplateInput2githubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐUpdateTemplateInput(ctx context.Context, v interface{}) (models.UpdateTemplateInput, error) {
+	return ec.unmarshalInputUpdateTemplateInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalOUpdateTemplateInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐUpdateTemplateInput(ctx context.Context, v interface{}) (*models.UpdateTemplateInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOUpdateTemplateInput2githubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐUpdateTemplateInput(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) marshalOUser2githubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v models.User) graphql.Marshaler {
@@ -22006,6 +22841,30 @@ func (ec *executionContext) marshalOUserEdge2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋ
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) unmarshalOValidateConnectionInput2githubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐValidateConnectionInput(ctx context.Context, v interface{}) (models.ValidateConnectionInput, error) {
+	return ec.unmarshalInputValidateConnectionInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalOValidateConnectionInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐValidateConnectionInput(ctx context.Context, v interface{}) (*models.ValidateConnectionInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOValidateConnectionInput2githubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐValidateConnectionInput(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) unmarshalOValidatePatternInput2githubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐValidatePatternInput(ctx context.Context, v interface{}) (models.ValidatePatternInput, error) {
+	return ec.unmarshalInputValidatePatternInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalOValidatePatternInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐValidatePatternInput(ctx context.Context, v interface{}) (*models.ValidatePatternInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOValidatePatternInput2githubᚗcomᚋmia0x75ᚋhaloᚋmodelsᚐValidatePatternInput(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValue(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

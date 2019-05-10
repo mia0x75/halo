@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 	"time"
 
@@ -174,27 +175,280 @@ L:
 }
 
 // Metadata 获取群集上某一个具体的数据库的元数据信息
-func (m *Cluster) Metadata(name string, passwd func(c *Cluster) []byte) (tables []*core.Table, err error) {
+func (m *Cluster) Metadata(database string, passwd func(c *Cluster) []byte) (tables map[string][]*core.Table, err error) {
 L:
 	for {
 		var engine *xorm.Engine
 
-		engine, err = m.Connect(name, passwd)
+		engine, err = m.Connect("information_schema", passwd)
 		if err != nil {
 			break L
 		}
 		defer engine.Close()
 
-		if _, err = m.Stat(name, passwd); err != nil {
-			break L
+		args := []interface{}{}
+		sql := ""
+		if database == "*" {
+			sql = "SELECT `TABLE_SCHEMA`, `TABLE_NAME`, `ENGINE`, `TABLE_ROWS`, " +
+				"`AUTO_INCREMENT`, `TABLE_COMMENT`, `TABLE_COLLATION` " +
+				"FROM `INFORMATION_SCHEMA`.`TABLES` " +
+				"WHERE 1 = ? AND `ENGINE` IN ('MyISAM', 'InnoDB', 'TokuDB', 'RocksDB') " +
+				"ORDER BY `TABLE_SCHEMA`;"
+			args = []interface{}{1}
+		} else {
+			sql = "SELECT `TABLE_SCHEMA`, `TABLE_NAME`, `ENGINE`, `TABLE_ROWS`, " +
+				"`AUTO_INCREMENT`, `TABLE_COMMENT`, `TABLE_COLLATION` " +
+				"FROM `INFORMATION_SCHEMA`.`TABLES` " +
+				"WHERE `TABLE_SCHEMA` = ? AND `ENGINE` IN ('MyISAM', 'InnoDB', 'TokuDB', 'RocksDB') " +
+				"ORDER BY `TABLE_SCHEMA`;"
+			args = []interface{}{database}
 		}
-
-		tables, err = engine.DBMetas()
+		rows, err := engine.DB().Query(sql, args...)
 		if err != nil {
-			break L
+			return nil, err
+		}
+		defer rows.Close()
+
+		tables = make(map[string][]*core.Table, 0)
+		for rows.Next() {
+			table := core.NewEmptyTable()
+			var db, name, engine, tableRows, comment, charset, collate string
+			var autoIncr *string
+			err = rows.Scan(&db, &name, &engine, &tableRows, &autoIncr, &comment, &collate)
+			if err != nil {
+				return nil, err
+			}
+
+			charset = strings.Split(collate, "_")[0]
+			table.Name = name
+			table.Comment = comment
+			table.StoreEngine = engine
+			table.Charset = charset
+			table.Collate = collate
+			if _, ok := tables[db]; ok {
+				tables[db] = append(tables[db], table)
+			} else {
+				tables[db] = []*core.Table{table}
+			}
 		}
 
+		allColumns, _ := m.columns(engine, database)
+		allIndexes, _ := m.indexes(engine, database)
+		for db, tbls := range tables {
+			for _, tbl := range tbls {
+				k := fmt.Sprintf("%s.%s", db, tbl.Name)
+				cols := allColumns[k]
+				inds := allIndexes[k]
+				for _, col := range cols {
+					tbl.AddColumn(col)
+					tbl.Indexes = inds
+				}
+				for _, idx := range inds {
+					for _, name := range idx.Cols {
+						if col := tbl.GetColumn(name); col != nil {
+							col.Indexes[idx.Name] = idx.Type
+						} else {
+							return nil, fmt.Errorf("Unknown col %s in index %v of table %v, columns %v", name, idx.Name, tbl.Name, tbl.ColumnsSeq())
+						}
+					}
+				}
+			}
+		}
 		break
+	}
+
+	return
+}
+
+func (m *Cluster) columns(engine *xorm.Engine, database string) (cols map[string]map[string]*core.Column, err error) {
+	args := []interface{}{}
+	sql := ""
+	if database == "*" {
+		sql = "SELECT `TABLE_SCHEMA`, `TABLE_NAME`, `COLUMN_NAME`, `IS_NULLABLE`, " +
+			"`COLUMN_DEFAULT`, `COLUMN_TYPE`, `COLUMN_KEY`, `EXTRA`,`COLUMN_COMMENT` " +
+			"FROM `INFORMATION_SCHEMA`.`COLUMNS` " +
+			"WHERE 1 = ? AND `TABLE_SCHEMA` NOT IN ('mysql', 'sys', 'information_schema') " +
+			"ORDER BY `TABLE_SCHEMA`, `TABLE_NAME`;"
+		args = []interface{}{1}
+	} else {
+		sql = "SELECT `TABLE_SCHEMA`, `TABLE_NAME`, `COLUMN_NAME`, `IS_NULLABLE`, " +
+			"`COLUMN_DEFAULT`, `COLUMN_TYPE`, `COLUMN_KEY`, `EXTRA`,`COLUMN_COMMENT` " +
+			"FROM `INFORMATION_SCHEMA`.`COLUMNS` " +
+			"WHERE `TABLE_SCHEMA` = ? AND `TABLE_SCHEMA` NOT IN ('mysql', 'sys', 'information_schema') " +
+			"ORDER BY `TABLE_SCHEMA`, `TABLE_NAME`;"
+		args = []interface{}{database}
+	}
+
+	rows, err := engine.DB().Query(sql, args...)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	cols = make(map[string]map[string]*core.Column)
+	for rows.Next() {
+		col := new(core.Column)
+		col.Indexes = make(map[string]int)
+
+		var db, table, columnName, isNullable, colType, colKey, extra, comment string
+		var colDefault *string
+		err = rows.Scan(&db, &table, &columnName, &isNullable, &colDefault, &colType, &colKey, &extra, &comment)
+		if err != nil {
+			return nil, err
+		}
+		col.Name = strings.Trim(columnName, "` ")
+		col.Comment = comment
+		if "YES" == isNullable {
+			col.Nullable = true
+		}
+
+		if colDefault != nil {
+			col.Default = *colDefault
+			if col.Default == "" {
+				col.DefaultIsEmpty = true
+			}
+		}
+
+		cts := strings.Split(colType, "(")
+		colType = strings.ToUpper(cts[0])
+		var len1, len2 int
+		if len(cts) == 2 {
+			idx := strings.Index(cts[1], ")")
+			if colType == core.Enum && cts[1][0] == '\'' { //enum
+				options := strings.Split(cts[1][0:idx], ",")
+				col.EnumOptions = make(map[string]int)
+				for k, v := range options {
+					v = strings.TrimSpace(v)
+					v = strings.Trim(v, "'")
+					col.EnumOptions[v] = k
+				}
+			} else if colType == core.Set && cts[1][0] == '\'' {
+				options := strings.Split(cts[1][0:idx], ",")
+				col.SetOptions = make(map[string]int)
+				for k, v := range options {
+					v = strings.TrimSpace(v)
+					v = strings.Trim(v, "'")
+					col.SetOptions[v] = k
+				}
+			} else {
+				lens := strings.Split(cts[1][0:idx], ",")
+				len1, err = strconv.Atoi(strings.TrimSpace(lens[0]))
+				if err != nil {
+					return nil, err
+				}
+				if len(lens) == 2 {
+					len2, err = strconv.Atoi(lens[1])
+					if err != nil {
+						return nil, err
+					}
+				}
+			}
+		}
+		if colType == "FLOAT UNSIGNED" {
+			colType = "FLOAT"
+		}
+		if colType == "DOUBLE UNSIGNED" {
+			colType = "DOUBLE"
+		}
+		col.Length = len1
+		col.Length2 = len2
+		if _, ok := core.SqlTypes[colType]; ok {
+			col.SQLType = core.SQLType{Name: colType, DefaultLength: len1, DefaultLength2: len2}
+		} else {
+			return nil, fmt.Errorf("Unknown colType %v", colType)
+		}
+
+		if colKey == "PRI" {
+			col.IsPrimaryKey = true
+		}
+		if colKey == "UNI" {
+			//col.is
+		}
+
+		if extra == "auto_increment" {
+			col.IsAutoIncrement = true
+		}
+
+		if col.SQLType.IsText() || col.SQLType.IsTime() {
+			if col.Default != "" {
+				col.Default = "'" + col.Default + "'"
+			} else {
+				if col.DefaultIsEmpty {
+					col.Default = "''"
+				}
+			}
+		}
+		k := fmt.Sprintf("%s.%s", db, table)
+		if _, ok := cols[k]; ok {
+			cols[k][col.Name] = col
+		} else {
+			cols[k] = map[string]*core.Column{col.Name: col}
+		}
+	}
+
+	return
+}
+
+func (m *Cluster) indexes(engine *xorm.Engine, database string) (indexes map[string]map[string]*core.Index, err error) {
+	args := []interface{}{}
+	sql := ""
+	if database == "*" {
+		sql = "SELECT `TABLE_SCHEMA`, `TABLE_NAME`, `INDEX_NAME`, `NON_UNIQUE`, `COLUMN_NAME` " +
+			"FROM `INFORMATION_SCHEMA`.`STATISTICS` " +
+			"WHERE 1 = ? AND `TABLE_SCHEMA` NOT IN ('mysql', 'sys', 'information_schema') " +
+			"ORDER BY `TABLE_SCHEMA`, `TABLE_NAME`;"
+		args = []interface{}{1}
+	} else {
+		sql = "SELECT `TABLE_SCHEMA`, `TABLE_NAME`, `INDEX_NAME`, `NON_UNIQUE`, `COLUMN_NAME` " +
+			"FROM `INFORMATION_SCHEMA`.`STATISTICS` " +
+			"WHERE `TABLE_SCHEMA` = ? AND `TABLE_SCHEMA` NOT IN ('mysql', 'sys', 'information_schema') " +
+			"ORDER BY `TABLE_SCHEMA`, `TABLE_NAME`;"
+		args = []interface{}{database}
+	}
+
+	rows, err := engine.DB().Query(sql, args...)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	indexes = make(map[string]map[string]*core.Index, 0)
+	for rows.Next() {
+		var indexType int
+		var db, table, indexName, colName, nonUnique string
+		err = rows.Scan(&db, &table, &indexName, &nonUnique, &colName)
+		if err != nil {
+			return nil, err
+		}
+
+		if indexName == "PRIMARY" {
+			continue
+		}
+
+		if "YES" == nonUnique || nonUnique == "1" {
+			indexType = core.IndexType
+		} else {
+			indexType = core.UniqueType
+		}
+
+		colName = strings.Trim(colName, "` ")
+
+		var index *core.Index
+		var ok bool
+		if index, ok = indexes[fmt.Sprintf("%s.%s", db, table)][indexName]; !ok {
+			index = new(core.Index)
+			index.Type = indexType
+			index.Name = indexName
+			k := fmt.Sprintf("%s.%s", db, table)
+			if indexes[k] == nil {
+				indexes[k] = map[string]*core.Index{indexName: index}
+			} else {
+				indexes[k][indexName] = index
+			}
+		}
+		index.AddColumn(colName)
 	}
 
 	return

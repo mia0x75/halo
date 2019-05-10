@@ -2,7 +2,7 @@ module github.com/mia0x75/halo
 
 require (
 	cloud.google.com/go v0.34.0 // indirect
-	github.com/99designs/gqlgen v0.8.2
+	github.com/99designs/gqlgen v0.8.3
 	github.com/akhenakh/statgo v0.0.0-20171021021904-3ae2cda264c5
 	github.com/cznic/mathutil v0.0.0-20160613104831-78ad7f262603 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -18,7 +18,7 @@ require (
 	github.com/machinebox/graphql v0.2.2
 	github.com/matryer/is v1.2.0 // indirect
 	github.com/mia0x75/antlr v0.0.0-20190323140341-bf6915c3dd7b // indirect
-	github.com/mia0x75/parser v0.0.0-20190414125336-5dc3dc069005
+	github.com/mia0x75/parser v0.0.0-20190510005206-932a40f52f52
 	github.com/mia0x75/yql v0.0.0-20190325023231-8a8982f46522
 	github.com/pingcap/check v0.0.0-20171206051426-1c287c953996 // indirect
 	github.com/pingcap/errors v0.11.0 // indirect
@@ -34,6 +34,7 @@ require (
 
 replace (
 	cloud.google.com/go => github.com/googleapis/google-cloud-go v0.36.0
+	github.com/go-xorm/core => github.com/mia0x75/xorm-core v0.6.3
 
 	golang.org/x/build => github.com/golang/build v0.0.0-20190228010158-44b79b8774a7
 	golang.org/x/crypto => github.com/golang/crypto v0.0.0-20190227175134-215aa809caaf

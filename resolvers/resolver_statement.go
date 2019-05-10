@@ -30,3 +30,13 @@ func (r *statementResolver) Ticket(ctx context.Context, obj *models.Statement) (
 
 	return
 }
+
+// TypeDesc 语句类型
+func (r *statementResolver) TypeDesc(ctx context.Context, obj *models.Statement) (string, error) {
+	for k, v := range gqlapi.StatementTypeEnumMap {
+		if v == obj.Type {
+			return string(k), nil
+		}
+	}
+	return "OTHER", nil
+}

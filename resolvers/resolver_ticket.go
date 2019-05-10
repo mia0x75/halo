@@ -2,11 +2,13 @@ package resolvers
 
 import (
 	"context"
+	"database/sql"
 	"encoding/base64"
 	"fmt"
 	"math"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-xorm/core"
 	"github.com/mia0x75/parser"
@@ -16,6 +18,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/mia0x75/halo/caches"
+	"github.com/mia0x75/halo/crons"
 	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
@@ -171,6 +174,7 @@ L:
 			stat := models.Statement{
 				Sequence:   uint16(i),
 				Content:    sql,
+				Type:       StatementType2Uint8(node),
 				Status:     gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumWaitingForVld],
 				TicketID:   ticket.TicketID,
 				StmtNode:   node,
@@ -195,8 +199,9 @@ L:
 		go validation(statements, cluster, ticket)
 
 		events.Fire(events.EventTicketCreated, &events.TicketCreatedArgs{
-			User:   *user,
-			Ticket: *ticket,
+			User:    *user,
+			Ticket:  *ticket,
+			Cluster: *cluster,
 		})
 
 		// 退出for循环
@@ -379,6 +384,7 @@ L:
 			}
 			stat := models.Statement{
 				Sequence:   uint16(i),
+				Type:       StatementType2Uint8(node),
 				Content:    sql,
 				Status:     gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumWaitingForVld],
 				TicketID:   ticket.TicketID,
@@ -415,8 +421,9 @@ L:
 		go validation(statements, cluster, ticket)
 
 		events.Fire(events.EventTicketUpdated, &events.TicketUpdatedArgs{
-			User:   *user,
-			Ticket: *ticket,
+			User:    *user,
+			Ticket:  *ticket,
+			Cluster: *cluster,
 		})
 
 		// 退出for循环
@@ -436,7 +443,7 @@ func (r *mutationRootResolver) RemoveTicket(ctx context.Context, id string) (ok 
 		rc := gqlapi.ReturnCodeOK
 		found := false
 		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
-		ticket := models.Ticket{}
+		ticket := &models.Ticket{}
 		user := credential.User
 		ticket.UUID = id
 
@@ -450,7 +457,7 @@ func (r *mutationRootResolver) RemoveTicket(ctx context.Context, id string) (ok 
 		defer session.Close()
 		session.Begin()
 		//获取数据库原有的ticket信息
-		if found, err = session.Where("uuid = ?", ticket.UUID).Get(&ticket); err != nil {
+		if found, err = session.Where("uuid = ?", ticket.UUID).Get(ticket); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break
@@ -485,7 +492,7 @@ func (r *mutationRootResolver) RemoveTicket(ctx context.Context, id string) (ok 
 		}
 
 		// 删除工单
-		if _, err = session.ID(ticket.TicketID).Delete(&ticket); err != nil {
+		if _, err = session.ID(ticket.TicketID).Delete(ticket); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			session.Rollback()
@@ -499,9 +506,16 @@ func (r *mutationRootResolver) RemoveTicket(ctx context.Context, id string) (ok 
 			break
 		}
 
+		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+			if elem.ClusterID == ticket.ClusterID {
+				return true
+			}
+			return false
+		})
 		events.Fire(events.EventTicketRemoved, &events.TicketRemovedArgs{
-			User:   *user,
-			Ticket: ticket,
+			User:    *user,
+			Ticket:  *ticket,
+			Cluster: *cluster,
 		})
 
 		// 退出for循环
@@ -607,10 +621,16 @@ func (r *mutationRootResolver) PatchTicketStatus(ctx context.Context, input mode
 			break
 		}
 
+		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+			if elem.ClusterID == ticket.ClusterID {
+				return true
+			}
+			return false
+		})
 		events.Fire(events.EventTicketStatusPatched, &events.TicketStatusPatchedArgs{
-			User:   *user,
-			Ticket: *ticket,
-			Status: input.Status,
+			User:    *user,
+			Ticket:  *ticket,
+			Cluster: *cluster,
 		})
 
 		// 退出for循环
@@ -625,7 +645,7 @@ func (r *mutationRootResolver) PatchTicketStatus(ctx context.Context, input mode
 func (r *mutationRootResolver) ExecuteTicket(ctx context.Context, id string) (ok bool, err error) {
 	input := models.ScheduleTicketInput{
 		TicketUUID: id,
-		Schedule:   "NOW", // 立刻执行
+		Schedule:   time.Now().UTC().Format("2006-01-02 15:04:05"),
 	}
 
 	if _, err = r.ScheduleTicket(ctx, input); err == nil {
@@ -678,6 +698,12 @@ func (r *mutationRootResolver) ScheduleTicket(ctx context.Context, input models.
 			break
 		}
 
+		// 工单当前状态是LGTM才允许执行
+		if ticket.Status != gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumLgtm] {
+			err = fmt.Errorf("错误代码: %s, 错误信息: xxxx。", rc)
+			break
+		}
+
 		// 是否需要判断群集的状态
 		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
 			if elem.ClusterID == ticket.ClusterID {
@@ -697,9 +723,35 @@ func (r *mutationRootResolver) ScheduleTicket(ctx context.Context, input models.
 			break
 		}
 
+		// 启动一个计划
+		s := crons.NewScheduler()
+		local, _ := time.LoadLocation("Local")
+		when, _ := time.ParseInLocation("2006-01-02 15:04:05", input.Schedule, local)
+		cronUUID, _ := s.RunAt(when, ticket.Subject, "execute", "-T", ticket.UUID)
+
+		cron = &models.Cron{}
+		if _, err = g.Engine.Where("`uuid` = ?", cronUUID).Get(cron); err != nil {
+			cron = nil
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+			break
+		}
+
+		ticket.CronID = sql.NullInt64{
+			Int64: int64(cron.CronID),
+			Valid: true,
+		}
+		if _, err = g.Engine.ID(ticket.TicketID).Update(ticket); err != nil {
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+			break
+		}
+
 		events.Fire(events.EventTicketScheduled, &events.TicketScheduledArgs{
-			User:   *user,
-			Ticket: *ticket,
+			User:    *user,
+			Ticket:  *ticket,
+			Cluster: *cluster,
+			Cron:    *cron,
 		})
 
 		break
@@ -880,6 +932,22 @@ func (r *ticketResolver) Reviewer(ctx context.Context, obj *models.Ticket) (user
 	return
 }
 
+// Cron 执行预约信息
+func (r *ticketResolver) Cron(ctx context.Context, obj *models.Ticket) (cron *models.Cron, err error) {
+	rc := gqlapi.ReturnCodeOK
+	if !obj.CronID.Valid {
+		return
+	}
+	cron = &models.Cron{}
+	if _, err = g.Engine.ID(obj.CronID.Int64).Get(cron); err != nil {
+		cron = nil
+		rc = gqlapi.ReturnCodeUnknowError
+		err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+	}
+
+	return
+}
+
 // Statements 工单的分解语句，TODO: 分页未完成
 func (r *ticketResolver) Statements(ctx context.Context, obj *models.Ticket, after *string, before *string, first *int, last *int) (*gqlapi.StatementConnection, error) {
 	rc := gqlapi.ReturnCodeOK
@@ -1025,4 +1093,67 @@ func validation(stmts []*models.Statement, cluster *models.Cluster, ticket *mode
 	if err := session.Commit(); err != nil {
 		log.Errorf("[E] An unexpected error occured during data updating, err: %s", err.Error())
 	}
+}
+
+// StatementType2Uint8 generates a label for a statement.
+func StatementType2Uint8(node ast.StmtNode) uint8 {
+	switch node.(type) {
+	case *ast.AlterTableStmt:
+		return 1
+	case *ast.AnalyzeTableStmt:
+		return 2
+	case *ast.BeginStmt:
+		return 3
+	case *ast.CommitStmt:
+		return 4
+	case *ast.CreateDatabaseStmt:
+		return 5
+	case *ast.CreateIndexStmt:
+		return 6
+	case *ast.CreateTableStmt:
+		return 7
+	case *ast.CreateViewStmt:
+		return 8
+	case *ast.CreateUserStmt:
+		return 9
+	case *ast.DeleteStmt:
+		return 10
+	case *ast.DropDatabaseStmt:
+		return 11
+	case *ast.DropIndexStmt:
+		return 12
+	case *ast.DropTableStmt:
+		return 13
+	case *ast.ExplainStmt:
+		return 14
+	case *ast.InsertStmt:
+		return 15
+	case *ast.LoadDataStmt:
+		return 16
+	case *ast.RollbackStmt:
+		return 17
+	case *ast.SelectStmt:
+		return 18
+	case *ast.SetStmt, *ast.SetPwdStmt:
+		return 19
+	case *ast.ShowStmt:
+		return 20
+	case *ast.TruncateTableStmt:
+		return 21
+	case *ast.UpdateStmt:
+		return 22
+	case *ast.GrantStmt:
+		return 23
+	case *ast.RevokeStmt:
+		return 24
+	case *ast.DeallocateStmt:
+		return 25
+	case *ast.ExecuteStmt:
+		return 26
+	case *ast.PrepareStmt:
+		return 27
+	case *ast.UseStmt:
+		return 28
+	}
+	return 0
 }
