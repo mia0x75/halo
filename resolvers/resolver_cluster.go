@@ -48,7 +48,7 @@ func (r *queryRootResolver) TestCluster(ctx context.Context, input *models.Valid
 }
 
 // Databases 获取某一个群集的所有用户数据库
-func (r *queryRootResolver) Databases(ctx context.Context, clusterUUID string) (L []gqlapi.Database, err error) {
+func (r *queryRootResolver) Databases(ctx context.Context, clusterUUID string) (L []*gqlapi.Database, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -97,7 +97,11 @@ L:
 		}
 
 		for _, database := range databases {
-			L = append(L, gqlapi.Database(database))
+			L = append(L, &gqlapi.Database{
+				Name:    database.Name,
+				Charset: database.Charset,
+				Collate: database.Collate,
+			})
 		}
 
 		break
@@ -136,9 +140,9 @@ func (r *queryRootResolver) Clusters(ctx context.Context, after *string, before 
 	}
 
 	clusters := caches.ClustersMap.All()
-	edges := []gqlapi.ClusterEdge{}
+	edges := []*gqlapi.ClusterEdge{}
 	for _, cluster := range clusters {
-		edges = append(edges, gqlapi.ClusterEdge{
+		edges = append(edges, &gqlapi.ClusterEdge{
 			Node:   cluster,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", cluster.ClusterID)),
 		})
@@ -149,7 +153,7 @@ func (r *queryRootResolver) Clusters(ctx context.Context, after *string, before 
 	// 获取pageInfo
 	startCursor := EncodeCursor(fmt.Sprintf("%d", clusters[0].ClusterID))
 	endCursor := EncodeCursor(fmt.Sprintf("%d", clusters[len(clusters)-1].ClusterID))
-	pageInfo := gqlapi.PageInfo{
+	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: false,
 		HasNextPage:     false,
 		StartCursor:     startCursor,
@@ -198,14 +202,14 @@ L:
 			break L
 		}
 		// 获取edges
-		edges := []gqlapi.ClusterEdge{}
+		edges := []*gqlapi.ClusterEdge{}
 		for _, cluster := range clusters {
-			edges = append(edges, gqlapi.ClusterEdge{
+			edges = append(edges, &gqlapi.ClusterEdge{
 				Node:   cluster,
 				Cursor: EncodeCursor(strconv.Itoa(0)),
 			})
 		}
-		pageInfo := gqlapi.PageInfo{
+		pageInfo := &gqlapi.PageInfo{
 			StartCursor:     edges[0].Cursor,
 			EndCursor:       edges[count-1].Cursor,
 			HasPreviousPage: false,

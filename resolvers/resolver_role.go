@@ -72,9 +72,9 @@ func (r *roleResolver) Users(ctx context.Context, obj *models.Role, after *strin
 		return &gqlapi.UserConnection{}, nil
 	}
 
-	userEdges := []gqlapi.UserEdge{}
+	userEdges := []*gqlapi.UserEdge{}
 	for _, user := range users {
-		userEdges = append(userEdges, gqlapi.UserEdge{
+		userEdges = append(userEdges, &gqlapi.UserEdge{
 			Node:   user,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", user.UserID)),
 		})
@@ -83,7 +83,7 @@ func (r *roleResolver) Users(ctx context.Context, obj *models.Role, after *strin
 		return &gqlapi.UserConnection{}, nil
 	}
 	// 获取pageInfo
-	pageInfo := gqlapi.PageInfo{
+	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: false,
 		HasNextPage:     false,
 		StartCursor:     "",

@@ -2,7 +2,7 @@ module github.com/mia0x75/halo
 
 require (
 	cloud.google.com/go v0.34.0 // indirect
-	github.com/99designs/gqlgen v0.8.3
+	github.com/99designs/gqlgen v0.9.0
 	github.com/akhenakh/statgo v0.0.0-20171021021904-3ae2cda264c5
 	github.com/cznic/mathutil v0.0.0-20160613104831-78ad7f262603 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible

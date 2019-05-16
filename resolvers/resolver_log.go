@@ -74,14 +74,14 @@ L:
 			hasPreviousPage = false
 		}
 		// 获取edges
-		edges := []gqlapi.LogEdge{}
+		edges := []*gqlapi.LogEdge{}
 		logs := []*models.Log{}
 		if err = g.Engine.Desc("log_id").Where("log_id < ?", from).Limit(*first).Find(&logs); err != nil {
 			return nil, err
 		}
 
 		for _, log := range logs {
-			edges = append(edges, gqlapi.LogEdge{
+			edges = append(edges, &gqlapi.LogEdge{
 				Node:   log,
 				Cursor: EncodeCursor(fmt.Sprintf("%d", log.LogID)),
 			})
@@ -97,7 +97,7 @@ L:
 		// 获取pageInfo
 		startCursor := EncodeCursor(fmt.Sprintf("%d", logs[0].LogID))
 		endCursor := EncodeCursor(fmt.Sprintf("%d", logs[len(logs)-1].LogID))
-		pageInfo := gqlapi.PageInfo{
+		pageInfo := &gqlapi.PageInfo{
 			HasPreviousPage: hasPreviousPage,
 			HasNextPage:     hasNextPage,
 			StartCursor:     startCursor,

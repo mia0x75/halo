@@ -79,7 +79,7 @@ func (r *queryRootResolver) Users(ctx context.Context, after *string, before *st
 		hasPreviousPage = false
 	}
 	// 获取edges
-	edges := []gqlapi.UserEdge{}
+	edges := []*gqlapi.UserEdge{}
 
 	// TODO: 一次从数据库查出足够的数据
 	// TODO: 对于分页中下一页的处理：
@@ -93,7 +93,7 @@ func (r *queryRootResolver) Users(ctx context.Context, after *string, before *st
 	}
 
 	for _, user := range users {
-		edges = append(edges, gqlapi.UserEdge{
+		edges = append(edges, &gqlapi.UserEdge{
 			Node:   user,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", user.UserID)),
 		})
@@ -110,7 +110,7 @@ func (r *queryRootResolver) Users(ctx context.Context, after *string, before *st
 	// 获取pageInfo
 	startCursor := EncodeCursor(fmt.Sprintf("%d", users[0].UserID))
 	endCursor := EncodeCursor(fmt.Sprintf("%d", users[len(users)-1].UserID))
-	pageInfo := gqlapi.PageInfo{
+	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: hasPreviousPage,
 		HasNextPage:     hasNextPage,
 		StartCursor:     startCursor,
@@ -160,14 +160,14 @@ L:
 			break L
 		}
 		// 获取edges
-		edges := []gqlapi.UserEdge{}
+		edges := []*gqlapi.UserEdge{}
 		for _, user := range users {
-			edges = append(edges, gqlapi.UserEdge{
+			edges = append(edges, &gqlapi.UserEdge{
 				Node:   user,
 				Cursor: EncodeCursor(strconv.Itoa(0)),
 			})
 		}
-		pageInfo := gqlapi.PageInfo{
+		pageInfo := &gqlapi.PageInfo{
 			StartCursor:     edges[0].Cursor,
 			EndCursor:       edges[count-1].Cursor,
 			HasPreviousPage: false,
@@ -484,7 +484,7 @@ L:
 		}
 
 		payload = &gqlapi.LoginPayload{
-			Me:    *user,
+			Me:    user,
 			Token: token,
 		}
 
@@ -1466,9 +1466,9 @@ func (r *userResolver) Clusters(ctx context.Context, obj *models.User, after *st
 		}
 		return false
 	})
-	clusterEdges := []gqlapi.ClusterEdge{}
+	clusterEdges := []*gqlapi.ClusterEdge{}
 	for _, cluster := range clusters {
-		clusterEdges = append(clusterEdges, gqlapi.ClusterEdge{
+		clusterEdges = append(clusterEdges, &gqlapi.ClusterEdge{
 			Node:   cluster,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", cluster.ClusterID)),
 		})
@@ -1477,7 +1477,7 @@ func (r *userResolver) Clusters(ctx context.Context, obj *models.User, after *st
 		return &gqlapi.ClusterConnection{}, nil
 	}
 	// 获取pageInfo
-	pageInfo := gqlapi.PageInfo{
+	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: false,
 		HasNextPage:     false,
 		StartCursor:     "",
@@ -1508,9 +1508,9 @@ func (r *userResolver) Tickets(ctx context.Context, obj *models.User, after *str
 	if err := g.Engine.Where("user_id = ?", obj.UserID).Find(tickets); err != nil {
 		return &gqlapi.TicketConnection{}, err
 	}
-	edges := []gqlapi.TicketEdge{}
+	edges := []*gqlapi.TicketEdge{}
 	for _, ticket := range tickets {
-		edges = append(edges, gqlapi.TicketEdge{
+		edges = append(edges, &gqlapi.TicketEdge{
 			Node:   ticket,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", ticket.TicketID)),
 		})
@@ -1519,7 +1519,7 @@ func (r *userResolver) Tickets(ctx context.Context, obj *models.User, after *str
 		return &gqlapi.TicketConnection{}, nil
 	}
 	// 获取pageInfo
-	pageInfo := gqlapi.PageInfo{
+	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: false,
 		HasNextPage:     false,
 		StartCursor:     "",
@@ -1548,9 +1548,9 @@ func (r *userResolver) Queries(ctx context.Context, obj *models.User, after *str
 
 	queries := []*models.Query{}
 	g.Engine.Where("user_id = ?", obj.UserID).Find(queries)
-	edges := []gqlapi.QueryEdge{}
+	edges := []*gqlapi.QueryEdge{}
 	for _, query := range queries {
-		edges = append(edges, gqlapi.QueryEdge{
+		edges = append(edges, &gqlapi.QueryEdge{
 			Node:   query,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", query.QueryID)),
 		})
@@ -1559,7 +1559,7 @@ func (r *userResolver) Queries(ctx context.Context, obj *models.User, after *str
 		return &gqlapi.QueryConnection{}, nil
 	}
 	// 获取pageInfo
-	pageInfo := gqlapi.PageInfo{
+	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: false,
 		HasNextPage:     false,
 		StartCursor:     "",

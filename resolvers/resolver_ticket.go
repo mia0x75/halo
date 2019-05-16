@@ -823,7 +823,7 @@ func (r *queryRootResolver) Tickets(ctx context.Context, after *string, before *
 		hasPreviousPage = false
 	}
 	// 获取edges
-	edges := []gqlapi.TicketEdge{}
+	edges := []*gqlapi.TicketEdge{}
 	tickets := []*models.Ticket{}
 
 	var err error
@@ -834,7 +834,7 @@ func (r *queryRootResolver) Tickets(ctx context.Context, after *string, before *
 	}
 
 	for _, ticket := range tickets {
-		edges = append(edges, gqlapi.TicketEdge{
+		edges = append(edges, &gqlapi.TicketEdge{
 			Node:   ticket,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", ticket.TicketID)),
 		})
@@ -850,7 +850,7 @@ func (r *queryRootResolver) Tickets(ctx context.Context, after *string, before *
 	// 获取pageInfo
 	startCursor := EncodeCursor(fmt.Sprintf("%d", tickets[0].TicketID))
 	endCursor := EncodeCursor(fmt.Sprintf("%d", tickets[len(tickets)-1].TicketID))
-	pageInfo := gqlapi.PageInfo{
+	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: hasPreviousPage,
 		HasNextPage:     hasNextPage,
 		StartCursor:     startCursor,
@@ -965,9 +965,9 @@ func (r *ticketResolver) Statements(ctx context.Context, obj *models.Ticket, aft
 	if err := g.Engine.Where("ticket_id = ?", obj.TicketID).Find(&stmts); err != nil {
 		return nil, err
 	}
-	edges := []gqlapi.StatementEdge{}
+	edges := []*gqlapi.StatementEdge{}
 	for _, stmt := range stmts {
-		edges = append(edges, gqlapi.StatementEdge{
+		edges = append(edges, &gqlapi.StatementEdge{
 			Node:   stmt,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", stmt.Sequence)),
 		})
@@ -978,7 +978,7 @@ func (r *ticketResolver) Statements(ctx context.Context, obj *models.Ticket, aft
 	// 获取pageInfo
 	startCursor := EncodeCursor(fmt.Sprintf("%d", stmts[0].Sequence))
 	endCursor := EncodeCursor(fmt.Sprintf("%d", stmts[len(stmts)-1].Sequence))
-	pageInfo := gqlapi.PageInfo{
+	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: false,
 		HasNextPage:     false,
 		StartCursor:     startCursor,
@@ -1007,9 +1007,9 @@ func (r *ticketResolver) Comments(ctx context.Context, obj *models.Ticket, after
 
 	comments := []*models.Comment{}
 	g.Engine.Where("ticket_id = ?", obj.TicketID).Find(&comments)
-	edges := []gqlapi.CommentEdge{}
+	edges := []*gqlapi.CommentEdge{}
 	for _, comment := range comments {
-		edges = append(edges, gqlapi.CommentEdge{
+		edges = append(edges, &gqlapi.CommentEdge{
 			Node:   comment,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", comment.CommentID)),
 		})
@@ -1020,7 +1020,7 @@ func (r *ticketResolver) Comments(ctx context.Context, obj *models.Ticket, after
 	// 获取pageInfo
 	startCursor := EncodeCursor(fmt.Sprintf("%d", comments[0].CommentID))
 	endCursor := EncodeCursor(fmt.Sprintf("%d", comments[len(comments)-1].CommentID))
-	pageInfo := gqlapi.PageInfo{
+	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: false,
 		HasNextPage:     false,
 		StartCursor:     startCursor,

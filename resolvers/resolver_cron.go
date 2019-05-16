@@ -109,7 +109,7 @@ func (r *queryRootResolver) Crons(ctx context.Context, after *string, before *st
 		hasPreviousPage = false
 	}
 	// 获取edges
-	edges := []gqlapi.CronEdge{}
+	edges := []*gqlapi.CronEdge{}
 	crons := []*models.Cron{}
 
 	var err error
@@ -120,7 +120,7 @@ func (r *queryRootResolver) Crons(ctx context.Context, after *string, before *st
 	}
 
 	for _, cron := range crons {
-		edges = append(edges, gqlapi.CronEdge{
+		edges = append(edges, &gqlapi.CronEdge{
 			Node:   cron,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", cron.CronID)),
 		})
@@ -136,7 +136,7 @@ func (r *queryRootResolver) Crons(ctx context.Context, after *string, before *st
 	// 获取pageInfo
 	startCursor := EncodeCursor(fmt.Sprintf("%d", crons[0].CronID))
 	endCursor := EncodeCursor(fmt.Sprintf("%d", crons[len(crons)-1].CronID))
-	pageInfo := gqlapi.PageInfo{
+	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: hasPreviousPage,
 		HasNextPage:     hasNextPage,
 		StartCursor:     startCursor,

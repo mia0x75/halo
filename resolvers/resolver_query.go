@@ -73,7 +73,7 @@ func (r *queryRootResolver) Queries(ctx context.Context, after *string, before *
 		hasPreviousPage = false
 	}
 	// 获取edges
-	edges := []gqlapi.QueryEdge{}
+	edges := []*gqlapi.QueryEdge{}
 	queries := []*models.Query{}
 	var err error
 	if err = g.Engine.Desc("user_id").Where("query_id < ?", from).Limit(*first).Find(&queries); err != nil {
@@ -81,7 +81,7 @@ func (r *queryRootResolver) Queries(ctx context.Context, after *string, before *
 	}
 
 	for _, query := range queries {
-		edges = append(edges, gqlapi.QueryEdge{
+		edges = append(edges, &gqlapi.QueryEdge{
 			Node:   query,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", query.QueryID)),
 		})
@@ -97,7 +97,7 @@ func (r *queryRootResolver) Queries(ctx context.Context, after *string, before *
 	// 获取pageInfo
 	startCursor := EncodeCursor(fmt.Sprintf("%d", queries[0].QueryID))
 	endCursor := EncodeCursor(fmt.Sprintf("%d", queries[len(queries)-1].QueryID))
-	pageInfo := gqlapi.PageInfo{
+	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: hasPreviousPage,
 		HasNextPage:     hasNextPage,
 		StartCursor:     startCursor,

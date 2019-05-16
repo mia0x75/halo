@@ -33,10 +33,10 @@ func (r *queryRootResolver) Environments(ctx context.Context) (env *gqlapi.Envir
 	ms := g.GlobalStat.MemStats()
 	hi := g.GlobalStat.HostInfos()
 	ps := g.GlobalStat.ProcessStats()
-	env.CPUStats = *cs
-	env.HostInfos = *hi
-	env.ProcessStats = *ps
-	env.MemStats = *ms
+	env.CPUStats = cs
+	env.HostInfos = hi
+	env.ProcessStats = ps
+	env.MemStats = ms
 	return
 }
 
