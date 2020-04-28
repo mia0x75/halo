@@ -22,11 +22,11 @@ resolver:
 # Tell gqlgen about any existing models you want to reuse for
 # graphql. These normally come from the db or a remote api.
 models:
-  Avatar:
-    model: github.com/mia0x75/halo/models.Avatar
-
   Comment:
     model: github.com/mia0x75/halo/models.Comment
+
+  Avatar:
+    model: github.com/mia0x75/halo/models.Avatar
 
   Cron:
     model: github.com/mia0x75/halo/models.Cron
@@ -85,24 +85,24 @@ models:
   Int8:
     model: github.com/mia0x75/halo/gqlapi.Int8
 
-  UInt8:
-    model: github.com/mia0x75/halo/gqlapi.UInt8
-
+#  UInt8:
+#    model: github.com/mia0x75/halo/gqlapi.UInt8
+#
   Int16:
     model: github.com/mia0x75/halo/gqlapi.Int16
 
-  UInt16:
-    model: github.com/mia0x75/halo/gqlapi.UInt16
-
+#  UInt16:
+#    model: github.com/mia0x75/halo/gqlapi.UInt16
+#
   UInt:
     model: github.com/mia0x75/halo/gqlapi.UInt
 
   Int32:
     model: github.com/mia0x75/halo/gqlapi.Int32
 
-  UInt32:
-    model: github.com/mia0x75/halo/gqlapi.UInt32
-
+#  UInt32:
+#    model: github.com/mia0x75/halo/gqlapi.UInt32
+#
   Int64:
     model: github.com/mia0x75/halo/gqlapi.Int64
 

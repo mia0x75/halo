@@ -1,0 +1,83 @@
+所有的函数名称再次过一遍
+
+AlterTableStmt:
+  - AlterTableOption
+    - Charset [+]
+    - Collate [+]
+    - Engine [+]
+    - Comment [-]
+  - AlterTableAddColumns
+    - Name
+      - Qualified
+      - MaxLength
+      - Lowercase
+    - Type
+    - Charset
+    - Collate
+    - Primary Key ?
+    - Unique Key ?
+    - Autoincrement ?
+    - Comment
+    - Default
+    - ColumnPosition
+      - First
+      - After
+    - Exists => Metadata {Source Database, Source Table, ColumnPosition.After}
+    - NotExists => Metadata {Target Column}
+  - AlterTableAddConstraint
+  - AlterTableDropColumn
+    - Exists => Metadata {Source Database, Source Table, Source Column}
+  - AlterTableDropPrimaryKey
+    - Exists => Metadata {Source Database, Source Table, Source Key}
+  - AlterTableDropIndex
+    - Exists => Metadata {Source Database, Source Table, Source Key}
+  - AlterTableDropForeignKey
+    - Exists => Metadata {Source Database, Source Table, Source Key}
+  - AlterTableModifyColumn
+    - Type
+    - Charset
+    - Collate
+    - Default
+    - Primary Key ?
+    - Unique Key ?
+    - Autoincrement ?
+    - Comment
+    - ColumnPosition
+      - First
+      - After
+    - Exists => Metadata {Source Database / Source Table / Source Column}
+  - AlterTableChangeColumn
+    - Type
+    - Charset
+    - Collate
+    - Default
+    - Primary Key ?
+    - Unique Key ?
+    - Autoincrement ?
+    - Comment
+    - ColumnPosition
+      - First
+      - After
+    - Exists => Metadata {Source Database / Source Table / Source Column}
+    - NotExists => Metadata {Target Column}
+  - AlterTableRenameTable
+    - Name
+    - Exists => Metadata {Source Database / Source Table / Target Database}
+    - NotExists => Metadata {Target Table}
+  - AlterTableAlterColumn
+    - Set Default / Drop Default
+  - AlterTableLock
+    - NotSupport
+  - AlterTableAlgorithm
+    - NotSupport
+  - AlterTableRenameIndex
+  - AlterTableForce
+    - NotSupport
+  - AlterTableAddPartitions
+    - NotSupport
+  - AlterTableCoalescePartitions
+    - NotSupport
+  - AlterTableDropPartition
+    - NotSupport
+  - AlterTableTruncatePartition
+    - NotSupport

@@ -4,11 +4,21 @@ version=$(cat VERSION)
 build=$(cat BUILD)
 echo $(($(cat BUILD) + 1)) > BUILD
 kernel=$(uname -r)
-name=$(cat /etc/*-release | tr [:upper:] [:lower:] | grep -Poi '(debian|ubuntu|red hat|centos|fedora)'|uniq)
 distro="Unknown"
-if [ ! -z $name ]; then
-	distro=$(cat /etc/${name}-release)
-fi
+os=$(uname | tr '[:upper:]' '[:lower:]')
+case ${os} in
+	linux*)
+		name=$(cat /etc/*-release | tr [:upper:] [:lower:] | grep -Poi '(debian|ubuntu|red hat|centos|fedora)'|uniq)
+		if [ ! -z $name ]; then
+			distro=$(cat /etc/${name}-release)
+		fi
+		;;
+	darwin*)
+		distro="$(sw_vers -productName) $(sw_vers -productVersion) $(sw_vers -buildVersion)"
+		;;
+	*)
+		;;
+esac
 
 if [ "X${git}" == "X" ]; then
     git="not a git repo"

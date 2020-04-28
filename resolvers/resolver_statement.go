@@ -12,7 +12,7 @@ import (
 type statementResolver struct{ *Resolver }
 
 // Ticket 语句所属工单信息
-func (r *statementResolver) Ticket(ctx context.Context, obj *models.Statement) (ticket *models.Ticket, err error) {
+func (r statementResolver) Ticket(ctx context.Context, obj *models.Statement) (ticket *models.Ticket, err error) {
 	rc := gqlapi.ReturnCodeOK
 	found := false
 	ticket = &models.Ticket{
@@ -32,7 +32,7 @@ func (r *statementResolver) Ticket(ctx context.Context, obj *models.Statement) (
 }
 
 // TypeDesc 语句类型
-func (r *statementResolver) TypeDesc(ctx context.Context, obj *models.Statement) (string, error) {
+func (r statementResolver) TypeDesc(ctx context.Context, obj *models.Statement) (string, error) {
 	for k, v := range gqlapi.StatementTypeEnumMap {
 		if v == obj.Type {
 			return string(k), nil

@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-xorm/xorm"
 	"github.com/mia0x75/parser"
 	"github.com/mia0x75/parser/ast"
+	"xorm.io/xorm"
 
 	"github.com/mia0x75/halo/caches"
 	"github.com/mia0x75/halo/events"
@@ -23,7 +23,7 @@ import (
 )
 
 // Query 查看某一查询的信息
-func (r *queryRootResolver) Query(ctx context.Context, id string) (query *models.Query, err error) {
+func (r queryRootResolver) Query(ctx context.Context, id string) (query *models.Query, err error) {
 	rc := gqlapi.ReturnCodeOK
 	found := false
 	query = &models.Query{
@@ -42,7 +42,7 @@ func (r *queryRootResolver) Query(ctx context.Context, id string) (query *models
 }
 
 // Queries 分页查询数据查询
-func (r *queryRootResolver) Queries(ctx context.Context, after *string, before *string, first *int, last *int) (*gqlapi.QueryConnection, error) {
+func (r queryRootResolver) Queries(ctx context.Context, after *string, before *string, first *int, last *int) (*gqlapi.QueryConnection, error) {
 	rc := gqlapi.ReturnCodeOK
 	// 参数判断，只允许 first/before first/after last/before last/after 模式
 	if first != nil && last != nil {
@@ -73,7 +73,7 @@ func (r *queryRootResolver) Queries(ctx context.Context, after *string, before *
 		hasPreviousPage = false
 	}
 	// 获取edges
-	edges := []gqlapi.QueryEdge{}
+	edges := []*gqlapi.QueryEdge{}
 	queries := []*models.Query{}
 	var err error
 	if err = g.Engine.Desc("user_id").Where("query_id < ?", from).Limit(*first).Find(&queries); err != nil {
@@ -81,7 +81,7 @@ func (r *queryRootResolver) Queries(ctx context.Context, after *string, before *
 	}
 
 	for _, query := range queries {
-		edges = append(edges, gqlapi.QueryEdge{
+		edges = append(edges, &gqlapi.QueryEdge{
 			Node:   query,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", query.QueryID)),
 		})
@@ -97,7 +97,7 @@ func (r *queryRootResolver) Queries(ctx context.Context, after *string, before *
 	// 获取pageInfo
 	startCursor := EncodeCursor(fmt.Sprintf("%d", queries[0].QueryID))
 	endCursor := EncodeCursor(fmt.Sprintf("%d", queries[len(queries)-1].QueryID))
-	pageInfo := gqlapi.PageInfo{
+	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: hasPreviousPage,
 		HasNextPage:     hasNextPage,
 		StartCursor:     startCursor,
@@ -112,7 +112,7 @@ func (r *queryRootResolver) Queries(ctx context.Context, after *string, before *
 }
 
 // QuerySearch TODO: 下一个版本考虑实现
-func (r *queryRootResolver) QuerySearch(ctx context.Context, search string, after *string, before *string, first *int, last *int) (*gqlapi.QueryConnection, error) {
+func (r queryRootResolver) QuerySearch(ctx context.Context, search string, after *string, before *string, first *int, last *int) (*gqlapi.QueryConnection, error) {
 	rc := gqlapi.ReturnCodeOK
 	// 参数判断，只允许 first/before first/after last/before last/after 模式
 	if first != nil && last != nil {
@@ -129,7 +129,7 @@ func (r *queryRootResolver) QuerySearch(ctx context.Context, search string, afte
 }
 
 // CreateQuery 创建一个查询
-func (r *mutationRootResolver) CreateQuery(ctx context.Context, input models.CreateQueryInput) (rs string, err error) {
+func (r mutationRootResolver) CreateQuery(ctx context.Context, input models.CreateQueryInput) (rs string, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -285,7 +285,7 @@ L:
 }
 
 // AnalyzeQuery 调用SOAR的SQL分析功能
-func (r *mutationRootResolver) AnalyzeQuery(ctx context.Context, input models.SoarQueryInput) (report string, err error) {
+func (r mutationRootResolver) AnalyzeQuery(ctx context.Context, input models.SoarQueryInput) (report string, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -381,7 +381,7 @@ L:
 }
 
 // RewriteQuery 调用SOAR的重写SQL功能
-func (r *mutationRootResolver) RewriteQuery(ctx context.Context, input models.SoarQueryInput) (sql string, err error) {
+func (r mutationRootResolver) RewriteQuery(ctx context.Context, input models.SoarQueryInput) (sql string, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -478,7 +478,7 @@ L:
 type queryResolver struct{ *Resolver }
 
 // Cluster 查询发起的目标群集信息
-func (r *queryResolver) Cluster(ctx context.Context, obj *models.Query) (cluster *models.Cluster, err error) {
+func (r queryResolver) Cluster(ctx context.Context, obj *models.Query) (cluster *models.Cluster, err error) {
 	rc := gqlapi.ReturnCodeOK
 	cluster = caches.ClustersMap.Any(func(elem *models.Cluster) bool {
 		if elem.ClusterID == obj.ClusterID {
@@ -494,7 +494,7 @@ func (r *queryResolver) Cluster(ctx context.Context, obj *models.Query) (cluster
 }
 
 // User 查询发起的用户
-func (r *queryResolver) User(ctx context.Context, obj *models.Query) (user *models.User, err error) {
+func (r queryResolver) User(ctx context.Context, obj *models.Query) (user *models.User, err error) {
 	rc := gqlapi.ReturnCodeOK
 	user = caches.UsersMap.Any(func(elem *models.User) bool {
 		if elem.UserID == obj.UserID {

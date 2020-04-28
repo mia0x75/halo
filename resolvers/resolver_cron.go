@@ -17,7 +17,7 @@ import (
 )
 
 // CancelCron 取消一个预约（工单关闭）
-func (r *mutationRootResolver) CancelCron(ctx context.Context, id string) (ok bool, err error) {
+func (r mutationRootResolver) CancelCron(ctx context.Context, id string) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
 		s := crons.NewScheduler()
@@ -55,7 +55,7 @@ func (r *mutationRootResolver) CancelCron(ctx context.Context, id string) (ok bo
 }
 
 // Cron 查看某一个预约的详细信息
-func (r *queryRootResolver) Cron(ctx context.Context, id string) (cron *models.Cron, err error) {
+func (r queryRootResolver) Cron(ctx context.Context, id string) (cron *models.Cron, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
 		cron = &models.Cron{
@@ -78,7 +78,7 @@ func (r *queryRootResolver) Cron(ctx context.Context, id string) (cron *models.C
 }
 
 // Crons 分页查看预约任务列表
-func (r *queryRootResolver) Crons(ctx context.Context, after *string, before *string, first *int, last *int) (*gqlapi.CronConnection, error) {
+func (r queryRootResolver) Crons(ctx context.Context, after *string, before *string, first *int, last *int) (*gqlapi.CronConnection, error) {
 	rc := gqlapi.ReturnCodeOK
 	// 参数判断，只允许 first/before first/after last/before last/after 模式
 	if first != nil && last != nil {
@@ -109,7 +109,7 @@ func (r *queryRootResolver) Crons(ctx context.Context, after *string, before *st
 		hasPreviousPage = false
 	}
 	// 获取edges
-	edges := []gqlapi.CronEdge{}
+	edges := []*gqlapi.CronEdge{}
 	crons := []*models.Cron{}
 
 	var err error
@@ -120,7 +120,7 @@ func (r *queryRootResolver) Crons(ctx context.Context, after *string, before *st
 	}
 
 	for _, cron := range crons {
-		edges = append(edges, gqlapi.CronEdge{
+		edges = append(edges, &gqlapi.CronEdge{
 			Node:   cron,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", cron.CronID)),
 		})
@@ -136,7 +136,7 @@ func (r *queryRootResolver) Crons(ctx context.Context, after *string, before *st
 	// 获取pageInfo
 	startCursor := EncodeCursor(fmt.Sprintf("%d", crons[0].CronID))
 	endCursor := EncodeCursor(fmt.Sprintf("%d", crons[len(crons)-1].CronID))
-	pageInfo := gqlapi.PageInfo{
+	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: hasPreviousPage,
 		HasNextPage:     hasNextPage,
 		StartCursor:     startCursor,
@@ -151,7 +151,7 @@ func (r *queryRootResolver) Crons(ctx context.Context, after *string, before *st
 }
 
 // Tasks 返回所有正在等待执行的计划任务
-func (r *queryRootResolver) Tasks(ctx context.Context) (L []*models.Cron, err error) {
+func (r queryRootResolver) Tasks(ctx context.Context) (L []*models.Cron, err error) {
 	s := crons.NewScheduler()
 	return s.Crons()
 }

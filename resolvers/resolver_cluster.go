@@ -8,8 +8,8 @@ import (
 	"strconv"
 
 	"github.com/fatih/structs"
-	"github.com/go-xorm/core"
 	"github.com/mia0x75/yql"
+	"xorm.io/core"
 
 	"github.com/mia0x75/halo/caches"
 	"github.com/mia0x75/halo/events"
@@ -20,7 +20,7 @@ import (
 )
 
 // TestCluster 测试群集的连接性
-func (r *queryRootResolver) TestCluster(ctx context.Context, input *models.ValidateConnectionInput) (ok bool, err error) {
+func (r queryRootResolver) TestCluster(ctx context.Context, input *models.ValidateConnectionInput) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
 		const pattern = "%s:%s@tcp(%s:%d)/mysql?loc=Local&parseTime=true"
@@ -48,7 +48,7 @@ func (r *queryRootResolver) TestCluster(ctx context.Context, input *models.Valid
 }
 
 // Databases 获取某一个群集的所有用户数据库
-func (r *queryRootResolver) Databases(ctx context.Context, clusterUUID string) (L []gqlapi.Database, err error) {
+func (r queryRootResolver) Databases(ctx context.Context, clusterUUID string) (L []*gqlapi.Database, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -96,8 +96,12 @@ L:
 			break L
 		}
 
-		for _, database := range databases {
-			L = append(L, gqlapi.Database(database))
+		for _, d := range databases {
+			L = append(L, &gqlapi.Database{
+				Name:    d.Name,
+				Charset: d.Charset,
+				Collate: d.Collate,
+			})
 		}
 
 		break
@@ -107,7 +111,7 @@ L:
 }
 
 // Cluster 获取某一指定群集的详细信息
-func (r *queryRootResolver) Cluster(ctx context.Context, id string) (cluster *models.Cluster, err error) {
+func (r queryRootResolver) Cluster(ctx context.Context, id string) (cluster *models.Cluster, err error) {
 	rc := gqlapi.ReturnCodeOK
 	cluster = caches.ClustersMap.Any(func(elem *models.Cluster) bool {
 		if elem.UUID == id {
@@ -123,7 +127,7 @@ func (r *queryRootResolver) Cluster(ctx context.Context, id string) (cluster *mo
 }
 
 // Clusters 分页获取群集列表，TODO: 分页未完成
-func (r *queryRootResolver) Clusters(ctx context.Context, after *string, before *string, first *int, last *int) (*gqlapi.ClusterConnection, error) {
+func (r queryRootResolver) Clusters(ctx context.Context, after *string, before *string, first *int, last *int) (*gqlapi.ClusterConnection, error) {
 	rc := gqlapi.ReturnCodeOK
 	// 参数判断，只允许 first/before first/after last/before last/after 模式
 	if first != nil && last != nil {
@@ -136,9 +140,9 @@ func (r *queryRootResolver) Clusters(ctx context.Context, after *string, before 
 	}
 
 	clusters := caches.ClustersMap.All()
-	edges := []gqlapi.ClusterEdge{}
+	edges := []*gqlapi.ClusterEdge{}
 	for _, cluster := range clusters {
-		edges = append(edges, gqlapi.ClusterEdge{
+		edges = append(edges, &gqlapi.ClusterEdge{
 			Node:   cluster,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", cluster.ClusterID)),
 		})
@@ -149,7 +153,7 @@ func (r *queryRootResolver) Clusters(ctx context.Context, after *string, before 
 	// 获取pageInfo
 	startCursor := EncodeCursor(fmt.Sprintf("%d", clusters[0].ClusterID))
 	endCursor := EncodeCursor(fmt.Sprintf("%d", clusters[len(clusters)-1].ClusterID))
-	pageInfo := gqlapi.PageInfo{
+	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: false,
 		HasNextPage:     false,
 		StartCursor:     startCursor,
@@ -164,7 +168,7 @@ func (r *queryRootResolver) Clusters(ctx context.Context, after *string, before 
 }
 
 // ClusterSearch 群集查询，TODO: 分页未实现
-func (r *queryRootResolver) ClusterSearch(ctx context.Context, search string, after *string, before *string, first *int, last *int) (rs *gqlapi.ClusterConnection, err error) {
+func (r queryRootResolver) ClusterSearch(ctx context.Context, search string, after *string, before *string, first *int, last *int) (rs *gqlapi.ClusterConnection, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -198,14 +202,14 @@ L:
 			break L
 		}
 		// 获取edges
-		edges := []gqlapi.ClusterEdge{}
+		edges := []*gqlapi.ClusterEdge{}
 		for _, cluster := range clusters {
-			edges = append(edges, gqlapi.ClusterEdge{
+			edges = append(edges, &gqlapi.ClusterEdge{
 				Node:   cluster,
 				Cursor: EncodeCursor(strconv.Itoa(0)),
 			})
 		}
-		pageInfo := gqlapi.PageInfo{
+		pageInfo := &gqlapi.PageInfo{
 			StartCursor:     edges[0].Cursor,
 			EndCursor:       edges[count-1].Cursor,
 			HasPreviousPage: false,
@@ -225,7 +229,7 @@ L:
 }
 
 // Metadata 获取群集上某一个数据库的元数据信息
-func (r *queryRootResolver) Metadata(ctx context.Context, clusterUUID string, database string) (resp string, err error) {
+func (r queryRootResolver) Metadata(ctx context.Context, clusterUUID string, database string) (resp string, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -299,7 +303,7 @@ L:
 }
 
 // CreateCluster 创建一个群集
-func (r *mutationRootResolver) CreateCluster(ctx context.Context, input models.CreateClusterInput) (cluster *models.Cluster, err error) {
+func (r mutationRootResolver) CreateCluster(ctx context.Context, input models.CreateClusterInput) (cluster *models.Cluster, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -363,7 +367,7 @@ L:
 }
 
 // UpdateCluster 更新一个群集
-func (r *mutationRootResolver) UpdateCluster(ctx context.Context, input models.UpdateClusterInput) (cluster *models.Cluster, err error) {
+func (r mutationRootResolver) UpdateCluster(ctx context.Context, input models.UpdateClusterInput) (cluster *models.Cluster, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -449,7 +453,7 @@ L:
 }
 
 // RemoveCluster 有限的条件下，删除群集
-func (r *mutationRootResolver) RemoveCluster(ctx context.Context, id string) (ok bool, err error) {
+func (r mutationRootResolver) RemoveCluster(ctx context.Context, id string) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
 		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
@@ -492,7 +496,7 @@ func (r *mutationRootResolver) RemoveCluster(ctx context.Context, id string) (ok
 }
 
 // PatchClusterStatus 修改群集状态
-func (r *mutationRootResolver) PatchClusterStatus(ctx context.Context, input models.PatchClusterStatusInput) (ok bool, err error) {
+func (r mutationRootResolver) PatchClusterStatus(ctx context.Context, input models.PatchClusterStatusInput) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
 		if input.Status < 1 || input.Status > 2 {

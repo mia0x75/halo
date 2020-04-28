@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-xorm/xorm"
 	"github.com/google/uuid"
+	"xorm.io/xorm"
 )
 
 // Statistic 统计模型

@@ -17,7 +17,7 @@ import (
 type logResolver struct{ *Resolver }
 
 // User 操作日志的发起人（委托人）
-func (r *logResolver) User(ctx context.Context, obj *models.Log) (user *models.User, err error) {
+func (r logResolver) User(ctx context.Context, obj *models.Log) (user *models.User, err error) {
 	rc := gqlapi.ReturnCodeOK
 	user = caches.UsersMap.Any(func(elem *models.User) bool {
 		if elem.UserID == obj.UserID {
@@ -33,7 +33,7 @@ func (r *logResolver) User(ctx context.Context, obj *models.Log) (user *models.U
 }
 
 // Logs 操作日志分页查看
-func (r *queryRootResolver) Logs(ctx context.Context, after *string, before *string, first *int, last *int) (data *gqlapi.LogConnection, err error) {
+func (r queryRootResolver) Logs(ctx context.Context, after *string, before *string, first *int, last *int) (data *gqlapi.LogConnection, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -74,14 +74,14 @@ L:
 			hasPreviousPage = false
 		}
 		// 获取edges
-		edges := []gqlapi.LogEdge{}
+		edges := []*gqlapi.LogEdge{}
 		logs := []*models.Log{}
 		if err = g.Engine.Desc("log_id").Where("log_id < ?", from).Limit(*first).Find(&logs); err != nil {
 			return nil, err
 		}
 
 		for _, log := range logs {
-			edges = append(edges, gqlapi.LogEdge{
+			edges = append(edges, &gqlapi.LogEdge{
 				Node:   log,
 				Cursor: EncodeCursor(fmt.Sprintf("%d", log.LogID)),
 			})
@@ -97,7 +97,7 @@ L:
 		// 获取pageInfo
 		startCursor := EncodeCursor(fmt.Sprintf("%d", logs[0].LogID))
 		endCursor := EncodeCursor(fmt.Sprintf("%d", logs[len(logs)-1].LogID))
-		pageInfo := gqlapi.PageInfo{
+		pageInfo := &gqlapi.PageInfo{
 			HasPreviousPage: hasPreviousPage,
 			HasNextPage:     hasNextPage,
 			StartCursor:     startCursor,

@@ -11,7 +11,7 @@ import (
 )
 
 // UpdateTemplate 修改一个工单
-func (r *mutationRootResolver) UpdateTemplate(ctx context.Context, input *models.UpdateTemplateInput) (template *models.Template, err error) {
+func (r mutationRootResolver) UpdateTemplate(ctx context.Context, input *models.UpdateTemplateInput) (template *models.Template, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
 		// credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
@@ -48,7 +48,7 @@ func (r *mutationRootResolver) UpdateTemplate(ctx context.Context, input *models
 }
 
 // Templates 邮件模板在页面上是一个页面处理所有内容，所以不需要考虑分页
-func (r *queryRootResolver) Templates(ctx context.Context) (L []*models.Template, err error) {
+func (r queryRootResolver) Templates(ctx context.Context) (L []*models.Template, err error) {
 	L = caches.TemplatesMap.All()
 	return
 }

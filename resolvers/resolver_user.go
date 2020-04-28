@@ -24,7 +24,7 @@ import (
 )
 
 // Me 当前登陆用户信息
-func (r *queryRootResolver) Me(ctx context.Context) (user *models.User, err error) {
+func (r queryRootResolver) Me(ctx context.Context) (user *models.User, err error) {
 	// Directive.Auth确保了一定可以获得正确的凭证
 	credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
 	user = credential.User
@@ -32,7 +32,7 @@ func (r *queryRootResolver) Me(ctx context.Context) (user *models.User, err erro
 }
 
 // User 根据ID查看用户详细信息
-func (r *queryRootResolver) User(ctx context.Context, id string) (user *models.User, err error) {
+func (r queryRootResolver) User(ctx context.Context, id string) (user *models.User, err error) {
 	rc := gqlapi.ReturnCodeOK
 	user = caches.UsersMap.Any(func(elem *models.User) bool {
 		if elem.UUID == id {
@@ -48,7 +48,7 @@ func (r *queryRootResolver) User(ctx context.Context, id string) (user *models.U
 }
 
 // Users 分页查看用户列表
-func (r *queryRootResolver) Users(ctx context.Context, after *string, before *string, first *int, last *int) (*gqlapi.UserConnection, error) {
+func (r queryRootResolver) Users(ctx context.Context, after *string, before *string, first *int, last *int) (*gqlapi.UserConnection, error) {
 	rc := gqlapi.ReturnCodeOK
 	// 参数判断，只允许 first/before first/after last/before last/after 模式
 	if first != nil && last != nil {
@@ -79,7 +79,7 @@ func (r *queryRootResolver) Users(ctx context.Context, after *string, before *st
 		hasPreviousPage = false
 	}
 	// 获取edges
-	edges := []gqlapi.UserEdge{}
+	edges := []*gqlapi.UserEdge{}
 
 	// TODO: 一次从数据库查出足够的数据
 	// TODO: 对于分页中下一页的处理：
@@ -93,7 +93,7 @@ func (r *queryRootResolver) Users(ctx context.Context, after *string, before *st
 	}
 
 	for _, user := range users {
-		edges = append(edges, gqlapi.UserEdge{
+		edges = append(edges, &gqlapi.UserEdge{
 			Node:   user,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", user.UserID)),
 		})
@@ -110,7 +110,7 @@ func (r *queryRootResolver) Users(ctx context.Context, after *string, before *st
 	// 获取pageInfo
 	startCursor := EncodeCursor(fmt.Sprintf("%d", users[0].UserID))
 	endCursor := EncodeCursor(fmt.Sprintf("%d", users[len(users)-1].UserID))
-	pageInfo := gqlapi.PageInfo{
+	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: hasPreviousPage,
 		HasNextPage:     hasNextPage,
 		StartCursor:     startCursor,
@@ -125,7 +125,7 @@ func (r *queryRootResolver) Users(ctx context.Context, after *string, before *st
 }
 
 // UserSearch 用户搜索，TODO: 分页处理
-func (r *queryRootResolver) UserSearch(ctx context.Context, search string, after *string, before *string, first *int, last *int) (rs *gqlapi.UserConnection, err error) {
+func (r queryRootResolver) UserSearch(ctx context.Context, search string, after *string, before *string, first *int, last *int) (rs *gqlapi.UserConnection, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -160,14 +160,14 @@ L:
 			break L
 		}
 		// 获取edges
-		edges := []gqlapi.UserEdge{}
+		edges := []*gqlapi.UserEdge{}
 		for _, user := range users {
-			edges = append(edges, gqlapi.UserEdge{
+			edges = append(edges, &gqlapi.UserEdge{
 				Node:   user,
 				Cursor: EncodeCursor(strconv.Itoa(0)),
 			})
 		}
-		pageInfo := gqlapi.PageInfo{
+		pageInfo := &gqlapi.PageInfo{
 			StartCursor:     edges[0].Cursor,
 			EndCursor:       edges[count-1].Cursor,
 			HasPreviousPage: false,
@@ -187,7 +187,7 @@ L:
 }
 
 // Register 用户注册
-func (r *mutationRootResolver) Register(ctx context.Context, input models.UserRegisterInput) (user *models.User, err error) {
+func (r mutationRootResolver) Register(ctx context.Context, input models.UserRegisterInput) (user *models.User, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -267,7 +267,7 @@ L:
 }
 
 // Activate 账号激活
-func (r *mutationRootResolver) Activate(ctx context.Context, input models.ActivateInput) (payload *gqlapi.ActivatePayload, err error) {
+func (r mutationRootResolver) Activate(ctx context.Context, input models.ActivateInput) (payload *gqlapi.ActivatePayload, err error) {
 L:
 	// 1, 解密
 	// 2, 数据有效性判断
@@ -361,7 +361,7 @@ L:
 }
 
 // LostPasswd 忘记密码
-func (r *mutationRootResolver) LostPasswd(ctx context.Context, input models.LostPasswdInput) (ok bool, err error) {
+func (r mutationRootResolver) LostPasswd(ctx context.Context, input models.LostPasswdInput) (ok bool, err error) {
 L:
 	for {
 		user := caches.UsersMap.Any(func(elem *models.User) bool {
@@ -404,7 +404,7 @@ L:
 }
 
 // ResetPasswd 重置密码
-func (r *mutationRootResolver) ResetPasswd(ctx context.Context, input models.ResetPasswdInput) (ok bool, err error) {
+func (r mutationRootResolver) ResetPasswd(ctx context.Context, input models.ResetPasswdInput) (ok bool, err error) {
 L:
 	for {
 		// TODO:
@@ -418,7 +418,7 @@ L:
 }
 
 // ResendActivationMail 重发验证激活邮件
-func (r *mutationRootResolver) ResendActivationMail(ctx context.Context, input models.ActivateInput) (ok bool, err error) {
+func (r mutationRootResolver) ResendActivationMail(ctx context.Context, input models.ActivateInput) (ok bool, err error) {
 L:
 	for {
 		// 1, 参考Activate 1/2/3/4，不同是没有过期则不允许
@@ -433,7 +433,7 @@ L:
 }
 
 // Login 用户登陆
-func (r *mutationRootResolver) Login(ctx context.Context, input models.UserLoginInput) (payload *gqlapi.LoginPayload, err error) {
+func (r mutationRootResolver) Login(ctx context.Context, input models.UserLoginInput) (payload *gqlapi.LoginPayload, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -484,7 +484,7 @@ L:
 		}
 
 		payload = &gqlapi.LoginPayload{
-			Me:    *user,
+			Me:    user,
 			Token: token,
 		}
 
@@ -505,7 +505,7 @@ L:
 }
 
 // Logout 退出登陆
-func (r *mutationRootResolver) Logout(ctx context.Context) (bool, error) {
+func (r mutationRootResolver) Logout(ctx context.Context) (bool, error) {
 	// 通过上下文获得用户凭证，此处凭证经过auth的检测，必然是有效的
 	credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
 	user := credential.User
@@ -519,7 +519,7 @@ func (r *mutationRootResolver) Logout(ctx context.Context) (bool, error) {
 }
 
 // UpdateProfile 用户自行修改个人信息
-func (r *mutationRootResolver) UpdateProfile(ctx context.Context, input models.UpdateProfileInput) (user *models.User, err error) {
+func (r mutationRootResolver) UpdateProfile(ctx context.Context, input models.UpdateProfileInput) (user *models.User, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -561,7 +561,7 @@ L:
 }
 
 // UpdatePassword 用户自行修改密码
-func (r *mutationRootResolver) UpdatePassword(ctx context.Context, input models.PatchPasswordInput) (ok bool, err error) {
+func (r mutationRootResolver) UpdatePassword(ctx context.Context, input models.PatchPasswordInput) (ok bool, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -602,7 +602,7 @@ L:
 }
 
 // UpdateEmail 用户自行更新邮件（登陆账号）
-func (r *mutationRootResolver) UpdateEmail(ctx context.Context, input models.PatchEmailInput) (ok bool, err error) {
+func (r mutationRootResolver) UpdateEmail(ctx context.Context, input models.PatchEmailInput) (ok bool, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -651,7 +651,7 @@ L:
 }
 
 // GrantReviewers 关联用户到审核人
-func (r *mutationRootResolver) GrantReviewers(ctx context.Context, input models.GrantReviewersInput) (ok bool, err error) {
+func (r mutationRootResolver) GrantReviewers(ctx context.Context, input models.GrantReviewersInput) (ok bool, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -720,7 +720,7 @@ L:
 }
 
 // RevokeReviewers 收回用户的审核人
-func (r *mutationRootResolver) RevokeReviewers(ctx context.Context, input models.RevokeReviewersInput) (ok bool, err error) {
+func (r mutationRootResolver) RevokeReviewers(ctx context.Context, input models.RevokeReviewersInput) (ok bool, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -785,7 +785,7 @@ L:
 }
 
 // GrantClusters 关联用户到群集
-func (r *mutationRootResolver) GrantClusters(ctx context.Context, input models.GrantClustersInput) (ok bool, err error) {
+func (r mutationRootResolver) GrantClusters(ctx context.Context, input models.GrantClustersInput) (ok bool, err error) {
 L:
 	for {
 		edges := []*models.Edge{}
@@ -854,7 +854,7 @@ L:
 }
 
 // RevokeClusters 收回用户的群集授权
-func (r *mutationRootResolver) RevokeClusters(ctx context.Context, input models.RevokeClustersInput) (ok bool, err error) {
+func (r mutationRootResolver) RevokeClusters(ctx context.Context, input models.RevokeClustersInput) (ok bool, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -919,7 +919,7 @@ L:
 }
 
 // GrantRoles 关联用户到角色
-func (r *mutationRootResolver) GrantRoles(ctx context.Context, input models.GrantRolesInput) (ok bool, err error) {
+func (r mutationRootResolver) GrantRoles(ctx context.Context, input models.GrantRolesInput) (ok bool, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -981,7 +981,7 @@ L:
 }
 
 // RevokeRoles 收回用户的角色授权
-func (r *mutationRootResolver) RevokeRoles(ctx context.Context, input models.RevokeRolesInput) (ok bool, err error) {
+func (r mutationRootResolver) RevokeRoles(ctx context.Context, input models.RevokeRolesInput) (ok bool, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -1047,7 +1047,7 @@ L:
 }
 
 // CreateUser 创建一个用户
-func (r *mutationRootResolver) CreateUser(ctx context.Context, input models.CreateUserInput) (user *models.User, err error) {
+func (r mutationRootResolver) CreateUser(ctx context.Context, input models.CreateUserInput) (user *models.User, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -1226,7 +1226,7 @@ L:
 }
 
 // UpdateUser 更新用户信息
-func (r *mutationRootResolver) UpdateUser(ctx context.Context, input models.UpdateUserInput) (user *models.User, err error) {
+func (r mutationRootResolver) UpdateUser(ctx context.Context, input models.UpdateUserInput) (user *models.User, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -1312,7 +1312,7 @@ L:
 }
 
 // PatchUserStatus 修改用户状态
-func (r *mutationRootResolver) PatchUserStatus(ctx context.Context, input models.PatchUserStatusInput) (ok bool, err error) {
+func (r mutationRootResolver) PatchUserStatus(ctx context.Context, input models.PatchUserStatusInput) (ok bool, err error) {
 L:
 	for {
 		var user *models.User
@@ -1368,7 +1368,7 @@ L:
 type userResolver struct{ *Resolver }
 
 // Avatar 用户的头像
-func (r *userResolver) Avatar(ctx context.Context, obj *models.User) (avatar *models.Avatar, err error) {
+func (r userResolver) Avatar(ctx context.Context, obj *models.User) (avatar *models.Avatar, err error) {
 	rc := gqlapi.ReturnCodeOK
 	avatar = caches.AvatarsMap.Any(func(elem *models.Avatar) bool {
 		if elem.AvatarID == obj.AvatarID {
@@ -1384,7 +1384,7 @@ func (r *userResolver) Avatar(ctx context.Context, obj *models.User) (avatar *mo
 }
 
 // Roles 用户的角色
-func (r *userResolver) Roles(ctx context.Context, obj *models.User) (L []*models.Role, err error) {
+func (r userResolver) Roles(ctx context.Context, obj *models.User) (L []*models.Role, err error) {
 	edges := caches.EdgesMap.Filter(func(elem *models.Edge) bool {
 		if elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToRole] &&
 			elem.AncestorID == obj.UserID {
@@ -1409,7 +1409,7 @@ func (r *userResolver) Roles(ctx context.Context, obj *models.User) (L []*models
 }
 
 // Reviewers 用户的审核人
-func (r *userResolver) Reviewers(ctx context.Context, obj *models.User) (L []*models.User, err error) {
+func (r userResolver) Reviewers(ctx context.Context, obj *models.User) (L []*models.User, err error) {
 	edges := caches.EdgesMap.Filter(func(elem *models.Edge) bool {
 		if elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToReviewer] &&
 			elem.AncestorID == obj.UserID {
@@ -1434,7 +1434,7 @@ func (r *userResolver) Reviewers(ctx context.Context, obj *models.User) (L []*mo
 }
 
 // Clusters 用户可以访问的群集，TODO: 分页未完成
-func (r *userResolver) Clusters(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*gqlapi.ClusterConnection, error) {
+func (r userResolver) Clusters(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*gqlapi.ClusterConnection, error) {
 	rc := gqlapi.ReturnCodeOK
 	// 参数判断，只允许 first/before first/after last/before last/after 模式
 	if first != nil && last != nil {
@@ -1466,9 +1466,9 @@ func (r *userResolver) Clusters(ctx context.Context, obj *models.User, after *st
 		}
 		return false
 	})
-	clusterEdges := []gqlapi.ClusterEdge{}
+	clusterEdges := []*gqlapi.ClusterEdge{}
 	for _, cluster := range clusters {
-		clusterEdges = append(clusterEdges, gqlapi.ClusterEdge{
+		clusterEdges = append(clusterEdges, &gqlapi.ClusterEdge{
 			Node:   cluster,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", cluster.ClusterID)),
 		})
@@ -1477,7 +1477,7 @@ func (r *userResolver) Clusters(ctx context.Context, obj *models.User, after *st
 		return &gqlapi.ClusterConnection{}, nil
 	}
 	// 获取pageInfo
-	pageInfo := gqlapi.PageInfo{
+	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: false,
 		HasNextPage:     false,
 		StartCursor:     "",
@@ -1492,7 +1492,7 @@ func (r *userResolver) Clusters(ctx context.Context, obj *models.User, after *st
 }
 
 // Tickets 用户发起的工单，TODO: 分页未完成
-func (r *userResolver) Tickets(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*gqlapi.TicketConnection, error) {
+func (r userResolver) Tickets(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*gqlapi.TicketConnection, error) {
 	rc := gqlapi.ReturnCodeOK
 	// 参数判断，只允许 first/before first/after last/before last/after 模式
 	if first != nil && last != nil {
@@ -1508,9 +1508,9 @@ func (r *userResolver) Tickets(ctx context.Context, obj *models.User, after *str
 	if err := g.Engine.Where("user_id = ?", obj.UserID).Find(tickets); err != nil {
 		return &gqlapi.TicketConnection{}, err
 	}
-	edges := []gqlapi.TicketEdge{}
+	edges := []*gqlapi.TicketEdge{}
 	for _, ticket := range tickets {
-		edges = append(edges, gqlapi.TicketEdge{
+		edges = append(edges, &gqlapi.TicketEdge{
 			Node:   ticket,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", ticket.TicketID)),
 		})
@@ -1519,7 +1519,7 @@ func (r *userResolver) Tickets(ctx context.Context, obj *models.User, after *str
 		return &gqlapi.TicketConnection{}, nil
 	}
 	// 获取pageInfo
-	pageInfo := gqlapi.PageInfo{
+	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: false,
 		HasNextPage:     false,
 		StartCursor:     "",
@@ -1534,7 +1534,7 @@ func (r *userResolver) Tickets(ctx context.Context, obj *models.User, after *str
 }
 
 // Queries 用户发起的查询，TODO: 分页未完成
-func (r *userResolver) Queries(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*gqlapi.QueryConnection, error) {
+func (r userResolver) Queries(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*gqlapi.QueryConnection, error) {
 	rc := gqlapi.ReturnCodeOK
 	// 参数判断，只允许 first/before first/after last/before last/after 模式
 	if first != nil && last != nil {
@@ -1548,9 +1548,9 @@ func (r *userResolver) Queries(ctx context.Context, obj *models.User, after *str
 
 	queries := []*models.Query{}
 	g.Engine.Where("user_id = ?", obj.UserID).Find(queries)
-	edges := []gqlapi.QueryEdge{}
+	edges := []*gqlapi.QueryEdge{}
 	for _, query := range queries {
-		edges = append(edges, gqlapi.QueryEdge{
+		edges = append(edges, &gqlapi.QueryEdge{
 			Node:   query,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", query.QueryID)),
 		})
@@ -1559,7 +1559,7 @@ func (r *userResolver) Queries(ctx context.Context, obj *models.User, after *str
 		return &gqlapi.QueryConnection{}, nil
 	}
 	// 获取pageInfo
-	pageInfo := gqlapi.PageInfo{
+	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: false,
 		HasNextPage:     false,
 		StartCursor:     "",
@@ -1574,7 +1574,7 @@ func (r *userResolver) Queries(ctx context.Context, obj *models.User, after *str
 }
 
 // Statistics 用户维度的统计信息
-func (r *userResolver) Statistics(ctx context.Context, obj *models.User) (L []*models.Statistic, err error) {
+func (r userResolver) Statistics(ctx context.Context, obj *models.User) (L []*models.Statistic, err error) {
 	L = caches.StatisticsMap.Filter(func(elem *models.Statistic) bool {
 		if elem.Group == obj.UUID {
 			return true

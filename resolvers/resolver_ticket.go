@@ -10,12 +10,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-xorm/core"
 	"github.com/mia0x75/parser"
 	"github.com/mia0x75/parser/ast"
 	"github.com/mia0x75/parser/driver"
 	"github.com/mia0x75/parser/format"
 	log "github.com/sirupsen/logrus"
+	"xorm.io/core"
 
 	"github.com/mia0x75/halo/caches"
 	"github.com/mia0x75/halo/crons"
@@ -31,7 +31,7 @@ import (
 var _ = driver.ValueExpr{}
 
 // CreateTicket 创建一个工单
-func (r *mutationRootResolver) CreateTicket(ctx context.Context, input models.CreateTicketInput) (ticket *models.Ticket, err error) {
+func (r mutationRootResolver) CreateTicket(ctx context.Context, input models.CreateTicketInput) (ticket *models.Ticket, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -216,7 +216,7 @@ L:
 }
 
 // UpdateTicket 修改一个工单
-func (r *mutationRootResolver) UpdateTicket(ctx context.Context, input models.UpdateTicketInput) (ticket *models.Ticket, err error) {
+func (r mutationRootResolver) UpdateTicket(ctx context.Context, input models.UpdateTicketInput) (ticket *models.Ticket, err error) {
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
@@ -438,7 +438,7 @@ L:
 }
 
 // RemoveTicket 有条件的删除一个工单
-func (r *mutationRootResolver) RemoveTicket(ctx context.Context, id string) (ok bool, err error) {
+func (r mutationRootResolver) RemoveTicket(ctx context.Context, id string) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
 		found := false
@@ -535,7 +535,7 @@ func (r *mutationRootResolver) RemoveTicket(ctx context.Context, id string) (ok 
 // WAITING_FOR_MRV -> MRV_FAILURE
 // VLD_WARNING -> LGTM
 // WAITING_FOR_MRV -> LGTM 同时需要指定执行时间，客户端根据要求执行ExecuteTicket或者ScheduleTicket方法
-func (r *mutationRootResolver) PatchTicketStatus(ctx context.Context, input models.PatchTicketStatusInput) (ok bool, err error) {
+func (r mutationRootResolver) PatchTicketStatus(ctx context.Context, input models.PatchTicketStatusInput) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
 		found := false
@@ -642,7 +642,7 @@ func (r *mutationRootResolver) PatchTicketStatus(ctx context.Context, input mode
 }
 
 // ExecuteTicket 执行一个工单，公用ScheduleTicket，所有错误由ScheduleTicket处理
-func (r *mutationRootResolver) ExecuteTicket(ctx context.Context, id string) (ok bool, err error) {
+func (r mutationRootResolver) ExecuteTicket(ctx context.Context, id string) (ok bool, err error) {
 	input := models.ScheduleTicketInput{
 		TicketUUID: id,
 		Schedule:   time.Now().UTC().Format("2006-01-02 15:04:05"),
@@ -656,7 +656,7 @@ func (r *mutationRootResolver) ExecuteTicket(ctx context.Context, id string) (ok
 }
 
 // ScheduleTicket 预约执行一个工单
-func (r *mutationRootResolver) ScheduleTicket(ctx context.Context, input models.ScheduleTicketInput) (cron *models.Cron, err error) {
+func (r mutationRootResolver) ScheduleTicket(ctx context.Context, input models.ScheduleTicketInput) (cron *models.Cron, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
 		found := false
@@ -761,7 +761,7 @@ func (r *mutationRootResolver) ScheduleTicket(ctx context.Context, input models.
 }
 
 // Ticket 查看一个工单
-func (r *queryRootResolver) Ticket(ctx context.Context, id string) (ticket *models.Ticket, err error) {
+func (r queryRootResolver) Ticket(ctx context.Context, id string) (ticket *models.Ticket, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
 		found := false
@@ -791,7 +791,7 @@ func (r *queryRootResolver) Ticket(ctx context.Context, id string) (ticket *mode
 }
 
 // Tickets 分页查看全部工单
-func (r *queryRootResolver) Tickets(ctx context.Context, after *string, before *string, first *int, last *int) (*gqlapi.TicketConnection, error) {
+func (r queryRootResolver) Tickets(ctx context.Context, after *string, before *string, first *int, last *int) (*gqlapi.TicketConnection, error) {
 	rc := gqlapi.ReturnCodeOK
 
 	// 参数判断，只允许 first/before first/after last/before last/after 模式
@@ -823,7 +823,7 @@ func (r *queryRootResolver) Tickets(ctx context.Context, after *string, before *
 		hasPreviousPage = false
 	}
 	// 获取edges
-	edges := []gqlapi.TicketEdge{}
+	edges := []*gqlapi.TicketEdge{}
 	tickets := []*models.Ticket{}
 
 	var err error
@@ -834,7 +834,7 @@ func (r *queryRootResolver) Tickets(ctx context.Context, after *string, before *
 	}
 
 	for _, ticket := range tickets {
-		edges = append(edges, gqlapi.TicketEdge{
+		edges = append(edges, &gqlapi.TicketEdge{
 			Node:   ticket,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", ticket.TicketID)),
 		})
@@ -850,7 +850,7 @@ func (r *queryRootResolver) Tickets(ctx context.Context, after *string, before *
 	// 获取pageInfo
 	startCursor := EncodeCursor(fmt.Sprintf("%d", tickets[0].TicketID))
 	endCursor := EncodeCursor(fmt.Sprintf("%d", tickets[len(tickets)-1].TicketID))
-	pageInfo := gqlapi.PageInfo{
+	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: hasPreviousPage,
 		HasNextPage:     hasNextPage,
 		StartCursor:     startCursor,
@@ -865,7 +865,7 @@ func (r *queryRootResolver) Tickets(ctx context.Context, after *string, before *
 }
 
 // TicketSearch 工单搜索，TODO: 下一个版本考虑实现
-func (r *queryRootResolver) TicketSearch(ctx context.Context, search string, after *string, before *string, first *int, last *int) (*gqlapi.TicketConnection, error) {
+func (r queryRootResolver) TicketSearch(ctx context.Context, search string, after *string, before *string, first *int, last *int) (*gqlapi.TicketConnection, error) {
 	rc := gqlapi.ReturnCodeOK
 	// 参数判断，只允许 first/before first/after last/before last/after 模式
 	if first != nil && last != nil {
@@ -883,7 +883,7 @@ func (r *queryRootResolver) TicketSearch(ctx context.Context, search string, aft
 type ticketResolver struct{ *Resolver }
 
 // Cluster 工单的目标群集
-func (r *ticketResolver) Cluster(ctx context.Context, obj *models.Ticket) (cluster *models.Cluster, err error) {
+func (r ticketResolver) Cluster(ctx context.Context, obj *models.Ticket) (cluster *models.Cluster, err error) {
 	rc := gqlapi.ReturnCodeOK
 	cluster = caches.ClustersMap.Any(func(elem *models.Cluster) bool {
 		if elem.ClusterID == obj.ClusterID {
@@ -899,7 +899,7 @@ func (r *ticketResolver) Cluster(ctx context.Context, obj *models.Ticket) (clust
 }
 
 // User 工单的发起人
-func (r *ticketResolver) User(ctx context.Context, obj *models.Ticket) (user *models.User, err error) {
+func (r ticketResolver) User(ctx context.Context, obj *models.Ticket) (user *models.User, err error) {
 	rc := gqlapi.ReturnCodeOK
 	user = caches.UsersMap.Any(func(elem *models.User) bool {
 		if elem.UserID == obj.UserID {
@@ -916,7 +916,7 @@ func (r *ticketResolver) User(ctx context.Context, obj *models.Ticket) (user *mo
 }
 
 // Reviewer 工单的审核人
-func (r *ticketResolver) Reviewer(ctx context.Context, obj *models.Ticket) (user *models.User, err error) {
+func (r ticketResolver) Reviewer(ctx context.Context, obj *models.Ticket) (user *models.User, err error) {
 	rc := gqlapi.ReturnCodeOK
 	user = caches.UsersMap.Any(func(elem *models.User) bool {
 		if elem.UserID == obj.ReviewerID {
@@ -933,7 +933,7 @@ func (r *ticketResolver) Reviewer(ctx context.Context, obj *models.Ticket) (user
 }
 
 // Cron 执行预约信息
-func (r *ticketResolver) Cron(ctx context.Context, obj *models.Ticket) (cron *models.Cron, err error) {
+func (r ticketResolver) Cron(ctx context.Context, obj *models.Ticket) (cron *models.Cron, err error) {
 	rc := gqlapi.ReturnCodeOK
 	if !obj.CronID.Valid {
 		return
@@ -949,7 +949,7 @@ func (r *ticketResolver) Cron(ctx context.Context, obj *models.Ticket) (cron *mo
 }
 
 // Statements 工单的分解语句，TODO: 分页未完成
-func (r *ticketResolver) Statements(ctx context.Context, obj *models.Ticket, after *string, before *string, first *int, last *int) (*gqlapi.StatementConnection, error) {
+func (r ticketResolver) Statements(ctx context.Context, obj *models.Ticket, after *string, before *string, first *int, last *int) (*gqlapi.StatementConnection, error) {
 	rc := gqlapi.ReturnCodeOK
 	// 参数判断，只允许 first/before first/after last/before last/after 模式
 	if first != nil && last != nil {
@@ -965,9 +965,9 @@ func (r *ticketResolver) Statements(ctx context.Context, obj *models.Ticket, aft
 	if err := g.Engine.Where("ticket_id = ?", obj.TicketID).Find(&stmts); err != nil {
 		return nil, err
 	}
-	edges := []gqlapi.StatementEdge{}
+	edges := []*gqlapi.StatementEdge{}
 	for _, stmt := range stmts {
-		edges = append(edges, gqlapi.StatementEdge{
+		edges = append(edges, &gqlapi.StatementEdge{
 			Node:   stmt,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", stmt.Sequence)),
 		})
@@ -978,7 +978,7 @@ func (r *ticketResolver) Statements(ctx context.Context, obj *models.Ticket, aft
 	// 获取pageInfo
 	startCursor := EncodeCursor(fmt.Sprintf("%d", stmts[0].Sequence))
 	endCursor := EncodeCursor(fmt.Sprintf("%d", stmts[len(stmts)-1].Sequence))
-	pageInfo := gqlapi.PageInfo{
+	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: false,
 		HasNextPage:     false,
 		StartCursor:     startCursor,
@@ -993,7 +993,7 @@ func (r *ticketResolver) Statements(ctx context.Context, obj *models.Ticket, aft
 }
 
 // Comments 工单的审核意见
-func (r *ticketResolver) Comments(ctx context.Context, obj *models.Ticket, after *string, before *string, first *int, last *int) (*gqlapi.CommentConnection, error) {
+func (r ticketResolver) Comments(ctx context.Context, obj *models.Ticket, after *string, before *string, first *int, last *int) (*gqlapi.CommentConnection, error) {
 	rc := gqlapi.ReturnCodeOK
 	// 参数判断，只允许 first/before first/after last/before last/after 模式
 	if first != nil && last != nil {
@@ -1007,9 +1007,9 @@ func (r *ticketResolver) Comments(ctx context.Context, obj *models.Ticket, after
 
 	comments := []*models.Comment{}
 	g.Engine.Where("ticket_id = ?", obj.TicketID).Find(&comments)
-	edges := []gqlapi.CommentEdge{}
+	edges := []*gqlapi.CommentEdge{}
 	for _, comment := range comments {
-		edges = append(edges, gqlapi.CommentEdge{
+		edges = append(edges, &gqlapi.CommentEdge{
 			Node:   comment,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", comment.CommentID)),
 		})
@@ -1020,7 +1020,7 @@ func (r *ticketResolver) Comments(ctx context.Context, obj *models.Ticket, after
 	// 获取pageInfo
 	startCursor := EncodeCursor(fmt.Sprintf("%d", comments[0].CommentID))
 	endCursor := EncodeCursor(fmt.Sprintf("%d", comments[len(comments)-1].CommentID))
-	pageInfo := gqlapi.PageInfo{
+	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: false,
 		HasNextPage:     false,
 		StartCursor:     startCursor,

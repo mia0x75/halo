@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-xorm/xorm"
 	"github.com/google/uuid"
 	"github.com/mia0x75/parser/ast"
+	"xorm.io/xorm"
 )
 
 // Statement 工单分解出来的单个SQL语句

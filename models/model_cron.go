@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-xorm/xorm"
 	"github.com/google/uuid"
+	"xorm.io/xorm"
 )
 
 // Cron 计划任务的模型

@@ -4,8 +4,8 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/go-xorm/xorm"
 	log "github.com/sirupsen/logrus"
+	"xorm.io/xorm"
 )
 
 // Engine 全局XORM的引擎

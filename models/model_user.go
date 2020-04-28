@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-xorm/xorm"
 	"github.com/google/uuid"
+	"xorm.io/xorm"
 )
 
 // User 用户模型

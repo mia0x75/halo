@@ -101,52 +101,75 @@ type subscriptionRootResolver struct{ *Resolver }
 
 // Comment TODO: 添加描述
 func (r *Resolver) Comment() gqlapi.CommentResolver {
-	return &commentResolver{r}
+	return commentResolver{r}
 }
 
 // Log TODO: 添加描述
 func (r *Resolver) Log() gqlapi.LogResolver {
-	return &logResolver{r}
+	return logResolver{r}
 }
 
 // MutationRoot TODO: 添加描述
 func (r *Resolver) MutationRoot() gqlapi.MutationRootResolver {
-	return &mutationRootResolver{r}
+	return mutationRootResolver{r}
 }
 
 // Query TODO: 添加描述
 func (r *Resolver) Query() gqlapi.QueryResolver {
-	return &queryResolver{r}
+	return queryResolver{r}
 }
 
 // QueryRoot TODO: 添加描述
 func (r *Resolver) QueryRoot() gqlapi.QueryRootResolver {
-	return &queryRootResolver{r}
+	return queryRootResolver{r}
 }
 
 // Role TODO: 添加描述
 func (r *Resolver) Role() gqlapi.RoleResolver {
-	return &roleResolver{r}
+	return roleResolver{r}
 }
 
 // Statement TODO: 添加描述
 func (r *Resolver) Statement() gqlapi.StatementResolver {
-	return &statementResolver{r}
+	return statementResolver{r}
 }
 
 // SubscriptionRoot TODO: 添加描述
 func (r *Resolver) SubscriptionRoot() gqlapi.SubscriptionRootResolver {
-	return &subscriptionRootResolver{r}
+	return subscriptionRootResolver{r}
 }
 
 // Ticket TODO: 添加描述
 func (r *Resolver) Ticket() gqlapi.TicketResolver {
-	return &ticketResolver{r}
+	return ticketResolver{r}
 }
 
 // User TODO: 添加描述
 func (r *Resolver) User() gqlapi.UserResolver {
-	return &userResolver{r}
+	return userResolver{r}
+}
+
+// Cluster TODO: 添加描述
+func (r *Resolver) Cluster() gqlapi.ClusterResolver {
+	return clusterResolver{r}
+}
+func (r *Resolver) Avatar() gqlapi.AvatarResolver {
+	return avatarResolver{r}
+}
+func (r *Resolver) Cron() gqlapi.CronResolver {
+	return cronResolver{r}
+}
+func (r *Resolver) Glossary() gqlapi.GlossaryResolver {
+	return glossaryResolver{r}
+}
+func (r *Resolver) Option() gqlapi.OptionResolver {
+	return optionResolver{r}
+}
+func (r *Resolver) Rule() gqlapi.RuleResolver {
+	return ruleResolver{r}
+}
+func (r *Resolver) Statistic() gqlapi.StatisticResolver {
+	return statisticResolver{r}
 }
 
 // EncodeCursor 对分页的光标进行编码
@@ -156,9 +179,9 @@ func EncodeCursor(s string) string {
 }
 
 // RequestCols TODO: 有问题
-func (r *Resolver) RequestCols(fields []graphql.CollectedField, model interface{}) (columns []string) {
+func (r Resolver) RequestCols(fields []graphql.CollectedField, model interface{}) (columns []string) {
 	// 从model的成员和底层映射表字段的对照关系
-	table := g.Engine.TableInfo(model)
+	table, _ := g.Engine.TableInfo(model)
 	cols := table.Columns()
 	for _, col := range cols {
 		for _, field := range fields {

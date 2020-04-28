@@ -23,7 +23,7 @@ var cfg = gqlapi.Config{}
 
 func init() {
 	cfg = gqlapi.Config{
-		Resolvers: &resolvers.Resolver{},
+		Resolvers: resolvers.Resolver{},
 		Directives: gqlapi.DirectiveRoot{
 			Auth:    directives.Auth,
 			Date:    directives.Date,

@@ -13,7 +13,7 @@ import (
 )
 
 // CreateComment 添加审核意见
-func (r *mutationRootResolver) CreateComment(ctx context.Context, input models.CreateCommentInput) (comment *models.Comment, err error) {
+func (r mutationRootResolver) CreateComment(ctx context.Context, input models.CreateCommentInput) (comment *models.Comment, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
 		found := false
@@ -69,7 +69,7 @@ func (r *mutationRootResolver) CreateComment(ctx context.Context, input models.C
 type commentResolver struct{ *Resolver }
 
 // User 审核意见的发起人
-func (r *commentResolver) User(ctx context.Context, obj *models.Comment) (user *models.User, err error) {
+func (r commentResolver) User(ctx context.Context, obj *models.Comment) (user *models.User, err error) {
 	rc := gqlapi.ReturnCodeOK
 	user = caches.UsersMap.Any(func(elem *models.User) bool {
 		if elem.UserID == obj.UserID {
@@ -87,7 +87,7 @@ func (r *commentResolver) User(ctx context.Context, obj *models.Comment) (user *
 }
 
 // Ticket 审核意见关联的工单
-func (r *commentResolver) Ticket(ctx context.Context, obj *models.Comment) (ticket *models.Ticket, err error) {
+func (r commentResolver) Ticket(ctx context.Context, obj *models.Comment) (ticket *models.Ticket, err error) {
 	rc := gqlapi.ReturnCodeOK
 	ticket = &models.Ticket{
 		TicketID: obj.TicketID,

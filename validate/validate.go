@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"sync"
 
-	"github.com/go-xorm/core"
+	"xorm.io/core"
 
 	"github.com/mia0x75/halo/caches"
 	"github.com/mia0x75/halo/g"

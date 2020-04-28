@@ -13,7 +13,7 @@ import (
 )
 
 // Option 获取某一具体的选项信息
-func (r *queryRootResolver) Option(ctx context.Context, id string) (option *models.Option, err error) {
+func (r queryRootResolver) Option(ctx context.Context, id string) (option *models.Option, err error) {
 	rc := gqlapi.ReturnCodeOK
 	option = caches.OptionsMap.Any(func(elem *models.Option) bool {
 		if elem.UUID == id {
@@ -29,7 +29,7 @@ func (r *queryRootResolver) Option(ctx context.Context, id string) (option *mode
 }
 
 // Options 查看全部系统选项
-func (r *queryRootResolver) Options(ctx context.Context) (L []*models.Option, err error) {
+func (r queryRootResolver) Options(ctx context.Context) (L []*models.Option, err error) {
 	L = caches.OptionsMap.All()
 	return
 }
@@ -37,7 +37,7 @@ func (r *queryRootResolver) Options(ctx context.Context) (L []*models.Option, er
 type optionResolver struct{ *Resolver }
 
 // PatchOptionValues 修改系统选项
-func (r *mutationRootResolver) PatchOptionValues(ctx context.Context, input models.PatchOptionValueInput) (ok bool, err error) {
+func (r mutationRootResolver) PatchOptionValues(ctx context.Context, input models.PatchOptionValueInput) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
 		option := caches.OptionsMap.Any(func(elem *models.Option) bool {

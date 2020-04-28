@@ -14,7 +14,7 @@ import (
 )
 
 // Statistics 根据分组获取统计信息
-func (r *queryRootResolver) Statistics(ctx context.Context, groups []string) (L []*models.Statistic, err error) {
+func (r queryRootResolver) Statistics(ctx context.Context, groups []string) (L []*models.Statistic, err error) {
 	L = caches.StatisticsMap.Filter(func(elem *models.Statistic) bool {
 		return tools.Contains(groups, elem.Group)
 	})
@@ -27,16 +27,16 @@ func (r *queryRootResolver) Statistics(ctx context.Context, groups []string) (L 
 }
 
 // Environments 系统运行环境状态信息
-func (r *queryRootResolver) Environments(ctx context.Context) (env *gqlapi.Environments, err error) {
+func (r queryRootResolver) Environments(ctx context.Context) (env *gqlapi.Environments, err error) {
 	env = &gqlapi.Environments{}
 	cs := g.GlobalStat.CPUStats()
 	ms := g.GlobalStat.MemStats()
 	hi := g.GlobalStat.HostInfos()
 	ps := g.GlobalStat.ProcessStats()
-	env.CPUStats = *cs
-	env.HostInfos = *hi
-	env.ProcessStats = *ps
-	env.MemStats = *ms
+	env.CPUStats = cs
+	env.HostInfos = hi
+	env.ProcessStats = ps
+	env.MemStats = ms
 	return
 }
 

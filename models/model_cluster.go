@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-xorm/core"
-	"github.com/go-xorm/xorm"
 	"github.com/google/uuid"
+	"xorm.io/core"
+	"xorm.io/xorm"
 )
 
 // Cluster 群集的模型

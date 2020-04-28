@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-xorm/xorm"
 	"github.com/google/uuid"
+	"xorm.io/xorm"
 )
 
 // Avatar 用户可选的头像

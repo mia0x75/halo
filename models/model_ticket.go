@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-xorm/xorm"
 	"github.com/google/uuid"
+	"xorm.io/xorm"
 )
 
 // Ticket 工单模型

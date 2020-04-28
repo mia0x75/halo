@@ -10,7 +10,7 @@ import (
 )
 
 // Role 查看某一个角色信息
-func (r *queryRootResolver) Role(ctx context.Context, id string) (role *models.Role, err error) {
+func (r queryRootResolver) Role(ctx context.Context, id string) (role *models.Role, err error) {
 	rc := gqlapi.ReturnCodeOK
 	role = caches.RolesMap.Any(func(elem *models.Role) bool {
 		if elem.UUID == id {
@@ -26,7 +26,7 @@ func (r *queryRootResolver) Role(ctx context.Context, id string) (role *models.R
 }
 
 // Roles 因为角色不会太多，所以不需要考虑数据分页问题
-func (r *queryRootResolver) Roles(ctx context.Context) (L []*models.Role, err error) {
+func (r queryRootResolver) Roles(ctx context.Context) (L []*models.Role, err error) {
 	L = caches.RolesMap.All()
 	return
 }
@@ -34,7 +34,7 @@ func (r *queryRootResolver) Roles(ctx context.Context) (L []*models.Role, err er
 type roleResolver struct{ *Resolver }
 
 // Users 查看角色关联的用户信息
-func (r *roleResolver) Users(ctx context.Context, obj *models.Role, after *string, before *string, first *int, last *int) (*gqlapi.UserConnection, error) {
+func (r roleResolver) Users(ctx context.Context, obj *models.Role, after *string, before *string, first *int, last *int) (*gqlapi.UserConnection, error) {
 	rc := gqlapi.ReturnCodeOK
 	// 参数判断，只允许 first/before first/after last/before last/after 模式
 	if first != nil && last != nil {
@@ -72,9 +72,9 @@ func (r *roleResolver) Users(ctx context.Context, obj *models.Role, after *strin
 		return &gqlapi.UserConnection{}, nil
 	}
 
-	userEdges := []gqlapi.UserEdge{}
+	userEdges := []*gqlapi.UserEdge{}
 	for _, user := range users {
-		userEdges = append(userEdges, gqlapi.UserEdge{
+		userEdges = append(userEdges, &gqlapi.UserEdge{
 			Node:   user,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", user.UserID)),
 		})
@@ -83,7 +83,7 @@ func (r *roleResolver) Users(ctx context.Context, obj *models.Role, after *strin
 		return &gqlapi.UserConnection{}, nil
 	}
 	// 获取pageInfo
-	pageInfo := gqlapi.PageInfo{
+	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: false,
 		HasNextPage:     false,
 		StartCursor:     "",

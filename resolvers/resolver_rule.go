@@ -15,7 +15,7 @@ import (
 )
 
 // PatchRuleValues 修改规则值
-func (r *mutationRootResolver) PatchRuleValues(ctx context.Context, input models.PatchRuleValuesInput) (ok bool, err error) {
+func (r mutationRootResolver) PatchRuleValues(ctx context.Context, input models.PatchRuleValuesInput) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
 		rule := caches.RulesMap.Any(func(elem *models.Rule) bool {
@@ -55,7 +55,7 @@ func (r *mutationRootResolver) PatchRuleValues(ctx context.Context, input models
 }
 
 // PatchRuleBitwise 修改规则执行标志位
-func (r *mutationRootResolver) PatchRuleBitwise(ctx context.Context, input models.PatchRuleBitwiseInput) (ok bool, err error) {
+func (r mutationRootResolver) PatchRuleBitwise(ctx context.Context, input models.PatchRuleBitwiseInput) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
 		rule := caches.RulesMap.Any(func(elem *models.Rule) bool {
@@ -105,7 +105,7 @@ func (r *mutationRootResolver) PatchRuleBitwise(ctx context.Context, input model
 }
 
 // TestRegexp 测试正则表达式的有效性
-func (r *queryRootResolver) TestRegexp(ctx context.Context, input *models.ValidatePatternInput) (ok bool, err error) {
+func (r queryRootResolver) TestRegexp(ctx context.Context, input *models.ValidatePatternInput) (ok bool, err error) {
 	rc := gqlapi.ReturnCodeOK
 	if _, err = regexp.Compile(input.Pattern); err != nil {
 		// TODO: 处理rc
@@ -118,7 +118,7 @@ func (r *queryRootResolver) TestRegexp(ctx context.Context, input *models.Valida
 }
 
 // Rule 查看某一个具体的规则信息，好像目前用处不大
-func (r *queryRootResolver) Rule(ctx context.Context, id string) (rule *models.Rule, err error) {
+func (r queryRootResolver) Rule(ctx context.Context, id string) (rule *models.Rule, err error) {
 	rc := gqlapi.ReturnCodeOK
 	rule = caches.RulesMap.Any(func(elem *models.Rule) bool {
 		if elem.UUID == id {
@@ -135,7 +135,7 @@ func (r *queryRootResolver) Rule(ctx context.Context, id string) (rule *models.R
 }
 
 // Rules 规则在页面上是一个页面处理所有内容，所以不需要考虑分页
-func (r *queryRootResolver) Rules(ctx context.Context) (L []*models.Rule, err error) {
+func (r queryRootResolver) Rules(ctx context.Context) (L []*models.Rule, err error) {
 	L = caches.RulesMap.All()
 	return
 }

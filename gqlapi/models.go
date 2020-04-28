@@ -26,9 +26,9 @@ type ActivatePayload struct {
 
 type ClusterConnection struct {
 	// 分页信息
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// 记录信息
-	Edges []ClusterEdge `json:"edges"`
+	Edges []*ClusterEdge `json:"edges"`
 	// 记录总数
 	TotalCount int `json:"totalCount"`
 }
@@ -42,9 +42,9 @@ type ClusterEdge struct {
 
 type CommentConnection struct {
 	// 分页信息
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// 记录信息
-	Edges []CommentEdge `json:"edges"`
+	Edges []*CommentEdge `json:"edges"`
 	// 记录总数
 	TotalCount int `json:"totalCount"`
 }
@@ -58,9 +58,9 @@ type CommentEdge struct {
 
 type CronConnection struct {
 	// 分页信息
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// 记录信息
-	Edges []CronEdge `json:"edges"`
+	Edges []*CronEdge `json:"edges"`
 	// 记录总数
 	TotalCount int `json:"totalCount"`
 }
@@ -83,17 +83,17 @@ type Database struct {
 }
 
 type Environments struct {
-	CPUStats     statgo.CPUStats     `json:"CPUStats"`
-	HostInfos    statgo.HostInfos    `json:"HostInfos"`
-	ProcessStats statgo.ProcessStats `json:"ProcessStats"`
-	MemStats     statgo.MemStats     `json:"MemStats"`
+	CPUStats     *statgo.CPUStats     `json:"CPUStats"`
+	HostInfos    *statgo.HostInfos    `json:"HostInfos"`
+	ProcessStats *statgo.ProcessStats `json:"ProcessStats"`
+	MemStats     *statgo.MemStats     `json:"MemStats"`
 }
 
 type LogConnection struct {
 	// 分页信息
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// 记录信息
-	Edges []LogEdge `json:"edges"`
+	Edges []*LogEdge `json:"edges"`
 	// 记录总数
 	TotalCount int `json:"totalCount"`
 }
@@ -108,7 +108,7 @@ type LogEdge struct {
 // 用户登录后返回当前用户信息和令牌
 type LoginPayload struct {
 	// 用户信息
-	Me models.User `json:"Me"`
+	Me *models.User `json:"Me"`
 	// 登录令牌
 	Token string `json:"Token"`
 }
@@ -127,9 +127,9 @@ type PageInfo struct {
 
 type QueryConnection struct {
 	// 分页信息
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// 记录信息
-	Edges []QueryEdge `json:"edges"`
+	Edges []*QueryEdge `json:"edges"`
 	// 记录总数
 	TotalCount int `json:"totalCount"`
 }
@@ -143,9 +143,9 @@ type QueryEdge struct {
 
 type StatementConnection struct {
 	// 分页信息
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// 记录信息
-	Edges []StatementEdge `json:"edges"`
+	Edges []*StatementEdge `json:"edges"`
 	// 记录总数
 	TotalCount int `json:"totalCount"`
 }
@@ -159,9 +159,9 @@ type StatementEdge struct {
 
 type TicketConnection struct {
 	// 分页信息
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// 记录信息
-	Edges []TicketEdge `json:"edges"`
+	Edges []*TicketEdge `json:"edges"`
 	// 记录总数
 	TotalCount int `json:"totalCount"`
 }
@@ -181,9 +181,9 @@ type TicketStatusChangePayload struct {
 // 用户连接定义
 type UserConnection struct {
 	// 分页信息
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// 记录信息
-	Edges []UserEdge `json:"edges"`
+	Edges []*UserEdge `json:"edges"`
 	// 记录总数
 	TotalCount int `json:"totalCount"`
 }
