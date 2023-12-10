@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-xorm/xorm"
 	"github.com/mia0x75/parser"
 	"github.com/mia0x75/parser/ast"
+	"xorm.io/xorm"
 
 	"github.com/mia0x75/halo/caches"
 	"github.com/mia0x75/halo/events"

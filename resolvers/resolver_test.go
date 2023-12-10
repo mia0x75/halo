@@ -503,7 +503,7 @@ func TestRemoveTickets(t *testing.T) {
 
 }
 
-//user
+// user
 func TestRegister(t *testing.T) {
 	req := graphql.NewRequest(`
     mutation ($email: String!,$password: String!) {
@@ -818,7 +818,7 @@ func TestPatchUserStatus(t *testing.T) {
 	}
 }
 
-//UpdateProfile
+// UpdateProfile
 func TestUpdateProfile(t *testing.T) {
 	req := graphql.NewRequest(`
     mutation ($id: String!,$name: String!) {

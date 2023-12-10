@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-xorm/xorm"
 	"github.com/google/uuid"
 	"github.com/mia0x75/parser/ast"
+	"xorm.io/xorm"
 )
 
 // Statement 工单分解出来的单个SQL语句
@@ -66,6 +66,16 @@ func (m *Statement) String() string {
 
 // IsNode GraphQL的基类需要实现的接口，暂时不动
 func (Statement) IsNode() {}
+
+// 创建时间
+func (m *Statement) GetCreateAt() uint {
+	return m.CreateAt
+}
+
+// 最后一次修改时间
+func (m *Statement) GetUpdateAt() *uint {
+	return &m.UpdateAt
+}
 
 // Violations 单独一条语句不通过的所有的信息描述
 type Violations struct {

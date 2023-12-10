@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-xorm/xorm"
 	"github.com/google/uuid"
+	"xorm.io/xorm"
 )
 
 // Ticket 工单模型
@@ -64,6 +64,16 @@ func (m *Ticket) String() string {
 
 // IsNode GraphQL的基类需要实现的接口，暂时不动
 func (Ticket) IsNode() {}
+
+// 创建时间
+func (m *Ticket) GetCreateAt() uint {
+	return m.CreateAt
+}
+
+// 最后一次修改时间
+func (m *Ticket) GetUpdateAt() *uint {
+	return &m.UpdateAt
+}
 
 // IsSearchable GraphQL的基类需要实现的接口，暂时不动
 func (Ticket) IsSearchable() {}

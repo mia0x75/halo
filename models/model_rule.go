@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-xorm/xorm"
 	"github.com/google/uuid"
+	"xorm.io/xorm"
 )
 
 // Rule 系统审核规则
@@ -64,3 +64,13 @@ func (m *Rule) String() string {
 
 // IsNode GraphQL的基类需要实现的接口，暂时不动
 func (Rule) IsNode() {}
+
+// 创建时间
+func (m *Rule) GetCreateAt() uint {
+	return m.CreateAt
+}
+
+// 最后一次修改时间
+func (m *Rule) GetUpdateAt() *uint {
+	return &m.UpdateAt
+}

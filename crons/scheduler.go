@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-xorm/builder"
 	log "github.com/sirupsen/logrus"
+	"xorm.io/builder"
 
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/models"

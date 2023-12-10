@@ -158,7 +158,7 @@ func EncodeCursor(s string) string {
 // RequestCols TODO: 有问题
 func (r *Resolver) RequestCols(fields []graphql.CollectedField, model interface{}) (columns []string) {
 	// 从model的成员和底层映射表字段的对照关系
-	table := g.Engine.TableInfo(model)
+	table, _ := g.Engine.TableInfo(model)
 	cols := table.Columns()
 	for _, col := range cols {
 		for _, field := range fields {

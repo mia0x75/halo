@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/go-xorm/core"
-	"github.com/go-xorm/xorm"
 	"github.com/google/uuid"
+	"xorm.io/xorm"
 )
 
 // Cluster 群集的模型
@@ -94,6 +94,16 @@ func (m *Cluster) Sha1(data string) []byte {
 
 // IsNode GraphQL的基类需要实现的接口，暂时不动
 func (Cluster) IsNode() {}
+
+// 创建时间
+func (m *Cluster) GetCreateAt() uint {
+	return m.CreateAt
+}
+
+// 最后一次修改时间
+func (m *Cluster) GetUpdateAt() *uint {
+	return &m.UpdateAt
+}
 
 // IsSearchable GraphQL的基类需要实现的接口，暂时不动
 func (Cluster) IsSearchable() {}

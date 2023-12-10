@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-xorm/xorm"
 	"github.com/google/uuid"
+	"xorm.io/xorm"
 )
 
 // Avatar 用户可选的头像
@@ -48,3 +48,13 @@ func (m *Avatar) String() string {
 
 // IsNode GraphQL的基类需要实现的接口，暂时不动
 func (Avatar) IsNode() {}
+
+// 创建时间
+func (m *Avatar) GetCreateAt() uint {
+	return m.CreateAt
+}
+
+// 最后一次修改时间
+func (m *Avatar) GetUpdateAt() *uint {
+	return &m.UpdateAt
+}

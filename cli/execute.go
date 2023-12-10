@@ -8,8 +8,8 @@ import (
 	"os"
 
 	"github.com/go-xorm/core"
-	"github.com/go-xorm/xorm"
 	"github.com/spf13/cobra"
+	"xorm.io/xorm"
 
 	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/g"

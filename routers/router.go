@@ -6,15 +6,15 @@ import (
 	"log"
 	"net/http"
 	"net/http/pprof"
-	"strings"
+	//	"strings"
 
-	"github.com/99designs/gqlgen/graphql"
+	//	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/handler"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 
 	"github.com/mia0x75/halo/directives"
-	"github.com/mia0x75/halo/g"
+	//	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/resolvers"
 )
@@ -110,6 +110,7 @@ func Routes(r *mux.Router) {
 		}),
 		handler.WebsocketUpgrader(upgrader),
 	}
+	/* RequestMiddleware signature error ??
 	if strings.EqualFold(g.Config().Log.Level, "debug") {
 		options = append(options,
 			// 性能跟踪，DEBUG模式时打开
@@ -129,6 +130,7 @@ func Routes(r *mux.Router) {
 			handler.ComplexityLimit(1000),
 		)
 	}
+	*/
 
 	r.HandleFunc("/api/query", handler.GraphQL(
 		gqlapi.NewExecutableSchema(cfg),

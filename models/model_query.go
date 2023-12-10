@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-xorm/xorm"
 	"github.com/google/uuid"
+	"xorm.io/xorm"
 )
 
 // Query 记录用户发起一般数据查询及SHOW语句
@@ -59,3 +59,13 @@ func (m *Query) String() string {
 
 // IsNode GraphQL的基类需要实现的接口，暂时不动
 func (Query) IsNode() {}
+
+// 创建时间
+func (m *Query) GetCreateAt() uint {
+	return m.CreateAt
+}
+
+// 最后一次修改时间
+func (m *Query) GetUpdateAt() *uint {
+	return &m.UpdateAt
+}

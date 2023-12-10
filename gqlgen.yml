@@ -7,6 +7,7 @@ schema:
 - gqlapi/schema.graphql
 
 exec:
+  dir: gqlapi
   filename: gqlapi/generated.go
   package: gqlapi
 
@@ -15,7 +16,8 @@ model:
   package: gqlapi
 
 resolver:
-  filename: resolvers/resolver.go
+  layout: follow-schema
+  filename_template: "resolvers/{name}.resolvers.go"
   package: resolvers
   type: Resolver
 
@@ -114,31 +116,31 @@ models:
 
   CreateTicketInput:
     model: github.com/mia0x75/halo/models.CreateTicketInput
-  
+
   UpdateTicketInput:
     model: github.com/mia0x75/halo/models.UpdateTicketInput
-  
+
   PatchTicketStatusInput:
     model: github.com/mia0x75/halo/models.PatchTicketStatusInput
-  
+
   CreateCommentInput:
     model: github.com/mia0x75/halo/models.CreateCommentInput
-  
+
   CreateUserInput:
     model: github.com/mia0x75/halo/models.CreateUserInput
-  
+
   UpdateUserInput:
     model: github.com/mia0x75/halo/models.UpdateUserInput
-  
+
   PatchPasswordInput:
     model: github.com/mia0x75/halo/models.PatchPasswordInput
-  
+
   PatchEmailInput:
     model: github.com/mia0x75/halo/models.PatchEmailInput
-  
+
   GrantRolesInput:
     model: github.com/mia0x75/halo/models.GrantRolesInput
-  
+
   GrantClustersInput:
     model: github.com/mia0x75/halo/models.GrantClustersInput
 
@@ -147,7 +149,7 @@ models:
 
   RevokeClustersInput:
     model: github.com/mia0x75/halo/models.RevokeClustersInput
-  
+
   GrantReviewersInput:
     model: github.com/mia0x75/halo/models.GrantReviewersInput
 
@@ -156,13 +158,13 @@ models:
 
   UserRegisterInput:
     model: github.com/mia0x75/halo/models.UserRegisterInput
-  
+
   UserLoginInput:
     model: github.com/mia0x75/halo/models.UserLoginInput
-    
+
   CreateClusterInput:
     model: github.com/mia0x75/halo/models.CreateClusterInput
-  
+
   UpdateClusterInput:
     model: github.com/mia0x75/halo/models.UpdateClusterInput
 
@@ -171,19 +173,19 @@ models:
 
   ValidateConnectionInput:
     model: github.com/mia0x75/halo/models.ValidateConnectionInput
-  
+
   ValidatePatternInput:
     model: github.com/mia0x75/halo/models.ValidatePatternInput
-  
+
   PatchOptionValueInput:
     model: github.com/mia0x75/halo/models.PatchOptionValueInput
-  
+
   CreateQueryInput:
     model: github.com/mia0x75/halo/models.CreateQueryInput
-  
+
   PatchRuleValuesInput:
     model: github.com/mia0x75/halo/models.PatchRuleValuesInput
-  
+
   PatchRuleBitwiseInput:
     model: github.com/mia0x75/halo/models.PatchRuleBitwiseInput
 
@@ -192,7 +194,7 @@ models:
 
   UpdateProfileInput:
     model: github.com/mia0x75/halo/models.UpdateProfileInput
-  
+
   SoarQueryInput:
     model: github.com/mia0x75/halo/models.SoarQueryInput
 

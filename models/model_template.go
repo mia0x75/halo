@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-xorm/xorm"
 	"github.com/google/uuid"
+	"xorm.io/xorm"
 )
 
 // Template 用户模型
@@ -54,3 +54,13 @@ func (m *Template) String() string {
 
 // IsNode GraphQL的基类需要实现的接口，暂时不动
 func (Template) IsNode() {}
+
+// 创建时间
+func (m *Template) GetCreateAt() uint {
+	return m.CreateAt
+}
+
+// 最后一次修改时间
+func (m *Template) GetUpdateAt() *uint {
+	return &m.UpdateAt
+}

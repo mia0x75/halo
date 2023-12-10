@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-xorm/xorm"
 	"github.com/google/uuid"
+	"xorm.io/xorm"
 )
 
 // Comment 审核意见建议的模型
@@ -53,3 +53,13 @@ func (m *Comment) String() string {
 
 // IsNode GraphQL的基类需要实现的接口，暂时不动
 func (Comment) IsNode() {}
+
+// 创建时间
+func (m *Comment) GetCreateAt() uint {
+	return m.CreateAt
+}
+
+// 最后一次修改时间
+func (m *Comment) GetUpdateAt() *uint {
+	return &m.UpdateAt
+}

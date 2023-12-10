@@ -14,6 +14,10 @@ import (
 // 接口定义
 type Node interface {
 	IsNode()
+	// 创建时间
+	GetCreateAt() uint
+	// 最后一次修改时间
+	GetUpdateAt() *uint
 }
 
 type Searchable interface {
@@ -28,14 +32,14 @@ type ClusterConnection struct {
 	// 分页信息
 	PageInfo *PageInfo `json:"pageInfo"`
 	// 记录信息
-	Edges []*ClusterEdge `json:"edges"`
+	Edges []*ClusterEdge `json:"edges,omitempty"`
 	// 记录总数
 	TotalCount int `json:"totalCount"`
 }
 
 type ClusterEdge struct {
 	// 端
-	Node *models.Cluster `json:"node"`
+	Node *models.Cluster `json:"node,omitempty"`
 	// 分页时使用的光标
 	Cursor string `json:"cursor"`
 }
@@ -44,14 +48,14 @@ type CommentConnection struct {
 	// 分页信息
 	PageInfo *PageInfo `json:"pageInfo"`
 	// 记录信息
-	Edges []*CommentEdge `json:"edges"`
+	Edges []*CommentEdge `json:"edges,omitempty"`
 	// 记录总数
 	TotalCount int `json:"totalCount"`
 }
 
 type CommentEdge struct {
 	// 端
-	Node *models.Comment `json:"node"`
+	Node *models.Comment `json:"node,omitempty"`
 	// 分页时使用的光标
 	Cursor string `json:"cursor"`
 }
@@ -60,14 +64,14 @@ type CronConnection struct {
 	// 分页信息
 	PageInfo *PageInfo `json:"pageInfo"`
 	// 记录信息
-	Edges []*CronEdge `json:"edges"`
+	Edges []*CronEdge `json:"edges,omitempty"`
 	// 记录总数
 	TotalCount int `json:"totalCount"`
 }
 
 type CronEdge struct {
 	// 端
-	Node *models.Cron `json:"node"`
+	Node *models.Cron `json:"node,omitempty"`
 	// 分页时使用的光标
 	Cursor string `json:"cursor"`
 }
@@ -93,14 +97,14 @@ type LogConnection struct {
 	// 分页信息
 	PageInfo *PageInfo `json:"pageInfo"`
 	// 记录信息
-	Edges []*LogEdge `json:"edges"`
+	Edges []*LogEdge `json:"edges,omitempty"`
 	// 记录总数
 	TotalCount int `json:"totalCount"`
 }
 
 type LogEdge struct {
 	// 端
-	Node *models.Log `json:"node"`
+	Node *models.Log `json:"node,omitempty"`
 	// 分页时使用的光标
 	Cursor string `json:"cursor"`
 }
@@ -129,14 +133,14 @@ type QueryConnection struct {
 	// 分页信息
 	PageInfo *PageInfo `json:"pageInfo"`
 	// 记录信息
-	Edges []*QueryEdge `json:"edges"`
+	Edges []*QueryEdge `json:"edges,omitempty"`
 	// 记录总数
 	TotalCount int `json:"totalCount"`
 }
 
 type QueryEdge struct {
 	// 端
-	Node *models.Query `json:"node"`
+	Node *models.Query `json:"node,omitempty"`
 	// 分页时使用的光标
 	Cursor string `json:"cursor"`
 }
@@ -145,14 +149,14 @@ type StatementConnection struct {
 	// 分页信息
 	PageInfo *PageInfo `json:"pageInfo"`
 	// 记录信息
-	Edges []*StatementEdge `json:"edges"`
+	Edges []*StatementEdge `json:"edges,omitempty"`
 	// 记录总数
 	TotalCount int `json:"totalCount"`
 }
 
 type StatementEdge struct {
 	// 端
-	Node *models.Statement `json:"node"`
+	Node *models.Statement `json:"node,omitempty"`
 	// 分页时使用的光标
 	Cursor string `json:"cursor"`
 }
@@ -161,14 +165,14 @@ type TicketConnection struct {
 	// 分页信息
 	PageInfo *PageInfo `json:"pageInfo"`
 	// 记录信息
-	Edges []*TicketEdge `json:"edges"`
+	Edges []*TicketEdge `json:"edges,omitempty"`
 	// 记录总数
 	TotalCount int `json:"totalCount"`
 }
 
 type TicketEdge struct {
 	// 端
-	Node *models.Ticket `json:"node"`
+	Node *models.Ticket `json:"node,omitempty"`
 	// 分页时使用的光标
 	Cursor string `json:"cursor"`
 }
@@ -183,7 +187,7 @@ type UserConnection struct {
 	// 分页信息
 	PageInfo *PageInfo `json:"pageInfo"`
 	// 记录信息
-	Edges []*UserEdge `json:"edges"`
+	Edges []*UserEdge `json:"edges,omitempty"`
 	// 记录总数
 	TotalCount int `json:"totalCount"`
 }
@@ -191,7 +195,7 @@ type UserConnection struct {
 // 连接中用户的端
 type UserEdge struct {
 	// 端
-	Node *models.User `json:"node"`
+	Node *models.User `json:"node,omitempty"`
 	// 分页时使用的光标
 	Cursor string `json:"cursor"`
 }

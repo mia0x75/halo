@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-xorm/xorm"
 	"github.com/google/uuid"
+	"xorm.io/xorm"
 )
 
 // Role 系统角色
@@ -50,3 +50,13 @@ func (m *Role) String() string {
 
 // IsNode GraphQL的基类需要实现的接口，暂时不动
 func (Role) IsNode() {}
+
+// 创建时间
+func (m *Role) GetCreateAt() uint {
+	return m.CreateAt
+}
+
+// 最后一次修改时间
+func (m *Role) GetUpdateAt() *uint {
+	return &m.UpdateAt
+}

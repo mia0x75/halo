@@ -1,55 +1,63 @@
 module github.com/mia0x75/halo
 
+go 1.21.4
+
+replace github.com/go-xorm/core => github.com/mia0x75/xorm-core v0.6.3
+
 require (
-	cloud.google.com/go v0.34.0 // indirect
-	github.com/99designs/gqlgen v0.9.0
+	github.com/99designs/gqlgen v0.17.41
 	github.com/akhenakh/statgo v0.0.0-20171021021904-3ae2cda264c5
-	github.com/cznic/mathutil v0.0.0-20160613104831-78ad7f262603 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fatih/structs v1.1.0
-	github.com/go-sql-driver/mysql v1.4.1
-	github.com/go-xorm/builder v0.3.2
-	github.com/go-xorm/core v0.6.2
-	github.com/go-xorm/xorm v0.7.1
-	github.com/google/uuid v1.1.1
-	github.com/gorilla/mux v1.6.1
-	github.com/gorilla/websocket v1.4.0
-	github.com/hashicorp/golang-lru v0.5.1 // indirect
+	github.com/go-sql-driver/mysql v1.7.1
+	github.com/go-xorm/core v0.0.0-00010101000000-000000000000
+	github.com/google/uuid v1.4.0
+	github.com/gorilla/mux v1.8.1
+	github.com/gorilla/websocket v1.5.1
 	github.com/machinebox/graphql v0.2.2
-	github.com/matryer/is v1.2.0 // indirect
-	github.com/mia0x75/antlr v0.0.0-20190323140341-bf6915c3dd7b // indirect
-	github.com/mia0x75/parser v0.0.0-20190510005206-932a40f52f52
+	github.com/mia0x75/parser v0.0.0-20190531113551-6fbc203ea218
 	github.com/mia0x75/yql v0.0.0-20190325023231-8a8982f46522
-	github.com/pingcap/check v0.0.0-20171206051426-1c287c953996 // indirect
-	github.com/pingcap/errors v0.11.0 // indirect
-	github.com/sirupsen/logrus v1.3.0
-	github.com/spf13/cobra v0.0.3
-	github.com/spf13/pflag v1.0.3 // indirect
-	github.com/stretchr/testify v1.3.0
+	github.com/sirupsen/logrus v1.9.3
+	github.com/spf13/cobra v1.8.0
+	github.com/stretchr/testify v1.8.4
 	github.com/toolkits/file v0.0.0-20160325033739-a5b3c5147e07
-	github.com/vektah/gqlparser v1.1.2
-	golang.org/x/crypto v0.0.0-20190130090550-b01c7a725664
-	golang.org/x/sys v0.0.0-20190222072716-a9d3bda3a223 // indirect
+	github.com/vektah/gqlparser/v2 v2.5.10
+	golang.org/x/crypto v0.16.0
+	xorm.io/builder v0.3.11-0.20220531020008-1bd24a7dc978
+	xorm.io/xorm v1.3.4
 )
 
-replace (
-	cloud.google.com/go => github.com/googleapis/google-cloud-go v0.36.0
-	github.com/go-xorm/core => github.com/mia0x75/xorm-core v0.6.3
-
-	golang.org/x/build => github.com/golang/build v0.0.0-20190228010158-44b79b8774a7
-	golang.org/x/crypto => github.com/golang/crypto v0.0.0-20190227175134-215aa809caaf
-	golang.org/x/exp => github.com/golang/exp v0.0.0-20190221220918-438050ddec5e
-	golang.org/x/lint => github.com/golang/lint v0.0.0-20190227174305-5b3e6a55c961
-	golang.org/x/net => github.com/golang/net v0.0.0-20190227160552-c95aed5357e7
-	golang.org/x/oauth2 => github.com/golang/oauth2 v0.0.0-20190226205417-e64efc72b421
-	golang.org/x/perf => github.com/golang/perf v0.0.0-20190124201629-844a5f5b46f4
-	golang.org/x/sync => github.com/golang/sync v0.0.0-20190227155943-e225da77a7e6
-	golang.org/x/sys => github.com/golang/sys v0.0.0-20190226215855-775f8194d0f9
-	golang.org/x/text => github.com/golang/text v0.3.0
-	golang.org/x/time => github.com/golang/time v0.0.0-20181108054448-85acf8d2951c
-	golang.org/x/tools => github.com/golang/tools v0.0.0-20190227232517-f0a709d59f0f
-	google.golang.org/api => github.com/googleapis/google-api-go-client v0.1.0
-	google.golang.org/appengine => github.com/golang/appengine v1.4.0
-	google.golang.org/genproto => github.com/google/go-genproto v0.0.0-20190227213309-4f5b463f9597
-	google.golang.org/grpc => github.com/grpc/grpc-go v1.19.0
+require (
+	github.com/agnivade/levenshtein v1.1.1 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.3 // indirect
+	github.com/cznic/mathutil v0.0.0-20181122101859-297441e03548 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/goccy/go-json v0.8.1 // indirect
+	github.com/golang/snappy v0.0.4 // indirect
+	github.com/hashicorp/golang-lru/v2 v2.0.3 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/matryer/is v1.4.1 // indirect
+	github.com/mia0x75/antlr v0.0.0-20190323140341-bf6915c3dd7b // indirect
+	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
+	github.com/modern-go/reflect2 v1.0.2 // indirect
+	github.com/pingcap/check v0.0.0-20211026125417-57bd13f7b5f0 // indirect
+	github.com/pingcap/errors v0.11.4 // indirect
+	github.com/pingcap/tidb v2.0.11+incompatible // indirect
+	github.com/pkg/errors v0.8.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
+	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/sosodev/duration v1.1.0 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/syndtr/goleveldb v1.0.0 // indirect
+	github.com/urfave/cli/v2 v2.25.5 // indirect
+	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
+	golang.org/x/mod v0.10.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/tools v0.9.3 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

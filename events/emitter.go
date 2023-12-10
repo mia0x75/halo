@@ -1,9 +1,9 @@
 /*
 Package events implements channel based pubsub pattern.
 The design goals are:
-	- fully functional and safety
-	- simple to understand and use
-	- make the code readable, maintainable and minimalistic
+  - fully functional and safety
+  - simple to understand and use
+  - make the code readable, maintainable and minimalistic
 */
 package events
 

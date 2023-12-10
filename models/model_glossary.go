@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-xorm/xorm"
 	"github.com/google/uuid"
+	"xorm.io/xorm"
 )
 
 // Glossary 系统字典表
@@ -53,3 +53,13 @@ func (m *Glossary) String() string {
 
 // IsNode GraphQL的基类需要实现的接口，暂时不动
 func (Glossary) IsNode() {}
+
+// 创建时间
+func (m *Glossary) GetCreateAt() uint {
+	return m.CreateAt
+}
+
+// 最后一次修改时间
+func (m *Glossary) GetUpdateAt() *uint {
+	return &m.UpdateAt
+}

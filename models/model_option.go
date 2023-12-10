@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-xorm/xorm"
 	"github.com/google/uuid"
+	"xorm.io/xorm"
 )
 
 // Option 系统选项
@@ -55,3 +55,13 @@ func (m *Option) String() string {
 
 // IsNode GraphQL的基类需要实现的接口，暂时不动
 func (Option) IsNode() {}
+
+// 创建时间
+func (m *Option) GetCreateAt() uint {
+	return m.CreateAt
+}
+
+// 最后一次修改时间
+func (m *Option) GetUpdateAt() *uint {
+	return &m.UpdateAt
+}

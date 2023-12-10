@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-xorm/xorm"
 	"github.com/google/uuid"
+	"xorm.io/xorm"
 )
 
 // Cron 计划任务的模型
@@ -62,3 +62,13 @@ func (m *Cron) String() string {
 
 // IsNode GraphQL的基类需要实现的接口，暂时不动
 func (Cron) IsNode() {}
+
+// 创建时间
+func (m *Cron) GetCreateAt() uint {
+	return m.CreateAt
+}
+
+// 最后一次修改时间
+func (m *Cron) GetUpdateAt() *uint {
+	return &m.UpdateAt
+}

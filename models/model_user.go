@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-xorm/xorm"
 	"github.com/google/uuid"
+	"xorm.io/xorm"
 )
 
 // User 用户模型
@@ -67,6 +67,16 @@ func (m *User) String() string {
 
 // IsNode GraphQL的基类需要实现的接口，暂时不动
 func (User) IsNode() {}
+
+// 创建时间
+func (m *User) GetCreateAt() uint {
+	return m.CreateAt
+}
+
+// 最后一次修改时间
+func (m *User) GetUpdateAt() *uint {
+	return &m.UpdateAt
+}
 
 // IsSearchable GraphQL的基类需要实现的接口，暂时不动
 func (User) IsSearchable() {}
