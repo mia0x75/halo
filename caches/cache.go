@@ -3,8 +3,6 @@ package caches
 import (
 	"sync"
 
-	"github.com/mia0x75/halo/models"
-
 	log "github.com/sirupsen/logrus"
 )
 
@@ -13,9 +11,6 @@ type SafeMap[T any] struct {
 	M         []*T
 	fetchFunc func() ([]*T, error)
 }
-
-// UsersMap 用户缓存对象
-var GenericUsersMap = &SafeMap[models.User]{}
 
 // Count 返回缓存条数
 func (c *SafeMap[T]) Count() int {
@@ -85,17 +80,6 @@ func (c *SafeMap[T]) Filter(f func(*T) bool) (L []*T) {
 		}
 	}
 	return
-}
-
-// Lookup 根据UUID返回一个用户信息
-func (c *SafeMap[T]) Lookup(UUID string) *T {
-	return c.Any(func(elem *T) bool {
-		// TODO:
-		// if elem.UUID == UUID {
-		// 	return true
-		// }
-		return false
-	})
 }
 
 // Map returns a new slice containing the results of applying the function f to each string in the original slice.
