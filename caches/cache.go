@@ -1,68 +1,150 @@
 package caches
 
 import (
-	"time"
+	"sync"
+
+	"github.com/mia0x75/halo/models"
 
 	log "github.com/sirupsen/logrus"
 )
 
-// Init 初始化缓存
-func Init() {
-	log.Info("[I] cache begin")
-
-	log.Info("[I] #0 Avatars...")
-	AvatarsMap.Init()
-
-	log.Info("[I] #1 Clusters...")
-	ClustersMap.Init()
-
-	log.Info("[I] #2 Options...")
-	OptionsMap.Init()
-
-	log.Info("[I] #3 Roles...")
-	RolesMap.Init()
-
-	log.Info("[I] #4 Edges...")
-	EdgesMap.Init()
-
-	log.Info("[I] #5 Rules...")
-	RulesMap.Init()
-
-	log.Info("[I] #6 Glossaries...")
-	GlossariesMap.Init()
-
-	log.Info("[I] #7 Users...")
-	UsersMap.Init()
-
-	log.Info("[I] #8 Statistics...")
-	StatisticsMap.Init()
-
-	log.Info("[I] #9 Templates...")
-	TemplatesMap.Init()
-
-	log.Info("[I] cache done")
-
-	LoopInit()
+type SafeMap[T any] struct {
+	sync.RWMutex
+	M         []*T
+	fetchFunc func() ([]*T, error)
 }
 
-// LoopInit 定期刷新缓存
-func LoopInit() {
-	go func() {
-		d := time.Duration(10) * time.Second
-		for range time.Tick(d) {
-			EdgesMap.Init()
-			UsersMap.Init()
-			StatisticsMap.Init()
-		}
-	}()
+// UsersMap 用户缓存对象
+var GenericUsersMap = &SafeMap[models.User]{}
 
-	go func() {
-		d := time.Duration(60) * time.Second
-		for range time.Tick(d) {
-			ClustersMap.Init()
-			OptionsMap.Init()
-			RulesMap.Init()
-			TemplatesMap.Init()
+// Count 返回缓存条数
+func (c *SafeMap[T]) Count() int {
+	c.RLock()
+	defer c.RUnlock()
+	return len(c.M)
+}
+
+// Append 添加元素
+func (c *SafeMap[T]) Append(item *T) {
+	c.RLock()
+	defer c.RUnlock()
+	c.M = append(c.M, item)
+}
+
+// Remove 删除元素
+func (c *SafeMap[T]) Remove(f func(*T) bool) {
+	c.RLock()
+	defer c.RUnlock()
+	var s []*T
+	for _, v := range c.M {
+		if !f(v) {
+			s = append(s, v)
 		}
-	}()
+	}
+	c.M = s
+}
+
+// Include returns true if one of the element in the sliece satisfies the predicate f.
+func (c *SafeMap[T]) Include(f func(*T) bool) bool {
+	c.RLock()
+	defer c.RUnlock()
+	for _, v := range c.M {
+		if f(v) {
+			return true
+		}
+	}
+	return false
+}
+
+// Any returns the element if one of the element in the sliece satisfies the predicate f.
+func (c *SafeMap[T]) Any(f func(*T) bool) *T {
+	c.RLock()
+	defer c.RUnlock()
+	for _, v := range c.M {
+		if f(v) {
+			return v
+		}
+	}
+	return nil
+}
+
+// All returns all of the slice.
+func (c *SafeMap[T]) All() []*T {
+	c.RLock()
+	defer c.RUnlock()
+	return c.M
+}
+
+// Filter returns a new slice containing all elements in the slice that satisfy the predicate f.
+func (c *SafeMap[T]) Filter(f func(*T) bool) (L []*T) {
+	c.RLock()
+	defer c.RUnlock()
+	for _, v := range c.M {
+		if f(v) {
+			L = append(L, v)
+		}
+	}
+	return
+}
+
+// Lookup 根据UUID返回一个用户信息
+func (c *SafeMap[T]) Lookup(UUID string) *T {
+	return c.Any(func(elem *T) bool {
+		// TODO:
+		// if elem.UUID == UUID {
+		// 	return true
+		// }
+		return false
+	})
+}
+
+// Map returns a new slice containing the results of applying the function f to each string in the original slice.
+func (c *SafeMap[T]) Map(f func(*T) *T) []*T {
+	c.RLock()
+	defer c.RUnlock()
+	m := make([]*T, len(c.M))
+	for i, v := range c.M {
+		m[i] = f(v)
+	}
+	return m
+}
+
+// GetPage 返回一页缓存数据
+func (c *SafeMap[T]) GetPage(offset, limit int) (users []*T) {
+	c.RLock()
+	defer c.RUnlock()
+	switch {
+	case offset >= len(c.M) || offset < 0:
+	case offset+int(limit) >= len(c.M):
+		users = c.M[offset:]
+	default:
+		users = c.M[offset : offset+limit]
+	}
+	return
+}
+
+// Reload 重新加载数据
+func (c *SafeMap[T]) Reload() {
+	c.Lock()
+	defer c.Unlock()
+	if c.fetchFunc == nil {
+		return
+	}
+	if m, err := c.fetchFunc(); err != nil {
+		c.M = m
+	}
+}
+
+// Init 缓存初始化
+func (c *SafeMap[T]) WithInit(fn func() ([]*T, error)) []*T {
+	if m, err := fn(); err != nil {
+		log.Printf("查询数据表`%s`时发生一个错误:%s", "users", err.Error())
+		return nil
+	} else {
+		c.Lock()
+		defer c.Unlock()
+		c.M = m
+		c.fetchFunc = fn
+		return m
+	}
 }
