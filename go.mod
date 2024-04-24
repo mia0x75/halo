@@ -1,6 +1,6 @@
 module github.com/mia0x75/halo
 
-go 1.21.4
+go 1.22.2
 
 replace github.com/go-xorm/core => github.com/mia0x75/xorm-core v0.6.3
 
