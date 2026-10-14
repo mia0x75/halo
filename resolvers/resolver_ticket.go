@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-xorm/core"
 	"github.com/mia0x75/parser"
 	"github.com/mia0x75/parser/ast"
 	"github.com/mia0x75/parser/driver"
@@ -194,7 +193,7 @@ L:
 		}
 
 		notifyTicketStatusChange(user.UUID, ticket.UUID, fmt.Sprintf("新建工单(uuid=%s)成功，系统正在开始启动自动化审核。", ticket.UUID))
-		go validation(statements, cluster, ticket)
+		go r.validation(statements, cluster, ticket)
 
 		events.Fire(events.EventTicketCreated, &events.TicketCreatedArgs{
 			User:    *user,
@@ -390,7 +389,7 @@ L:
 		}
 
 		notifyTicketStatusChange(user.UUID, ticket.UUID, fmt.Sprintf("更新工单(uuid=%s)成功，系统正在开始启动自动化审核。", ticket.UUID))
-		go validation(statements, cluster, ticket)
+		go r.validation(statements, cluster, ticket)
 
 		events.Fire(events.EventTicketUpdated, &events.TicketUpdatedArgs{
 			User:    *user,
@@ -943,7 +942,7 @@ func (r *ticketResolver) Comments(ctx context.Context, obj *models.Ticket, after
 }
 
 // 校验工单详情并处理请求结果
-func validation(stmts []*models.Statement, cluster *models.Cluster, ticket *models.Ticket) {
+func (r *mutationRootResolver) validation(stmts []*models.Statement, cluster *models.Cluster, ticket *models.Ticket) {
 	validate.Run(stmts, cluster, ticket)
 
 	for _, s := range stmts {
@@ -980,25 +979,15 @@ func validation(stmts []*models.Statement, cluster *models.Cluster, ticket *mode
 	}
 
 	// 更新到数据库
-	session := g.Engine.NewSession()
-	defer session.Close()
-	session.Begin()
-	for _, stmt := range stmts {
-		if _, err := session.ID(core.PK{stmt.TicketID, stmt.Sequence}).Update(stmt); err != nil {
-			session.Rollback()
-			log.Errorf("[E] An unexpected error occured during data updating, err: %s", err.Error())
-			return
+	err := r.app.Tx.WithTx(context.Background(), func(ctx context.Context, repos service.Repos) error {
+		for _, stmt := range stmts {
+			if err := repos.Statement.Update(ctx, bridge.StatementToDomain(stmt)); err != nil {
+				return err
+			}
 		}
-	}
-
-	// 更新工单
-	if _, err := session.ID(ticket.TicketID).Update(ticket); err != nil {
-		session.Rollback()
-		log.Errorf("[E] An unexpected error occured during data updating, err: %s", err.Error())
-		return
-	}
-
-	if err := session.Commit(); err != nil {
+		return repos.Ticket.Update(ctx, bridge.TicketToDomain(ticket))
+	})
+	if err != nil {
 		log.Errorf("[E] An unexpected error occured during data updating, err: %s", err.Error())
 	}
 }
