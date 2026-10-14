@@ -15,6 +15,7 @@ import (
 	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
+	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
 )
@@ -342,18 +343,21 @@ L:
 		cluster.Status = input.Status
 		cluster.Password = passwd
 		cluster.Alias = input.Alias
+		cluster.BeforeInsert()
 
-		if _, err = g.Engine.Insert(cluster); err != nil {
+		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		newID, createErr := r.app.Services.Cluster.Create(ctx, bridge.ClusterToDomain(cluster), credential.User.UserID)
+		if createErr != nil {
 			cluster = nil
 			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, createErr.Error())
 			break L
 		}
+		cluster.ClusterID = uint(newID)
 
 		// 主动同步缓存
 		caches.ClustersMap.Append(cluster)
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
 		events.Fire(events.EventClusterCreated, &events.ClusterCreatedArgs{
 			Manager: *credential.User,
 			Cluster: *cluster,
@@ -431,15 +435,16 @@ L:
 		cluster.User = input.User
 		cluster.Alias = input.Alias
 		cluster.Status = input.Status
+		cluster.BeforeUpdate()
 
-		if _, err = g.Engine.ID(cluster.ClusterID).AllCols().Update(cluster); err != nil {
+		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		if updErr := r.app.Services.Cluster.Update(ctx, bridge.ClusterToDomain(cluster), credential.User.UserID); updErr != nil {
 			cluster = nil
 			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, updErr.Error())
 			break L
 		}
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
 		events.Fire(events.EventClusterUpdated, &events.ClusterUpdatedArgs{
 			Manager: *credential.User,
 			Cluster: *cluster,
@@ -467,9 +472,10 @@ func (r *mutationRootResolver) RemoveCluster(ctx context.Context, id string) (ok
 			err = fmt.Errorf("错误代码: %s, 错误信息: 群集(uuid=%s)不存在。", rc, id)
 			break
 		}
-		if _, err = g.Engine.ID(cluster.ClusterID).Delete(cluster); err != nil {
+		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		if delErr := r.app.Services.Cluster.Delete(ctx, cluster.ClusterID, credential.User.UserID); delErr != nil {
 			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, delErr.Error())
 			break
 		}
 
@@ -481,7 +487,6 @@ func (r *mutationRootResolver) RemoveCluster(ctx context.Context, id string) (ok
 			return false
 		})
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
 		events.Fire(events.EventClusterRemoved, &events.ClusterRemovedArgs{
 			Manager: *credential.User,
 			Cluster: *cluster,
@@ -517,15 +522,17 @@ func (r *mutationRootResolver) PatchClusterStatus(ctx context.Context, input mod
 			break
 		}
 
-		cluster.Status = input.Status
-		// TODO: 需要单元测试
-		if _, err = g.Engine.ID(cluster.ClusterID).Where("`status` <> ?", input.Status).Update(cluster); err != nil {
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
-			break
+		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		if cluster.Status != input.Status {
+			cluster.Status = input.Status
+			cluster.BeforeUpdate()
+			if updErr := r.app.Services.Cluster.Update(ctx, bridge.ClusterToDomain(cluster), credential.User.UserID); updErr != nil {
+				rc = gqlapi.ReturnCodeUnknowError
+				err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, updErr.Error())
+				break
+			}
 		}
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
 		events.Fire(events.EventClusterStatusPatched, &events.ClusterStatusPatchedArgs{
 			Manager: *credential.User,
 			Cluster: *cluster,
