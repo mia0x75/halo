@@ -387,6 +387,10 @@ CREATE TABLE `mm_clusters` (
   `user`        VARCHAR(50)
                 NOT NULL
                 COMMENT '连接用户',
+  `type`        VARCHAR(20)
+                NOT NULL
+                DEFAULT 'mysql'
+                COMMENT '数据库类型',
   `password`    VARBINARY(48)
                 NOT NULL
                 COMMENT '密码',

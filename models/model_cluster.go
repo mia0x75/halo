@@ -12,6 +12,8 @@ import (
 	"github.com/go-xorm/core"
 	"github.com/google/uuid"
 	"xorm.io/xorm"
+
+	"github.com/mia0x75/halo/internal/domain"
 )
 
 // Cluster 群集的模型
@@ -23,6 +25,7 @@ type Cluster struct {
 	Port        uint16 `xorm:"'port' notnull smallint unique(unique_2) unique(unique_3)" db:"port" valid:"required,port"                    json:"port"        gqlgen:"Port"`          //
 	Alias       string `xorm:"'alias' notnull varchar(75) unique(unique_4)" db:"alias"              valid:"required,runelength(1|100)"       json:"alias"       gqlgen:"Alias"`        //
 	User        string `xorm:"'user' notnull varchar(50)" db:"user"                                valid:"required,length(1|50),alphanum"   json:"user"        gqlgen:"User"`          //
+	Type        string `xorm:"'type' notnull varchar(20)" db:"type"                                 valid:"required,in(mysql|postgres)"      json:"type"        gqlgen:"Type"`         // 目标库类型
 	Password    []byte `xorm:"'password' notnull varbinary(48)" db:"password"                          valid:"required"                         json:"-"           gqlgen:"-"`         // 双向加密
 	FingerPrint []byte `xorm:"'fingerprint' notnull varbinary(16)" db:"fingerprint"                       valid:"required"                         json:"-"           gqlgen:"-"`      //
 	Status      uint8  `xorm:"'status' notnull tinyint" db:"status"                                  valid:"required,matches(^[0-9]$)"        json:"status"      gqlgen:"Status"`      //
@@ -38,6 +41,10 @@ func (m *Cluster) TableName() string {
 
 // BeforeInsert ORM在执行数据插入前会调用该方法
 func (m *Cluster) BeforeInsert() {
+	// GraphQL 尚未暴露 type，缺省按 MySQL 记录，避免写入空串。
+	if m.Type == "" {
+		m.Type = string(domain.ClusterTypeMySQL)
+	}
 	m.UUID = uuid.New().String()
 	m.Host = strings.TrimSpace(m.Host)
 	m.IP = strings.TrimSpace(m.IP)
