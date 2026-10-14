@@ -26,17 +26,13 @@ func (r *queryRootResolver) Statistics(ctx context.Context, groups []string) (L 
 	return
 }
 
-// Environments 系统运行环境状态信息
+// Environments 系统运行环境状态信息（纯 Go 实现，无 CGO 依赖）
 func (r *queryRootResolver) Environments(ctx context.Context) (env *gqlapi.Environments, err error) {
 	env = &gqlapi.Environments{}
-	cs := g.GlobalStat.CPUStats()
-	ms := g.GlobalStat.MemStats()
-	hi := g.GlobalStat.HostInfos()
-	ps := g.GlobalStat.ProcessStats()
-	env.CPUStats = cs
-	env.HostInfos = hi
-	env.ProcessStats = ps
-	env.MemStats = ms
+	env.CPUStats = g.GetCPUStats()
+	env.MemStats = g.GetMemStats()
+	env.HostInfos = g.GetHostInfos()
+	env.ProcessStats = g.GetProcessStats()
 	return
 }
 

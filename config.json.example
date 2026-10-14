@@ -1,0 +1,35 @@
+{
+  "log": {
+    "level": "info"
+  },
+  "cert": "certs/cert.pem",
+  "key": "certs/key.pem",
+  "listen": ":443",
+  "database": {
+    "addr": "halo:password@tcp(127.0.0.1:3306)/halo?charset=utf8mb4&parseTime=true&loc=Local",
+    "max_idle": 10,
+    "max_connections": 100,
+    "wait_timeout": 300
+  },
+  "backup": {
+    "addr": "halo:password@tcp(127.0.0.1:3306)/halo?charset=utf8mb4&parseTime=true&loc=Local",
+    "max_idle": 5,
+    "max_connections": 20,
+    "wait_timeout": 300
+  },
+  "mail": {
+    "enabled": false,
+    "addr": "smtp.example.com:465",
+    "user": "noreply@example.com",
+    "password": "change-me",
+    "encryption": "ssl"
+  },
+  "secret": {
+    "jwt": {
+      "token_name": "Authentication",
+      "issuer": "halo",
+      "secret_key": "change-me-32-hex-chars-000000000000"
+    },
+    "crypto": "change-me-aes-key"
+  }
+}

@@ -73,16 +73,16 @@ models:
     model: github.com/mia0x75/halo/models.Statistic
 
   CPUStats:
-    model: github.com/akhenakh/statgo.CPUStats
+    model: github.com/mia0x75/halo/models.CPUStats
 
   HostInfos:
-    model: github.com/akhenakh/statgo.HostInfos
+    model: github.com/mia0x75/halo/models.HostInfos
 
   ProcessStats:
-    model: github.com/akhenakh/statgo.ProcessStats
+    model: github.com/mia0x75/halo/models.ProcessStats
 
   MemStats:
-    model: github.com/akhenakh/statgo.MemStats
+    model: github.com/mia0x75/halo/models.MemStats
 
   Int8:
     model: github.com/mia0x75/halo/gqlapi.Int8

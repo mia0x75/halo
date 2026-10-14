@@ -6,12 +6,16 @@ import (
 	"log"
 	"net/http"
 	"net/http/pprof"
+	"time"
 	//	"strings"
 
-	//	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/lru"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/websocket"
+	"github.com/vektah/gqlparser/v2/ast"
 
 	"github.com/mia0x75/halo/directives"
 	//	"github.com/mia0x75/halo/g"
@@ -94,48 +98,39 @@ func Routes(r *mux.Router) {
 	r.Use(Logging)
 	r.Use(Compress)
 
-	r.HandleFunc("/", handler.Playground("GraphQL playground", "/api/query"))
+	r.HandleFunc("/", playground.Handler("GraphQL playground", "/api/query"))
 
-	upgrader := websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool {
-			return true
-		},
-		EnableCompression: true,
-	}
+	srv := handler.New(gqlapi.NewExecutableSchema(cfg))
 
-	options := []handler.Option{
-		handler.RecoverFunc(func(ctx context.Context, err interface{}) error {
-			// notify bug tracker...
-			return fmt.Errorf("错误代码: %s, 错误信息: 内部服务器错误，%v", gqlapi.ReturnCodeUnknowError, err)
-		}),
-		handler.WebsocketUpgrader(upgrader),
-	}
+	// WebSocket 传输（替代旧版 handler.WebsocketUpgrader，默认允许所有来源的等价行为由 coder/websocket 实现承担；
+	// 如需自定义来源校验，可通过 transport.CoderWebsocketImplementation{AcceptOptions} 传入）。
+	srv.AddTransport(transport.Websocket{
+		KeepAlivePingInterval: 10 * time.Second,
+	})
+	srv.AddTransport(transport.Options{})
+	srv.AddTransport(transport.GET{})
+	srv.AddTransport(transport.POST{})
+	srv.AddTransport(transport.MultipartForm{})
+
+	srv.SetQueryCache(lru.New[*ast.QueryDocument](1000))
+
+	srv.SetRecoverFunc(func(ctx context.Context, err interface{}) error {
+		// notify bug tracker...
+		return fmt.Errorf("错误代码: %s, 错误信息: 内部服务器错误，%v", gqlapi.ReturnCodeUnknowError, err)
+	})
+
+	srv.Use(extension.Introspection{})
+
 	/* RequestMiddleware signature error ??
 	if strings.EqualFold(g.Config().Log.Level, "debug") {
-		options = append(options,
-			// 性能跟踪，DEBUG模式时打开
-			// interface conversion: interface {} is nil, not *gqlapollotracing.tracingData
-			// handler.RequestMiddleware(gqlapollotracing.RequestMiddleware()),
-			// handler.Tracer(gqlapollotracing.NewTracer()),
-			// 自省功能，DEBUG模式时打开
-			handler.RequestMiddleware(func(ctx context.Context, next func(ctx context.Context) []byte) []byte {
-				// if userForContext(ctx).IsAdmin {
-				// 	graphql.GetRequestContext(ctx).DisableIntrospection = true
-				// }
-
-				graphql.GetRequestContext(ctx).DisableIntrospection = false
-				return next(ctx)
-			}),
-			// TODO: 处理复杂度
-			handler.ComplexityLimit(1000),
-		)
+		// 性能跟踪，DEBUG模式时打开
+		// 自省功能，DEBUG模式时打开
+		// TODO: 处理复杂度
+		// 可按需在此添加 extension.FixedComplexityLimit(1000) 等扩展
 	}
 	*/
 
-	r.HandleFunc("/api/query", handler.GraphQL(
-		gqlapi.NewExecutableSchema(cfg),
-		options...,
-	))
+	r.HandleFunc("/api/query", srv.ServeHTTP)
 }
 
 func Error403(w http.ResponseWriter, r *http.Request) {

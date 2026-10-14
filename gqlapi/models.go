@@ -3,11 +3,11 @@
 package gqlapi
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"strconv"
 
-	"github.com/akhenakh/statgo"
 	"github.com/mia0x75/halo/models"
 )
 
@@ -87,10 +87,10 @@ type Database struct {
 }
 
 type Environments struct {
-	CPUStats     *statgo.CPUStats     `json:"CPUStats"`
-	HostInfos    *statgo.HostInfos    `json:"HostInfos"`
-	ProcessStats *statgo.ProcessStats `json:"ProcessStats"`
-	MemStats     *statgo.MemStats     `json:"MemStats"`
+	CPUStats     *models.CPUStats     `json:"CPUStats"`
+	HostInfos    *models.HostInfos    `json:"HostInfos"`
+	ProcessStats *models.ProcessStats `json:"ProcessStats"`
+	MemStats     *models.MemStats     `json:"MemStats"`
 }
 
 type LogConnection struct {
@@ -115,6 +115,10 @@ type LoginPayload struct {
 	Me *models.User `json:"Me"`
 	// 登录令牌
 	Token string `json:"Token"`
+}
+
+// 数据修改入口
+type MutationRoot struct {
 }
 
 // 翻页信息
@@ -145,6 +149,10 @@ type QueryEdge struct {
 	Cursor string `json:"cursor"`
 }
 
+// 数据查询入口
+type QueryRoot struct {
+}
+
 type StatementConnection struct {
 	// 分页信息
 	PageInfo *PageInfo `json:"pageInfo"`
@@ -159,6 +167,10 @@ type StatementEdge struct {
 	Node *models.Statement `json:"node,omitempty"`
 	// 分页时使用的光标
 	Cursor string `json:"cursor"`
+}
+
+// 消息订阅入口
+type SubscriptionRoot struct {
 }
 
 type TicketConnection struct {
@@ -226,7 +238,7 @@ func (e ClusterStatusEnum) String() string {
 	return string(e)
 }
 
-func (e *ClusterStatusEnum) UnmarshalGQL(v interface{}) error {
+func (e *ClusterStatusEnum) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -240,7 +252,21 @@ func (e *ClusterStatusEnum) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ClusterStatusEnum) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ClusterStatusEnum) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ClusterStatusEnum) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // 关联表类型描述
@@ -273,7 +299,7 @@ func (e EdgeEnum) String() string {
 	return string(e)
 }
 
-func (e *EdgeEnum) UnmarshalGQL(v interface{}) error {
+func (e *EdgeEnum) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -287,7 +313,21 @@ func (e *EdgeEnum) UnmarshalGQL(v interface{}) error {
 }
 
 func (e EdgeEnum) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *EdgeEnum) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e EdgeEnum) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // 性别定义
@@ -320,7 +360,7 @@ func (e GenderEnum) String() string {
 	return string(e)
 }
 
-func (e *GenderEnum) UnmarshalGQL(v interface{}) error {
+func (e *GenderEnum) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -334,7 +374,21 @@ func (e *GenderEnum) UnmarshalGQL(v interface{}) error {
 }
 
 func (e GenderEnum) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *GenderEnum) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e GenderEnum) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 type QueryTypeEnum string
@@ -366,7 +420,7 @@ func (e QueryTypeEnum) String() string {
 	return string(e)
 }
 
-func (e *QueryTypeEnum) UnmarshalGQL(v interface{}) error {
+func (e *QueryTypeEnum) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -380,7 +434,21 @@ func (e *QueryTypeEnum) UnmarshalGQL(v interface{}) error {
 }
 
 func (e QueryTypeEnum) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *QueryTypeEnum) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e QueryTypeEnum) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // 角色定义
@@ -419,7 +487,7 @@ func (e RoleEnum) String() string {
 	return string(e)
 }
 
-func (e *RoleEnum) UnmarshalGQL(v interface{}) error {
+func (e *RoleEnum) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -433,7 +501,21 @@ func (e *RoleEnum) UnmarshalGQL(v interface{}) error {
 }
 
 func (e RoleEnum) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *RoleEnum) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e RoleEnum) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 // SQL语句抽象语法树类型枚举
@@ -513,7 +595,7 @@ func (e StatementTypeEnum) String() string {
 	return string(e)
 }
 
-func (e *StatementTypeEnum) UnmarshalGQL(v interface{}) error {
+func (e *StatementTypeEnum) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -527,7 +609,21 @@ func (e *StatementTypeEnum) UnmarshalGQL(v interface{}) error {
 }
 
 func (e StatementTypeEnum) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *StatementTypeEnum) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e StatementTypeEnum) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 type TicketStatusEnum string
@@ -577,7 +673,7 @@ func (e TicketStatusEnum) String() string {
 	return string(e)
 }
 
-func (e *TicketStatusEnum) UnmarshalGQL(v interface{}) error {
+func (e *TicketStatusEnum) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -591,7 +687,21 @@ func (e *TicketStatusEnum) UnmarshalGQL(v interface{}) error {
 }
 
 func (e TicketStatusEnum) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *TicketStatusEnum) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e TicketStatusEnum) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 type UserStatusEnum string
@@ -623,7 +733,7 @@ func (e UserStatusEnum) String() string {
 	return string(e)
 }
 
-func (e *UserStatusEnum) UnmarshalGQL(v interface{}) error {
+func (e *UserStatusEnum) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -637,5 +747,19 @@ func (e *UserStatusEnum) UnmarshalGQL(v interface{}) error {
 }
 
 func (e UserStatusEnum) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *UserStatusEnum) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e UserStatusEnum) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }

@@ -8,7 +8,7 @@ import (
 	"sync"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
@@ -31,7 +31,7 @@ func SubscriptionAuth(ctx context.Context, requires []gqlapi.RoleEnum) (user *mo
 
 		credential, ok = ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
 		if !ok {
-			payload := handler.GetInitPayload(ctx)
+			payload := transport.GetInitPayload(ctx)
 			if payload == nil {
 				rc = gqlapi.ReturnCodeUnauthorized
 				err = fmt.Errorf("错误代码: %s, 错误信息: 没有提供访问令牌、访问令牌被收回或已过期，访问被拒绝。", rc)
