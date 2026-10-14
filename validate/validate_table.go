@@ -1576,7 +1576,7 @@ func (v *TableAlterVldr) CommentRequired(s *models.Statement, r *models.Rule) {
 			}
 			if strings.TrimSpace(opt.StrValue) == "" {
 				c := &models.Clause{
-					Description: fmt.Sprintf(r.Message),
+					Description: r.Message,
 					Level:       r.Level,
 				}
 				s.Violations.Append(c)
@@ -1898,7 +1898,7 @@ func (v *TableAlterVldr) PositionColumnDoesNotExist(s *models.Statement, r *mode
 			continue
 		}
 		c := &models.Clause{
-			Description: fmt.Sprintf(r.Message),
+			Description: r.Message,
 			Level:       r.Level,
 		}
 		s.Violations.Append(c)

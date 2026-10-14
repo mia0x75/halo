@@ -51,7 +51,7 @@ func main() {
 
 	flag.Parse()
 
-	fmt.Println(g.Banner)
+	fmt.Print(g.Banner)
 	fmt.Printf("%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n",
 		"Version", g.Version,
 		"Git commit", g.Git,

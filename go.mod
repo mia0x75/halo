@@ -25,7 +25,6 @@ require (
 	github.com/toolkits/file v0.0.0-20160325033739-a5b3c5147e07
 	github.com/vektah/gqlparser/v2 v2.5.62
 	golang.org/x/crypto v0.58.0
-	xorm.io/builder v0.3.13
 	xorm.io/xorm v1.4.3
 )
 
@@ -68,4 +67,5 @@ require (
 	golang.org/x/sys v0.49.0 // indirect
 	golang.org/x/text v0.43.0 // indirect
 	golang.org/x/tools v0.52.0 // indirect
+	xorm.io/builder v0.3.13 // indirect
 )
