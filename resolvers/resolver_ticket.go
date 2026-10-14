@@ -156,17 +156,6 @@ L:
 			Status:     gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumWaitingForVld],
 		}
 
-		session := g.Engine.NewSession()
-		session.Begin()
-		defer session.Close()
-
-		if _, err = session.Insert(ticket); err != nil {
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
-			session.Rollback()
-			break
-		}
-
 		i := 1
 		for _, node := range stmts {
 			var sb strings.Builder
@@ -180,23 +169,28 @@ L:
 				Content:    sql,
 				Type:       StatementType2Uint8(node),
 				Status:     gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumWaitingForVld],
-				TicketID:   ticket.TicketID,
 				StmtNode:   node,
 				Violations: &models.Violations{},
 			}
 			statements = append(statements, &stat)
 			i++
 		}
-		if _, err = session.Insert(&statements); err != nil {
+
+		domainTicket := bridge.TicketToDomain(ticket)
+		domainStmts := make([]*domain.Statement, 0, len(statements))
+		for _, st := range statements {
+			domainStmts = append(domainStmts, bridge.StatementToDomain(st))
+		}
+		newID, createErr := r.app.Services.Ticket.Create(ctx, domainTicket, domainStmts)
+		if createErr != nil {
 			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
-			session.Rollback()
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, createErr.Error())
 			break
 		}
-		if err = session.Commit(); err != nil {
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
-			break
+		ticket.TicketID = uint(newID)
+		ticket.UUID = domainTicket.UUID
+		for _, st := range statements {
+			st.TicketID = uint(newID)
 		}
 
 		notifyTicketStatusChange(user.UUID, ticket.UUID, fmt.Sprintf("新建工单(uuid=%s)成功，系统正在开始启动自动化审核。", ticket.UUID))
@@ -330,26 +324,19 @@ L:
 			break
 		}
 
-		// 开启事务
-		session := g.Engine.NewSession()
-		defer session.Close()
-		session.Begin()
-
 		//获取数据库原有的ticket信息
-		ticket = &models.Ticket{}
-		if _, err = session.Where("uuid = ?", input.TicketUUID).Get(ticket); err != nil {
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
-			session.Rollback()
+		existing, getErr := r.app.Services.Ticket.GetByUUID(ctx, input.TicketUUID)
+		if getErr != nil {
+			if errors.Is(getErr, domain.ErrNotFound) {
+				rc = gqlapi.ReturnCodeNotFound
+				err = fmt.Errorf("错误代码: %s, 错误信息: 工单(uuid=%s)不存在。", rc, input.TicketUUID)
+			} else {
+				rc = gqlapi.ReturnCodeUnknowError
+				err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, getErr.Error())
+			}
 			break
 		}
-
-		if ticket.TicketID == 0 {
-			rc = gqlapi.ReturnCodeNotFound
-			err = fmt.Errorf("错误代码: %s, 错误信息: 工单(uuid=%s)不存在。", rc, input.TicketUUID)
-			session.Rollback()
-			break
-		}
+		ticket = bridge.TicketFromDomain(existing)
 
 		// 状态已关闭、已执行成功、已执行失败的工单不可编辑
 		if ticket.Status == gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumClosed] ||
@@ -369,16 +356,6 @@ L:
 		ticket.Database = input.Database
 		ticket.Status = gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumWaitingForVld]
 
-		// 删除原来关联语句
-		stat := models.Statement{
-			TicketID: ticket.TicketID,
-		}
-		if _, err = session.Where("ticket_id = ?", ticket.TicketID).Delete(&stat); err != nil {
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
-			session.Rollback()
-			break
-		}
 		for _, node := range stmts {
 			var sb strings.Builder
 			node.Restore(format.NewRestoreCtx(format.DefaultRestoreFlags, &sb))
@@ -391,34 +368,25 @@ L:
 				Type:       StatementType2Uint8(node),
 				Content:    sql,
 				Status:     gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumWaitingForVld],
-				TicketID:   ticket.TicketID,
 				StmtNode:   node,
 				Violations: &models.Violations{},
 			}
 			statements = append(statements, &stat)
 			i++
 		}
-		// 更新工单
-		if _, err = session.ID(ticket.TicketID).AllCols().Update(ticket); err != nil {
+
+		domainTicket := bridge.TicketToDomain(ticket)
+		domainStmts := make([]*domain.Statement, 0, len(statements))
+		for _, st := range statements {
+			domainStmts = append(domainStmts, bridge.StatementToDomain(st))
+		}
+		if updErr := r.app.Services.Ticket.Update(ctx, domainTicket, domainStmts); updErr != nil {
 			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
-			session.Rollback()
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, updErr.Error())
 			break
 		}
-
-		// 重新添加语句
-		if _, err = session.Insert(&statements); err != nil {
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
-			session.Rollback()
-			break
-		}
-
-		if err = session.Commit(); err != nil {
-			session.Rollback()
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
-			break
+		for _, st := range statements {
+			st.TicketID = ticket.TicketID
 		}
 
 		notifyTicketStatusChange(user.UUID, ticket.UUID, fmt.Sprintf("更新工单(uuid=%s)成功，系统正在开始启动自动化审核。", ticket.UUID))

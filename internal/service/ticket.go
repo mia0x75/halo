@@ -269,6 +269,70 @@ func (s *TicketService) UpdateCron(ctx context.Context, ticketUUID string, cronI
 	})
 }
 
+// Create persists a new ticket and its statements atomically. UUIDs and the
+// create timestamp are filled in when absent, mirroring the legacy xorm hooks.
+func (s *TicketService) Create(ctx context.Context, ticket *domain.Ticket, statements []*domain.Statement) (uint, error) {
+	if ticket.UUID == "" {
+		ticket.UUID = uuid.NewString()
+	}
+	if ticket.CreateAt == 0 {
+		ticket.CreateAt = uint(time.Now().Unix())
+	}
+	var id uint
+	err := s.tx.WithTx(ctx, func(ctx context.Context, repos Repos) error {
+		newID, err := repos.Ticket.Create(ctx, ticket)
+		if err != nil {
+			return err
+		}
+		id = uint(newID)
+		if err := createStatements(ctx, repos.Statement, id, statements); err != nil {
+			return err
+		}
+		return NewLogService(repos.Log).Log(ctx, LogEntry{UserID: ticket.UserID, Operation: "ticket.create", Target: "ticket:" + ticket.UUID})
+	})
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
+// Update replaces a ticket and its statements atomically.
+func (s *TicketService) Update(ctx context.Context, ticket *domain.Ticket, statements []*domain.Statement) error {
+	now := uint(time.Now().Unix())
+	ticket.UpdateAt = &now
+	return s.tx.WithTx(ctx, func(ctx context.Context, repos Repos) error {
+		if err := repos.Ticket.Update(ctx, ticket); err != nil {
+			return err
+		}
+		if err := repos.Statement.DeleteByTicket(ctx, ticket.TicketID); err != nil {
+			return err
+		}
+		if err := createStatements(ctx, repos.Statement, ticket.TicketID, statements); err != nil {
+			return err
+		}
+		return NewLogService(repos.Log).Log(ctx, LogEntry{UserID: ticket.UserID, Operation: "ticket.update", Target: "ticket:" + ticket.UUID})
+	})
+}
+
+// createStatements assigns the owning ticket and fills UUID/create_at before
+// inserting each statement.
+func createStatements(ctx context.Context, repo domain.StatementRepository, ticketID uint, statements []*domain.Statement) error {
+	now := uint(time.Now().Unix())
+	for _, st := range statements {
+		st.TicketID = ticketID
+		if st.UUID == "" {
+			st.UUID = uuid.NewString()
+		}
+		if st.CreateAt == 0 {
+			st.CreateAt = now
+		}
+		if err := repo.Create(ctx, st); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // transition loads the ticket, validates the edge and applies it with its audit
 // row in one transaction.
 func (s *TicketService) transition(ctx context.Context, ticketID uint, to domain.TicketStatus, actor uint, op, detail string, apply func(*domain.Ticket)) error {
