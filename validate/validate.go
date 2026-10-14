@@ -55,6 +55,10 @@ type Context struct {
 	Cluster   *models.Cluster          // 目标群集
 	Databases []models.Database        // 目标群集所有的用户数据库
 	Tables    map[string][]*core.Table // 目标群集上目标数据库的元数据
+	// Rules is the rule set the engine runs against. It is the future channel
+	// for RunRegistry; the legacy global wiring (SetGroup reading caches) is
+	// still in place and is removed in 2D-B.
+	Rules []*models.Rule
 }
 
 // 相当于注册表
@@ -91,9 +95,12 @@ var registry = map[uint16]Validator{
 	230: &MiscVldr{},
 }
 
-// Run 调用入口
+// Run 调用入口。签名保持不变以兼容 resolvers。
+//
+// It performs the IO (target DB metadata) and the legacy global wiring, then
+// delegates the pure rule execution to RunRegistry. Violations are written back
+// in place onto each statement, exactly as before.
 func Run(stmts []*models.Statement, cluster *models.Cluster, ticket *models.Ticket) {
-	wg := &sync.WaitGroup{}
 	ctx := &Context{
 		Cluster: cluster,
 		Ticket:  ticket,
@@ -110,16 +117,53 @@ func Run(stmts []*models.Statement, cluster *models.Cluster, ticket *models.Tick
 	if ctx.Databases, err = cluster.Databases(passwd); err != nil {
 		fmt.Println(err)
 	}
+	ctx.Rules = caches.RulesMap.All()
 
+	// Each validator group pulls its rules from the process-wide cache. This
+	// global wiring is deliberately kept here (never in RunRegistry) and is
+	// removed in 2D-B once rules flow through Context.Rules.
 	for g, v := range registry {
 		if v.Enabled() {
-			wg.Add(1)
 			v.SetGroup(g)
-			v.SetContext(ctx)
+		}
+	}
+	RunRegistry(ctx)
+}
+
+// Violation pairs a rule hit with the statement it was raised on.
+type Violation struct {
+	Statement *models.Statement
+	Clause    *models.Clause
+}
+
+// RunRegistry is the pure rule engine: it runs every enabled validator group
+// over c and returns the aggregated hits. It performs no IO and never reads
+// caches.RulesMap; callers must wire each group's rules (SetGroup) beforehand.
+func RunRegistry(c *Context) []Violation {
+	wg := &sync.WaitGroup{}
+	for _, v := range registry {
+		if v.Enabled() {
+			wg.Add(1)
+			v.SetContext(c)
 			go v.Validate(wg)
 		}
 	}
 	wg.Wait()
+	return collectViolations(c.Stmts)
+}
+
+// collectViolations flattens the per-statement hits into a single slice.
+func collectViolations(stmts []*models.Statement) []Violation {
+	var out []Violation
+	for _, s := range stmts {
+		if s.Violations == nil {
+			continue
+		}
+		for _, clause := range s.Violations.Clauses() {
+			out = append(out, Violation{Statement: s, Clause: clause})
+		}
+	}
+	return out
 }
 
 // Validator 接口定义
