@@ -20,6 +20,7 @@ import (
 	"github.com/mia0x75/halo/directives"
 	//	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
+	"github.com/mia0x75/halo/internal/app"
 	"github.com/mia0x75/halo/resolvers"
 )
 
@@ -27,7 +28,6 @@ var cfg = gqlapi.Config{}
 
 func init() {
 	cfg = gqlapi.Config{
-		Resolvers: &resolvers.Resolver{},
 		Directives: gqlapi.DirectiveRoot{
 			Auth:    directives.Auth,
 			Date:    directives.Date,
@@ -84,7 +84,8 @@ func (m *AuthMiddleware) Middleware(next http.Handler) http.Handler {
 
 // 示例代码 - 结束
 
-func Routes(r *mux.Router) {
+func Routes(r *mux.Router, application *app.App) {
+	cfg.Resolvers = resolvers.NewResolver(application)
 	// TODO: 暂时保留
 	// CSRF := csrf.Protect(
 	// 	[]byte("a-32-byte-long-key-goes-here"),

@@ -17,6 +17,8 @@ import (
 	"github.com/mia0x75/halo/caches"
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
+	"github.com/mia0x75/halo/internal/app"
+	"github.com/mia0x75/halo/internal/platform/db"
 	"github.com/mia0x75/halo/models"
 )
 
@@ -45,7 +47,10 @@ func init() {
 	if err := g.InitDB(); err != nil {
 		os.Exit(0)
 	}
-	caches.Init()
+	application, err := app.New(context.Background(), db.Config{Addr: g.Config().Database.Addr})
+	if err == nil {
+		caches.Init(application.Repos)
+	}
 
 	Login()
 }

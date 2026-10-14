@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"math"
 	"strconv"
@@ -22,6 +23,8 @@ import (
 	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
+	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
 	"github.com/mia0x75/halo/validate"
@@ -764,21 +767,18 @@ func (r *mutationRootResolver) ScheduleTicket(ctx context.Context, input models.
 func (r *queryRootResolver) Ticket(ctx context.Context, id string) (ticket *models.Ticket, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
-		found := false
-		ticket = &models.Ticket{
-			UUID: id,
-		}
-		found, err = g.Engine.Get(ticket)
-		if err != nil {
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+		t, getErr := r.app.Services.Ticket.GetByUUID(ctx, id)
+		if getErr != nil {
+			if errors.Is(getErr, domain.ErrNotFound) {
+				rc = gqlapi.ReturnCodeNotFound
+				err = fmt.Errorf("错误代码: %s, 错误信息: 工单(uuid=%s)不存在。", rc, id)
+			} else {
+				rc = gqlapi.ReturnCodeUnknowError
+				err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, getErr.Error())
+			}
 			break
 		}
-		if !found {
-			rc = gqlapi.ReturnCodeNotFound
-			err = fmt.Errorf("错误代码: %s, 错误信息: 工单(uuid=%s)不存在。", rc, id)
-			break
-		}
+		ticket = bridge.TicketFromDomain(t)
 
 		break
 	}
@@ -824,13 +824,17 @@ func (r *queryRootResolver) Tickets(ctx context.Context, after *string, before *
 	}
 	// 获取edges
 	edges := []*gqlapi.TicketEdge{}
-	tickets := []*models.Ticket{}
-
-	var err error
 
 	// 列表不允许查询Content内容
-	if err = g.Engine.Omit("content").Desc("ticket_id").Where("ticket_id < ?", from).Limit(*first).Find(&tickets); err != nil {
+	domainTickets, err := r.app.Services.Ticket.List(ctx, int64(from), *first)
+	if err != nil {
 		return nil, err
+	}
+	tickets := make([]*models.Ticket, 0, len(domainTickets))
+	for _, t := range domainTickets {
+		m := bridge.TicketFromDomain(t)
+		m.Content = ""
+		tickets = append(tickets, m)
 	}
 
 	for _, ticket := range tickets {

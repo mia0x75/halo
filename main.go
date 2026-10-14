@@ -92,7 +92,7 @@ func main() {
 	log.Infof("[I] http listening %s", addr)
 
 	r := mux.NewRouter()
-	routers.Routes(r)
+	routers.Routes(r, application)
 	if strings.EqualFold(g.Config().Log.Level, "debug") {
 		routers.ProfilerRoutes(r)
 	}

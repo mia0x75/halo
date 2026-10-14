@@ -73,6 +73,11 @@ func (s *TicketService) Get(ctx context.Context, id uint) (*domain.Ticket, error
 	return s.tickets.GetByID(ctx, int64(id))
 }
 
+// GetByUUID returns one ticket by its stable uuid (read path).
+func (s *TicketService) GetByUUID(ctx context.Context, uuid string) (*domain.Ticket, error) {
+	return s.tickets.GetByUUID(ctx, uuid)
+}
+
 // List returns a keyset page of tickets.
 func (s *TicketService) List(ctx context.Context, cursor int64, limit int) ([]*domain.Ticket, error) {
 	return s.tickets.List(ctx, cursor, limit)

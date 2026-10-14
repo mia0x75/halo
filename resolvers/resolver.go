@@ -12,6 +12,7 @@ import (
 
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
+	"github.com/mia0x75/halo/internal/app"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
 )
@@ -94,7 +95,16 @@ func init() {
 }
 
 // Resolver resolver
-type Resolver struct{}
+type Resolver struct {
+	app *app.App
+}
+
+// NewResolver returns a resolver wired to the application container. During the
+// 2D migration the container runs alongside the legacy xorm engine.
+func NewResolver(a *app.App) *Resolver {
+	return &Resolver{app: a}
+}
+
 type mutationRootResolver struct{ *Resolver }
 type queryRootResolver struct{ *Resolver }
 type subscriptionRootResolver struct{ *Resolver }
