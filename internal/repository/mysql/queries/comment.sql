@@ -18,3 +18,6 @@ DELETE FROM mm_comments WHERE uuid = ?;
 
 -- name: ListComments :many
 SELECT comment_id, uuid, content, ticket_id, user_id, version, update_at, create_at FROM mm_comments WHERE comment_id < ? ORDER BY comment_id DESC LIMIT ?;
+
+-- name: ListCommentsByTicket :many
+SELECT comment_id, uuid, content, ticket_id, user_id, version, update_at, create_at FROM mm_comments WHERE ticket_id = ? ORDER BY comment_id;

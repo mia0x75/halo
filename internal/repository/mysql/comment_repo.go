@@ -96,3 +96,16 @@ func (r *CommentRepo) List(ctx context.Context, cursor int64, limit int) ([]*dom
 	}
 	return out, nil
 }
+
+// ListByTicket returns every comment on a ticket, oldest first.
+func (r *CommentRepo) ListByTicket(ctx context.Context, ticketID uint) ([]*domain.Comment, error) {
+	rows, err := r.q.ListCommentsByTicket(ctx, uint32(ticketID))
+	if err != nil {
+		return nil, wrap("comment.ListByTicket", err)
+	}
+	out := make([]*domain.Comment, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, commentFromRow(row))
+	}
+	return out, nil
+}

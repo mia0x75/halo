@@ -942,12 +942,14 @@ func (r *ticketResolver) Cron(ctx context.Context, obj *models.Ticket) (cron *mo
 	if !obj.CronID.Valid {
 		return
 	}
-	cron = &models.Cron{}
-	if _, err = g.Engine.ID(obj.CronID.Int64).Get(cron); err != nil {
+	c, getErr := r.app.Services.Cron.Get(ctx, uint(obj.CronID.Int64))
+	if getErr != nil {
 		cron = nil
 		rc = gqlapi.ReturnCodeUnknowError
-		err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+		err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, getErr.Error())
+		return
 	}
+	cron = bridge.CronFromDomain(c)
 
 	return
 }
@@ -965,9 +967,13 @@ func (r *ticketResolver) Statements(ctx context.Context, obj *models.Ticket, aft
 		return nil, fmt.Errorf("错误代码: %s, 错误信息: 参数`after`和`before`只能选择一种。", rc)
 	}
 
-	stmts := []*models.Statement{}
-	if err := g.Engine.Where("ticket_id = ?", obj.TicketID).Find(&stmts); err != nil {
+	domainStmts, err := r.app.Services.Statement.ListByTicket(ctx, uint(obj.TicketID))
+	if err != nil {
 		return nil, err
+	}
+	stmts := make([]*models.Statement, 0, len(domainStmts))
+	for _, s := range domainStmts {
+		stmts = append(stmts, bridge.StatementFromDomain(s))
 	}
 	edges := []*gqlapi.StatementEdge{}
 	for _, stmt := range stmts {
@@ -1009,8 +1015,14 @@ func (r *ticketResolver) Comments(ctx context.Context, obj *models.Ticket, after
 		return nil, fmt.Errorf("错误代码: %s, 错误信息: 参数`after`和`before`只能选择一种。", rc)
 	}
 
-	comments := []*models.Comment{}
-	g.Engine.Where("ticket_id = ?", obj.TicketID).Find(&comments)
+	domainComments, err := r.app.Services.Comment.ListByTicket(ctx, uint(obj.TicketID))
+	if err != nil {
+		return nil, err
+	}
+	comments := make([]*models.Comment, 0, len(domainComments))
+	for _, c := range domainComments {
+		comments = append(comments, bridge.CommentFromDomain(c))
+	}
 	edges := []*gqlapi.CommentEdge{}
 	for _, comment := range comments {
 		edges = append(edges, &gqlapi.CommentEdge{

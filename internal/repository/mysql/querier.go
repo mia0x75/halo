@@ -87,6 +87,7 @@ type Querier interface {
 	ListAvatars(ctx context.Context, arg ListAvatarsParams) ([]MmAvatar, error)
 	ListClusters(ctx context.Context, arg ListClustersParams) ([]MmCluster, error)
 	ListComments(ctx context.Context, arg ListCommentsParams) ([]MmComment, error)
+	ListCommentsByTicket(ctx context.Context, ticketID uint32) ([]MmComment, error)
 	ListCrons(ctx context.Context, arg ListCronsParams) ([]MmCron, error)
 	ListEdges(ctx context.Context, arg ListEdgesParams) ([]MmEdge, error)
 	ListGlossaries(ctx context.Context, arg ListGlossariesParams) ([]MmGlossary, error)

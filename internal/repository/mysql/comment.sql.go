@@ -139,6 +139,42 @@ func (q *Queries) ListComments(ctx context.Context, arg ListCommentsParams) ([]M
 	return items, nil
 }
 
+const listCommentsByTicket = `-- name: ListCommentsByTicket :many
+SELECT comment_id, uuid, content, ticket_id, user_id, version, update_at, create_at FROM mm_comments WHERE ticket_id = ? ORDER BY comment_id
+`
+
+func (q *Queries) ListCommentsByTicket(ctx context.Context, ticketID uint32) ([]MmComment, error) {
+	rows, err := q.db.QueryContext(ctx, listCommentsByTicket, ticketID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []MmComment{}
+	for rows.Next() {
+		var i MmComment
+		if err := rows.Scan(
+			&i.CommentID,
+			&i.Uuid,
+			&i.Content,
+			&i.TicketID,
+			&i.UserID,
+			&i.Version,
+			&i.UpdateAt,
+			&i.CreateAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateComment = `-- name: UpdateComment :exec
 UPDATE mm_comments SET uuid = ?, content = ?, ticket_id = ?, user_id = ?, version = ?, update_at = ? WHERE comment_id = ?
 `

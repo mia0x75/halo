@@ -28,6 +28,11 @@ func (s *CommentService) List(ctx context.Context, cursor int64, limit int) ([]*
 	return s.comments.List(ctx, cursor, limit)
 }
 
+// ListByTicket returns every comment on a ticket, oldest first.
+func (s *CommentService) ListByTicket(ctx context.Context, ticketID uint) ([]*domain.Comment, error) {
+	return s.comments.ListByTicket(ctx, ticketID)
+}
+
 func (s *CommentService) Create(ctx context.Context, c *domain.Comment, operatorID uint) (uint, error) {
 	var id uint
 	err := s.tx.WithTx(ctx, func(ctx context.Context, repos Repos) error {

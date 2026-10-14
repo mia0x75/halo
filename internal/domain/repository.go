@@ -27,6 +27,7 @@ type CommentRepository interface {
 	Delete(ctx context.Context, id int64) error
 	DeleteByUUID(ctx context.Context, uuid string) error
 	List(ctx context.Context, cursor int64, limit int) ([]*Comment, error)
+	ListByTicket(ctx context.Context, ticketID uint) ([]*Comment, error)
 }
 
 type CronRepository interface {
