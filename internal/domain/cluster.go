@@ -1,6 +1,6 @@
 package domain
 
-// ClusterType 目标数据库的类型。存储值对齐 mm_clusters.type 列。
+// ClusterType is the target database engine. Stored in mm_clusters.type.
 type ClusterType string
 
 const (
@@ -8,17 +8,30 @@ const (
 	ClusterTypePostgres ClusterType = "postgres"
 )
 
-// Cluster 目标数据库群集。仅承载执行器必需的最小字段集，
-// 业务字段由 models.Cluster 持有，二者在阶段 2 收敛。
+// ClusterStatus is the lifecycle state of a cluster. Stored in mm_clusters.status.
+type ClusterStatus int
+
+const (
+	ClusterStatusNormal   ClusterStatus = 1
+	ClusterStatusDisabled ClusterStatus = 2
+)
+
+// Cluster is a row of mm_clusters. Database is not a column: it is the schema
+// resolved at connect time and carried here so the executor takes one value.
 type Cluster struct {
-	ClusterID uint
-	UUID      string
-	Host      string
-	IP        string
-	Port      uint16
-	Alias     string
-	User      string
-	Type      ClusterType
-	Database  string
-	Status    uint8
+	ClusterID   uint          `db:"cluster_id"`
+	UUID        string        `db:"uuid"`
+	Host        string        `db:"host"`
+	Alias       string        `db:"alias"`
+	IP          string        `db:"ip"`
+	Port        uint          `db:"port"`
+	User        string        `db:"user"`
+	Type        ClusterType   `db:"type"`
+	Password    []byte        `db:"password"`
+	Fingerprint []byte        `db:"fingerprint"`
+	Status      ClusterStatus `db:"status"`
+	Version     int           `db:"version"`
+	UpdateAt    *uint         `db:"update_at"`
+	CreateAt    uint          `db:"create_at"`
+	Database    string        `db:"-"`
 }
