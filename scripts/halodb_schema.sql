@@ -1,0 +1,674 @@
+DROP TABLE IF EXISTS `mm_avatars`;
+CREATE TABLE `mm_avatars` (
+   `avatar_id` INT UNSIGNED
+               NOT NULL
+               AUTO_INCREMENT
+               COMMENT '自增主键',
+   `uuid`      CHAR(36)
+               NOT NULL
+               COMMENT 'UUID',
+   `url`       VARCHAR(75)
+               NOT NULL
+               COMMENT '头像位置',
+   `version`   INT UNSIGNED
+               NOT NULL
+               COMMENT '版本',
+   `update_at` INT UNSIGNED
+               COMMENT '修改时间',
+   `create_at` INT UNSIGNED
+               NOT NULL
+               COMMENT '创建时间',
+
+   PRIMARY KEY (`avatar_id`),
+   UNIQUE KEY `unique_1` (`uuid`),
+   UNIQUE KEY `unique_2` (`url`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '头像表'
+;
+
+DROP TABLE IF EXISTS `mm_comments`;
+CREATE TABLE `mm_comments` (
+  `comment_id` INT UNSIGNED
+               NOT NULL
+               AUTO_INCREMENT
+               COMMENT '自增主键',
+  `uuid`       CHAR(36)
+               NOT NULL
+               COMMENT 'UUID',
+  `content`    TINYTEXT
+               NOT NULL
+               COMMENT '意见建议',
+  `ticket_id`  INT UNSIGNED
+               NOT NULL
+               COMMENT '对应工单',
+  `user_id`    INT UNSIGNED
+               NOT NULL
+               COMMENT '发起人',
+  `version`    INT UNSIGNED
+               NOT NULL
+               COMMENT '版本',
+  `update_at`  INT UNSIGNED
+               COMMENT '修改时间',
+  `create_at`  INT UNSIGNED
+               NOT NULL
+               COMMENT '创建时间',
+
+  PRIMARY KEY (`comment_id`),
+  UNIQUE KEY `unique_1` (`uuid`),
+  KEY `index_1` (`ticket_id`),
+  KEY `index_2` (`user_id`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '审核意见表'
+;
+
+DROP TABLE IF EXISTS `mm_crons`;
+CREATE TABLE `mm_crons` (
+  `cron_id`   INT UNSIGNED
+              NOT NULL
+              AUTO_INCREMENT
+              COMMENT '自增主键',
+  `uuid`      CHAR(36)
+              NOT NULL
+              COMMENT 'UUID',
+  `status`    CHAR(1)
+              NOT NULL
+              COMMENT '执行状态',
+  `name`      VARCHAR(75)
+              NOT NULL
+              COMMENT '任务名称',
+  `cmd`       VARCHAR(75)
+              NOT NULL
+              COMMENT '函数名称',
+  `params`    VARCHAR(150)
+              NOT NULL
+              COMMENT '运行参数',
+  `last_run`  CHAR(25)
+              COMMENT '上一次运行时间',
+  `next_run`  CHAR(25)
+              COMMENT '下一次运行时间',
+  `interval`  VARCHAR(20)
+              COMMENT '执行间隔',
+  `duration`  VARCHAR(20)
+              COMMENT '执行耗时',
+  `recurrent` TINYINT UNSIGNED
+              COMMENT '是否周期运行',
+  `hash`      VARCHAR(60)
+              COMMENT '哈希值',
+  `version`   INT UNSIGNED
+              NOT NULL
+              COMMENT '版本',
+  `update_at` INT UNSIGNED
+              COMMENT '修改时间',
+  `create_at` INT UNSIGNED
+              NOT NULL
+              COMMENT '创建时间',
+
+  PRIMARY KEY (`cron_id`),
+  UNIQUE KEY `unique_1` (`uuid`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '计划任务表'
+;
+
+DROP TABLE IF EXISTS `mm_glossaries`;
+CREATE TABLE `mm_glossaries` (
+  `group`       VARCHAR(25)
+                NOT NULL
+                COMMENT '分组',
+  `key`         TINYINT UNSIGNED
+                NOT NULL
+                COMMENT '键',
+  `value`       VARCHAR(50)
+                NOT NULL
+                COMMENT '值',
+  `uuid`        CHAR(36)
+                NOT NULL
+                COMMENT 'UUID',
+  `description` VARCHAR(150)
+                NOT NULL
+                COMMENT '值描述',
+  `version`     INT UNSIGNED
+                NOT NULL
+                COMMENT '版本',
+  `update_at`   INT UNSIGNED
+                COMMENT '修改时间',
+  `create_at`   INT UNSIGNED
+                NOT NULL
+                COMMENT '创建时间',
+
+  PRIMARY KEY (`group`,`key`),
+  UNIQUE KEY `unique_1` (`group`,`value`),
+  UNIQUE KEY `unique_2` (`uuid`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '字典表'
+;
+
+DROP TABLE IF EXISTS `mm_clusters`;
+CREATE TABLE `mm_clusters` (
+  `cluster_id`  INT UNSIGNED
+                NOT NULL
+                AUTO_INCREMENT
+                COMMENT '自增主键',
+  `uuid`        CHAR(36)
+                NOT NULL
+                COMMENT 'UUID',
+  `host`        VARCHAR(150)
+                NOT NULL
+                COMMENT '主机名称',
+  `alias`       VARCHAR(75)
+                NOT NULL
+                COMMENT '主机别名',
+  `ip`          VARCHAR(15)
+                NOT NULL
+                COMMENT '主机地址',
+  `port`        INT UNSIGNED
+                NOT NULL
+                DEFAULT 3306
+                COMMENT '端口',
+  `user`        VARCHAR(50)
+                NOT NULL
+                COMMENT '连接用户',
+  `type`        VARCHAR(20)
+                NOT NULL
+                DEFAULT 'mysql'
+                COMMENT '数据库类型',
+  `password`    VARBINARY(48)
+                NOT NULL
+                COMMENT '密码',
+  `fingerprint` VARBINARY(20)
+                NOT NULL
+                COMMENT '指纹',
+  `status`      TINYINT UNSIGNED
+                NOT NULL
+                DEFAULT 1
+                COMMENT '状态',
+  `version`     INT UNSIGNED
+                NOT NULL
+                COMMENT '版本',
+  `update_at`   INT UNSIGNED
+                COMMENT '修改时间',
+  `create_at`   INT UNSIGNED
+                NOT NULL
+                COMMENT '创建时间',
+
+  PRIMARY KEY (`cluster_id`),
+  UNIQUE KEY `unique_1` (`uuid`),
+  UNIQUE KEY `unique_2` (`alias`),
+  UNIQUE KEY `unique_3` (`host`,`port`),
+  UNIQUE KEY `unique_4` (`ip`,`port`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '群集表'
+;
+
+DROP TABLE IF EXISTS `mm_logs`;
+CREATE TABLE `mm_logs` (
+  `log_id`    INT UNSIGNED
+              NOT NULL
+              AUTO_INCREMENT
+              COMMENT '自增主键',
+  `uuid`      CHAR(36)
+              NOT NULL
+              COMMENT 'UUID',
+  `user_id`   INT UNSIGNED
+              NOT NULL
+              DEFAULT 0
+              COMMENT '操作员',
+  `operation` TINYTEXT
+              NOT NULL
+              COMMENT '操作记录',
+  `version`   INT UNSIGNED
+              NOT NULL
+              COMMENT '版本',
+  `create_at` INT UNSIGNED
+              NOT NULL
+              COMMENT '创建时间',
+
+  PRIMARY KEY (`log_id`),
+  UNIQUE KEY `unique_1` (`uuid`),
+  KEY `index_1` (`user_id`,`create_at`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '日志表'
+;
+
+DROP TABLE IF EXISTS `mm_options`;
+CREATE TABLE `mm_options` (
+  `name`        VARCHAR(50)
+                NOT NULL
+                COMMENT '配置项',
+  `uuid`        CHAR(36)
+                NOT NULL
+                COMMENT 'UUID',
+  `value`       TINYTEXT
+                NOT NULL
+                COMMENT '配置值',
+  `description` VARCHAR(75)
+                NOT NULL
+                COMMENT '描述',
+  `element`     VARCHAR(15)
+                NOT NULL
+                DEFAULT '-'
+                COMMENT '展现组件类型',
+  `writable`    TINYINT UNSIGNED
+                NOT NULL
+                COMMENT '是否可写',
+  `version`     INT UNSIGNED
+                NOT NULL
+                COMMENT '版本',
+  `update_at`   INT UNSIGNED
+                COMMENT '修改时间',
+  `create_at`   INT UNSIGNED
+                NOT NULL
+                COMMENT '创建时间',
+
+  PRIMARY KEY (`name`),
+  UNIQUE KEY `unique_1` (`uuid`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '系统选项表'
+;
+
+DROP TABLE IF EXISTS `mm_queries`;
+CREATE TABLE `mm_queries` (
+  `query_id`   INT UNSIGNED
+               NOT NULL
+               AUTO_INCREMENT
+               COMMENT '主键',
+  `uuid`       CHAR(36)
+               NOT NULL
+               COMMENT 'UUID',
+  `type`       TINYINT UNSIGNED
+               NOT NULL
+               COMMENT '查询类型',
+  `cluster_id` INT UNSIGNED
+               NOT NULL
+               COMMENT '目标群集',
+  `database`   VARCHAR(75)
+               NOT NULL
+               COMMENT '目标库',
+  `content`    TEXT
+               NOT NULL
+               COMMENT '执行语句',
+  `plan`       TEXT
+               NOT NULL
+               COMMENT '执行计划',
+  `user_id`    INT UNSIGNED
+               NOT NULL
+               COMMENT '发起人',
+  `version`    INT UNSIGNED
+               NOT NULL
+               COMMENT '版本',
+  `update_at`  INT UNSIGNED
+               COMMENT '修改时间',
+  `create_at`  INT UNSIGNED
+               NOT NULL
+               COMMENT '创建时间',
+
+  PRIMARY KEY (`query_id`),
+  UNIQUE KEY `unique_1` (`uuid`),
+  KEY `index_1` (`user_id`),
+  KEY `index_2` (`cluster_id`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '查询表'
+;
+
+DROP TABLE IF EXISTS `mm_edges`;
+CREATE TABLE `mm_edges` (
+  `edge_id`       INT UNSIGNED
+                  NOT NULL
+                  AUTO_INCREMENT
+                  COMMENT '自增主键',
+  `uuid`          CHAR(36)
+                  NOT NULL
+                  COMMENT 'UUID',
+  `type`          INT UNSIGNED
+                  NOT NULL
+                  COMMENT '分类标识',
+  `ancestor_id`   INT UNSIGNED
+                  NOT NULL
+                  COMMENT '先代',
+  `descendant_id` INT UNSIGNED
+                  NOT NULL
+                  COMMENT '后代',
+  `version`       INT UNSIGNED
+                  NOT NULL
+                  COMMENT '版本',
+  `update_at`     INT UNSIGNED
+                  COMMENT '修改时间',
+  `create_at`     INT UNSIGNED
+                  NOT NULL
+                  COMMENT '创建时间',
+
+  PRIMARY KEY (`edge_id`),
+  UNIQUE KEY `unique_1` (`uuid`),
+  UNIQUE KEY `unique_2` (`type`,`ancestor_id`,`descendant_id`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '多对多关联表'
+;
+
+DROP TABLE IF EXISTS `mm_roles`;
+CREATE TABLE `mm_roles` (
+  `role_id`     INT UNSIGNED
+                NOT NULL
+                AUTO_INCREMENT
+                COMMENT '自增主键',
+  `uuid`        CHAR(36)
+                NOT NULL
+                COMMENT 'UUID',
+  `name`        VARCHAR(25)
+                NOT NULL
+                COMMENT '角色名称',
+  `description` VARCHAR(75)
+                NOT NULL
+                COMMENT '描述',
+  `version`     INT UNSIGNED
+                NOT NULL
+                COMMENT '版本',
+  `update_at`   INT UNSIGNED
+                COMMENT '修改时间',
+  `create_at`   INT UNSIGNED
+                NOT NULL
+                COMMENT '创建时间',
+
+  PRIMARY KEY (`role_id`),
+  UNIQUE KEY `unique_1` (`uuid`),
+  UNIQUE KEY `unique_2` (`name`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '角色表'
+;
+
+DROP TABLE IF EXISTS `mm_rules`;
+CREATE TABLE `mm_rules` (
+  `name`        CHAR(10)
+                NOT NULL
+                COMMENT '规则名称',
+  `uuid`        CHAR(36)
+                NOT NULL
+                COMMENT 'UUID',
+  `group`       TINYINT UNSIGNED
+                NOT NULL
+                COMMENT '规则分组',
+  `description` VARCHAR(75)
+                NOT NULL
+                COMMENT '规则描述',
+  `level`       TINYINT UNSIGNED
+                NOT NULL
+                COMMENT '严重级别',
+  `vldr_group`  TINYINT UNSIGNED
+                NOT NULL
+                COMMENT '审核分组',
+  `operator`    VARCHAR(10)
+                NOT NULL
+                COMMENT '比较符',
+  `values`      VARCHAR(150)
+                NOT NULL
+                COMMENT '有效值',
+  `bitwise`     TINYINT UNSIGNED
+                NOT NULL
+                COMMENT '是否可用',
+  `func`        VARCHAR(75)
+                NOT NULL
+                DEFAULT 'nil'
+                COMMENT '处理函数',
+  `message`     VARCHAR(150)
+                NOT NULL
+                COMMENT '错误提示',
+  `element`     VARCHAR(50)
+                NOT NULL
+                COMMENT '展现组件类型',
+  `version`     INT UNSIGNED
+                NOT NULL
+                COMMENT '版本',
+  `update_at`   INT UNSIGNED
+                COMMENT '修改时间',
+  `create_at`   INT UNSIGNED
+                NOT NULL
+                COMMENT '创建时间',
+
+  PRIMARY KEY (`name`),
+  UNIQUE KEY `unique_1` (`uuid`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '规则表'
+;
+
+DROP TABLE IF EXISTS `mm_statements`;
+CREATE TABLE `mm_statements` (
+  `ticket_id`     INT UNSIGNED
+                  NOT NULL
+                  COMMENT '所属工单',
+  `sequence`      SMALLINT UNSIGNED
+                  NOT NULL
+                  COMMENT '分解序号',
+  `uuid`          CHAR(36)
+                  NOT NULL
+                  COMMENT 'UUID',
+  `content`       TEXT
+                  NOT NULL
+                  COMMENT '单独语句',
+  `type`          TINYINT UNSIGNED
+                  NOT NULL
+                  COMMENT '类型',
+  `status`        TINYINT UNSIGNED
+                  NOT NULL
+                  COMMENT '审核状态',
+  `report`        TEXT
+                  NOT NULL
+                  COMMENT '审核结果',
+  `plan`          TEXT
+                  COMMENT '执行计划',
+  `results`       TEXT
+                  COMMENT '执行结果',
+  `rows_affected` INT UNSIGNED
+                  COMMENT '在服务器正确执行后影响的行数',
+  `version`       INT UNSIGNED
+                  NOT NULL
+                  COMMENT '版本',
+  `update_at`     INT UNSIGNED
+                  COMMENT '修改时间',
+  `create_at`     INT UNSIGNED
+                  NOT NULL
+                  COMMENT '创建时间',
+
+  PRIMARY KEY (`ticket_id`,`sequence`),
+  UNIQUE KEY `unique_1` (`uuid`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '工单分解表'
+;
+
+DROP TABLE IF EXISTS `mm_statistics`;
+CREATE TABLE `mm_statistics` (
+  `group`        VARCHAR(36)
+                 NOT NULL
+                 COMMENT '分组',
+  `key`          VARCHAR(50)
+                 NOT NULL
+                 COMMENT '键',
+  `uuid`         CHAR(36)
+                 NOT NULL
+                 COMMENT 'UUID',
+  `value`        DECIMAL(18,4)
+                 NOT NULL
+                 COMMENT '值',
+  `version`      INT UNSIGNED
+                 NOT NULL
+                 COMMENT '版本',
+  `update_at`    INT UNSIGNED
+                 COMMENT '修改时间',
+  `create_at`    INT UNSIGNED
+                 NOT NULL
+                 COMMENT '创建时间',
+
+  PRIMARY KEY (`group`, `key`),
+  UNIQUE KEY `unique_1` (`uuid`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '统计表'
+;
+
+
+DROP TABLE IF EXISTS `mm_tickets`;
+CREATE TABLE `mm_tickets` (
+  `ticket_id`   INT UNSIGNED
+                NOT NULL
+                AUTO_INCREMENT
+                COMMENT '自增主键',
+  `uuid`        CHAR(36)
+                NOT NULL
+                COMMENT 'UUID',
+  `cluster_id` INT UNSIGNED
+                NOT NULL
+                COMMENT '目标群集',
+  `database`    VARCHAR(75)
+                NOT NULL
+                COMMENT '目标库',
+  `subject`     VARCHAR(50)
+                NOT NULL
+                COMMENT '主题',
+  `content`     TEXT
+                NOT NULL
+                COMMENT '更新语句',
+  `status`      TINYINT UNSIGNED
+                NOT NULL
+                COMMENT '状态',
+  `user_id`     INT UNSIGNED
+                NOT NULL
+                COMMENT '申请人',
+  `reviewer_id` INT UNSIGNED
+                NOT NULL
+                COMMENT '审核人',
+  `cron_id`     INT UNSIGNED
+                COMMENT '预约信息',
+  `version`     INT UNSIGNED
+                NOT NULL
+                COMMENT '版本',
+  `update_at`   INT UNSIGNED
+                COMMENT '修改时间',
+  `create_at`   INT UNSIGNED
+                NOT NULL
+                COMMENT '创建时间',
+
+  PRIMARY KEY (`ticket_id`),
+  UNIQUE KEY `unique_1` (`uuid`),
+  UNIQUE KEY `unique_2` (`cron_id`),
+  KEY `index_1` (`user_id`),
+  KEY `index_2` (`cluster_id`),
+  KEY `index_3` (`reviewer_id`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '工单表'
+;
+
+DROP TABLE IF EXISTS `mm_users`;
+CREATE TABLE `mm_users` (
+  `user_id`   INT UNSIGNED
+              NOT NULL
+              AUTO_INCREMENT
+              COMMENT '自增主键',
+  `uuid`      CHAR(36)
+              NOT NULL
+              COMMENT 'UUID',
+  `email`     VARCHAR(75)
+              NOT NULL
+              COMMENT '电子邮件',
+  `password`  CHAR(60)
+              NOT NULL
+              COMMENT '密码',
+  `status`    TINYINT UNSIGNED
+              NOT NULL
+              COMMENT '状态',
+  `name`      VARCHAR(15)
+              NOT NULL
+              COMMENT '真实名称',
+  `phone`     BIGINT UNSIGNED
+              NOT NULL
+              COMMENT '电话号码',
+  `avatar_id` INT UNSIGNED
+              NOT NULL
+              COMMENT '头像',
+  `version`   INT UNSIGNED
+              NOT NULL
+              COMMENT '版本',
+  `update_at` INT UNSIGNED
+              COMMENT '修改时间',
+  `create_at` INT UNSIGNED
+              NOT NULL
+              COMMENT '创建时间',
+
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `unique_1` (`uuid`),
+  UNIQUE KEY `unique_2` (`email`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '用户表'
+;
+
+DROP TABLE IF EXISTS `mm_templates`;
+CREATE TABLE `mm_templates` (
+  `uuid`        CHAR(36)
+                NOT NULL
+                COMMENT 'UUID',
+  `subject`     CHAR(100)
+                NOT NULL
+                COMMENT '主题',
+  `body`        TEXT
+                NOT NULL
+                COMMENT '内容',
+  `description` VARCHAR(50)
+                NOT NULL
+                COMMENT '模板说明',
+  `version`     INT UNSIGNED
+                NOT NULL
+                COMMENT '版本',
+  `update_at`   INT UNSIGNED
+                COMMENT '修改时间',
+  `create_at`   INT UNSIGNED
+                NOT NULL
+                COMMENT '创建时间',
+
+  PRIMARY KEY (`uuid`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '邮件模板表'
+;
+
