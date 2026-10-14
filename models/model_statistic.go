@@ -5,18 +5,17 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"xorm.io/xorm"
 )
 
 // Statistic 统计模型
 type Statistic struct {
-	Group    string  `xorm:"'group' notnull char(25) pk"              valid:"-"                              json:"group"        gqlgen:"Group"`    //
-	Key      string  `xorm:"'key' notnull varchar(50) pk"             valid:"required,length(1|50),alphanum" json:"name"         gqlgen:"Key"`      //
-	UUID     string  `xorm:"'uuid' notnull char(36) unique(unique_1)" valid:"-"                              json:"uuid"         gqlgen:"UUID"`     //
-	Value    float64 `xorm:"'value' notnull decimal(18,4)"            valid:"required"                       json:"value"        gqlgen:"Value"`    //
-	Version  int     `xorm:"'version'"                                valid:"-"                              json:"version"      gqlgen:"-"`        //
-	UpdateAt uint    `xorm:"'update_at' notnull int"                  valid:"-"                              json:"update_at"    gqlgen:"UpdateAt"` //
-	CreateAt uint    `xorm:"'create_at' notnull int"                  valid:"-"                              json:"create_at"    gqlgen:"CreateAt"` //
+	Group    string  `xorm:"'group' notnull char(25) pk" db:"group"              valid:"-"                              json:"group"        gqlgen:"Group"`        //
+	Key      string  `xorm:"'key' notnull varchar(50) pk" db:"key"             valid:"required,length(1|50),alphanum" json:"name"         gqlgen:"Key"`            //
+	UUID     string  `xorm:"'uuid' notnull char(36) unique(unique_1)" db:"uuid" valid:"-"                              json:"uuid"         gqlgen:"UUID"`          //
+	Value    float64 `xorm:"'value' notnull decimal(18,4)" db:"value"            valid:"required"                       json:"value"        gqlgen:"Value"`        //
+	Version  int     `xorm:"'version'" db:"version"                                valid:"-"                              json:"version"      gqlgen:"-"`          //
+	UpdateAt uint    `xorm:"'update_at' notnull int" db:"update_at"                  valid:"-"                              json:"update_at"    gqlgen:"UpdateAt"` //
+	CreateAt uint    `xorm:"'create_at' notnull int" db:"create_at"                  valid:"-"                              json:"create_at"    gqlgen:"CreateAt"` //
 }
 
 // TableName 结构体到数据库表名称的映射
@@ -33,10 +32,6 @@ func (m *Statistic) BeforeInsert() {
 // BeforeUpdate ORM在执行数据更新前会调用该方法
 func (m *Statistic) BeforeUpdate() {
 	m.UpdateAt = uint(time.Now().Unix())
-}
-
-// AfterSet ORM在执行数据更新后会调用该方法
-func (m *Statistic) AfterSet(colName string, _ xorm.Cell) {
 }
 
 // String 结构体输出到字符串的默认方式

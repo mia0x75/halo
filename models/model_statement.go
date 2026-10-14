@@ -9,26 +9,25 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/mia0x75/parser/ast"
-	"xorm.io/xorm"
 )
 
 // Statement 工单分解出来的单个SQL语句
 type Statement struct {
-	TicketID     uint         `xorm:"'ticket_id' notnull int pk"               valid:"required,int,range(0|4294967295)"  json:"ticket_id"     gqlgen:"-"`            //
-	Sequence     uint16       `xorm:"'sequence' notnull smallint pk"           valid:"required,int,range(0|65535)"       json:"sequence"      gqlgen:"Sequence"`     //
-	UUID         string       `xorm:"'uuid' notnull char(36) unique(unique_1)" valid:"-"                                 json:"uuid"          gqlgen:"UUID"`         //
-	Content      string       `xorm:"'content' notnull text"                   valid:"required,length(1|65535),ascii"    json:"content"       gqlgen:"Content"`      //
-	Type         uint8        `xorm:"'type' notnull tinyint"                   valid:"required,matches(^([1-9]?[0-9])$)" json:"type"          gqlgen:"Type"`         // 类型 0-99
-	Status       uint8        `xorm:"'status' notnull tinyint"                 valid:"required,matches(^([1-9]?[0-9])$)" json:"status"        gqlgen:"Status"`       // 状态 0-99
-	Report       string       `xorm:"'report' notnull json"                    valid:"required,length(1|65535)"          json:"report"        gqlgen:"Report"`       //
-	Plan         string       `xorm:"'plan' notnull json"                      valid:"required,length(1|65535)"          json:"plan"          gqlgen:"Plan"`         //
-	Results      string       `xorm:"'results' text"                           valid:"length(1|65535)"                   json:"results"       gqlgen:"Results"`      //
-	RowsAffected uint         `xorm:"'rows_affected' notnull int"              valid:"required,int,range(0|4294967295)"  json:"rows_affected" gqlgen:"RowsAffected"` //
-	Version      int          `xorm:"'version'"                                valid:"-"                                 json:"version"       gqlgen:"-"`            //
-	UpdateAt     uint         `xorm:"'update_at' notnull int"                  valid:"-"                                 json:"update_at"     gqlgen:"UpdateAt"`     //
-	CreateAt     uint         `xorm:"'create_at' notnull int"                  valid:"-"                                 json:"create_at"     gqlgen:"CreateAt"`     //
-	StmtNode     ast.StmtNode `xorm:"-"                                        valid:"-"                                 json:"-"             gqlgen:"-"`            //
-	Violations   *Violations  `xorm:"-"                                        valid:"-"                                 json:"-"             gqlgen:"-"`            //
+	TicketID     uint         `xorm:"'ticket_id' notnull int pk" db:"ticket_id"               valid:"required,int,range(0|4294967295)"  json:"ticket_id"     gqlgen:"-"`                //
+	Sequence     uint16       `xorm:"'sequence' notnull smallint pk" db:"sequence"           valid:"required,int,range(0|65535)"       json:"sequence"      gqlgen:"Sequence"`          //
+	UUID         string       `xorm:"'uuid' notnull char(36) unique(unique_1)" db:"uuid" valid:"-"                                 json:"uuid"          gqlgen:"UUID"`                  //
+	Content      string       `xorm:"'content' notnull text" db:"content"                   valid:"required,length(1|65535),ascii"    json:"content"       gqlgen:"Content"`            //
+	Type         uint8        `xorm:"'type' notnull tinyint" db:"type"                   valid:"required,matches(^([1-9]?[0-9])$)" json:"type"          gqlgen:"Type"`                  // 类型 0-99
+	Status       uint8        `xorm:"'status' notnull tinyint" db:"status"                 valid:"required,matches(^([1-9]?[0-9])$)" json:"status"        gqlgen:"Status"`              // 状态 0-99
+	Report       string       `xorm:"'report' notnull json" db:"report"                    valid:"required,length(1|65535)"          json:"report"        gqlgen:"Report"`              //
+	Plan         string       `xorm:"'plan' notnull json" db:"plan"                      valid:"required,length(1|65535)"          json:"plan"          gqlgen:"Plan"`                  //
+	Results      string       `xorm:"'results' text" db:"results"                           valid:"length(1|65535)"                   json:"results"       gqlgen:"Results"`            //
+	RowsAffected uint         `xorm:"'rows_affected' notnull int" db:"rows_affected"              valid:"required,int,range(0|4294967295)"  json:"rows_affected" gqlgen:"RowsAffected"` //
+	Version      int          `xorm:"'version'" db:"version"                                valid:"-"                                 json:"version"       gqlgen:"-"`                  //
+	UpdateAt     uint         `xorm:"'update_at' notnull int" db:"update_at"                  valid:"-"                                 json:"update_at"     gqlgen:"UpdateAt"`         //
+	CreateAt     uint         `xorm:"'create_at' notnull int" db:"create_at"                  valid:"-"                                 json:"create_at"     gqlgen:"CreateAt"`         //
+	StmtNode     ast.StmtNode `xorm:"-"                                        valid:"-"                                 json:"-"             gqlgen:"-"`                               //
+	Violations   *Violations  `xorm:"-"                                        valid:"-"                                 json:"-"             gqlgen:"-"`                               //
 }
 
 // TableName 结构体到数据库表名称的映射
@@ -47,10 +46,6 @@ func (m *Statement) BeforeInsert() {
 func (m *Statement) BeforeUpdate() {
 	m.Content = strings.TrimSpace(m.Content)
 	m.UpdateAt = uint(time.Now().Unix())
-}
-
-// AfterSet ORM在执行数据更新后会调用该方法
-func (m *Statement) AfterSet(colName string, _ xorm.Cell) {
 }
 
 // String 结构体输出到字符串的默认方式

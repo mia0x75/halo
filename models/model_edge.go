@@ -5,19 +5,18 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"xorm.io/xorm"
 )
 
 // Edge 根据图论，Edge是连接不同对象的线
 type Edge struct {
-	EdgeID       uint   `xorm:"'edge_id' notnull int pk autoincr"            valid:"-"                                json:"edge_id"       gqlgen:"-"`            //
-	UUID         string `xorm:"'uuid' notnull char(36) unique(unique_1)"     valid:"-"                                json:"uuid"          gqlgen:"UUID"`         //
-	Type         uint   `xorm:"'type' notnull int unique(unique_2)"          valid:"required,int,range(0|4294967295)" json:"type"          gqlgen:"Type"`         //
-	AncestorID   uint   `xorm:"'ancestor_id' notnull int unique(unique_2)"   valid:"required,int,range(0|4294967295)" json:"ancestor_id"   gqlgen:"AncestorID"`   //
-	DescendantID uint   `xorm:"'descendant_id' notnull int unique(unique_2)" valid:"required,int,range(0|4294967295)" json:"descendant_id" gqlgen:"DescendantID"` //
-	Version      int    `xorm:"'version'"                                    valid:"-"                                json:"version"       gqlgen:"-"`            //
-	UpdateAt     uint   `xorm:"'update_at' notnull int"                      valid:"-"                                json:"update_at"     gqlgen:"UpdateAt"`     //
-	CreateAt     uint   `xorm:"'create_at' notnull int"                      valid:"-"                                json:"create_at"     gqlgen:"CreateAt"`     //
+	EdgeID       uint   `xorm:"'edge_id' notnull int pk autoincr" db:"edge_id"            valid:"-"                                json:"edge_id"       gqlgen:"-"`                  //
+	UUID         string `xorm:"'uuid' notnull char(36) unique(unique_1)" db:"uuid"     valid:"-"                                json:"uuid"          gqlgen:"UUID"`                  //
+	Type         uint   `xorm:"'type' notnull int unique(unique_2)" db:"type"          valid:"required,int,range(0|4294967295)" json:"type"          gqlgen:"Type"`                  //
+	AncestorID   uint   `xorm:"'ancestor_id' notnull int unique(unique_2)" db:"ancestor_id"   valid:"required,int,range(0|4294967295)" json:"ancestor_id"   gqlgen:"AncestorID"`     //
+	DescendantID uint   `xorm:"'descendant_id' notnull int unique(unique_2)" db:"descendant_id" valid:"required,int,range(0|4294967295)" json:"descendant_id" gqlgen:"DescendantID"` //
+	Version      int    `xorm:"'version'" db:"version"                                    valid:"-"                                json:"version"       gqlgen:"-"`                  //
+	UpdateAt     uint   `xorm:"'update_at' notnull int" db:"update_at"                      valid:"-"                                json:"update_at"     gqlgen:"UpdateAt"`         //
+	CreateAt     uint   `xorm:"'create_at' notnull int" db:"create_at"                      valid:"-"                                json:"create_at"     gqlgen:"CreateAt"`         //
 }
 
 // TableName 结构体到数据库表名称的映射
@@ -34,10 +33,6 @@ func (m *Edge) BeforeInsert() {
 // BeforeUpdate ORM在执行数据更新前会调用该方法
 func (m *Edge) BeforeUpdate() {
 	m.UpdateAt = uint(time.Now().Unix())
-}
-
-// AfterSet ORM在执行数据更新后会调用该方法
-func (m *Edge) AfterSet(colName string, _ xorm.Cell) {
 }
 
 // String 结构体输出到字符串的默认方式

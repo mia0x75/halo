@@ -5,17 +5,16 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"xorm.io/xorm"
 )
 
 // Avatar 用户可选的头像
 type Avatar struct {
-	AvatarID uint   `xorm:"'avatar_id' notnull int pk autoincr <-"     valid:"-"                     json:"avatar_id" gqlgen:"-"`        //
-	UUID     string `xorm:"'uuid' notnull char(36) unique(unique_1)"   valid:"-"                     json:"uuid"      gqlgen:"UUID"`     //
-	URL      string `xorm:"'url' notnull tinytext unique(unique_2) <-" valid:"required,length(1|75)" json:"url"       gqlgen:"URL"`      //
-	Version  int    `xorm:"'version'"                                  valid:"-"                     json:"version"   gqlgen:"-"`        //
-	UpdateAt uint   `xorm:"'update_at' notnull int"                    valid:"-"                     json:"update_at" gqlgen:"UpdateAt"` //
-	CreateAt uint   `xorm:"'create_at' notnull int"                    valid:"-"                     json:"create_at" gqlgen:"CreateAt"` //
+	AvatarID uint   `xorm:"'avatar_id' notnull int pk autoincr <-" db:"avatar_id"     valid:"-"                     json:"avatar_id" gqlgen:"-"`        //
+	UUID     string `xorm:"'uuid' notnull char(36) unique(unique_1)" db:"uuid"   valid:"-"                     json:"uuid"      gqlgen:"UUID"`          //
+	URL      string `xorm:"'url' notnull tinytext unique(unique_2) <-" db:"url" valid:"required,length(1|75)" json:"url"       gqlgen:"URL"`            //
+	Version  int    `xorm:"'version'" db:"version"                                  valid:"-"                     json:"version"   gqlgen:"-"`          //
+	UpdateAt uint   `xorm:"'update_at' notnull int" db:"update_at"                    valid:"-"                     json:"update_at" gqlgen:"UpdateAt"` //
+	CreateAt uint   `xorm:"'create_at' notnull int" db:"create_at"                    valid:"-"                     json:"create_at" gqlgen:"CreateAt"` //
 }
 
 // TableName 结构体到数据库表名称的映射
@@ -32,10 +31,6 @@ func (m *Avatar) BeforeInsert() {
 // BeforeUpdate ORM在执行数据更新前会调用该方法
 func (m *Avatar) BeforeUpdate() {
 	m.UpdateAt = uint(time.Now().Unix())
-}
-
-// AfterSet ORM在执行数据更新后会调用该方法
-func (m *Avatar) AfterSet(colName string, _ xorm.Cell) {
 }
 
 // String 结构体输出到字符串的默认方式
