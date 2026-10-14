@@ -1,0 +1,16 @@
+version: "2"
+
+# The repository layer keeps sqlc's generated files out of linting: they are
+# machine-written and would otherwise drown real findings.
+linters:
+  exclusions:
+    rules:
+      - path: internal/repository/mysql/db\.go
+        linters:
+          - all
+      - path: internal/repository/mysql/models\.go
+        linters:
+          - all
+      - path: internal/repository/mysql/.*\.sql\.go
+        linters:
+          - all
