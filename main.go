@@ -69,12 +69,8 @@ func main() {
 	os.Setenv("HALO_CFG", g.ConfigFile)
 
 	g.InitLog()
-	if err := g.InitDB(); err != nil {
-		os.Exit(0)
-	}
 
-	// The new dependency container runs alongside the legacy xorm engine during
-	// the 2D migration. g.Init() stays until 2D-B.11 removes xorm.
+	// The new dependency container replaces the legacy xorm engine (g.Engine).
 	application, err := app.New(context.Background(), db.Config{
 		Addr:           g.Config().Database.Addr,
 		MaxIdle:        g.Config().Database.MaxIdle,

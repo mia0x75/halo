@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
-	"os"
 	"os/exec"
 	"testing"
 
@@ -44,9 +43,6 @@ func init() {
 	flag.Parse()
 	g.ParseConfig(*cfg)
 
-	if err := g.InitDB(); err != nil {
-		os.Exit(0)
-	}
 	application, err := app.New(context.Background(), db.Config{Addr: g.Config().Database.Addr})
 	if err == nil {
 		caches.Init(application.Repos)

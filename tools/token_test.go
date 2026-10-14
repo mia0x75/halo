@@ -3,10 +3,8 @@ package tools
 import (
 	"flag"
 	"fmt"
-	"os"
 	"testing"
 
-	"github.com/mia0x75/halo/caches"
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/models"
 )
@@ -16,11 +14,6 @@ func init() {
 	flag.Parse()
 
 	g.ParseConfig(*cfg)
-
-	if err := g.InitDB(); err != nil {
-		os.Exit(0)
-	}
-	caches.Init()
 }
 
 func TestGenerator_ParseToken(t *testing.T) {

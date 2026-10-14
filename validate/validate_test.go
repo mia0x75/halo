@@ -3,7 +3,6 @@ package validate
 import (
 	"flag"
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
@@ -31,11 +30,6 @@ func init() {
 	cfg := flag.String("c", "/etc/halo/cfg.json", "configuration file")
 	flag.Parse()
 	g.ParseConfig(*cfg)
-
-	if err := g.InitDB(); err != nil {
-		os.Exit(0)
-	}
-	caches.Init()
 }
 
 func TestSingleSQL(t *testing.T) {
