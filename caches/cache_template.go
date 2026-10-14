@@ -1,9 +1,7 @@
 package caches
 
 import (
-	log "github.com/sirupsen/logrus"
-
-	"github.com/mia0x75/halo/g"
+	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/models"
 )
 
@@ -12,13 +10,8 @@ var TemplatesMap = SafeMap[models.Template]{}
 
 // Init 缓存初始化
 func TemplatesInit() (err error) {
-	TemplatesMap.WithInit(
-		func() (m []*models.Template, err error) {
-			if err = g.Engine.Find(&m); err != nil {
-				log.Printf("查询数据表`%s`时发生一个错误:%s", "templates", err.Error())
-			}
-			return
-		},
-	)
+	_, err = TemplatesMap.WithInit(func() ([]*models.Template, error) {
+		return loadUUIDKeyed(repos.Template.List, bridge.TemplateFromDomain)
+	})
 	return
 }

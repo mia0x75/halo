@@ -1,9 +1,7 @@
 package caches
 
 import (
-	log "github.com/sirupsen/logrus"
-
-	"github.com/mia0x75/halo/g"
+	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/models"
 )
 
@@ -12,13 +10,8 @@ var EdgesMap = &SafeMap[models.Edge]{}
 
 // Init 缓存初始化
 func EdgesInit() (err error) {
-	EdgesMap.WithInit(
-		func() (m []*models.Edge, err error) {
-			if err = g.Engine.Find(&m); err != nil {
-				log.Printf("查询数据表`%s`时发生一个错误:%s", "edges", err.Error())
-			}
-			return
-		},
-	)
+	_, err = EdgesMap.WithInit(func() ([]*models.Edge, error) {
+		return loadIntKeyed(repos.Edge.List, bridge.EdgeFromDomain)
+	})
 	return
 }

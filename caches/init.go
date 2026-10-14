@@ -2,10 +2,58 @@ package caches
 
 import (
 	"context"
+	"math"
+	"strings"
 	"time"
 
 	log "github.com/sirupsen/logrus"
+
+	"github.com/mia0x75/halo/internal/service"
 )
+
+// repos is injected once at startup via Init. The caches read their rows
+// through the repository layer instead of the legacy xorm engine.
+var repos service.Repos
+
+// The caches hold whole tables in memory. List is keyset-paginated, so a single
+// page is requested with a cursor that sorts after every key.
+const (
+	cacheLimit     = 1 << 20
+	cacheIntCursor = int64(math.MaxUint32)
+)
+
+// cacheUUIDCursor sorts after every UUID-keyed row. The uuid columns hold hex
+// UUIDs except mm_options, whose seed inserts values positionally and so stores
+// option names ("ldap.domain") in the uuid column; 'z' repeated past the widest
+// column sorts after both under the connection collation.
+var cacheUUIDCursor = strings.Repeat("z", 64)
+
+// loadIntKeyed pages in every row of an integer-keyed table and converts it to
+// the legacy model the cache stores.
+func loadIntKeyed[D any, M any](list func(context.Context, int64, int) ([]D, error), conv func(D) *M) ([]*M, error) {
+	items, err := list(context.Background(), cacheIntCursor, cacheLimit)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*M, 0, len(items))
+	for _, item := range items {
+		out = append(out, conv(item))
+	}
+	return out, nil
+}
+
+// loadUUIDKeyed pages in every row of a UUID-keyed table.
+func loadUUIDKeyed[D any, M any](list func(context.Context, string, int) ([]D, error), conv func(D) *M) ([]*M, error) {
+	items, err := list(context.Background(), cacheUUIDCursor, cacheLimit)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*M, 0, len(items))
+	for _, item := range items {
+		out = append(out, conv(item))
+	}
+	return out, nil
+}
 
 // CacheInit 描述一组共享同一刷新间隔的缓存。
 // InitFuncs 在启动时同步加载一次；RefreshFuncs 此后按 RefreshInterval 周期刷新。
@@ -39,8 +87,9 @@ func LoopInit() {
 	cancel()
 }
 
-// Init 初始化缓存：先同步加载全部缓存，再启动周期刷新。
-func Init() {
+// Init 注入仓储并初始化缓存：先同步加载全部缓存，再启动周期刷新。
+func Init(r service.Repos) {
+	repos = r
 	log.Info("[I] cache begin")
 	for _, ci := range cacheInits {
 		for _, fn := range ci.InitFuncs {

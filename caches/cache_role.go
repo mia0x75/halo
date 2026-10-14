@@ -1,9 +1,7 @@
 package caches
 
 import (
-	log "github.com/sirupsen/logrus"
-
-	"github.com/mia0x75/halo/g"
+	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/models"
 )
 
@@ -12,13 +10,8 @@ var RolesMap = &SafeMap[models.Role]{}
 
 // Init 缓存初始化
 func RolesInit() (err error) {
-	RolesMap.WithInit(
-		func() (m []*models.Role, err error) {
-			if err = g.Engine.Find(&m); err != nil {
-				log.Printf("查询数据表`%s`时发生一个错误:%s", "roles", err.Error())
-			}
-			return
-		},
-	)
+	_, err = RolesMap.WithInit(func() ([]*models.Role, error) {
+		return loadIntKeyed(repos.Role.List, bridge.RoleFromDomain)
+	})
 	return
 }

@@ -1,9 +1,7 @@
 package caches
 
 import (
-	log "github.com/sirupsen/logrus"
-
-	"github.com/mia0x75/halo/g"
+	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/models"
 )
 
@@ -12,13 +10,8 @@ var OptionsMap = &SafeMap[models.Option]{}
 
 // Init 缓存初始化
 func OptionsInit() (err error) {
-	OptionsMap.WithInit(
-		func() (m []*models.Option, err error) {
-			if err = g.Engine.Find(&m); err != nil {
-				log.Printf("查询数据表`%s`时发生一个错误:%s", "options", err.Error())
-			}
-			return
-		},
-	)
+	_, err = OptionsMap.WithInit(func() ([]*models.Option, error) {
+		return loadUUIDKeyed(repos.Option.List, bridge.OptionFromDomain)
+	})
 	return
 }

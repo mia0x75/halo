@@ -1,9 +1,7 @@
 package caches
 
 import (
-	log "github.com/sirupsen/logrus"
-
-	"github.com/mia0x75/halo/g"
+	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/models"
 )
 
@@ -12,13 +10,8 @@ var StatisticsMap = &SafeMap[models.Statistic]{}
 
 // Init 缓存初始化
 func StatisticsInit() (err error) {
-	StatisticsMap.WithInit(
-		func() (m []*models.Statistic, err error) {
-			if err = g.Engine.Find(&m); err != nil {
-				log.Printf("查询数据表`%s`时发生一个错误:%s", "statistics", err.Error())
-			}
-			return
-		},
-	)
+	_, err = StatisticsMap.WithInit(func() ([]*models.Statistic, error) {
+		return loadUUIDKeyed(repos.Statistic.List, bridge.StatisticFromDomain)
+	})
 	return
 }

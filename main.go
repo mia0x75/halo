@@ -20,6 +20,8 @@ import (
 	"github.com/mia0x75/halo/caches"
 	"github.com/mia0x75/halo/crons"
 	"github.com/mia0x75/halo/g"
+	"github.com/mia0x75/halo/internal/app"
+	"github.com/mia0x75/halo/internal/platform/db"
 	"github.com/mia0x75/halo/routers"
 )
 
@@ -69,7 +71,21 @@ func main() {
 	if err := g.InitDB(); err != nil {
 		os.Exit(0)
 	}
-	caches.Init()
+
+	// The new dependency container runs alongside the legacy xorm engine during
+	// the 2D migration. g.Init() stays until 2D-B.11 removes xorm.
+	application, err := app.New(context.Background(), db.Config{
+		Addr:           g.Config().Database.Addr,
+		MaxIdle:        g.Config().Database.MaxIdle,
+		MaxConnections: g.Config().Database.MaxConnections,
+		WaitTimeout:    g.Config().Database.WaitTimeout,
+	})
+	if err != nil {
+		log.Fatalf("[F] init app fail: %v", err)
+	}
+	defer func() { _ = application.Close() }()
+
+	caches.Init(application.Repos)
 	crons.NewScheduler()
 
 	addr := g.Config().Listen
