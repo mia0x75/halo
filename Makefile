@@ -1,5 +1,4 @@
 BINARY=halo
-export GO111MODULE=on
 GOPATH ?= $(shell go env GOPATH)
 ifeq "$(GOPATH)" ""
   $(error 运行`make`命令前请先设置好GOPATH环境变量。)
@@ -9,7 +8,7 @@ CRED:=$(shell tput setaf 1 2>/dev/null)
 CGREEN:=$(shell tput setaf 2 2>/dev/null)
 CYELLOW:=$(shell tput setaf 3 2>/dev/null)
 CEND:=$(shell tput sgr0 2>/dev/null)
-GO_VERSION_MIN=1.10
+GO_VERSION_MIN=1.26
 
 .PHONY: all
 all: | fmt build
@@ -59,7 +58,7 @@ build: fmt
 	@echo "$(CGREEN)Building ...$(CEND)"
 	@bash ./genver.sh $(GO_VERSION_MIN)
 	@ret=0 && for d in $$(go list -f '{{if (eq .Name "main")}}{{.ImportPath}}{{end}}' ./); do \
-		CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -mod=readonly -ldflags="-s -w" -race -o bin/$(BINARY) $$d || ret=$$? ; \
+		GOOS=linux GOARCH=amd64 go build -mod=readonly -ldflags="-s -w" -race -o bin/$(BINARY) $$d || ret=$$? ; \
 	done ; exit $$ret
 	@echo "build Success!"
 
