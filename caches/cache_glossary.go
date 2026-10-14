@@ -11,7 +11,7 @@ import (
 var GlossariesMap = &SafeMap[models.Glossary]{}
 
 // Init 缓存初始化
-func GlossariesInit() {
+func GlossariesInit() (err error) {
 	GlossariesMap.WithInit(
 		func() (m []*models.Glossary, err error) {
 			if err = g.Engine.Asc("group").Asc("key").Find(&m); err != nil {
@@ -20,4 +20,5 @@ func GlossariesInit() {
 			return
 		},
 	)
+	return
 }

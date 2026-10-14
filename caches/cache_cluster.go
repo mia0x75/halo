@@ -25,7 +25,7 @@ var ClustersMap = &SafeMap[models.Cluster]{}
 // }
 
 // Init 缓存初始化
-func ClustersInit() {
+func ClustersInit() (err error) {
 	ClustersMap.WithInit(
 		func() (m []*models.Cluster, err error) {
 			if err = g.Engine.Desc("cluster_id").Find(&m); err != nil {
@@ -34,4 +34,5 @@ func ClustersInit() {
 			return
 		},
 	)
+	return
 }

@@ -11,7 +11,7 @@ import (
 var AvatarsMap = &SafeMap[models.Avatar]{}
 
 // Init 缓存初始化
-func AvatarsInit() {
+func AvatarsInit() (err error) {
 	AvatarsMap.WithInit(
 		func() (m []*models.Avatar, err error) {
 			if err := g.Engine.Find(&m); err != nil {
@@ -20,4 +20,5 @@ func AvatarsInit() {
 			return
 		},
 	)
+	return
 }

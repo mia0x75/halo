@@ -11,7 +11,7 @@ import (
 var UsersMap = SafeMap[models.User]{}
 
 // Init 缓存初始化
-func UsersInit() {
+func UsersInit() (err error) {
 	UsersMap.WithInit(
 		func() (m []*models.User, err error) {
 			if err = g.Engine.Desc("user_id").Find(&m); err != nil {
@@ -20,4 +20,5 @@ func UsersInit() {
 			return
 		},
 	)
+	return
 }

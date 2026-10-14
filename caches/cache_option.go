@@ -11,7 +11,7 @@ import (
 var OptionsMap = &SafeMap[models.Option]{}
 
 // Init 缓存初始化
-func OptionsInit() {
+func OptionsInit() (err error) {
 	OptionsMap.WithInit(
 		func() (m []*models.Option, err error) {
 			if err = g.Engine.Find(&m); err != nil {
@@ -20,4 +20,5 @@ func OptionsInit() {
 			return
 		},
 	)
+	return
 }

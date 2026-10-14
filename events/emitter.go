@@ -8,6 +8,7 @@ The design goals are:
 package events
 
 import (
+	"log"
 	"sync"
 )
 
@@ -60,16 +61,6 @@ func Close(e *Event) { e.Flags = e.Flags | FlagClose }
 // Sync middleware sets FlagSync flag for an event
 func Sync(e *Event) { e.Flags = e.Flags | FlagSync }
 
-// New returns just created Emitter struct. Capacity argument
-// will be used to create channels with given capacity
-// optionally include a matcher to use or nil to use the default
-// which implements path.Match() from the system library
-func New(capacity uint, matcher Matcher) *Emitter {
-	e := &Emitter{Cap: capacity, Matcher: matcher}
-	e.init()
-	return e
-}
-
 // Emitter is a struct that allows to emit, receive
 // event, close receiver channel, get info
 // about topics and listeners
@@ -82,6 +73,11 @@ type Emitter struct {
 	Matcher     Matcher
 }
 
+type listener struct {
+	ch          chan Event
+	middlewares []func(*Event)
+}
+
 func newListener(capacity uint, middlewares ...func(*Event)) listener {
 	return listener{
 		ch:          make(chan Event, capacity),
@@ -89,13 +85,20 @@ func newListener(capacity uint, middlewares ...func(*Event)) listener {
 	}
 }
 
-type listener struct {
-	ch          chan Event
-	middlewares []func(*Event)
+// New returns just created Emitter struct. Capacity argument
+// will be used to create channels with given capacity
+// optionally include a matcher to use or nil to use the default
+// which implements path.Match() from the system library
+func New(capacity uint, matcher Matcher) *Emitter {
+	e := &Emitter{Cap: capacity, Matcher: matcher}
+	e.init()
+	return e
 }
 
 func (e *Emitter) init() {
 	if !e.isInit {
+		e.mu.Lock()
+		defer e.mu.Unlock()
 		e.listeners = make(map[string][]listener)
 		e.middlewares = make(map[string][]func(*Event))
 		e.isInit = true
@@ -108,8 +111,8 @@ func (e *Emitter) init() {
 // Use registers middlewares for the pattern.
 func (e *Emitter) Use(pattern string, middlewares ...func(*Event)) {
 	e.mu.Lock()
-	e.init()
 	defer e.mu.Unlock()
+	e.init()
 
 	e.middlewares[pattern] = middlewares
 	if len(e.middlewares[pattern]) == 0 {
@@ -143,7 +146,12 @@ func (e *Emitter) Off(topic string, channels ...<-chan Event) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	e.init()
-	match, _ := e.matched(topic)
+
+	match, err := e.matched(topic)
+	if err != nil {
+		log.Printf("Error matching topic: %v", err)
+		return
+	}
 
 	for _, _topic := range match {
 		if listeners, ok := e.listeners[_topic]; ok {
@@ -180,7 +188,11 @@ func (e *Emitter) Listeners(topic string) []<-chan Event {
 	e.init()
 	defer e.mu.Unlock()
 	var acc []<-chan Event
-	match, _ := e.matched(topic)
+	match, err := e.matched(topic)
+	if err != nil {
+		log.Printf("Error matching topic: %v", err)
+		return acc
+	}
 
 	for _, _topic := range match {
 		list := e.listeners[_topic]
@@ -235,7 +247,7 @@ func (e *Emitter) Emit(topic string, args interface{}) chan struct{} {
 	Loop:
 		for i := len(listeners) - 1; i >= 0; i-- {
 			lstnr := listeners[i]
-			evn := *(&event) // copy the event
+			evn := event
 			applyMiddlewares(&evn, lstnr.middlewares)
 
 			if (evn.Flags | FlagVoid) == evn.Flags {
@@ -243,7 +255,10 @@ func (e *Emitter) Emit(topic string, args interface{}) chan struct{} {
 			}
 
 			if (evn.Flags | FlagSync) == evn.Flags {
-				_, remove, _ := pushEvent(done, lstnr.ch, &evn)
+				_, remove, err := pushEvent(done, lstnr.ch, &evn)
+				if err != nil {
+					log.Printf("Error pushing event: %v", err)
+				}
 				if remove {
 					defer e.Off(event.Topic, lstnr.ch)
 				}
@@ -252,7 +267,10 @@ func (e *Emitter) Emit(topic string, args interface{}) chan struct{} {
 				haveToWait = true
 				go func(lstnr listener, event *Event) {
 					e.mu.Lock()
-					_, remove, _ := pushEvent(done, lstnr.ch, event)
+					_, remove, err := pushEvent(done, lstnr.ch, event)
+					if err != nil {
+						log.Printf("Error pushing event: %v", err)
+					}
 					if remove {
 						defer e.Off(event.Topic, lstnr.ch)
 					}

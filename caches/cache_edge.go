@@ -11,7 +11,7 @@ import (
 var EdgesMap = &SafeMap[models.Edge]{}
 
 // Init 缓存初始化
-func EdgesInit() {
+func EdgesInit() (err error) {
 	EdgesMap.WithInit(
 		func() (m []*models.Edge, err error) {
 			if err = g.Engine.Find(&m); err != nil {
@@ -20,4 +20,5 @@ func EdgesInit() {
 			return
 		},
 	)
+	return
 }

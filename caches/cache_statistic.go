@@ -11,7 +11,7 @@ import (
 var StatisticsMap = &SafeMap[models.Statistic]{}
 
 // Init 缓存初始化
-func StatisticsInit() {
+func StatisticsInit() (err error) {
 	StatisticsMap.WithInit(
 		func() (m []*models.Statistic, err error) {
 			if err = g.Engine.Find(&m); err != nil {
@@ -20,4 +20,5 @@ func StatisticsInit() {
 			return
 		},
 	)
+	return
 }

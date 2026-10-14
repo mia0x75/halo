@@ -11,7 +11,7 @@ import (
 var TemplatesMap = SafeMap[models.Template]{}
 
 // Init 缓存初始化
-func TemplatesInit() {
+func TemplatesInit() (err error) {
 	TemplatesMap.WithInit(
 		func() (m []*models.Template, err error) {
 			if err = g.Engine.Find(&m); err != nil {
@@ -20,4 +20,5 @@ func TemplatesInit() {
 			return
 		},
 	)
+	return
 }

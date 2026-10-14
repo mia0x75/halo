@@ -11,8 +11,8 @@ import (
 var RulesMap = &SafeMap[models.Rule]{}
 
 // Init 缓存初始化
-func RulesInit() {
-	RulesMap.WithInit(
+func RulesInit() (err error) {
+	_, err = RulesMap.WithInit(
 		func() (m []*models.Rule, err error) {
 			if err = g.Engine.Find(&m); err != nil {
 				log.Printf("查询数据表`%s`时发生一个错误:%s", "rules", err.Error())
@@ -20,4 +20,5 @@ func RulesInit() {
 			return
 		},
 	)
+	return
 }

@@ -11,7 +11,7 @@ import (
 var RolesMap = &SafeMap[models.Role]{}
 
 // Init 缓存初始化
-func RolesInit() {
+func RolesInit() (err error) {
 	RolesMap.WithInit(
 		func() (m []*models.Role, err error) {
 			if err = g.Engine.Find(&m); err != nil {
@@ -20,4 +20,5 @@ func RolesInit() {
 			return
 		},
 	)
+	return
 }
