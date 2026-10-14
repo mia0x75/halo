@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/mia0x75/halo/internal/analyzer/ir"
-	"github.com/mia0x75/halo/internal/analyzer/rules"
 	"github.com/mia0x75/halo/internal/domain"
 
 	pgparser "github.com/pgplex/pgparser/parser"
@@ -25,15 +24,6 @@ func (Postgres) Parse(ctx context.Context, sql string) (*ir.Statement, error) {
 		return nil, ErrUnsupportedStmt
 	}
 	return postgresToIR(sql), nil
-}
-
-// Analyze parses sql and runs the common rule set over the resulting IR.
-func (p Postgres) Analyze(ctx context.Context, sql string) (*ir.Result, error) {
-	st, err := p.Parse(ctx, sql)
-	if err != nil {
-		return nil, err
-	}
-	return &ir.Result{Statement: st, Violations: rules.CheckCommon(st)}, nil
 }
 
 func postgresToIR(sql string) *ir.Statement {

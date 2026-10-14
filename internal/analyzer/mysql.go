@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/mia0x75/halo/internal/analyzer/ir"
-	"github.com/mia0x75/halo/internal/analyzer/rules"
 	"github.com/mia0x75/halo/internal/domain"
 
 	"github.com/mia0x75/parser"
@@ -27,15 +26,6 @@ func (MySQL) Parse(ctx context.Context, sql string) (*ir.Statement, error) {
 		return nil, ErrUnsupportedStmt
 	}
 	return mysqlToIR(sql, stmts[0]), nil
-}
-
-// Analyze parses sql and runs the common rule set over the resulting IR.
-func (m MySQL) Analyze(ctx context.Context, sql string) (*ir.Result, error) {
-	st, err := m.Parse(ctx, sql)
-	if err != nil {
-		return nil, err
-	}
-	return &ir.Result{Statement: st, Violations: rules.CheckCommon(st)}, nil
 }
 
 // mysqlToIR lowers a MySQL AST node. Only kind, dialect and raw text are filled

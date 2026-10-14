@@ -77,24 +77,9 @@ type DDLInfo struct {
 	Targets []TableRef
 }
 
-// Result is the outcome of analyzing one statement.
+// Result is the outcome of analyzing one statement. Violations are owned by
+// domain so the IR stays independent of any particular rule engine.
 type Result struct {
 	Statement  *Statement
-	Violations []Violation
+	Violations []domain.Violation
 }
-
-// Violation is a single rule hit.
-type Violation struct {
-	Rule     string
-	Message  string
-	Severity Severity
-}
-
-// Severity orders violations by how strongly they should block execution.
-type Severity int
-
-const (
-	SeverityInfo Severity = iota
-	SeverityWarning
-	SeverityCritical
-)
