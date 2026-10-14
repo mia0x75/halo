@@ -18,3 +18,6 @@ DELETE FROM mm_queries WHERE uuid = ?;
 
 -- name: ListQueries :many
 SELECT query_id, uuid, `type`, cluster_id, `database`, content, plan, user_id, version, update_at, create_at FROM mm_queries WHERE query_id < ? ORDER BY query_id DESC LIMIT ?;
+
+-- name: ListQueriesByUser :many
+SELECT query_id, uuid, `type`, cluster_id, `database`, content, plan, user_id, version, update_at, create_at FROM mm_queries WHERE user_id = ? ORDER BY query_id;

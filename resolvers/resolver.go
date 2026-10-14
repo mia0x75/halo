@@ -7,12 +7,13 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/app"
+	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
 )
@@ -165,47 +166,13 @@ func EncodeCursor(s string) string {
 	return base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("cursor%d", i)))
 }
 
-// RequestCols TODO: 有问题
-func (r *Resolver) RequestCols(fields []graphql.CollectedField, model interface{}) (columns []string) {
-	// 从model的成员和底层映射表字段的对照关系
-	table, _ := g.Engine.TableInfo(model)
-	cols := table.Columns()
-	for _, col := range cols {
-		for _, field := range fields {
-			if field.Name == col.FieldName {
-				columns = append(columns, col.Name)
-			}
-		}
+// updateEdges replaces every edge of one kind leaving userID, in one tx.
+func (r *Resolver) updateEdges(ctx context.Context, edgeType uint, userID uint, edges []*models.Edge) error {
+	domainEdges := make([]*domain.Edge, 0, len(edges))
+	for _, e := range edges {
+		domainEdges = append(domainEdges, bridge.EdgeToDomain(e))
 	}
-
-	return
-}
-
-func updateEdges(edgeType uint, userID uint, edges []*models.Edge) (err error) {
-	session := g.Engine.NewSession()
-	defer session.Close()
-	session.Begin()
-
-	edge := models.Edge{
-		Type:       uint(edgeType),
-		AncestorID: userID,
-	}
-
-	for {
-		if _, err = session.Delete(&edge); err != nil {
-			session.Rollback()
-			break
-		}
-		if _, err = session.Insert(&edges); err != nil {
-			session.Rollback()
-			break
-		}
-		if err = session.Commit(); err != nil {
-			break
-		}
-		break
-	}
-	return
+	return r.app.Services.Edge.Replace(ctx, edgeType, userID, domainEdges, userID)
 }
 
 func notifyTicketStatusChange(userUUID string, ticketUUID string, message string) {

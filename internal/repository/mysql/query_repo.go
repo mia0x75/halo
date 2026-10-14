@@ -105,3 +105,16 @@ func (r *QueryRepo) List(ctx context.Context, cursor int64, limit int) ([]*domai
 	}
 	return out, nil
 }
+
+// ListByUser returns every query logged for one user, oldest first.
+func (r *QueryRepo) ListByUser(ctx context.Context, userID uint) ([]*domain.Query, error) {
+	rows, err := r.q.ListQueriesByUser(ctx, uint32(userID))
+	if err != nil {
+		return nil, wrap("query.ListByUser", err)
+	}
+	out := make([]*domain.Query, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, queryFromRow(row))
+	}
+	return out, nil
+}

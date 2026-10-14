@@ -111,3 +111,16 @@ func (r *TicketRepo) List(ctx context.Context, cursor int64, limit int) ([]*doma
 	}
 	return out, nil
 }
+
+// ListByUser returns every ticket raised by one user, oldest first.
+func (r *TicketRepo) ListByUser(ctx context.Context, userID uint) ([]*domain.Ticket, error) {
+	rows, err := r.q.ListTicketsByUser(ctx, uint32(userID))
+	if err != nil {
+		return nil, wrap("ticket.ListByUser", err)
+	}
+	out := make([]*domain.Ticket, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, ticketFromRow(row))
+	}
+	return out, nil
+}

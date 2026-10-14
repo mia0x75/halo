@@ -18,3 +18,6 @@ DELETE FROM mm_edges WHERE uuid = ?;
 
 -- name: ListEdges :many
 SELECT edge_id, uuid, `type`, ancestor_id, descendant_id, version, update_at, create_at FROM mm_edges WHERE edge_id < ? ORDER BY edge_id DESC LIMIT ?;
+
+-- name: DeleteEdgesByTypeAncestor :exec
+DELETE FROM mm_edges WHERE `type` = ? AND ancestor_id = ?;

@@ -58,6 +58,20 @@ func (q *Queries) DeleteEdgeByUUID(ctx context.Context, uuid string) error {
 	return err
 }
 
+const deleteEdgesByTypeAncestor = `-- name: DeleteEdgesByTypeAncestor :exec
+DELETE FROM mm_edges WHERE ` + "`" + `type` + "`" + ` = ? AND ancestor_id = ?
+`
+
+type DeleteEdgesByTypeAncestorParams struct {
+	Type       uint32
+	AncestorID uint32
+}
+
+func (q *Queries) DeleteEdgesByTypeAncestor(ctx context.Context, arg DeleteEdgesByTypeAncestorParams) error {
+	_, err := q.db.ExecContext(ctx, deleteEdgesByTypeAncestor, arg.Type, arg.AncestorID)
+	return err
+}
+
 const getEdgeByID = `-- name: GetEdgeByID :one
 SELECT edge_id, uuid, ` + "`" + `type` + "`" + `, ancestor_id, descendant_id, version, update_at, create_at FROM mm_edges WHERE edge_id = ? LIMIT 1
 `

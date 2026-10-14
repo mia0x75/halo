@@ -18,3 +18,6 @@ DELETE FROM mm_tickets WHERE uuid = ?;
 
 -- name: ListTickets :many
 SELECT ticket_id, uuid, cluster_id, `database`, subject, content, status, user_id, reviewer_id, cron_id, version, update_at, create_at FROM mm_tickets WHERE ticket_id < ? ORDER BY ticket_id DESC LIMIT ?;
+
+-- name: ListTicketsByUser :many
+SELECT ticket_id, uuid, cluster_id, `database`, subject, content, status, user_id, reviewer_id, cron_id, version, update_at, create_at FROM mm_tickets WHERE user_id = ? ORDER BY ticket_id;

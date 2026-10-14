@@ -19,6 +19,8 @@ import (
 	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
+	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/service"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
 )
@@ -86,10 +88,13 @@ func (r *queryRootResolver) Users(ctx context.Context, after *string, before *st
 	//       如果不需要记录总数或者说总页数，假设页大小为n，那么总是查n+1是否可行
 	//       如果需要查记录总数或者说总页数，假设页大小为n，那么用offset+n和记录总数判断是否可行
 	//       在Edge.Cursor中包含offset是否可行
-	users := []*models.User{}
-	var err error
-	if err = g.Engine.Desc("user_id").Where("user_id < ?", from).Limit(*first).Find(&users); err != nil {
+	domainUsers, err := r.app.Services.User.List(ctx, int64(from), *first)
+	if err != nil {
 		return nil, err
+	}
+	users := make([]*models.User, 0, len(domainUsers))
+	for _, u := range domainUsers {
+		users = append(users, bridge.UserFromDomain(u))
 	}
 
 	for _, user := range users {
@@ -223,31 +228,27 @@ L:
 			AvatarID: 1,
 			Status:   gqlapi.UserStatusEnumMap[gqlapi.UserStatusEnumPending],
 		}
-		session := g.Engine.NewSession()
-		defer session.Close()
-		session.Begin()
-		if _, err = session.Insert(user); err != nil {
-			session.Rollback()
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
-			break L
-		}
+		user.BeforeInsert()
 
 		edge := &models.Edge{
 			Type:         gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToRole], // TODO: 消除硬编码
-			AncestorID:   user.UserID,                                   //
 			DescendantID: gqlapi.RoleEnumMap["USER"],                    // 默认给USER权限
 		}
-		if _, err = session.Insert(edge); err != nil {
-			session.Rollback()
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
-			break L
-		}
+		edge.BeforeInsert()
 
-		if err = session.Commit(); err != nil {
+		regErr := r.app.Tx.WithTx(ctx, func(ctx context.Context, repos service.Repos) error {
+			newID, err := repos.User.Create(ctx, bridge.UserToDomain(user))
+			if err != nil {
+				return err
+			}
+			user.UserID = uint(newID)
+			edge.AncestorID = uint(newID)
+			_, err = repos.Edge.Create(ctx, bridge.EdgeToDomain(edge))
+			return err
+		})
+		if regErr != nil {
 			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, regErr.Error())
 			break L
 		}
 
@@ -344,8 +345,9 @@ L:
 		}
 
 		user.Status = gqlapi.UserStatusEnumMap[gqlapi.UserStatusEnumNormal]
+		user.BeforeUpdate()
 
-		if _, err = g.Engine.ID(user.UserID).Update(user); err != nil {
+		if err = r.app.Services.User.Update(ctx, bridge.UserToDomain(user), 0); err != nil {
 			err = fmt.Errorf("")
 			break L
 		}
@@ -539,8 +541,9 @@ L:
 		}
 		user.Name = strings.TrimSpace(input.Name)
 		user.Phone = input.Phone
+		user.BeforeUpdate()
 
-		if _, err = g.Engine.ID(user.UserID).Update(user); err != nil {
+		if err = r.app.Services.User.Update(ctx, bridge.UserToDomain(user), user.UserID); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break L
@@ -583,7 +586,8 @@ L:
 		}
 		bs, _ := bcrypt.GenerateFromPassword([]byte(input.NewPassword), bcrypt.DefaultCost)
 		credential.User.Password = string(bs)
-		if _, err = g.Engine.ID(user.UserID).Update(user); err != nil {
+		user.BeforeUpdate()
+		if err = r.app.Services.User.Update(ctx, bridge.UserToDomain(user), user.UserID); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break L
@@ -630,8 +634,8 @@ L:
 		}
 
 		user.Email = input.NewEmail
-		// TODO: 需要单元测试
-		if _, err = g.Engine.ID(user.UserID).Where("`email` <> ?", input.NewEmail).Update(user); err != nil {
+		user.BeforeUpdate()
+		if err = r.app.Services.User.Update(ctx, bridge.UserToDomain(user), user.UserID); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break L
@@ -696,7 +700,7 @@ L:
 			edges = append(edges, &r)
 		}
 
-		if err = updateEdges(gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToReviewer], user.UserID, edges); err != nil {
+		if err = r.updateEdges(ctx, gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToReviewer], user.UserID, edges); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break L
@@ -759,7 +763,8 @@ L:
 				return false
 			})
 			if edge != nil {
-				if _, err = g.Engine.ID(edge.EdgeID).Delete(edge); err != nil {
+				manager := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+				if err = r.app.Services.Edge.Delete(ctx, edge.EdgeID, manager.User.UserID); err != nil {
 					rc = gqlapi.ReturnCodeUnknowError
 					err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 					break L
@@ -830,7 +835,7 @@ L:
 			edges = append(edges, &r)
 		}
 
-		if err = updateEdges(gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToCluster], user.UserID, edges); err != nil {
+		if err = r.updateEdges(ctx, gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToCluster], user.UserID, edges); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break L
@@ -893,7 +898,8 @@ L:
 				return false
 			})
 			if edge != nil {
-				if _, err = g.Engine.ID(edge.EdgeID).Delete(edge); err != nil {
+				manager := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+				if err = r.app.Services.Edge.Delete(ctx, edge.EdgeID, manager.User.UserID); err != nil {
 					rc = gqlapi.ReturnCodeUnknowError
 					err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 					break L
@@ -957,7 +963,7 @@ L:
 			edges = append(edges, &r)
 		}
 
-		if err = updateEdges(gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToRole], user.UserID, edges); err != nil {
+		if err = r.updateEdges(ctx, gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToRole], user.UserID, edges); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break L
@@ -1021,7 +1027,8 @@ L:
 			})
 
 			if edge != nil {
-				if _, err = g.Engine.ID(edge.EdgeID).Delete(edge); err != nil {
+				manager := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+				if err = r.app.Services.Edge.Delete(ctx, edge.EdgeID, manager.User.UserID); err != nil {
 					rc = gqlapi.ReturnCodeUnknowError
 					err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 					break L
@@ -1174,33 +1181,29 @@ L:
 			user.AvatarID = 1
 		}
 
-		// 开启事务
-		session := g.Engine.NewSession()
-		defer session.Close()
-		session.Begin()
-		if _, err = session.Insert(user); err != nil {
-			session.Rollback()
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
-			break L
-		}
+		user.BeforeInsert()
 
-		// 写用户关联信息
-		if len(edges) > 0 {
+		// 开启事务
+		createErr := r.app.Tx.WithTx(ctx, func(ctx context.Context, repos service.Repos) error {
+			newID, err := repos.User.Create(ctx, bridge.UserToDomain(user))
+			if err != nil {
+				return err
+			}
+			user.UserID = uint(newID)
+
+			// 写用户关联信息
 			for _, edge := range edges {
 				edge.AncestorID = user.UserID
+				edge.BeforeInsert()
+				if _, err := repos.Edge.Create(ctx, bridge.EdgeToDomain(edge)); err != nil {
+					return err
+				}
 			}
-			if _, err = session.Insert(&edges); err != nil {
-				session.Rollback()
-				rc = gqlapi.ReturnCodeUnknowError
-				err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
-				break L
-			}
-		}
-
-		if err = session.Commit(); err != nil {
+			return nil
+		})
+		if createErr != nil {
 			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, createErr.Error())
 			break L
 		}
 
@@ -1288,8 +1291,10 @@ L:
 		} else {
 			user.AvatarID = avatar.AvatarID
 		}
+		user.BeforeUpdate()
 
-		if _, err = g.Engine.ID(user.UserID).Update(user); err != nil {
+		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		if err = r.app.Services.User.Update(ctx, bridge.UserToDomain(user), credential.User.UserID); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break L
@@ -1298,7 +1303,6 @@ L:
 		// 后台更新用户，同步清理该用户的令牌，如果有的话
 		tools.New().Delete(input.UserUUID)
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
 		defer events.Fire(events.EventUserUpdated, &events.UserUpdatedArgs{
 			Manager: *credential.User,
 			User:    *user,
@@ -1342,7 +1346,9 @@ L:
 		}
 
 		user.Status = input.Status
-		if _, err = g.Engine.ID(user.UserID).Update(user); err != nil {
+		user.BeforeUpdate()
+		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		if err = r.app.Services.User.Update(ctx, bridge.UserToDomain(user), credential.User.UserID); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break L
@@ -1351,7 +1357,6 @@ L:
 		// 后台更新用户，同步清理该用户的令牌，如果有的话
 		tools.New().Delete(input.UserUUID)
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
 		events.Fire(events.EventUserStatusPatched, &events.UserStatusPatchedArgs{
 			Manager: *credential.User,
 			User:    *user,
@@ -1504,9 +1509,13 @@ func (r *userResolver) Tickets(ctx context.Context, obj *models.User, after *str
 		return nil, fmt.Errorf("错误代码: %s, 错误信息: 参数`after`和`before`只能选择一种。", rc)
 	}
 
-	tickets := []*models.Ticket{}
-	if err := g.Engine.Where("user_id = ?", obj.UserID).Find(tickets); err != nil {
+	domainTickets, err := r.app.Services.Ticket.ListByUser(ctx, obj.UserID)
+	if err != nil {
 		return &gqlapi.TicketConnection{}, err
+	}
+	tickets := make([]*models.Ticket, 0, len(domainTickets))
+	for _, t := range domainTickets {
+		tickets = append(tickets, bridge.TicketFromDomain(t))
 	}
 	edges := []*gqlapi.TicketEdge{}
 	for _, ticket := range tickets {
@@ -1546,8 +1555,14 @@ func (r *userResolver) Queries(ctx context.Context, obj *models.User, after *str
 		return nil, fmt.Errorf("错误代码: %s, 错误信息: 参数`after`和`before`只能选择一种。", rc)
 	}
 
-	queries := []*models.Query{}
-	g.Engine.Where("user_id = ?", obj.UserID).Find(queries)
+	domainQueries, err := r.app.Services.Query.ListByUser(ctx, obj.UserID)
+	if err != nil {
+		return nil, err
+	}
+	queries := make([]*models.Query, 0, len(domainQueries))
+	for _, q := range domainQueries {
+		queries = append(queries, bridge.QueryFromDomain(q))
+	}
 	edges := []*gqlapi.QueryEdge{}
 	for _, query := range queries {
 		edges = append(edges, &gqlapi.QueryEdge{

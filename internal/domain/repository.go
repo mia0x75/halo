@@ -68,6 +68,7 @@ type QueryRepository interface {
 	Delete(ctx context.Context, id int64) error
 	DeleteByUUID(ctx context.Context, uuid string) error
 	List(ctx context.Context, cursor int64, limit int) ([]*Query, error)
+	ListByUser(ctx context.Context, userID uint) ([]*Query, error)
 }
 
 type EdgeRepository interface {
@@ -77,6 +78,7 @@ type EdgeRepository interface {
 	Update(ctx context.Context, e *Edge) error
 	Delete(ctx context.Context, id int64) error
 	DeleteByUUID(ctx context.Context, uuid string) error
+	DeleteByTypeAncestor(ctx context.Context, edgeType uint, ancestorID uint) error
 	List(ctx context.Context, cursor int64, limit int) ([]*Edge, error)
 }
 
@@ -98,6 +100,7 @@ type TicketRepository interface {
 	Delete(ctx context.Context, id int64) error
 	DeleteByUUID(ctx context.Context, uuid string) error
 	List(ctx context.Context, cursor int64, limit int) ([]*Ticket, error)
+	ListByUser(ctx context.Context, userID uint) ([]*Ticket, error)
 }
 
 type UserRepository interface {

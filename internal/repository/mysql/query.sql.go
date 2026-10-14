@@ -154,6 +154,45 @@ func (q *Queries) ListQueries(ctx context.Context, arg ListQueriesParams) ([]MmQ
 	return items, nil
 }
 
+const listQueriesByUser = `-- name: ListQueriesByUser :many
+SELECT query_id, uuid, ` + "`" + `type` + "`" + `, cluster_id, ` + "`" + `database` + "`" + `, content, plan, user_id, version, update_at, create_at FROM mm_queries WHERE user_id = ? ORDER BY query_id
+`
+
+func (q *Queries) ListQueriesByUser(ctx context.Context, userID uint32) ([]MmQuery, error) {
+	rows, err := q.db.QueryContext(ctx, listQueriesByUser, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []MmQuery{}
+	for rows.Next() {
+		var i MmQuery
+		if err := rows.Scan(
+			&i.QueryID,
+			&i.Uuid,
+			&i.Type,
+			&i.ClusterID,
+			&i.Database,
+			&i.Content,
+			&i.Plan,
+			&i.UserID,
+			&i.Version,
+			&i.UpdateAt,
+			&i.CreateAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateQuery = `-- name: UpdateQuery :exec
 UPDATE mm_queries SET uuid = ?, ` + "`" + `type` + "`" + ` = ?, cluster_id = ?, ` + "`" + `database` + "`" + ` = ?, content = ?, plan = ?, user_id = ?, version = ?, update_at = ? WHERE query_id = ?
 `

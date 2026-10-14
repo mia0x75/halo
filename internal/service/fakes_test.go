@@ -86,6 +86,10 @@ func (f *fakeTicketRepo) List(_ context.Context, _ int64, _ int) ([]*domain.Tick
 	return nil, nil
 }
 
+func (f *fakeTicketRepo) ListByUser(_ context.Context, _ uint) ([]*domain.Ticket, error) {
+	return nil, nil
+}
+
 type fakeLogRepo struct {
 	entries []*domain.Log
 	err     error

@@ -105,6 +105,11 @@ func (s *TicketService) List(ctx context.Context, cursor int64, limit int) ([]*d
 	return s.tickets.List(ctx, cursor, limit)
 }
 
+// ListByUser returns every ticket raised by one user.
+func (s *TicketService) ListByUser(ctx context.Context, userID uint) ([]*domain.Ticket, error) {
+	return s.tickets.ListByUser(ctx, userID)
+}
+
 // SubmitRequest is the input for submitting a new ticket.
 type SubmitRequest struct {
 	ClusterID uint

@@ -164,6 +164,47 @@ func (q *Queries) ListTickets(ctx context.Context, arg ListTicketsParams) ([]MmT
 	return items, nil
 }
 
+const listTicketsByUser = `-- name: ListTicketsByUser :many
+SELECT ticket_id, uuid, cluster_id, ` + "`" + `database` + "`" + `, subject, content, status, user_id, reviewer_id, cron_id, version, update_at, create_at FROM mm_tickets WHERE user_id = ? ORDER BY ticket_id
+`
+
+func (q *Queries) ListTicketsByUser(ctx context.Context, userID uint32) ([]MmTicket, error) {
+	rows, err := q.db.QueryContext(ctx, listTicketsByUser, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []MmTicket{}
+	for rows.Next() {
+		var i MmTicket
+		if err := rows.Scan(
+			&i.TicketID,
+			&i.Uuid,
+			&i.ClusterID,
+			&i.Database,
+			&i.Subject,
+			&i.Content,
+			&i.Status,
+			&i.UserID,
+			&i.ReviewerID,
+			&i.CronID,
+			&i.Version,
+			&i.UpdateAt,
+			&i.CreateAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateTicket = `-- name: UpdateTicket :exec
 UPDATE mm_tickets SET uuid = ?, cluster_id = ?, ` + "`" + `database` + "`" + ` = ?, subject = ?, content = ?, status = ?, user_id = ?, reviewer_id = ?, cron_id = ?, version = ?, update_at = ? WHERE ticket_id = ?
 `

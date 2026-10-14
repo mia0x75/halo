@@ -35,6 +35,7 @@ type Querier interface {
 	DeleteCronByUUID(ctx context.Context, uuid string) error
 	DeleteEdgeByID(ctx context.Context, edgeID uint32) error
 	DeleteEdgeByUUID(ctx context.Context, uuid string) error
+	DeleteEdgesByTypeAncestor(ctx context.Context, arg DeleteEdgesByTypeAncestorParams) error
 	DeleteGlossaryByKey(ctx context.Context, arg DeleteGlossaryByKeyParams) error
 	DeleteGlossaryByUUID(ctx context.Context, uuid string) error
 	DeleteLogByID(ctx context.Context, logID uint32) error
@@ -95,12 +96,14 @@ type Querier interface {
 	ListLogs(ctx context.Context, arg ListLogsParams) ([]MmLog, error)
 	ListOptions(ctx context.Context, arg ListOptionsParams) ([]MmOption, error)
 	ListQueries(ctx context.Context, arg ListQueriesParams) ([]MmQuery, error)
+	ListQueriesByUser(ctx context.Context, userID uint32) ([]MmQuery, error)
 	ListRoles(ctx context.Context, arg ListRolesParams) ([]MmRole, error)
 	ListRules(ctx context.Context, arg ListRulesParams) ([]MmRule, error)
 	ListStatements(ctx context.Context, arg ListStatementsParams) ([]MmStatement, error)
 	ListStatistics(ctx context.Context, arg ListStatisticsParams) ([]MmStatistic, error)
 	ListTemplates(ctx context.Context, arg ListTemplatesParams) ([]MmTemplate, error)
 	ListTickets(ctx context.Context, arg ListTicketsParams) ([]MmTicket, error)
+	ListTicketsByUser(ctx context.Context, userID uint32) ([]MmTicket, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]MmUser, error)
 	UpdateAvatar(ctx context.Context, arg UpdateAvatarParams) error
 	UpdateCluster(ctx context.Context, arg UpdateClusterParams) error

@@ -28,6 +28,11 @@ func (s *QueryService) List(ctx context.Context, cursor int64, limit int) ([]*do
 	return s.queries.List(ctx, cursor, limit)
 }
 
+// ListByUser returns every query logged for one user.
+func (s *QueryService) ListByUser(ctx context.Context, userID uint) ([]*domain.Query, error) {
+	return s.queries.ListByUser(ctx, userID)
+}
+
 func (s *QueryService) Create(ctx context.Context, q *domain.Query, operatorID uint) (uint, error) {
 	var id uint
 	err := s.tx.WithTx(ctx, func(ctx context.Context, repos Repos) error {

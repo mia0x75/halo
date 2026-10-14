@@ -96,3 +96,12 @@ func (r *EdgeRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain
 	}
 	return out, nil
 }
+
+// DeleteByTypeAncestor removes every edge of one kind leaving an ancestor, the
+// primitive behind "replace this user's grants".
+func (r *EdgeRepo) DeleteByTypeAncestor(ctx context.Context, edgeType uint, ancestorID uint) error {
+	return wrap("edge.DeleteByTypeAncestor", r.q.DeleteEdgesByTypeAncestor(ctx, DeleteEdgesByTypeAncestorParams{
+		Type:       uint32(edgeType),
+		AncestorID: uint32(ancestorID),
+	}))
+}
