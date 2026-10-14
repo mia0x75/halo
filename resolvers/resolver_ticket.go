@@ -444,11 +444,8 @@ L:
 func (r *mutationRootResolver) RemoveTicket(ctx context.Context, id string) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
-		found := false
 		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
-		ticket := &models.Ticket{}
 		user := credential.User
-		ticket.UUID = id
 
 		if strings.TrimSpace(user.Name) == "" {
 			rc = gqlapi.ReturnCodeRegistrationIncomplete
@@ -456,68 +453,33 @@ func (r *mutationRootResolver) RemoveTicket(ctx context.Context, id string) (ok 
 			break
 		}
 
-		session := g.Engine.NewSession()
-		defer session.Close()
-		session.Begin()
-		//获取数据库原有的ticket信息
-		if found, err = session.Where("uuid = ?", ticket.UUID).Get(ticket); err != nil {
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
-			break
-		} else if !found {
-			rc = gqlapi.ReturnCodeNotFound
-			err = fmt.Errorf("错误代码: %s, 错误信息: 工单(uuid=%s)不存在。", rc, id)
-			break
-		}
-
-		if ticket.UserID != user.UserID {
-			rc = gqlapi.ReturnCodeForbidden
-			err = fmt.Errorf("错误代码: %s, 错误信息: 只有工单(uuid=%s)的发起人可以删除工单。", rc, id)
-			break
-		}
-		if ticket.Status == gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumClosed] ||
-			ticket.Status == gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumDone] ||
-			ticket.Status == gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumExecFailure] {
-			// TODO: 处理rc
-			err = fmt.Errorf("错误代码: %s, 错误信息: 关闭、已执行成功和执行失败的工单不可删除。", rc)
-			break
-		}
-
-		// 删除原来关联语句
-		stat := models.Statement{
-			TicketID: ticket.TicketID,
-		}
-		if _, err = session.Where("ticket_id  = ?", ticket.TicketID).Delete(&stat); err != nil {
-			session.Rollback()
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
-			break
-		}
-
-		// 删除工单
-		if _, err = session.ID(ticket.TicketID).Delete(ticket); err != nil {
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
-			session.Rollback()
-			break
-		}
-
-		if err = session.Commit(); err != nil {
-			session.Rollback()
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+		removed, removeErr := r.app.Services.Ticket.Remove(ctx, id, user.UserID)
+		if removeErr != nil {
+			switch {
+			case errors.Is(removeErr, domain.ErrNotFound):
+				rc = gqlapi.ReturnCodeNotFound
+				err = fmt.Errorf("错误代码: %s, 错误信息: 工单(uuid=%s)不存在。", rc, id)
+			case errors.Is(removeErr, domain.ErrForbidden):
+				rc = gqlapi.ReturnCodeForbidden
+				err = fmt.Errorf("错误代码: %s, 错误信息: 只有工单(uuid=%s)的发起人可以删除工单。", rc, id)
+			case errors.Is(removeErr, domain.ErrInvalidInput):
+				err = fmt.Errorf("错误代码: %s, 错误信息: 关闭、已执行成功和执行失败的工单不可删除。", rc)
+			default:
+				rc = gqlapi.ReturnCodeUnknowError
+				err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, removeErr.Error())
+			}
 			break
 		}
 
 		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
-			if elem.ClusterID == ticket.ClusterID {
+			if elem.ClusterID == removed.ClusterID {
 				return true
 			}
 			return false
 		})
 		events.Fire(events.EventTicketRemoved, &events.TicketRemovedArgs{
 			User:    *user,
-			Ticket:  *ticket,
+			Ticket:  *bridge.TicketFromDomain(removed),
 			Cluster: *cluster,
 		})
 

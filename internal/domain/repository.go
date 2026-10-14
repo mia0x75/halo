@@ -136,6 +136,7 @@ type StatementRepository interface {
 	Update(ctx context.Context, s *Statement) error
 	DeleteByUUID(ctx context.Context, uuid string) error
 	DeleteByTicketSequence(ctx context.Context, ticketID uint, sequence uint16) error
+	DeleteByTicket(ctx context.Context, ticketID uint) error
 	List(ctx context.Context, cursor string, limit int) ([]*Statement, error)
 }
 

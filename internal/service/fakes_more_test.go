@@ -73,6 +73,15 @@ func (f *fakeStatementRepo) DeleteByTicketSequence(_ context.Context, ticketID u
 	return nil
 }
 
+func (f *fakeStatementRepo) DeleteByTicket(_ context.Context, ticketID uint) error {
+	for k := range f.byKey {
+		if k[0] == ticketID {
+			delete(f.byKey, k)
+		}
+	}
+	return nil
+}
+
 func (f *fakeStatementRepo) List(_ context.Context, _ string, _ int) ([]*domain.Statement, error) {
 	return nil, nil
 }

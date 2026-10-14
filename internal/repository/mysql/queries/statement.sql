@@ -16,5 +16,8 @@ DELETE FROM mm_statements WHERE uuid = ?;
 -- name: DeleteStatementByTicketSequence :exec
 DELETE FROM mm_statements WHERE ticket_id = ? AND sequence = ?;
 
+-- name: DeleteStatementsByTicket :exec
+DELETE FROM mm_statements WHERE ticket_id = ?;
+
 -- name: ListStatements :many
 SELECT ticket_id, sequence, uuid, content, `type`, status, report, plan, results, rows_affected, version, update_at, create_at FROM mm_statements WHERE uuid < ? ORDER BY uuid DESC LIMIT ?;

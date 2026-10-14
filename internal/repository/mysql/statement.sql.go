@@ -72,6 +72,15 @@ func (q *Queries) DeleteStatementByUUID(ctx context.Context, uuid string) error 
 	return err
 }
 
+const deleteStatementsByTicket = `-- name: DeleteStatementsByTicket :exec
+DELETE FROM mm_statements WHERE ticket_id = ?
+`
+
+func (q *Queries) DeleteStatementsByTicket(ctx context.Context, ticketID uint32) error {
+	_, err := q.db.ExecContext(ctx, deleteStatementsByTicket, ticketID)
+	return err
+}
+
 const getStatementByTicketSequence = `-- name: GetStatementByTicketSequence :one
 SELECT ticket_id, sequence, uuid, content, ` + "`" + `type` + "`" + `, status, report, plan, results, rows_affected, version, update_at, create_at FROM mm_statements WHERE ticket_id = ? AND sequence = ? LIMIT 1
 `

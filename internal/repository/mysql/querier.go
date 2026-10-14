@@ -47,6 +47,7 @@ type Querier interface {
 	DeleteRuleByUUID(ctx context.Context, uuid string) error
 	DeleteStatementByTicketSequence(ctx context.Context, arg DeleteStatementByTicketSequenceParams) error
 	DeleteStatementByUUID(ctx context.Context, uuid string) error
+	DeleteStatementsByTicket(ctx context.Context, ticketID uint32) error
 	DeleteStatisticByUUID(ctx context.Context, uuid string) error
 	DeleteTemplateByUUID(ctx context.Context, uuid string) error
 	DeleteTicketByID(ctx context.Context, ticketID uint32) error

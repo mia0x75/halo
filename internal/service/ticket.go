@@ -155,6 +155,38 @@ func (s *TicketService) MarkFailed(ctx context.Context, ticketID uint, reason st
 	return s.transition(ctx, ticketID, domain.TicketStatusExecFailure, 0, "ticket.exec_failure", reason, nil)
 }
 
+// Remove deletes a ticket and its statements after checking ownership and that
+// the workflow allows it. It returns the removed ticket so the caller can fire
+// its audit event.
+func (s *TicketService) Remove(ctx context.Context, ticketUUID string, userID uint) (*domain.Ticket, error) {
+	var removed *domain.Ticket
+	err := s.tx.WithTx(ctx, func(ctx context.Context, repos Repos) error {
+		tk, err := repos.Ticket.GetByUUID(ctx, ticketUUID)
+		if err != nil {
+			return err
+		}
+		if tk.UserID != userID {
+			return fmt.Errorf("%w: only the author may remove ticket %s", domain.ErrForbidden, ticketUUID)
+		}
+		switch tk.Status {
+		case domain.TicketStatusClosed, domain.TicketStatusDone, domain.TicketStatusExecFailure:
+			return fmt.Errorf("%w: ticket %s is not removable in status %d", domain.ErrInvalidInput, ticketUUID, tk.Status)
+		}
+		if err := repos.Statement.DeleteByTicket(ctx, tk.TicketID); err != nil {
+			return err
+		}
+		if err := repos.Ticket.Delete(ctx, int64(tk.TicketID)); err != nil {
+			return err
+		}
+		removed = tk
+		return NewLogService(repos.Log).Log(ctx, LogEntry{UserID: userID, Operation: "ticket.remove", Target: "ticket:" + tk.UUID})
+	})
+	if err != nil {
+		return nil, err
+	}
+	return removed, nil
+}
+
 // transition loads the ticket, validates the edge and applies it with its audit
 // row in one transaction.
 func (s *TicketService) transition(ctx context.Context, ticketID uint, to domain.TicketStatus, actor uint, op, detail string, apply func(*domain.Ticket)) error {

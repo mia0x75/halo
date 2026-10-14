@@ -98,6 +98,11 @@ func (r *StatementRepo) DeleteByTicketSequence(ctx context.Context, ticketID uin
 	}))
 }
 
+// DeleteByTicket removes every statement of a ticket in one shot.
+func (r *StatementRepo) DeleteByTicket(ctx context.Context, ticketID uint) error {
+	return wrap("statement.DeleteByTicket", r.q.DeleteStatementsByTicket(ctx, uint32(ticketID)))
+}
+
 func (r *StatementRepo) List(ctx context.Context, cursor string, limit int) ([]*domain.Statement, error) {
 	rows, err := r.q.ListStatements(ctx, ListStatementsParams{
 		Uuid:  cursor,
