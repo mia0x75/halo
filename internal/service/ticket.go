@@ -100,6 +100,11 @@ func (s *TicketService) GetByUUID(ctx context.Context, uuid string) (*domain.Tic
 	return s.tickets.GetByUUID(ctx, uuid)
 }
 
+// GetByCronID returns the ticket scheduled under a cron id.
+func (s *TicketService) GetByCronID(ctx context.Context, cronID uint) (*domain.Ticket, error) {
+	return s.tickets.GetByCronID(ctx, cronID)
+}
+
 // List returns a keyset page of tickets.
 func (s *TicketService) List(ctx context.Context, cursor int64, limit int) ([]*domain.Ticket, error) {
 	return s.tickets.List(ctx, cursor, limit)

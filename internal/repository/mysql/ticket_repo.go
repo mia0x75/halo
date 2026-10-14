@@ -71,6 +71,15 @@ func (r *TicketRepo) GetByUUID(ctx context.Context, uuid string) (*domain.Ticket
 	return ticketFromRow(row), nil
 }
 
+// GetByCronID resolves the ticket a scheduled cron belongs to.
+func (r *TicketRepo) GetByCronID(ctx context.Context, cronID uint) (*domain.Ticket, error) {
+	row, err := r.q.GetTicketByCronID(ctx, nullFromUint(&cronID))
+	if err != nil {
+		return nil, wrap("ticket.GetByCronID", err)
+	}
+	return ticketFromRow(row), nil
+}
+
 func (r *TicketRepo) Update(ctx context.Context, t *domain.Ticket) error {
 	err := r.q.UpdateTicket(ctx, UpdateTicketParams{
 		Uuid:       t.UUID,

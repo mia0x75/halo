@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/mia0x75/halo/caches"
-	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
+	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/models"
 )
 
@@ -75,9 +75,13 @@ L:
 		}
 		// 获取edges
 		edges := []*gqlapi.LogEdge{}
-		logs := []*models.Log{}
-		if err = g.Engine.Desc("log_id").Where("log_id < ?", from).Limit(*first).Find(&logs); err != nil {
-			return nil, err
+		domainLogs, listErr := r.app.Services.Log.List(ctx, int64(from), *first)
+		if listErr != nil {
+			return nil, listErr
+		}
+		logs := make([]*models.Log, 0, len(domainLogs))
+		for _, l := range domainLogs {
+			logs = append(logs, bridge.LogFromDomain(l))
 		}
 
 		for _, log := range logs {

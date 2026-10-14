@@ -6,6 +6,7 @@ package mysqlrepo
 
 import (
 	"context"
+	"database/sql"
 )
 
 type Querier interface {
@@ -82,6 +83,7 @@ type Querier interface {
 	GetStatisticByKey(ctx context.Context, arg GetStatisticByKeyParams) (MmStatistic, error)
 	GetStatisticByUUID(ctx context.Context, uuid string) (MmStatistic, error)
 	GetTemplateByUUID(ctx context.Context, uuid string) (MmTemplate, error)
+	GetTicketByCronID(ctx context.Context, cronID sql.NullInt32) (MmTicket, error)
 	GetTicketByID(ctx context.Context, ticketID uint32) (MmTicket, error)
 	GetTicketByUUID(ctx context.Context, uuid string) (MmTicket, error)
 	GetUserByID(ctx context.Context, userID uint32) (MmUser, error)

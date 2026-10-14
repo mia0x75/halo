@@ -68,6 +68,31 @@ func (q *Queries) DeleteTicketByUUID(ctx context.Context, uuid string) error {
 	return err
 }
 
+const getTicketByCronID = `-- name: GetTicketByCronID :one
+SELECT ticket_id, uuid, cluster_id, ` + "`" + `database` + "`" + `, subject, content, status, user_id, reviewer_id, cron_id, version, update_at, create_at FROM mm_tickets WHERE cron_id = ? LIMIT 1
+`
+
+func (q *Queries) GetTicketByCronID(ctx context.Context, cronID sql.NullInt32) (MmTicket, error) {
+	row := q.db.QueryRowContext(ctx, getTicketByCronID, cronID)
+	var i MmTicket
+	err := row.Scan(
+		&i.TicketID,
+		&i.Uuid,
+		&i.ClusterID,
+		&i.Database,
+		&i.Subject,
+		&i.Content,
+		&i.Status,
+		&i.UserID,
+		&i.ReviewerID,
+		&i.CronID,
+		&i.Version,
+		&i.UpdateAt,
+		&i.CreateAt,
+	)
+	return i, err
+}
+
 const getTicketByID = `-- name: GetTicketByID :one
 SELECT ticket_id, uuid, cluster_id, ` + "`" + `database` + "`" + `, subject, content, status, user_id, reviewer_id, cron_id, version, update_at, create_at FROM mm_tickets WHERE ticket_id = ? LIMIT 1
 `

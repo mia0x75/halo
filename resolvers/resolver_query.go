@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"strconv"
@@ -12,12 +13,13 @@ import (
 
 	"github.com/mia0x75/parser"
 	"github.com/mia0x75/parser/ast"
-	"xorm.io/xorm"
 
 	"github.com/mia0x75/halo/caches"
 	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
+	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
 )
@@ -25,19 +27,19 @@ import (
 // Query 查看某一查询的信息
 func (r *queryRootResolver) Query(ctx context.Context, id string) (query *models.Query, err error) {
 	rc := gqlapi.ReturnCodeOK
-	found := false
-	query = &models.Query{
-		UUID: id,
-	}
-	if found, err = g.Engine.Get(query); err != nil {
+	q, getErr := r.app.Services.Query.GetByUUID(ctx, id)
+	if getErr != nil {
 		query = nil
-		rc = gqlapi.ReturnCodeUnknowError
-		err = fmt.Errorf("错误代码: %s, 错误信息: %s。", rc, err.Error())
-	} else if !found {
-		query = nil
-		rc = gqlapi.ReturnCodeNotFound
-		err = fmt.Errorf("错误代码: %s, 错误信息: 查询(uuid=%s)不存在。", rc, id)
+		if errors.Is(getErr, domain.ErrNotFound) {
+			rc = gqlapi.ReturnCodeNotFound
+			err = fmt.Errorf("错误代码: %s, 错误信息: 查询(uuid=%s)不存在。", rc, id)
+		} else {
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s。", rc, getErr.Error())
+		}
+		return
 	}
+	query = bridge.QueryFromDomain(q)
 	return
 }
 
@@ -74,10 +76,13 @@ func (r *queryRootResolver) Queries(ctx context.Context, after *string, before *
 	}
 	// 获取edges
 	edges := []*gqlapi.QueryEdge{}
-	queries := []*models.Query{}
-	var err error
-	if err = g.Engine.Desc("user_id").Where("query_id < ?", from).Limit(*first).Find(&queries); err != nil {
+	domainQueries, err := r.app.Services.Query.List(ctx, int64(from), *first)
+	if err != nil {
 		return nil, err
+	}
+	queries := make([]*models.Query, 0, len(domainQueries))
+	for _, q := range domainQueries {
+		queries = append(queries, bridge.QueryFromDomain(q))
 	}
 
 	for _, query := range queries {
@@ -203,11 +208,15 @@ L:
 			Database:  input.Database,
 			Content:   input.Content,
 		}
-		if _, err = g.Engine.Insert(query); err != nil {
+		query.BeforeInsert()
+
+		newID, createErr := r.app.Services.Query.Create(ctx, bridge.QueryToDomain(query), user.UserID)
+		if createErr != nil {
 			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, createErr.Error())
 			break
 		}
+		query.QueryID = uint(newID)
 
 		// TODO: 进行规则检查
 		// 1. 类型断言
@@ -246,14 +255,13 @@ L:
 
 		}
 
-		engine := &xorm.Engine{}
-
-		if engine, err = cluster.Connect(input.Database, func(c *models.Cluster) []byte {
+		engine, connErr := cluster.Connect(input.Database, func(c *models.Cluster) []byte {
 			bs, _ := tools.DecryptAES(c.Password, g.Config().Secret.Crypto)
 			return bs
-		}); err != nil {
+		})
+		if connErr != nil {
 			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, connErr.Error())
 			break
 		}
 
@@ -342,11 +350,15 @@ L:
 			Database:  input.Database,
 			Content:   input.Content,
 		}
-		if _, err = g.Engine.Insert(query); err != nil {
+		query.BeforeInsert()
+
+		newID, createErr := r.app.Services.Query.Create(ctx, bridge.QueryToDomain(query), user.UserID)
+		if createErr != nil {
 			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, createErr.Error())
 			break
 		}
+		query.QueryID = uint(newID)
 
 		args := []string{
 			// TODO: 如果input.Content中有特殊字符，会不会存在服务器安全问题
@@ -438,11 +450,15 @@ L:
 			Database:  input.Database,
 			Content:   input.Content,
 		}
-		if _, err = g.Engine.Insert(query); err != nil {
+		query.BeforeInsert()
+
+		newID, createErr := r.app.Services.Query.Create(ctx, bridge.QueryToDomain(query), user.UserID)
+		if createErr != nil {
 			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, createErr.Error())
 			break
 		}
+		query.QueryID = uint(newID)
 
 		args := []string{
 			// TODO: 如果input.Content中有特殊字符，会不会存在服务器安全问题

@@ -7,6 +7,9 @@ SELECT ticket_id, uuid, cluster_id, `database`, subject, content, status, user_i
 -- name: GetTicketByUUID :one
 SELECT ticket_id, uuid, cluster_id, `database`, subject, content, status, user_id, reviewer_id, cron_id, version, update_at, create_at FROM mm_tickets WHERE uuid = ? LIMIT 1;
 
+-- name: GetTicketByCronID :one
+SELECT ticket_id, uuid, cluster_id, `database`, subject, content, status, user_id, reviewer_id, cron_id, version, update_at, create_at FROM mm_tickets WHERE cron_id = ? LIMIT 1;
+
 -- name: UpdateTicket :exec
 UPDATE mm_tickets SET uuid = ?, cluster_id = ?, `database` = ?, subject = ?, content = ?, status = ?, user_id = ?, reviewer_id = ?, cron_id = ?, version = ?, update_at = ? WHERE ticket_id = ?;
 

@@ -96,6 +96,7 @@ type TicketRepository interface {
 	Create(ctx context.Context, t *Ticket) (int64, error)
 	GetByID(ctx context.Context, id int64) (*Ticket, error)
 	GetByUUID(ctx context.Context, uuid string) (*Ticket, error)
+	GetByCronID(ctx context.Context, cronID uint) (*Ticket, error)
 	Update(ctx context.Context, t *Ticket) error
 	Delete(ctx context.Context, id int64) error
 	DeleteByUUID(ctx context.Context, uuid string) error

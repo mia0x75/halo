@@ -8,6 +8,7 @@ import (
 	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
+	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
 )
@@ -57,14 +58,14 @@ func (r *mutationRootResolver) PatchOptionValues(ctx context.Context, input mode
 			break
 		}
 		option.Value = input.Value
-		// TODO: 需要单元测试
-		if _, err = g.Engine.Where("`uuid` = ?", option.UUID).Update(option); err != nil {
+		option.BeforeUpdate()
+		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		if err = r.app.Services.Option.Update(ctx, bridge.OptionToDomain(option), credential.User.UserID); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break
 		}
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
 		events.Fire(events.EventOptionValuePatched, &events.OptionValuePatchedArgs{
 			Manager: *credential.User,
 			Option:  *option,

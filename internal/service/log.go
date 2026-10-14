@@ -46,3 +46,8 @@ func (s *LogService) Log(ctx context.Context, e LogEntry) error {
 	}
 	return nil
 }
+
+// List returns a keyset page of audit rows, newest first.
+func (s *LogService) List(ctx context.Context, cursor int64, limit int) ([]*domain.Log, error) {
+	return s.log.List(ctx, cursor, limit)
+}

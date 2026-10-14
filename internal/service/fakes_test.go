@@ -90,6 +90,10 @@ func (f *fakeTicketRepo) ListByUser(_ context.Context, _ uint) ([]*domain.Ticket
 	return nil, nil
 }
 
+func (f *fakeTicketRepo) GetByCronID(_ context.Context, _ uint) (*domain.Ticket, error) {
+	return nil, domain.ErrNotFound
+}
+
 type fakeLogRepo struct {
 	entries []*domain.Log
 	err     error

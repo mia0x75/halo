@@ -12,6 +12,7 @@ import (
 	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
+	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
 )
@@ -28,18 +29,22 @@ func (r *mutationRootResolver) CancelCron(ctx context.Context, id string) (ok bo
 		}
 
 		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
-		cron := &models.Cron{}
-		ticket := &models.Ticket{}
-		if _, err = g.Engine.Where("`uuid` = ?", id).Get(cron); err != nil {
+		domainCron, cronErr := r.app.Services.Cron.GetByUUID(ctx, id)
+		if cronErr != nil {
 			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, cronErr.Error())
 			break
 		}
-		if _, err = g.Engine.Where("`cron_id` = ?", cron.CronID).Get(ticket); err != nil {
+		cron := bridge.CronFromDomain(domainCron)
+
+		domainTicket, tkErr := r.app.Services.Ticket.GetByCronID(ctx, cron.CronID)
+		if tkErr != nil {
 			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, tkErr.Error())
 			break
 		}
+		ticket := bridge.TicketFromDomain(domainTicket)
+
 		events.Fire(events.EventCronCancelled, &events.CronCancelledArgs{
 			User:   *credential.User,
 			Cron:   *cron,
@@ -58,14 +63,13 @@ func (r *mutationRootResolver) CancelCron(ctx context.Context, id string) (ok bo
 func (r *queryRootResolver) Cron(ctx context.Context, id string) (cron *models.Cron, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
-		cron = &models.Cron{
-			UUID: id,
-		}
-		if err = g.Engine.Find(cron); err != nil {
+		domainCron, getErr := r.app.Services.Cron.GetByUUID(ctx, id)
+		if getErr != nil {
 			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, getErr.Error())
 			break
 		}
+		cron = bridge.CronFromDomain(domainCron)
 
 		break
 	}
@@ -110,13 +114,15 @@ func (r *queryRootResolver) Crons(ctx context.Context, after *string, before *st
 	}
 	// 获取edges
 	edges := []*gqlapi.CronEdge{}
-	crons := []*models.Cron{}
-
-	var err error
 
 	// 列表不允许查询Content内容
-	if err = g.Engine.Desc("cron_id").Where("cron_id < ?", from).Limit(*first).Find(&crons); err != nil {
+	domainCrons, err := r.app.Services.Cron.List(ctx, int64(from), *first)
+	if err != nil {
 		return nil, err
+	}
+	crons := make([]*models.Cron, 0, len(domainCrons))
+	for _, c := range domainCrons {
+		crons = append(crons, bridge.CronFromDomain(c))
 	}
 
 	for _, cron := range crons {

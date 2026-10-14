@@ -2,12 +2,15 @@ package resolvers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/mia0x75/halo/caches"
 	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
+	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
 )
@@ -16,28 +19,27 @@ import (
 func (r *mutationRootResolver) CreateComment(ctx context.Context, input models.CreateCommentInput) (comment *models.Comment, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
-		found := false
 		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
 		user := credential.User
-		ticket := &models.Ticket{
-			UUID: input.TicketUUID,
-		}
-		found, err = g.Engine.Get(ticket)
-		if err != nil {
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+
+		t, getErr := r.app.Services.Ticket.GetByUUID(ctx, input.TicketUUID)
+		if getErr != nil {
+			if errors.Is(getErr, domain.ErrNotFound) {
+				rc = gqlapi.ReturnCodeNotFound
+				err = fmt.Errorf("错误代码: %s, 错误信息: 工单(uuid=%s)不存在。", rc, input.TicketUUID)
+			} else {
+				rc = gqlapi.ReturnCodeUnknowError
+				err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, getErr.Error())
+			}
 			break
 		}
+		ticket := bridge.TicketFromDomain(t)
+
 		// TODO: 增加ticket.Staus的状态判断，只有在某几个状态才允许添加审核意见
 		if ticket.Status != gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumVldWarning] &&
 			ticket.Status != gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumWaitingForMrv] &&
 			ticket.Status != gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumMrvFailure] {
 			err = fmt.Errorf("错误代码: %s, 错误信息: 工单的当前状态不允许添加审核意见。", rc)
-			break
-		}
-		if !found {
-			rc = gqlapi.ReturnCodeNotFound
-			err = fmt.Errorf("错误代码: %s, 错误信息: 工单(uuid=%s)不存在。", rc, input.TicketUUID)
 			break
 		}
 
@@ -46,13 +48,16 @@ func (r *mutationRootResolver) CreateComment(ctx context.Context, input models.C
 			UserID:   user.UserID,
 			TicketID: ticket.TicketID,
 		}
+		comment.BeforeInsert()
 
-		if _, err = g.Engine.Insert(comment); err != nil {
+		newID, createErr := r.app.Services.Comment.Create(ctx, bridge.CommentToDomain(comment), user.UserID)
+		if createErr != nil {
 			comment = nil
 			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, createErr.Error())
 			break
 		}
+		comment.CommentID = uint(newID)
 
 		events.Fire(events.EventCommentCreated, &events.CommentCreatedArgs{
 			User:    *credential.User,
@@ -89,13 +94,13 @@ func (r *commentResolver) User(ctx context.Context, obj *models.Comment) (user *
 // Ticket 审核意见关联的工单
 func (r *commentResolver) Ticket(ctx context.Context, obj *models.Comment) (ticket *models.Ticket, err error) {
 	rc := gqlapi.ReturnCodeOK
-	ticket = &models.Ticket{
-		TicketID: obj.TicketID,
-	}
-	if _, err := g.Engine.Get(ticket); err != nil {
+	t, getErr := r.app.Services.Ticket.Get(ctx, obj.TicketID)
+	if getErr != nil {
 		ticket = nil
 		rc = gqlapi.ReturnCodeUnknowError
-		err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+		err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, getErr.Error())
+		return
 	}
+	ticket = bridge.TicketFromDomain(t)
 	return
 }

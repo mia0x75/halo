@@ -10,6 +10,7 @@ import (
 	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
+	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
 )
@@ -35,12 +36,13 @@ func (r *mutationRootResolver) PatchRuleValues(ctx context.Context, input models
 			break
 		}
 		rule.Values = input.Values
-		if _, err = g.Engine.Where("`uuid` = ?", rule.UUID).Update(rule); err != nil {
+		rule.BeforeUpdate()
+		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		if err = r.app.Services.Rule.Update(ctx, bridge.RuleToDomain(rule), credential.User.UserID); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 		}
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
 		events.Fire(events.EventRuleValuesPatched, &events.RuleValuesPatchedArgs{
 			Manager: *credential.User,
 			Rule:    *rule,
@@ -82,15 +84,15 @@ func (r *mutationRootResolver) PatchRuleBitwise(ctx context.Context, input model
 		rule.Bitwise = rule.Bitwise >> 1
 		rule.Bitwise = rule.Bitwise << 1
 		rule.Bitwise = rule.Bitwise | value
+		rule.BeforeUpdate()
 
-		// TODO: 需要单元测试
-		if _, err = g.Engine.Where("`uuid` = ?", rule.UUID).Where("`bitwise` & 1 <> ?", value).Update(rule); err != nil {
+		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		if err = r.app.Services.Rule.Update(ctx, bridge.RuleToDomain(rule), credential.User.UserID); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break
 		}
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
 		events.Fire(events.EventRuleBitwisePatched, &events.RuleBitwisePatchedArgs{
 			Manager: *credential.User,
 			Rule:    *rule,
