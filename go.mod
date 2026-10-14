@@ -12,6 +12,8 @@ require (
 	github.com/go-xorm/core v0.7.3
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
+	github.com/jackc/pgx/v5 v5.6.0
+	github.com/jmoiron/sqlx v1.4.0
 	github.com/machinebox/graphql v0.2.2
 	github.com/mia0x75/parser v0.0.0-20190531113551-6fbc203ea218
 	github.com/mia0x75/yql v0.0.0-20190325023231-8a8982f46522
@@ -40,6 +42,9 @@ require (
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
+	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/matryer/is v1.4.1 // indirect
 	github.com/mia0x75/antlr v0.0.0-20190323140341-bf6915c3dd7b // indirect
