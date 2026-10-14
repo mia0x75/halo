@@ -2,7 +2,9 @@ package events
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net"
 	"net/mail"
@@ -11,13 +13,26 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/mia0x75/halo/caches"
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
+	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/domain"
+	"github.com/mia0x75/halo/internal/service"
 	"github.com/mia0x75/halo/models"
 )
+
+// repos is injected once at startup via Init so event handlers read users and
+// write logs and statistics through the repository layer.
+var repos service.Repos
+
+// Init injects the repositories used by event handlers.
+func Init(r service.Repos) {
+	repos = r
+}
 
 // 事件列表
 const (
@@ -178,8 +193,8 @@ type TicketExecutedArgs struct {
 // TicketExecutedLogWriter 工单执行成功的日志记录
 func TicketExecutedLogWriter(e *Event) {
 	if args, ok := e.Args.(*TicketExecutedArgs); ok {
-		agent := &models.User{}
-		if _, err := g.Engine.Where("`uuid` = ?", "00000000-0000-0000-0000-000000000000").Get(agent); err != nil {
+		agent, getErr := repos.User.GetByUUID(context.Background(), "00000000-0000-0000-0000-000000000000")
+		if getErr != nil {
 			return
 		}
 		LogWriter(agent.UserID, fmt.Sprintf("用户(uuid=%s)执行工单(uuid=%s)成功。\n", agent.UUID, args.Ticket.UUID))
@@ -190,8 +205,12 @@ func TicketExecutedLogWriter(e *Event) {
 func TicketExecutedMailSender(e *Event) {
 	if args, ok := e.Args.(*TicketExecutedArgs); ok {
 		users := []models.User{}
-		if err := g.Engine.In("user_id", args.Ticket.UserID, args.Ticket.ReviewerID).Find(&users); err != nil {
-			return
+		for _, uid := range []uint{args.Ticket.UserID, args.Ticket.ReviewerID} {
+			du, getErr := repos.User.GetByID(context.Background(), int64(uid))
+			if getErr != nil {
+				return
+			}
+			users = append(users, *bridge.UserFromDomain(du))
 		}
 		subject, body := renderer(g.TplTicketExecuted, args)
 		for _, user := range users {
@@ -213,8 +232,8 @@ type TicketFailedArgs struct {
 // TicketFailedLogWriter 工单执行失败的日志记录
 func TicketFailedLogWriter(e *Event) {
 	if args, ok := e.Args.(*TicketFailedArgs); ok {
-		agent := &models.User{}
-		if _, err := g.Engine.Where("`uuid` = ?", "00000000-0000-0000-0000-000000000000").Get(agent); err != nil {
+		agent, getErr := repos.User.GetByUUID(context.Background(), "00000000-0000-0000-0000-000000000000")
+		if getErr != nil {
 			return
 		}
 		LogWriter(agent.UserID, fmt.Sprintf("用户(uuid=%s)执行工单(uuid=%s)失败。\n", agent.UUID, args.Ticket.UUID))
@@ -225,8 +244,12 @@ func TicketFailedLogWriter(e *Event) {
 func TicketFailedMailSender(e *Event) {
 	if args, ok := e.Args.(*TicketFailedArgs); ok {
 		users := []models.User{}
-		if err := g.Engine.In("user_id", args.Ticket.UserID, args.Ticket.ReviewerID).Find(&users); err != nil {
-			return
+		for _, uid := range []uint{args.Ticket.UserID, args.Ticket.ReviewerID} {
+			du, getErr := repos.User.GetByID(context.Background(), int64(uid))
+			if getErr != nil {
+				return
+			}
+			users = append(users, *bridge.UserFromDomain(du))
 		}
 		subject, body := renderer(g.TplTicketFailed, args)
 		for _, user := range users {
@@ -879,38 +902,37 @@ func RoleRevokedLogWriter(e *Event) {
 
 // UpdateStatistics 统计信息更新
 func UpdateStatistics(group string, key string, value float64) error {
-	session := g.Engine.NewSession()
-	stats := &models.Statistic{}
-	if ok, err := session.Where("`group` = ? AND `key` = ?", group, key).ForUpdate().Get(stats); ok {
-		stats.Value = stats.Value + value
-		if _, err := session.Where("`group` = ? AND `key` = ?", group, key).Update(stats); err != nil {
-			session.Rollback()
+	ctx := context.Background()
+	stats, err := repos.Statistic.GetByKey(ctx, group, key)
+	if err != nil {
+		if !errors.Is(err, domain.ErrNotFound) {
 			return err
 		}
-	} else if err != nil {
-		session.Rollback()
-		return err
-	} else if !ok {
-		stats.Group = group
-		stats.Key = key
-		stats.Value = value
-		if _, err := session.Insert(stats); err != nil {
-			session.Rollback()
-			return err
-		}
+		return repos.Statistic.Create(ctx, &domain.Statistic{
+			Group:    group,
+			Key:      key,
+			Value:    value,
+			UUID:     uuid.NewString(),
+			Version:  1,
+			CreateAt: uint(time.Now().Unix()),
+		})
 	}
-	if err := session.Commit(); err != nil {
-		return err
-	}
-	return nil
+	stats.Value += value
+	now := uint(time.Now().Unix())
+	stats.UpdateAt = &now
+	return repos.Statistic.Update(ctx, stats)
 }
 
 // LogWriter 日志记录表操作
 func LogWriter(userID uint, operation string) error {
-	if _, err := g.Engine.Insert(&models.Log{
+	entry := &domain.Log{
+		UUID:      uuid.NewString(),
 		UserID:    userID,
 		Operation: operation,
-	}); err != nil {
+		Version:   1,
+		CreateAt:  uint(time.Now().Unix()),
+	}
+	if _, err := repos.Log.Create(context.Background(), entry); err != nil {
 		return fmt.Errorf("[E] 错误代码: %s, 错误信息: %s", gqlapi.ReturnCodeUnknowError, err.Error())
 	}
 	return nil

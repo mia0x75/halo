@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -9,7 +10,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/mia0x75/halo/g"
-	"github.com/mia0x75/halo/models"
 )
 
 // ghostCmd represents the execute command
@@ -74,11 +74,14 @@ func ghost(cmd *cobra.Command, args []string) {
 			break
 		} else {
 			g.ParseConfig(cfg)
-			g.InitDB()
 		}
 
-		statement := &models.Statement{}
-		if _, err = g.Engine.Where("`uuid` = ?", statementUUID).Get(statement); err != nil {
+		application, appErr := newApp()
+		if appErr != nil {
+			err = appErr
+			break
+		}
+		if _, err = application.Services.Statement.GetByUUID(context.Background(), statementUUID); err != nil {
 			break
 		}
 

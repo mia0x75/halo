@@ -1,15 +1,16 @@
 package crons
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"sync"
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"xorm.io/builder"
 
-	"github.com/mia0x75/halo/g"
+	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/service"
 	"github.com/mia0x75/halo/models"
 )
 
@@ -20,6 +21,16 @@ var (
 	scheduler *Scheduler
 	once      sync.Once
 )
+
+// repos is injected once at startup via Init so the scheduler reloads and
+// persists tasks through the repository layer instead of the xorm engine.
+var repos service.Repos
+
+// Init injects the repositories the scheduler reads and writes crons with. It
+// must run before NewScheduler.
+func Init(r service.Repos) {
+	repos = r
+}
 
 // Schedule 保存任务执行时间相关的信息
 type Schedule struct {
@@ -152,10 +163,13 @@ R - Runing - 正在执行
 H - Halt - 任务暂停
 */
 func (s *Scheduler) load() error {
-	crons := []*models.Cron{}
-	where := builder.Or(builder.Eq{"recurrent": 1}, builder.And(builder.Neq{"recurrent": 1}, builder.In("status", "P", "H")))
-	if err := g.Engine.Where(where).Find(&crons); err != nil {
+	domainCrons, err := repos.Cron.ListSchedulable(context.Background())
+	if err != nil {
 		return err
+	}
+	crons := make([]*models.Cron, 0, len(domainCrons))
+	for _, c := range domainCrons {
+		crons = append(crons, bridge.CronFromDomain(c))
 	}
 	tasks := map[string]*Task{}
 	s.Lock()
@@ -252,19 +266,20 @@ func (s *Scheduler) taskExists(name string) (*Task, bool) {
 }
 
 func (s *Scheduler) persist(task *Task) (err error) {
+	ctx := context.Background()
 	cron := &models.Cron{}
 	if task.UUID != "" {
-		ok := false
-		if ok, err = g.Engine.Where("`uuid` = ?", task.UUID).Get(cron); err != nil {
-			log.Errorf("[E] An unexpected error ocurred, err: %s", err.Error())
-			return err
-		} else if !ok {
-			return fmt.Errorf("[E] Cannot find cron (uuid=%s)", task.UUID)
+		dc, getErr := repos.Cron.GetByUUID(ctx, task.UUID)
+		if getErr != nil {
+			log.Errorf("[E] An unexpected error ocurred, err: %s", getErr.Error())
+			return getErr
 		}
+		cron = bridge.CronFromDomain(dc)
 		cron.Status = task.Status
 		cron.LastRun = task.LastRun.Format(time.RFC3339)
 		cron.NextRun = task.NextRun.Format(time.RFC3339)
-		if _, err = g.Engine.ID(cron.CronID).Update(cron); err != nil {
+		cron.BeforeUpdate()
+		if err = repos.Cron.Update(ctx, bridge.CronToDomain(cron)); err != nil {
 			log.Errorf("[E] An unexpected error ocurred, err: %s", err.Error())
 			return err
 		}
@@ -284,10 +299,12 @@ func (s *Scheduler) persist(task *Task) (err error) {
 		data, err = json.Marshal(task.Params)
 		cron.Params = string(data)
 
-		if _, err = g.Engine.Insert(cron); err != nil {
-			return err
+		cron.BeforeInsert()
+		newID, createErr := repos.Cron.Create(ctx, bridge.CronToDomain(cron))
+		if createErr != nil {
+			return createErr
 		}
-
+		cron.CronID = uint(newID)
 		task.UUID = cron.UUID
 	}
 	return

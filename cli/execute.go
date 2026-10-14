@@ -2,18 +2,20 @@ package cli
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
 	"fmt"
 	"io/ioutil"
 	"os"
 
-	"github.com/go-xorm/core"
 	"github.com/spf13/cobra"
-	"xorm.io/xorm"
 
+	"github.com/mia0x75/halo/crons"
 	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
+	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/service"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
 )
@@ -35,7 +37,7 @@ func execute(cmd *cobra.Command, args []string) {
 	var err error
 	var buf bytes.Buffer
 	var ticketUUID string
-L:
+	ctx := context.Background()
 	for {
 		if cfg, ok := os.LookupEnv("HALO_CFG"); !ok {
 			err = fmt.Errorf("Missing halo config")
@@ -43,8 +45,15 @@ L:
 		} else {
 			buf.WriteString(cfg)
 			g.ParseConfig(cfg)
-			g.InitDB()
 		}
+
+		application, appErr := newApp()
+		if appErr != nil {
+			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", appErr.Error())
+			break
+		}
+		events.Init(application.Repos)
+		crons.Init(application.Repos)
 
 		if ticketUUID, err = cmd.Flags().GetString("ticket"); err != nil {
 			break
@@ -57,16 +66,12 @@ L:
 		buf.WriteString("\n")
 		buf.WriteString(ticketUUID)
 
-		passwd := func(c *models.Cluster) []byte {
-			bs, _ := tools.DecryptAES(c.Password, g.Config().Secret.Crypto)
-			return bs
-		}
-
-		ticket := &models.Ticket{}
-		if _, err = g.Engine.Where("`uuid` = ?", ticketUUID).Get(ticket); err != nil {
-			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", err.Error())
+		domainTicket, tkErr := application.Services.Ticket.GetByUUID(ctx, ticketUUID)
+		if tkErr != nil {
+			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", tkErr.Error())
 			break
 		}
+		ticket := bridge.TicketFromDomain(domainTicket)
 
 		// 工单当前状态是LGTM才允许执行
 		if ticket.Status != gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumLgtm] {
@@ -74,21 +79,31 @@ L:
 			break
 		}
 
-		stmts := []*models.Statement{}
-		if err = g.Engine.Where("`ticket_id` = ?", ticket.TicketID).Find(&stmts); err != nil {
-			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", err.Error())
+		domainStmts, stErr := application.Services.Statement.ListByTicket(ctx, ticket.TicketID)
+		if stErr != nil {
+			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", stErr.Error())
 			break
 		}
-
-		cluster := &models.Cluster{}
-		if _, err = g.Engine.ID(ticket.ClusterID).Get(cluster); err != nil {
-			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", err.Error())
-			break
+		stmts := make([]*models.Statement, 0, len(domainStmts))
+		for _, s := range domainStmts {
+			stmts = append(stmts, bridge.StatementFromDomain(s))
 		}
 
-		var engine *xorm.Engine
-		if engine, err = cluster.Connect(ticket.Database, passwd); err != nil {
-			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", err.Error())
+		domainCluster, clErr := application.Services.Cluster.Get(ctx, ticket.ClusterID)
+		if clErr != nil {
+			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", clErr.Error())
+			break
+		}
+		cluster := bridge.ClusterFromDomain(domainCluster)
+
+		passwd := func(c *models.Cluster) []byte {
+			bs, _ := tools.DecryptAES(c.Password, g.Config().Secret.Crypto)
+			return bs
+		}
+
+		engine, connErr := cluster.Connect(ticket.Database, passwd)
+		if connErr != nil {
+			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", connErr.Error())
 			break
 		}
 
@@ -120,22 +135,18 @@ L:
 				Cluster: *cluster,
 			})
 		}
-		session := g.Engine.NewSession()
-		session.Begin()
-		defer session.Close()
-		if _, err = session.ID(ticket.TicketID).Update(ticket); err != nil {
-			session.Rollback()
-			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", err.Error())
-			break L
-		}
-		for _, stmt := range stmts {
-			if _, err := session.ID(core.PK{stmt.TicketID, stmt.Sequence}).Update(stmt); err != nil {
-				session.Rollback()
-				err = fmt.Errorf("错误代码: 1500, 错误信息: %s", err.Error())
-				break L
+		err = application.Tx.WithTx(ctx, func(ctx context.Context, repos service.Repos) error {
+			if err := repos.Ticket.Update(ctx, bridge.TicketToDomain(ticket)); err != nil {
+				return err
 			}
-		}
-		if err = session.Commit(); err != nil {
+			for _, stmt := range stmts {
+				if err := repos.Statement.Update(ctx, bridge.StatementToDomain(stmt)); err != nil {
+					return err
+				}
+			}
+			return nil
+		})
+		if err != nil {
 			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", err.Error())
 			break
 		}

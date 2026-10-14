@@ -72,6 +72,11 @@ func (s *StatementService) ListByTicket(ctx context.Context, ticketID uint) ([]*
 	return listStatementsByTicket(ctx, s.statements, ticketID)
 }
 
+// GetByUUID returns one statement by its stable uuid.
+func (s *StatementService) GetByUUID(ctx context.Context, uuid string) (*domain.Statement, error) {
+	return s.statements.GetByUUID(ctx, uuid)
+}
+
 // StatementResult is the outcome written back after execution.
 type StatementResult struct {
 	Results      string

@@ -101,6 +101,7 @@ type Querier interface {
 	ListQueriesByUser(ctx context.Context, userID uint32) ([]MmQuery, error)
 	ListRoles(ctx context.Context, arg ListRolesParams) ([]MmRole, error)
 	ListRules(ctx context.Context, arg ListRulesParams) ([]MmRule, error)
+	ListSchedulableCrons(ctx context.Context) ([]MmCron, error)
 	ListStatements(ctx context.Context, arg ListStatementsParams) ([]MmStatement, error)
 	ListStatistics(ctx context.Context, arg ListStatisticsParams) ([]MmStatistic, error)
 	ListTemplates(ctx context.Context, arg ListTemplatesParams) ([]MmTemplate, error)

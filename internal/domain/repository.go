@@ -38,6 +38,7 @@ type CronRepository interface {
 	Delete(ctx context.Context, id int64) error
 	DeleteByUUID(ctx context.Context, uuid string) error
 	List(ctx context.Context, cursor int64, limit int) ([]*Cron, error)
+	ListSchedulable(ctx context.Context) ([]*Cron, error)
 }
 
 type ClusterRepository interface {

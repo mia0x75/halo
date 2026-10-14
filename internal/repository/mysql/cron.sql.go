@@ -174,6 +174,49 @@ func (q *Queries) ListCrons(ctx context.Context, arg ListCronsParams) ([]MmCron,
 	return items, nil
 }
 
+const listSchedulableCrons = `-- name: ListSchedulableCrons :many
+SELECT cron_id, uuid, status, name, cmd, params, last_run, next_run, ` + "`" + `interval` + "`" + `, duration, recurrent, hash, version, update_at, create_at FROM mm_crons WHERE recurrent = 1 OR (recurrent <> 1 AND status IN ('P', 'H'))
+`
+
+func (q *Queries) ListSchedulableCrons(ctx context.Context) ([]MmCron, error) {
+	rows, err := q.db.QueryContext(ctx, listSchedulableCrons)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []MmCron{}
+	for rows.Next() {
+		var i MmCron
+		if err := rows.Scan(
+			&i.CronID,
+			&i.Uuid,
+			&i.Status,
+			&i.Name,
+			&i.Cmd,
+			&i.Params,
+			&i.LastRun,
+			&i.NextRun,
+			&i.Interval,
+			&i.Duration,
+			&i.Recurrent,
+			&i.Hash,
+			&i.Version,
+			&i.UpdateAt,
+			&i.CreateAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateCron = `-- name: UpdateCron :exec
 UPDATE mm_crons SET uuid = ?, status = ?, name = ?, cmd = ?, params = ?, last_run = ?, next_run = ?, ` + "`" + `interval` + "`" + ` = ?, duration = ?, recurrent = ?, hash = ?, version = ?, update_at = ? WHERE cron_id = ?
 `

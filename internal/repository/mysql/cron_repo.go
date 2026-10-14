@@ -117,3 +117,17 @@ func (r *CronRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain
 	}
 	return out, nil
 }
+
+// ListSchedulable returns the crons the scheduler must reload on startup:
+// recurring ones plus pending/halted one-shots.
+func (r *CronRepo) ListSchedulable(ctx context.Context) ([]*domain.Cron, error) {
+	rows, err := r.q.ListSchedulableCrons(ctx)
+	if err != nil {
+		return nil, wrap("cron.ListSchedulable", err)
+	}
+	out := make([]*domain.Cron, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, cronFromRow(row))
+	}
+	return out, nil
+}

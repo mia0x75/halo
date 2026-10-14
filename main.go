@@ -19,6 +19,7 @@ import (
 
 	"github.com/mia0x75/halo/caches"
 	"github.com/mia0x75/halo/crons"
+	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/internal/app"
 	"github.com/mia0x75/halo/internal/platform/db"
@@ -86,6 +87,8 @@ func main() {
 	defer func() { _ = application.Close() }()
 
 	caches.Init(application.Repos)
+	crons.Init(application.Repos)
+	events.Init(application.Repos)
 	crons.NewScheduler()
 
 	addr := g.Config().Listen

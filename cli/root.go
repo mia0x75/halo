@@ -1,11 +1,27 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
+
+	"github.com/mia0x75/halo/g"
+	"github.com/mia0x75/halo/internal/app"
+	"github.com/mia0x75/halo/internal/platform/db"
 )
+
+// newApp builds the dependency container from the configuration already loaded
+// by the command (g.ParseConfig must have run first).
+func newApp() (*app.App, error) {
+	return app.New(context.Background(), db.Config{
+		Addr:           g.Config().Database.Addr,
+		MaxIdle:        g.Config().Database.MaxIdle,
+		MaxConnections: g.Config().Database.MaxConnections,
+		WaitTimeout:    g.Config().Database.WaitTimeout,
+	})
+}
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{

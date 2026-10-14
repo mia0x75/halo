@@ -2,15 +2,18 @@ package cli
 
 import (
 	"bytes"
+	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
 	"github.com/mia0x75/halo/g"
-	"github.com/mia0x75/halo/models"
+	"github.com/mia0x75/halo/internal/domain"
 )
 
 // statisticsCmd represents the statistics command
@@ -38,32 +41,35 @@ func statistics(cmd *cobra.Command, args []string) {
 		} else {
 			buf.WriteString(cfg)
 			g.ParseConfig(cfg)
-			g.InitDB()
 		}
 
-		tds := &models.Statistic{}
-		qds := &models.Statistic{}
-		if _, err = g.Engine.Where("`group` = ? AND `key` = ?", "tickets-daily", today).Get(tds); err != nil {
+		application, appErr := newApp()
+		if appErr != nil {
+			err = appErr
 			break
 		}
-		if tds.UUID == "" {
-			tds.Group = "tickets-daily"
-			tds.Key = today
-			tds.Value = 0
-			if _, err = g.Engine.Insert(tds); err != nil {
-				break
+		ctx := context.Background()
+
+		ensure := func(group string) error {
+			if _, gerr := application.Services.Statistic.GetByKey(ctx, group, today); gerr == nil {
+				return nil
+			} else if !errors.Is(gerr, domain.ErrNotFound) {
+				return gerr
 			}
+			return application.Services.Statistic.Create(ctx, &domain.Statistic{
+				Group:    group,
+				Key:      today,
+				Value:    0,
+				UUID:     uuid.NewString(),
+				Version:  1,
+				CreateAt: uint(time.Now().Unix()),
+			}, 0)
 		}
-		if _, err = g.Engine.Where("`group` = ? AND `key` = ?", "queries-daily", today).Get(qds); err != nil {
+		if err = ensure("tickets-daily"); err != nil {
 			break
 		}
-		if qds.UUID == "" {
-			qds.Group = "queries-daily"
-			qds.Key = today
-			qds.Value = 0
-			if _, err = g.Engine.Insert(qds); err != nil {
-				break
-			}
+		if err = ensure("queries-daily"); err != nil {
+			break
 		}
 
 		break
