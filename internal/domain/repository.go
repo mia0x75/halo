@@ -112,14 +112,17 @@ type UserRepository interface {
 type GlossaryRepository interface {
 	Create(ctx context.Context, g *Glossary) error
 	GetByUUID(ctx context.Context, uuid string) (*Glossary, error)
+	GetByKey(ctx context.Context, group string, key uint8) (*Glossary, error)
 	Update(ctx context.Context, g *Glossary) error
 	DeleteByUUID(ctx context.Context, uuid string) error
+	DeleteByKey(ctx context.Context, group string, key uint8) error
 	List(ctx context.Context, cursor string, limit int) ([]*Glossary, error)
 }
 
 type StatisticRepository interface {
 	Create(ctx context.Context, s *Statistic) error
 	GetByUUID(ctx context.Context, uuid string) (*Statistic, error)
+	GetByKey(ctx context.Context, group, key string) (*Statistic, error)
 	Update(ctx context.Context, s *Statistic) error
 	DeleteByUUID(ctx context.Context, uuid string) error
 	List(ctx context.Context, cursor string, limit int) ([]*Statistic, error)
@@ -128,14 +131,17 @@ type StatisticRepository interface {
 type StatementRepository interface {
 	Create(ctx context.Context, s *Statement) error
 	GetByUUID(ctx context.Context, uuid string) (*Statement, error)
+	GetByTicketSequence(ctx context.Context, ticketID uint, sequence uint16) (*Statement, error)
 	Update(ctx context.Context, s *Statement) error
 	DeleteByUUID(ctx context.Context, uuid string) error
+	DeleteByTicketSequence(ctx context.Context, ticketID uint, sequence uint16) error
 	List(ctx context.Context, cursor string, limit int) ([]*Statement, error)
 }
 
 type OptionRepository interface {
 	Create(ctx context.Context, o *Option) error
 	GetByUUID(ctx context.Context, uuid string) (*Option, error)
+	GetByName(ctx context.Context, name string) (*Option, error)
 	Update(ctx context.Context, o *Option) error
 	DeleteByUUID(ctx context.Context, uuid string) error
 	List(ctx context.Context, cursor string, limit int) ([]*Option, error)
@@ -144,6 +150,7 @@ type OptionRepository interface {
 type RuleRepository interface {
 	Create(ctx context.Context, r *Rule) error
 	GetByUUID(ctx context.Context, uuid string) (*Rule, error)
+	GetByName(ctx context.Context, name string) (*Rule, error)
 	Update(ctx context.Context, r *Rule) error
 	DeleteByUUID(ctx context.Context, uuid string) error
 	List(ctx context.Context, cursor string, limit int) ([]*Rule, error)
