@@ -25,6 +25,7 @@ import (
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/domain"
+	"github.com/mia0x75/halo/internal/service"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
 	"github.com/mia0x75/halo/validate"
@@ -503,88 +504,40 @@ func (r *mutationRootResolver) RemoveTicket(ctx context.Context, id string) (ok 
 func (r *mutationRootResolver) PatchTicketStatus(ctx context.Context, input models.PatchTicketStatusInput) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
-		found := false
 		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
 		user := credential.User
-		ticket := &models.Ticket{
-			UUID: input.TicketUUID,
-		}
-		found, err = g.Engine.Where("`uuid` = ?", input.TicketUUID).Get(ticket)
-		if err != nil {
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
-			break
-		}
-		if !found {
-			rc = gqlapi.ReturnCodeNotFound
-			err = fmt.Errorf("错误代码: %s, 错误信息: 工单(uuid=%s)不存在。", rc, input.TicketUUID)
-			break
-		}
 
-		var currentStatus gqlapi.TicketStatusEnum
-		for k, v := range gqlapi.TicketStatusEnumMap {
-			if ticket.Status == v {
-				currentStatus = k
-				break
-			}
-		}
-
-		if currentStatus == gqlapi.TicketStatusEnumClosed ||
-			currentStatus == gqlapi.TicketStatusEnumDone ||
-			currentStatus == gqlapi.TicketStatusEnumExecFailure {
-			// TODO: 处理rc
-			// rc = g.ReturnCodeTicketClosed
-			err = fmt.Errorf("错误代码: %s, 错误信息: 关闭、已执行成功和执行失败的工单不可编辑。", rc)
-			break
-		}
-
-		if status, ok := gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnum(input.Status)]; !ok {
+		statusValue, valid := gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnum(input.Status)]
+		if !valid {
 			err = fmt.Errorf("错误代码: %s, 错误信息: 无效的工单状态。", rc)
 			break
-		} else {
-			switch status {
-			case gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumClosed]: // 手动关闭工单
-				if currentStatus == gqlapi.TicketStatusEnumVldFailure ||
-					currentStatus == gqlapi.TicketStatusEnumVldWarning ||
-					currentStatus == gqlapi.TicketStatusEnumWaitingForMrv {
-					ticket.Status = status
-				} else {
-					// TODO: 处理rc
-					// rc = g.ReturnCodeTicketClosed
-					err = fmt.Errorf("错误代码: %s, 错误信息: 当前工单(uuid=%s)状态(status=%s)不允许执行关闭操作。", rc, ticket.UUID, currentStatus)
-				}
-			case gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumLgtm]: // 标记工单人工审核通过
-				if currentStatus == gqlapi.TicketStatusEnumVldWarning ||
-					currentStatus == gqlapi.TicketStatusEnumWaitingForMrv {
-					ticket.Status = status
-				} else {
-					// TODO: 处理rc
-					// rc = g.ReturnCodeTicketClosed
-					err = fmt.Errorf("错误代码: %s, 错误信息: 当前工单(uuid=%s)状态(status=%s)不允许执行人工审核操作。", rc, ticket.UUID, currentStatus)
-				}
-			case gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumMrvFailure]: // 标记工单人工审核失败
-				if currentStatus == gqlapi.TicketStatusEnumVldWarning ||
-					currentStatus == gqlapi.TicketStatusEnumWaitingForMrv {
-					ticket.Status = status
-				} else {
-					// TODO: 处理rc
-					// rc = g.ReturnCodeTicketClosed
-					err = fmt.Errorf("错误代码: %s, 错误信息: 当前工单(uuid=%s)状态(status=%s)不允许执行人工审核操作。", rc, ticket.UUID, currentStatus)
+		}
+
+		t, patchErr := r.app.Services.Ticket.PatchStatus(ctx, input.TicketUUID, domain.TicketStatus(statusValue))
+		if patchErr != nil {
+			var te *service.TransitionError
+			switch {
+			case errors.Is(patchErr, domain.ErrNotFound):
+				rc = gqlapi.ReturnCodeNotFound
+				err = fmt.Errorf("错误代码: %s, 错误信息: 工单(uuid=%s)不存在。", rc, input.TicketUUID)
+			case errors.As(patchErr, &te):
+				switch te.Kind {
+				case service.TransitionTerminal:
+					err = fmt.Errorf("错误代码: %s, 错误信息: 关闭、已执行成功和执行失败的工单不可编辑。", rc)
+				case service.TransitionClose:
+					err = fmt.Errorf("错误代码: %s, 错误信息: 当前工单(uuid=%s)状态(status=%s)不允许执行关闭操作。", rc, input.TicketUUID, ticketStatusName(te.Current))
+				case service.TransitionManualReview:
+					err = fmt.Errorf("错误代码: %s, 错误信息: 当前工单(uuid=%s)状态(status=%s)不允许执行人工审核操作。", rc, input.TicketUUID, ticketStatusName(te.Current))
+				case service.TransitionInvalidTarget:
+					err = fmt.Errorf("错误代码: %s, 错误信息: 无效的工单状态修改请求。", rc)
 				}
 			default:
-				// TODO: 处理rc
-				// rc = g.ReturnCodeTicketClosed
-				err = fmt.Errorf("错误代码: %s, 错误信息: 无效的工单状态修改请求。", rc)
+				rc = gqlapi.ReturnCodeUnknowError
+				err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, patchErr.Error())
 			}
-			if err != nil {
-				break
-			}
-		}
-		if _, err = g.Engine.ID(ticket.TicketID).Update(ticket); err != nil {
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break
 		}
+		ticket := bridge.TicketFromDomain(t)
 
 		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
 			if elem.ClusterID == ticket.ClusterID {
@@ -606,6 +559,17 @@ func (r *mutationRootResolver) PatchTicketStatus(ctx context.Context, input mode
 	return
 }
 
+// ticketStatusName maps a domain status back to its GraphQL enum name, used to
+// render the same messages as the legacy endpoint.
+func ticketStatusName(s domain.TicketStatus) gqlapi.TicketStatusEnum {
+	for k, v := range gqlapi.TicketStatusEnumMap {
+		if v == uint8(s) {
+			return k
+		}
+	}
+	return ""
+}
+
 // ExecuteTicket 执行一个工单，公用ScheduleTicket，所有错误由ScheduleTicket处理
 func (r *mutationRootResolver) ExecuteTicket(ctx context.Context, id string) (ok bool, err error) {
 	input := models.ScheduleTicketInput{
@@ -624,7 +588,6 @@ func (r *mutationRootResolver) ExecuteTicket(ctx context.Context, id string) (ok
 func (r *mutationRootResolver) ScheduleTicket(ctx context.Context, input models.ScheduleTicketInput) (cron *models.Cron, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
-		found := false
 		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
 		user := credential.User
 
@@ -634,20 +597,18 @@ func (r *mutationRootResolver) ScheduleTicket(ctx context.Context, input models.
 			break
 		}
 
-		ticket := &models.Ticket{
-			UUID: input.TicketUUID,
-		}
-		found, err = g.Engine.Get(ticket)
-		if err != nil {
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+		t, getErr := r.app.Services.Ticket.GetByUUID(ctx, input.TicketUUID)
+		if getErr != nil {
+			if errors.Is(getErr, domain.ErrNotFound) {
+				rc = gqlapi.ReturnCodeNotFound
+				err = fmt.Errorf("错误代码: %s, 错误信息: 工单(uuid=%s)不存在。", rc, input.TicketUUID)
+			} else {
+				rc = gqlapi.ReturnCodeUnknowError
+				err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, getErr.Error())
+			}
 			break
 		}
-		if !found {
-			rc = gqlapi.ReturnCodeNotFound
-			err = fmt.Errorf("错误代码: %s, 错误信息: 工单(uuid=%s)不存在。", rc, input.TicketUUID)
-			break
-		}
+		ticket := bridge.TicketFromDomain(t)
 
 		// 判断工单的状态，只有系统审核成功的状态才允许执行
 		if ticket.Status != gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumLgtm] {
@@ -694,22 +655,23 @@ func (r *mutationRootResolver) ScheduleTicket(ctx context.Context, input models.
 		when, _ := time.ParseInLocation("2006-01-02 15:04:05", input.Schedule, local)
 		cronUUID, _ := s.RunAt(when, ticket.Subject, "execute", "-T", ticket.UUID)
 
-		cron = &models.Cron{}
-		if _, err = g.Engine.Where("`uuid` = ?", cronUUID).Get(cron); err != nil {
+		domainCron, cronErr := r.app.Services.Cron.GetByUUID(ctx, cronUUID)
+		if cronErr != nil {
 			cron = nil
 			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, cronErr.Error())
 			break
 		}
+		cron = bridge.CronFromDomain(domainCron)
 
+		if updErr := r.app.Services.Ticket.UpdateCron(ctx, input.TicketUUID, cron.CronID); updErr != nil {
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, updErr.Error())
+			break
+		}
 		ticket.CronID = sql.NullInt64{
 			Int64: int64(cron.CronID),
 			Valid: true,
-		}
-		if _, err = g.Engine.ID(ticket.TicketID).Update(ticket); err != nil {
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
-			break
 		}
 
 		events.Fire(events.EventTicketScheduled, &events.TicketScheduledArgs{

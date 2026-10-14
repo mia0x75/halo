@@ -56,6 +56,28 @@ func canTransition(from, to domain.TicketStatus) bool {
 	return false
 }
 
+// TransitionKind classifies a rejected status change so the API layer can render
+// the matching message without re-implementing the workflow rules.
+type TransitionKind int
+
+const (
+	TransitionTerminal TransitionKind = iota
+	TransitionClose
+	TransitionManualReview
+	TransitionInvalidTarget
+)
+
+// TransitionError is returned by PatchStatus when a status change violates the
+// workflow. It satisfies domain.ErrInvalidInput.
+type TransitionError struct {
+	Current domain.TicketStatus
+	Kind    TransitionKind
+}
+
+func (e *TransitionError) Error() string { return "ticket transition rejected" }
+
+func (e *TransitionError) Is(target error) bool { return target == domain.ErrInvalidInput }
+
 // TicketService owns the ticket workflow: submission, review outcome and the
 // terminal transitions driven by execution. Every status change is audited in
 // the same transaction as the row update.
@@ -185,6 +207,66 @@ func (s *TicketService) Remove(ctx context.Context, ticketUUID string, userID ui
 		return nil, err
 	}
 	return removed, nil
+}
+
+// PatchStatus applies a manual status change. Its rules are intentionally more
+// permissive than the automated canTransition graph (a warning may go straight
+// to Lgtm), matching the legacy PatchTicketStatus endpoint.
+func (s *TicketService) PatchStatus(ctx context.Context, ticketUUID string, target domain.TicketStatus) (*domain.Ticket, error) {
+	var updated *domain.Ticket
+	err := s.tx.WithTx(ctx, func(ctx context.Context, repos Repos) error {
+		tk, err := repos.Ticket.GetByUUID(ctx, ticketUUID)
+		if err != nil {
+			return err
+		}
+		switch tk.Status {
+		case domain.TicketStatusClosed, domain.TicketStatusDone, domain.TicketStatusExecFailure:
+			return &TransitionError{Current: tk.Status, Kind: TransitionTerminal}
+		}
+
+		fromWarningOrMrv := tk.Status == domain.TicketStatusVldWarning || tk.Status == domain.TicketStatusWaitingForMrv
+		switch target {
+		case domain.TicketStatusClosed:
+			if tk.Status != domain.TicketStatusVldFailure && !fromWarningOrMrv {
+				return &TransitionError{Current: tk.Status, Kind: TransitionClose}
+			}
+		case domain.TicketStatusLgtm, domain.TicketStatusMrvFailure:
+			if !fromWarningOrMrv {
+				return &TransitionError{Current: tk.Status, Kind: TransitionManualReview}
+			}
+		default:
+			return &TransitionError{Current: tk.Status, Kind: TransitionInvalidTarget}
+		}
+
+		tk.Status = target
+		tk.Version++
+		now := uint(time.Now().Unix())
+		tk.UpdateAt = &now
+		if err := repos.Ticket.Update(ctx, tk); err != nil {
+			return err
+		}
+		updated = tk
+		return NewLogService(repos.Log).Log(ctx, LogEntry{Operation: "ticket.patch_status", Target: "ticket:" + tk.UUID})
+	})
+	if err != nil {
+		return nil, err
+	}
+	return updated, nil
+}
+
+// UpdateCron records the cron id a ticket was scheduled under.
+func (s *TicketService) UpdateCron(ctx context.Context, ticketUUID string, cronID uint) error {
+	return s.tx.WithTx(ctx, func(ctx context.Context, repos Repos) error {
+		tk, err := repos.Ticket.GetByUUID(ctx, ticketUUID)
+		if err != nil {
+			return err
+		}
+		tk.CronID = &cronID
+		tk.Version++
+		now := uint(time.Now().Unix())
+		tk.UpdateAt = &now
+		return repos.Ticket.Update(ctx, tk)
+	})
 }
 
 // transition loads the ticket, validates the edge and applies it with its audit
