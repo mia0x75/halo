@@ -23,7 +23,7 @@ type DatabaseCreateVldr struct {
 
 // Call 利用反射方法动态调用审核函数
 func (v *DatabaseCreateVldr) Call(method string, params ...interface{}) {
-	Call(v, method, params...)
+	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效
@@ -58,7 +58,7 @@ func (v *DatabaseCreateVldr) Validate(wg *sync.WaitGroup) {
 func (v *DatabaseCreateVldr) AvailableCharsets(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var charsets []string
-	json.Unmarshal([]byte(r.Values), &charsets)
+	_ = json.Unmarshal([]byte(r.Values), &charsets)
 	var useCharset = "<empty>"
 	valid := false
 	for _, db := range v.cd.Options {
@@ -87,7 +87,7 @@ func (v *DatabaseCreateVldr) AvailableCharsets(s *models.Statement, r *models.Ru
 func (v *DatabaseCreateVldr) AvailableCollates(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var collates []string
-	json.Unmarshal([]byte(r.Values), &collates)
+	_ = json.Unmarshal([]byte(r.Values), &collates)
 
 	var useCollate = "<empty>"
 	valid := false
@@ -206,7 +206,7 @@ type DatabaseAlterVldr struct {
 
 // Call 利用反射方法动态调用审核函数
 func (v *DatabaseAlterVldr) Call(method string, params ...interface{}) {
-	Call(v, method, params...)
+	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效
@@ -241,7 +241,7 @@ func (v *DatabaseAlterVldr) Validate(wg *sync.WaitGroup) {
 func (v *DatabaseAlterVldr) AvailableCharsets(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var charsets []string
-	json.Unmarshal([]byte(r.Values), &charsets)
+	_ = json.Unmarshal([]byte(r.Values), &charsets)
 
 	var useCharset string
 	valid := true
@@ -273,7 +273,7 @@ func (v *DatabaseAlterVldr) AvailableCharsets(s *models.Statement, r *models.Rul
 func (v *DatabaseAlterVldr) AvailableCollates(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var collates []string
-	json.Unmarshal([]byte(r.Values), &collates)
+	_ = json.Unmarshal([]byte(r.Values), &collates)
 
 	var useCollate string
 	valid := true
@@ -360,7 +360,7 @@ type DatabaseDropVldr struct {
 
 // Call 利用反射方法动态调用审核函数
 func (v *DatabaseDropVldr) Call(method string, params ...interface{}) {
-	Call(v, method, params...)
+	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效

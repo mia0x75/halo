@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/mia0x75/halo/internal/domain"
 )
@@ -95,4 +98,19 @@ func (r *StatisticRepo) List(ctx context.Context, cursor string, limit int) ([]*
 		out = append(out, s)
 	}
 	return out, nil
+}
+
+// UpsertIncrement atomically adds delta to a counter, inserting the row when it
+// does not exist yet. Single statement, so concurrent increments never lose an
+// update (the previous read-modify-write could).
+func (r *StatisticRepo) UpsertIncrement(ctx context.Context, group, key string, delta float64) error {
+	now := uint(time.Now().Unix())
+	return wrap("statistic.UpsertIncrement", r.q.UpsertStatistic(ctx, UpsertStatisticParams{
+		Group:    group,
+		Key:      key,
+		Uuid:     uuid.NewString(),
+		Value:    strconv.FormatFloat(delta, 'f', -1, 64),
+		UpdateAt: nullFromUint(&now),
+		CreateAt: uint32(now),
+	}))
 }

@@ -13,7 +13,7 @@ type ProcCreateVldr struct {
 
 // Call 利用反射方法动态调用审核函数
 func (v *ProcCreateVldr) Call(method string, params ...interface{}) {
-	Call(v, method, params...)
+	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效
@@ -63,7 +63,7 @@ type ProcAlterVldr struct {
 
 // Call 利用反射方法动态调用审核函数
 func (v *ProcAlterVldr) Call(method string, params ...interface{}) {
-	Call(v, method, params...)
+	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效
@@ -93,7 +93,7 @@ type ProcDropVldr struct {
 
 // Call 利用反射方法动态调用审核函数
 func (v *ProcDropVldr) Call(method string, params ...interface{}) {
-	Call(v, method, params...)
+	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效

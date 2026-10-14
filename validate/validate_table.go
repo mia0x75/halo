@@ -25,7 +25,7 @@ type TableCreateVldr struct {
 
 // Call 利用反射方法动态调用审核函数
 func (v *TableCreateVldr) Call(method string, params ...interface{}) {
-	Call(v, method, params...)
+	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效
@@ -66,7 +66,7 @@ func (v *TableCreateVldr) AvailableCharsets(s *models.Statement, r *models.Rule)
 
 	var charsets []string
 	// 将字符串反解析为结构体
-	json.Unmarshal([]byte(r.Values), &charsets)
+	_ = json.Unmarshal([]byte(r.Values), &charsets)
 
 	useCharset := "<empty>"
 	valid := false
@@ -103,7 +103,7 @@ func (v *TableCreateVldr) AvailableCollates(s *models.Statement, r *models.Rule)
 
 	var collates []string
 	// 将字符串反解析为结构体
-	json.Unmarshal([]byte(r.Values), &collates)
+	_ = json.Unmarshal([]byte(r.Values), &collates)
 
 	useCollate := "<empty>"
 	valid := false
@@ -173,7 +173,7 @@ func (v *TableCreateVldr) AvailableEngines(s *models.Statement, r *models.Rule) 
 	}
 
 	var engines []string
-	json.Unmarshal([]byte(r.Values), &engines)
+	_ = json.Unmarshal([]byte(r.Values), &engines)
 
 	useEngine := "<empty>"
 	valid := false
@@ -394,7 +394,7 @@ func (v *TableCreateVldr) MaxAllowedColumnCount(s *models.Statement, r *models.R
 func (v *TableCreateVldr) ColumnTypesDoesNotExpect(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var availableTypes []string
-	json.Unmarshal([]byte(r.Values), &availableTypes)
+	_ = json.Unmarshal([]byte(r.Values), &availableTypes)
 
 	if len(availableTypes) == 0 {
 		return
@@ -447,7 +447,7 @@ func (v *TableCreateVldr) ColumnAvailableCharsets(s *models.Statement, r *models
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// 字符集
 	var charsets []string
-	json.Unmarshal([]byte(r.Values), &charsets)
+	_ = json.Unmarshal([]byte(r.Values), &charsets)
 
 	for _, col := range v.ct.Cols {
 		colCharset := col.Tp.Charset
@@ -479,7 +479,7 @@ func (v *TableCreateVldr) ColumnAvailableCollates(s *models.Statement, r *models
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// 排序规则
 	var collates []string
-	json.Unmarshal([]byte(r.Values), &collates)
+	_ = json.Unmarshal([]byte(r.Values), &collates)
 
 	for _, col := range v.ct.Cols {
 		colCollate := col.Tp.Collate
@@ -575,7 +575,7 @@ func (v *TableCreateVldr) ColumnNotNullWithDefaultRequired(s *models.Statement, 
 func (v *TableCreateVldr) ColumnAutoIncAvailableTypes(s *models.Statement, r *models.Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var availableTypes []string
-	json.Unmarshal([]byte(r.Values), &availableTypes)
+	_ = json.Unmarshal([]byte(r.Values), &availableTypes)
 
 	for _, col := range v.ct.Cols {
 		hasAutoInc := false
@@ -1361,7 +1361,7 @@ type TableAlterVldr struct {
 
 // Call 利用反射方法动态调用审核函数
 func (v *TableAlterVldr) Call(method string, params ...interface{}) {
-	Call(v, method, params...)
+	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效
@@ -1397,7 +1397,7 @@ func (v *TableAlterVldr) AvailableCharsets(s *models.Statement, r *models.Rule) 
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var charsets []string
 	// 将字符串反解析为结构体
-	json.Unmarshal([]byte(r.Values), &charsets)
+	_ = json.Unmarshal([]byte(r.Values), &charsets)
 
 	useCharset := "<empty>"
 	valid := true
@@ -1436,7 +1436,7 @@ func (v *TableAlterVldr) AvailableCollates(s *models.Statement, r *models.Rule) 
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var collates []string
 	// 将字符串反解析为结构体
-	json.Unmarshal([]byte(r.Values), &collates)
+	_ = json.Unmarshal([]byte(r.Values), &collates)
 
 	useCollate := "<empty>"
 	valid := true
@@ -1524,7 +1524,7 @@ func (v *TableAlterVldr) AvailableEngines(s *models.Statement, r *models.Rule) {
 	}
 	var engines []string
 	// 将字符串反解析为结构体
-	json.Unmarshal([]byte(r.Values), &engines)
+	_ = json.Unmarshal([]byte(r.Values), &engines)
 
 	useEngine := "<empty>"
 	valid := true
@@ -1688,7 +1688,7 @@ func (v *TableAlterVldr) ColumnUnwantedTypes(s *models.Statement, r *models.Rule
 		return
 	}
 	var availableTypes []string
-	json.Unmarshal([]byte(r.Values), &availableTypes)
+	_ = json.Unmarshal([]byte(r.Values), &availableTypes)
 
 	if len(availableTypes) == 0 {
 		return
@@ -1762,7 +1762,7 @@ func (v *TableAlterVldr) ColumnAvailableCharsets(s *models.Statement, r *models.
 	}
 	// 字符集
 	var charsets []string
-	json.Unmarshal([]byte(r.Values), &charsets)
+	_ = json.Unmarshal([]byte(r.Values), &charsets)
 
 	for _, spec := range v.at.Specs {
 		if spec.Tp != ast.AlterTableAddColumns &&
@@ -1804,7 +1804,7 @@ func (v *TableAlterVldr) ColumnAvailableCollates(s *models.Statement, r *models.
 	}
 	// 排序规则
 	var collates []string
-	json.Unmarshal([]byte(r.Values), &collates)
+	_ = json.Unmarshal([]byte(r.Values), &collates)
 	for _, spec := range v.at.Specs {
 		if spec.Tp != ast.AlterTableAddColumns &&
 			spec.Tp != ast.AlterTableChangeColumn &&
@@ -1868,7 +1868,7 @@ func (v *TableAlterVldr) ColumnCharsetCollateMustMatch(s *models.Statement, r *m
 					}
 					s.Violations.Append(c)
 				}
-			} else {
+			} else { //nolint:staticcheck // placeholder: fetch charset/collation from the target database
 				// TODO:
 				// 从数据库获取字符集和排序规则
 			}
@@ -3051,7 +3051,7 @@ type TableRenameVldr struct {
 
 // Call 利用反射方法动态调用审核函数
 func (v *TableRenameVldr) Call(method string, params ...interface{}) {
-	Call(v, method, params...)
+	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效
@@ -3172,7 +3172,7 @@ type TableDropVldr struct {
 
 // Call 利用反射方法动态调用审核函数
 func (v *TableDropVldr) Call(method string, params ...interface{}) {
-	Call(v, method, params...)
+	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效

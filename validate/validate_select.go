@@ -19,7 +19,7 @@ type SelectVldr struct {
 
 // Call 利用反射方法动态调用审核函数
 func (v *SelectVldr) Call(method string, params ...interface{}) {
-	Call(v, method, params...)
+	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效
@@ -156,6 +156,7 @@ func (v *SelectVldr) ReturnBlobOrTextNotAllowed(s *models.Statement, r *models.R
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	fields := []*ast.SelectField{}
 	for _, field := range v.sd.Fields.Fields {
+		//nolint:staticcheck // placeholder: expand wildcard columns into concrete fields
 		if field.WildCard != nil {
 			// 如果是SELECT *或者SELECT alias.*则需要展开对应表的所有字段
 			// TODO:

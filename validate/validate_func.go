@@ -13,7 +13,7 @@ type FuncCreateVldr struct {
 
 // Call 利用反射方法动态调用审核函数
 func (v *FuncCreateVldr) Call(method string, params ...interface{}) {
-	Call(v, method, params...)
+	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效
@@ -63,7 +63,7 @@ type FuncAlterVldr struct {
 
 // Call 利用反射方法动态调用审核函数
 func (v *FuncAlterVldr) Call(method string, params ...interface{}) {
-	Call(v, method, params...)
+	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效
@@ -93,7 +93,7 @@ type FuncDropVldr struct {
 
 // Call 利用反射方法动态调用审核函数
 func (v *FuncDropVldr) Call(method string, params ...interface{}) {
-	Call(v, method, params...)
+	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效

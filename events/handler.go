@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
-	"errors"
 	"fmt"
 	"net"
 	"net/mail"
@@ -82,7 +81,7 @@ type TicketCreatedArgs struct {
 // TicketCreatedLogWriter 创建工单的日志记录
 func TicketCreatedLogWriter(e *Event) {
 	if args, ok := e.Args.(*TicketCreatedArgs); ok {
-		LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)创建了一个新工单(uuid=%s)。\n", args.User.UUID, args.Ticket.UUID))
+		_ = LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)创建了一个新工单(uuid=%s)。\n", args.User.UUID, args.Ticket.UUID))
 	}
 }
 
@@ -124,7 +123,7 @@ type TicketUpdatedArgs struct {
 // TicketUpdatedLogWriter 工单更新日志记录
 func TicketUpdatedLogWriter(e *Event) {
 	if args, ok := e.Args.(*TicketUpdatedArgs); ok {
-		LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)更新了工单(uuid=%s)。\n", args.User.UUID, args.Ticket.UUID))
+		_ = LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)更新了工单(uuid=%s)。\n", args.User.UUID, args.Ticket.UUID))
 	}
 }
 
@@ -150,7 +149,7 @@ type TicketRemovedArgs struct {
 // TicketRemovedLogWriter 删除工单的日志记录
 func TicketRemovedLogWriter(e *Event) {
 	if args, ok := e.Args.(*TicketRemovedArgs); ok {
-		LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)删除了工单(uuid=%s)。\n", args.User.UUID, args.Ticket.UUID))
+		_ = LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)删除了工单(uuid=%s)。\n", args.User.UUID, args.Ticket.UUID))
 	}
 }
 
@@ -197,7 +196,7 @@ func TicketExecutedLogWriter(e *Event) {
 		if getErr != nil {
 			return
 		}
-		LogWriter(agent.UserID, fmt.Sprintf("用户(uuid=%s)执行工单(uuid=%s)成功。\n", agent.UUID, args.Ticket.UUID))
+		_ = LogWriter(agent.UserID, fmt.Sprintf("用户(uuid=%s)执行工单(uuid=%s)成功。\n", agent.UUID, args.Ticket.UUID))
 	}
 }
 
@@ -236,7 +235,7 @@ func TicketFailedLogWriter(e *Event) {
 		if getErr != nil {
 			return
 		}
-		LogWriter(agent.UserID, fmt.Sprintf("用户(uuid=%s)执行工单(uuid=%s)失败。\n", agent.UUID, args.Ticket.UUID))
+		_ = LogWriter(agent.UserID, fmt.Sprintf("用户(uuid=%s)执行工单(uuid=%s)失败。\n", agent.UUID, args.Ticket.UUID))
 	}
 }
 
@@ -273,7 +272,7 @@ type TicketScheduledArgs struct {
 // TicketScheduledLogWriter 工单预约成功的日志记录
 func TicketScheduledLogWriter(e *Event) {
 	if args, ok := e.Args.(*TicketScheduledArgs); ok {
-		LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)在预约工单(uuid=%s)成功，预约时间(time=%v)。\n", args.User.UUID, args.Ticket.UUID, args.Cron.NextRun))
+		_ = LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)在预约工单(uuid=%s)成功，预约时间(time=%v)。\n", args.User.UUID, args.Ticket.UUID, args.Cron.NextRun))
 	}
 }
 
@@ -307,7 +306,7 @@ type TicketStatusPatchedArgs struct {
 // TicketStatusPatchedLogWriter 工单状态更新成功日志记录
 func TicketStatusPatchedLogWriter(e *Event) {
 	if args, ok := e.Args.(*TicketStatusPatchedArgs); ok {
-		LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)修改工单(uuid=%s)状态成功。\n", args.User.UUID, args.Ticket.UUID))
+		_ = LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)修改工单(uuid=%s)状态成功。\n", args.User.UUID, args.Ticket.UUID))
 	}
 }
 
@@ -351,7 +350,7 @@ type QueryCreatedArgs struct {
 // QueryCreatedLogWriter 创建查询的日志记录
 func QueryCreatedLogWriter(e *Event) {
 	if args, ok := e.Args.(*QueryCreatedArgs); ok {
-		LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)执行数据查询(uuid=%s)成功。\n", args.User.UUID, args.Query.UUID))
+		_ = LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)执行数据查询(uuid=%s)成功。\n", args.User.UUID, args.Query.UUID))
 	}
 }
 
@@ -380,7 +379,7 @@ type QueryAnalyzedArgs struct {
 // QueryAnalyzedLogWriter 查询分析的日志记录
 func QueryAnalyzedLogWriter(e *Event) {
 	if args, ok := e.Args.(*QueryAnalyzedArgs); ok {
-		LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)执行查询分析(uuid=%s)成功。\n", args.User.UUID, args.Query.UUID))
+		_ = LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)执行查询分析(uuid=%s)成功。\n", args.User.UUID, args.Query.UUID))
 	}
 }
 
@@ -409,7 +408,7 @@ type QueryRewritedArgs struct {
 // QueryRewritedLogWriter 查询重写的日志记录
 func QueryRewritedLogWriter(e *Event) {
 	if args, ok := e.Args.(*QueryRewritedArgs); ok {
-		LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)执行查询重写(uuid=%s)成功。\n", args.User.UUID, args.Query.UUID))
+		_ = LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)执行查询重写(uuid=%s)成功。\n", args.User.UUID, args.Query.UUID))
 	}
 }
 
@@ -437,7 +436,7 @@ type UserRegisteredArgs struct {
 // UserRegisteredLogWriter 用户注册的日志记录
 func UserRegisteredLogWriter(e *Event) {
 	if args, ok := e.Args.(*UserRegisteredArgs); ok {
-		LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)注册成功。\n", args.User.UUID))
+		_ = LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)注册成功。\n", args.User.UUID))
 	}
 }
 
@@ -471,7 +470,7 @@ type UserSignedInArgs struct {
 // UserSignedInLogWriter 用户登录的日志记录
 func UserSignedInLogWriter(e *Event) {
 	if args, ok := e.Args.(*UserSignedInArgs); ok {
-		LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)通过远程主机(ip=%s)登录系统。", args.User.UUID, args.IP))
+		_ = LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)通过远程主机(ip=%s)登录系统。", args.User.UUID, args.IP))
 	}
 }
 
@@ -495,7 +494,7 @@ type PasswordUpdatedArgs struct {
 // PasswordUpdatedLogWriter 密码更新日志记录
 func PasswordUpdatedLogWriter(e *Event) {
 	if args, ok := e.Args.(*PasswordUpdatedArgs); ok {
-		LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)更新密码成功。\n", args.User.UUID))
+		_ = LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)更新密码成功。\n", args.User.UUID))
 	}
 }
 
@@ -520,7 +519,7 @@ type EmailUpdatedArgs struct {
 // EmailUpdatedLogWriter 账号更新日志记录
 func EmailUpdatedLogWriter(e *Event) {
 	if args, ok := e.Args.(*EmailUpdatedArgs); ok {
-		LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)更新账号成功。\n", args.User.UUID))
+		_ = LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)更新账号成功。\n", args.User.UUID))
 	}
 }
 
@@ -545,7 +544,7 @@ type ProfileUpdatedArgs struct {
 // ProfileUpdatedLogWriter 用户信息更新日志记录
 func ProfileUpdatedLogWriter(e *Event) {
 	if args, ok := e.Args.(*ProfileUpdatedArgs); ok {
-		LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)更新个人资料成功。\n", args.User.UUID))
+		_ = LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)更新个人资料成功。\n", args.User.UUID))
 	}
 }
 
@@ -569,7 +568,7 @@ type UserLogoutArgs struct {
 // UserLogoutLogWriter 用户退出登录日志记录
 func UserLogoutLogWriter(e *Event) {
 	if args, ok := e.Args.(*UserLogoutArgs); ok {
-		LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)退出登录成功。\n", args.User.UUID))
+		_ = LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)退出登录成功。\n", args.User.UUID))
 	}
 }
 
@@ -582,7 +581,7 @@ type UserCreatedArgs struct {
 // UserCreatedLogWriter 用户创建成功日志记录
 func UserCreatedLogWriter(e *Event) {
 	if args, ok := e.Args.(*UserCreatedArgs); ok {
-		LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)创建用户(uuid=%s)成功。\n", args.Manager.UUID, args.User.UUID))
+		_ = LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)创建用户(uuid=%s)成功。\n", args.Manager.UUID, args.User.UUID))
 	}
 }
 
@@ -616,7 +615,7 @@ type UserUpdatedArgs struct {
 // UserUpdatedLogWriter 用户更新成功日志记录
 func UserUpdatedLogWriter(e *Event) {
 	if args, ok := e.Args.(*UserUpdatedArgs); ok {
-		LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)更新用户(uuid=%s)成功。\n", args.Manager.UUID, args.User.UUID))
+		_ = LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)更新用户(uuid=%s)成功。\n", args.Manager.UUID, args.User.UUID))
 	}
 }
 
@@ -629,7 +628,7 @@ type UserStatusPatchedArgs struct {
 // UserStatusPatchedLogWriter 用户状态更新成功日志记录
 func UserStatusPatchedLogWriter(e *Event) {
 	if args, ok := e.Args.(*UserStatusPatchedArgs); ok {
-		LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)更新用户(uuid=%s)状态成功。\n", args.Manager.UUID, args.User.UUID))
+		_ = LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)更新用户(uuid=%s)状态成功。\n", args.Manager.UUID, args.User.UUID))
 	}
 }
 
@@ -642,7 +641,7 @@ type RuleValuesPatchedArgs struct {
 // RuleValuesPatchedLogWriter 规则值更新成功日志记录
 func RuleValuesPatchedLogWriter(e *Event) {
 	if args, ok := e.Args.(*RuleValuesPatchedArgs); ok {
-		LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)更新规则(uuid=%s)值成功。\n", args.Manager.UUID, args.Rule.UUID))
+		_ = LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)更新规则(uuid=%s)值成功。\n", args.Manager.UUID, args.Rule.UUID))
 	}
 }
 
@@ -655,7 +654,7 @@ type RuleBitwisePatchedArgs struct {
 // RuleBitwisePatchedLogWriter 规则状态位更新成功日志记录
 func RuleBitwisePatchedLogWriter(e *Event) {
 	if args, ok := e.Args.(*RuleBitwisePatchedArgs); ok {
-		LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)更新规则(uuid=%s)状态位成功。\n", args.Manager.UUID, args.Rule.UUID))
+		_ = LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)更新规则(uuid=%s)状态位成功。\n", args.Manager.UUID, args.Rule.UUID))
 	}
 }
 
@@ -668,7 +667,7 @@ type OptionValuePatchedArgs struct {
 // OptionValuePatchedLogWriter 系统选项更新日志记录
 func OptionValuePatchedLogWriter(e *Event) {
 	if args, ok := e.Args.(*OptionValuePatchedArgs); ok {
-		LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)更新系统选项(uuid=%s)成功。\n", args.Manager.UUID, args.Option.UUID))
+		_ = LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)更新系统选项(uuid=%s)成功。\n", args.Manager.UUID, args.Option.UUID))
 	}
 }
 
@@ -682,7 +681,7 @@ type CommentCreatedArgs struct {
 // CommentCreatedLogWriter 审核意见添加成功日记记录
 func CommentCreatedLogWriter(e *Event) {
 	if args, ok := e.Args.(*CommentCreatedArgs); ok {
-		LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)添加工单(uuid=%s)审核意见成功。\n", args.User.UUID, args.Ticket.UUID))
+		_ = LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)添加工单(uuid=%s)审核意见成功。\n", args.User.UUID, args.Ticket.UUID))
 	}
 }
 
@@ -728,7 +727,7 @@ type CronCancelledArgs struct {
 // CronCancelledLogWriter 工单预约取消日志记录
 func CronCancelledLogWriter(e *Event) {
 	if args, ok := e.Args.(*CronCancelledArgs); ok {
-		LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)取消工单(uuid=%s)执行成功。\n", args.User.UUID, args.Ticket.UUID))
+		_ = LogWriter(args.User.UserID, fmt.Sprintf("用户(uuid=%s)取消工单(uuid=%s)执行成功。\n", args.User.UUID, args.Ticket.UUID))
 	}
 }
 
@@ -761,7 +760,7 @@ type ClusterStatusPatchedArgs struct {
 // ClusterStatusPatchedLogWriter 群集状态更新日志记录
 func ClusterStatusPatchedLogWriter(e *Event) {
 	if args, ok := e.Args.(*ClusterStatusPatchedArgs); ok {
-		LogWriter(args.Manager.UserID, fmt.Sprintf("用户(uuid=%s)修改群集(uuid=%s)状态成功。\n", args.Manager.UUID, args.Cluster.UUID))
+		_ = LogWriter(args.Manager.UserID, fmt.Sprintf("用户(uuid=%s)修改群集(uuid=%s)状态成功。\n", args.Manager.UUID, args.Cluster.UUID))
 	}
 }
 
@@ -774,7 +773,7 @@ type ClusterRemovedArgs struct {
 // ClusterRemovedLogWriter 群集移除日志记录
 func ClusterRemovedLogWriter(e *Event) {
 	if args, ok := e.Args.(*ClusterRemovedArgs); ok {
-		LogWriter(args.Manager.UserID, fmt.Sprintf("用户(uuid=%s)删除群集(uuid=%s)成功。\n", args.Manager.UUID, args.Cluster.UUID))
+		_ = LogWriter(args.Manager.UserID, fmt.Sprintf("用户(uuid=%s)删除群集(uuid=%s)成功。\n", args.Manager.UUID, args.Cluster.UUID))
 	}
 }
 
@@ -796,7 +795,7 @@ type ClusterUpdatedArgs struct {
 // ClusterUpdatedLogWriter 群集更新日志记录
 func ClusterUpdatedLogWriter(e *Event) {
 	if args, ok := e.Args.(*ClusterUpdatedArgs); ok {
-		LogWriter(args.Manager.UserID, fmt.Sprintf("用户(uuid=%s)更新群集(uuid=%s)成功。\n", args.Manager.UUID, args.Cluster.UUID))
+		_ = LogWriter(args.Manager.UserID, fmt.Sprintf("用户(uuid=%s)更新群集(uuid=%s)成功。\n", args.Manager.UUID, args.Cluster.UUID))
 	}
 }
 
@@ -809,7 +808,7 @@ type ClusterCreatedArgs struct {
 // ClusterCreatedLogWriter 群集创建日志记录
 func ClusterCreatedLogWriter(e *Event) {
 	if args, ok := e.Args.(*ClusterCreatedArgs); ok {
-		LogWriter(args.Manager.UserID, fmt.Sprintf("用户(uuid=%s)创建群集(uuid=%s)成功。\n", args.Manager.UUID, args.Cluster.UUID))
+		_ = LogWriter(args.Manager.UserID, fmt.Sprintf("用户(uuid=%s)创建群集(uuid=%s)成功。\n", args.Manager.UUID, args.Cluster.UUID))
 	}
 }
 
@@ -831,7 +830,7 @@ type ReviewerGrantedArgs struct {
 // ReviewerGrantedLogWriter 授权审核人日志记录
 func ReviewerGrantedLogWriter(e *Event) {
 	if args, ok := e.Args.(*ReviewerGrantedArgs); ok {
-		LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)授权用户(uuid=%s)审核人成功。\n", args.Manager.UUID, args.User.UUID))
+		_ = LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)授权用户(uuid=%s)审核人成功。\n", args.Manager.UUID, args.User.UUID))
 	}
 }
 
@@ -844,7 +843,7 @@ type ReviewerRevokedArgs struct {
 // ReviewerRevokedLogWriter 收回审核人日志记录
 func ReviewerRevokedLogWriter(e *Event) {
 	if args, ok := e.Args.(*ReviewerRevokedArgs); ok {
-		LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)收回用户(uuid=%s)审核人成功。\n", args.Manager.UUID, args.User.UUID))
+		_ = LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)收回用户(uuid=%s)审核人成功。\n", args.Manager.UUID, args.User.UUID))
 	}
 }
 
@@ -857,7 +856,7 @@ type ClusterGrantedArgs struct {
 // ClusterGrantedLogWriter 授权群集日志记录
 func ClusterGrantedLogWriter(e *Event) {
 	if args, ok := e.Args.(*ClusterGrantedArgs); ok {
-		LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)授权用户(uuid=%s)群集成功。\n", args.Manager.UUID, args.User.UUID))
+		_ = LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)授权用户(uuid=%s)群集成功。\n", args.Manager.UUID, args.User.UUID))
 	}
 }
 
@@ -870,7 +869,7 @@ type ClusterRevokedArgs struct {
 // ClusterRevokedLogWriter 收回群集日志记录
 func ClusterRevokedLogWriter(e *Event) {
 	if args, ok := e.Args.(*ClusterRevokedArgs); ok {
-		LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)收回用户(uuid=%s)群集成功。\n", args.Manager.UUID, args.User.UUID))
+		_ = LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)收回用户(uuid=%s)群集成功。\n", args.Manager.UUID, args.User.UUID))
 	}
 }
 
@@ -883,7 +882,7 @@ type RoleGrantedArgs struct {
 // RoleGrantedLogWriter 授权角色日志记录
 func RoleGrantedLogWriter(e *Event) {
 	if args, ok := e.Args.(*RoleGrantedArgs); ok {
-		LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)授权用户(uuid=%s)角色成功。\n", args.Manager.UUID, args.User.UUID))
+		_ = LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)授权用户(uuid=%s)角色成功。\n", args.Manager.UUID, args.User.UUID))
 	}
 }
 
@@ -896,31 +895,13 @@ type RoleRevokedArgs struct {
 // RoleRevokedLogWriter 收回角色日志记录
 func RoleRevokedLogWriter(e *Event) {
 	if args, ok := e.Args.(*RoleRevokedArgs); ok {
-		LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)收回用户(uuid=%s)角色成功。\n", args.Manager.UUID, args.User.UUID))
+		_ = LogWriter(args.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)收回用户(uuid=%s)角色成功。\n", args.Manager.UUID, args.User.UUID))
 	}
 }
 
 // UpdateStatistics 统计信息更新
 func UpdateStatistics(group string, key string, value float64) error {
-	ctx := context.Background()
-	stats, err := repos.Statistic.GetByKey(ctx, group, key)
-	if err != nil {
-		if !errors.Is(err, domain.ErrNotFound) {
-			return err
-		}
-		return repos.Statistic.Create(ctx, &domain.Statistic{
-			Group:    group,
-			Key:      key,
-			Value:    value,
-			UUID:     uuid.NewString(),
-			Version:  1,
-			CreateAt: uint(time.Now().Unix()),
-		})
-	}
-	stats.Value += value
-	now := uint(time.Now().Unix())
-	stats.UpdateAt = &now
-	return repos.Statistic.Update(ctx, stats)
+	return repos.Statistic.UpsertIncrement(context.Background(), group, key, value)
 }
 
 // LogWriter 日志记录表操作
@@ -977,11 +958,11 @@ func MailSender(args MailSendArgs) {
 
 	// write header
 	for key, value := range header {
-		buffer.WriteString(fmt.Sprintf("%s: %s\r\n", key, value[0]))
+		fmt.Fprintf(&buffer, "%s: %s\r\n", key, value[0])
 	}
 
 	// write body
-	buffer.WriteString(fmt.Sprintf("\r\n%s", args.Body))
+	fmt.Fprintf(&buffer, "\r\n%s", args.Body)
 
 	// Connect to the SMTP Server
 	servername := g.Config().Mail.Addr
@@ -1038,7 +1019,7 @@ func MailSender(args MailSendArgs) {
 		panic(err)
 	}
 
-	c.Quit()
+	_ = c.Quit()
 }
 
 func renderer(id g.Template, data interface{}) (string, string) {
@@ -1058,8 +1039,8 @@ func renderer(id g.Template, data interface{}) (string, string) {
 	tplBody := template.Must(template.New("body").Funcs(fmap).Parse(tpl.Body))
 	subject := new(bytes.Buffer)
 	body := new(bytes.Buffer)
-	tplSubject.Execute(subject, data)
-	tplBody.Execute(body, data)
+	_ = tplSubject.Execute(subject, data)
+	_ = tplBody.Execute(body, data)
 	return subject.String(), body.String()
 }
 

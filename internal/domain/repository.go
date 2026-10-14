@@ -132,6 +132,7 @@ type StatisticRepository interface {
 	Update(ctx context.Context, s *Statistic) error
 	DeleteByUUID(ctx context.Context, uuid string) error
 	List(ctx context.Context, cursor string, limit int) ([]*Statistic, error)
+	UpsertIncrement(ctx context.Context, group, key string, delta float64) error
 }
 
 type StatementRepository interface {

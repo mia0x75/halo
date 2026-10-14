@@ -13,7 +13,7 @@ type EventCreateVldr struct {
 
 // Call 利用反射方法动态调用审核函数
 func (v *EventCreateVldr) Call(method string, params ...interface{}) {
-	Call(v, method, params...)
+	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效
@@ -63,7 +63,7 @@ type EventAlterVldr struct {
 
 // Call 利用反射方法动态调用审核函数
 func (v *EventAlterVldr) Call(method string, params ...interface{}) {
-	Call(v, method, params...)
+	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效
@@ -93,7 +93,7 @@ type EventDropVldr struct {
 
 // Call 利用反射方法动态调用审核函数
 func (v *EventDropVldr) Call(method string, params ...interface{}) {
-	Call(v, method, params...)
+	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效

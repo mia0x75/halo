@@ -149,3 +149,37 @@ func (q *Queries) UpdateStatistic(ctx context.Context, arg UpdateStatisticParams
 	)
 	return err
 }
+
+const upsertStatistic = `-- name: UpsertStatistic :exec
+INSERT INTO mm_statistics (` + "`" + `group` + "`" + `, ` + "`" + `key` + "`" + `, uuid, value, version, update_at, create_at)
+VALUES (?, ?, ?, ?, 0, ?, ?)
+ON DUPLICATE KEY UPDATE
+    value = value + VALUES(value),
+    update_at = VALUES(update_at)
+`
+
+type UpsertStatisticParams struct {
+	Group    string
+	Key      string
+	Uuid     string
+	Value    string
+	UpdateAt sql.NullInt32
+	CreateAt uint32
+}
+
+// TODO(dialect): MySQL/MariaDB-specific upsert. Migrate to the dialect layer
+// when the metadata store gains PostgreSQL / SQLite:
+//
+//	PG:     INSERT ... ON CONFLICT (`group`, `key`) DO UPDATE SET value = mm_statistics.value + EXCLUDED.value
+//	SQLite: INSERT ... ON CONFLICT(`group`, `key`) DO UPDATE SET value = value + excluded.value
+func (q *Queries) UpsertStatistic(ctx context.Context, arg UpsertStatisticParams) error {
+	_, err := q.db.ExecContext(ctx, upsertStatistic,
+		arg.Group,
+		arg.Key,
+		arg.Uuid,
+		arg.Value,
+		arg.UpdateAt,
+		arg.CreateAt,
+	)
+	return err
+}

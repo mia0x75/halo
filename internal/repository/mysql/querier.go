@@ -124,6 +124,11 @@ type Querier interface {
 	UpdateTemplate(ctx context.Context, arg UpdateTemplateParams) error
 	UpdateTicket(ctx context.Context, arg UpdateTicketParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
+	// TODO(dialect): MySQL/MariaDB-specific upsert. Migrate to the dialect layer
+	// when the metadata store gains PostgreSQL / SQLite:
+	//   PG:     INSERT ... ON CONFLICT (`group`, `key`) DO UPDATE SET value = mm_statistics.value + EXCLUDED.value
+	//   SQLite: INSERT ... ON CONFLICT(`group`, `key`) DO UPDATE SET value = value + excluded.value
+	UpsertStatistic(ctx context.Context, arg UpsertStatisticParams) error
 }
 
 var _ Querier = (*Queries)(nil)

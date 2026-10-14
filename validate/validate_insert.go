@@ -20,7 +20,7 @@ type InsertVldr struct {
 
 // Call 利用反射方法动态调用审核函数
 func (v *InsertVldr) Call(method string, params ...interface{}) {
-	Call(v, method, params...)
+	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效
@@ -58,7 +58,7 @@ func (v *InsertVldr) ExplicitColumnRequired(s *models.Statement, r *models.Rule)
 		return
 	}
 
-	if v.id.Columns == nil || len(v.id.Columns) == 0 {
+	if len(v.id.Columns) == 0 {
 		c := &models.Clause{
 			Description: r.Message,
 			Level:       r.Level,
@@ -173,7 +173,7 @@ type ReplaceVldr struct {
 
 // Call 利用反射方法动态调用审核函数
 func (v *ReplaceVldr) Call(method string, params ...interface{}) {
-	Call(v, method, params...)
+	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效

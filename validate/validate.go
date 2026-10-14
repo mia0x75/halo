@@ -226,10 +226,7 @@ func (v *vldr) GetRules() []*models.Rule {
 // SetGroup 设置验证分组，并初始化验证规则
 func (v *vldr) SetGroup(gid uint16) {
 	rules := caches.RulesMap.Filter(func(elem *models.Rule) bool {
-		if elem.VldrGroup == gid {
-			return true
-		}
-		return false
+		return elem.VldrGroup == gid
 	})
 	v.Rules = rules
 }
@@ -297,7 +294,7 @@ func (s *Stack) Pop() (int, error) {
 
 	l := len(s.s)
 	if l == 0 {
-		return 0, errors.New("Empty Stack")
+		return 0, errors.New("empty stack")
 	}
 
 	res := s.s[l-1]
@@ -307,7 +304,6 @@ func (s *Stack) Pop() (int, error) {
 
 // WalkSubquery 递归检查自查询有效性并获取访问信息
 func (v *vldr) WalkSubquery(node ast.SubqueryExpr, stack *Stack) {
-	return
 }
 
 // Walk 语法树分析
@@ -710,14 +706,14 @@ func Call(object interface{}, method string, params ...interface{}) error {
 
 	v := reflect.ValueOf(object)
 	// Check if the passed interface is a pointer
-	if v.Type().Kind() != reflect.Ptr {
+	if v.Type().Kind() != reflect.Pointer {
 		// Create a new type of Iface, so we have a pointer to work with
 		v = reflect.New(reflect.TypeOf(object))
 	}
 	// Get the method by name
 	f := v.MethodByName(method)
 	if !f.IsValid() {
-		return fmt.Errorf("Couldn't find method `%s` in interface `%s`, is it exported?", method, v.Type())
+		return fmt.Errorf("couldn't find method `%s` in interface `%s`, is it exported?", method, v.Type())
 	}
 	// 'dereference' with Elem() and get the field by name
 	// f := ValueIface.Elem().FieldByName(FieldName)

@@ -24,7 +24,7 @@ func testHasDuplicates(tb testing.TB, s string) bool {
 func TestGenerator_Generate(t *testing.T) {
 	t.Parallel()
 
-	gen, err := NewGenerator(nil)
+	gen, err := NewGenerator()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,43 +109,6 @@ func TestGenerator_Generate(t *testing.T) {
 	})
 }
 
-func TestGenerator_Generate_Custom(t *testing.T) {
-	t.Parallel()
-
-	gen, err := NewGenerator(&GeneratorInput{
-		LowerLetters: "abcde",
-		UpperLetters: "ABCDE",
-		Symbols:      "!@#$%",
-		Digits:       "01234",
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	for i := 0; i < N; i++ {
-		res, err := gen.Generate(52, 10, 10, false, true)
-		if err != nil {
-			t.Error(err)
-		}
-
-		if strings.Contains(res, "f") {
-			t.Errorf("%q should only contain lower letters abcde", res)
-		}
-
-		if strings.Contains(res, "F") {
-			t.Errorf("%q should only contain upper letters ABCDE", res)
-		}
-
-		if strings.Contains(res, "&") {
-			t.Errorf("%q should only include symbols !@#$%%", res)
-		}
-
-		if strings.Contains(res, "5") {
-			t.Errorf("%q should only contain digits 01234", res)
-		}
-	}
-}
-
 func ExampleGenerate() {
 	res, err := Generate(64, 10, 10, false, false)
 	if err != nil {
@@ -161,7 +124,7 @@ func ExampleMustGenerate() {
 }
 
 func ExampleGenerator_Generate() {
-	gen, err := NewGenerator(nil)
+	gen, err := NewGenerator()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -173,22 +136,10 @@ func ExampleGenerator_Generate() {
 	log.Print(res)
 }
 
-func ExampleNewGenerator_nil() {
+func ExampleNewGenerator() {
 	// This is exactly the same as calling "Generate" directly. It will use all
 	// the default values.
-	gen, err := NewGenerator(nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_ = gen // gen.Generate(...)
-}
-
-func ExampleNewGenerator_custom() {
-	// Customize the list of symbols.
-	gen, err := NewGenerator(&GeneratorInput{
-		Symbols: "!@#$%^()",
-	})
+	gen, err := NewGenerator()
 	if err != nil {
 		log.Fatal(err)
 	}

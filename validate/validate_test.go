@@ -3,6 +3,7 @@ package validate
 import (
 	"flag"
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 
@@ -26,10 +27,26 @@ type RuleTestCase struct {
 	Valid    bool
 }
 
-func init() {
+// TestMain parses the config flag outside init(), so the testing package's own
+// flags are already registered when Parse runs.
+func TestMain(m *testing.M) {
 	cfg := flag.String("c", "/etc/halo/cfg.json", "configuration file")
 	flag.Parse()
-	g.ParseConfig(*cfg)
+	if _, err := os.Stat(*cfg); err == nil {
+		g.ParseConfig(*cfg)
+	}
+	os.Exit(m.Run())
+}
+
+// requireDB skips the rule tests that inspect target metadata. They need the
+// caches loaded from a live metadata database, which this package cannot do
+// itself: repository/mysql imports validate, so importing it here is an import
+// cycle.
+func requireDB(t *testing.T) {
+	t.Helper()
+	if caches.ClustersMap.Count() == 0 {
+		t.Skip("requires a live metadata database with loaded caches")
+	}
 }
 
 func TestSingleSQL(t *testing.T) {
@@ -51,10 +68,7 @@ func TestSingleSQL(t *testing.T) {
 
 func buildContext() *Context {
 	cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
-		if elem.UUID == "fd577136-24ec-40bb-a792-c70078f075ab" {
-			return true
-		}
-		return false
+		return elem.UUID == "fd577136-24ec-40bb-a792-c70078f075ab"
 	})
 
 	ticket := &models.Ticket{
@@ -84,6 +98,7 @@ func buildContext() *Context {
 	return ctx
 }
 func TestGeneralRules(t *testing.T) {
+	requireDB(t)
 	p := parser.New()
 	assert := assert.New(t)
 
@@ -102,10 +117,7 @@ func TestGeneralRules(t *testing.T) {
 
 	for _, c := range cases {
 		r := caches.RulesMap.Any(func(elem *models.Rule) bool {
-			if elem.Name == c.RuleName {
-				return true
-			}
-			return false
+			return elem.Name == c.RuleName
 		})
 		stmt, err := p.ParseOneStmt(c.Text, "", "")
 		if err != nil {
@@ -726,6 +738,7 @@ func TestTableCreateFromSelectEnabled(t *testing.T) {
 // TestTableCreateColumnCountLimit 表允许的最大列数
 // RULE:CTB-L2-014
 func TestTableCreateColumnCountLimit(t *testing.T) {
+	requireDB(t)
 	p := parser.New()
 	assert := assert.New(t)
 
@@ -793,10 +806,7 @@ func TestTableCreateColumnCountLimit(t *testing.T) {
 
 	for _, c := range Cases {
 		r := caches.RulesMap.Any(func(elem *models.Rule) bool {
-			if elem.Name == c.RuleName {
-				return true
-			}
-			return false
+			return elem.Name == c.RuleName
 		})
 		stmt, err := p.ParseOneStmt(c.Text, "", "")
 		if err != nil {
@@ -1273,6 +1283,7 @@ func TestSplitTicket(t *testing.T) {
 }
 
 func TestMergeStatement(t *testing.T) {
+	requireDB(t)
 	cases := []RuleTestCase{
 		{"MSC-L1-004", "CREATE TABLE t1 (c1 INT); CREATE INDEX index_1 ON t1(c1);", false},
 		{"MSC-L1-004", "CREATE TABLE t1 (c1 INT); ALTER TABLE t1 ADD c2 INT;", false},
@@ -1289,10 +1300,7 @@ func TestMergeStatement(t *testing.T) {
 	ctx := buildContext()
 	for _, c := range cases {
 		r := caches.RulesMap.Any(func(elem *models.Rule) bool {
-			if elem.Name == c.RuleName {
-				return true
-			}
-			return false
+			return elem.Name == c.RuleName
 		})
 		nodes, _, err := p.Parse(c.Text, "", "")
 		if err != nil {

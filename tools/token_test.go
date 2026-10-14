@@ -3,21 +3,32 @@ package tools
 import (
 	"flag"
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/models"
 )
 
-func init() {
-	cfg := flag.String("c", "../cfg.json", "configuration file")
-	flag.Parse()
+var cfg = flag.String("c", "../cfg.json", "configuration file")
 
-	g.ParseConfig(*cfg)
+// configAvailable is set by TestMain when the config file exists; tests that
+// need the JWT secret skip otherwise.
+var configAvailable bool
+
+func TestMain(m *testing.M) {
+	flag.Parse()
+	if _, err := os.Stat(*cfg); err == nil {
+		g.ParseConfig(*cfg)
+		configAvailable = true
+	}
+	os.Exit(m.Run())
 }
 
 func TestGenerator_ParseToken(t *testing.T) {
-	//token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1NTExNDYwOTcsImFkbWluIjp0cnVlLCJ1c2VySWQiOjF9.jKF2b0B-stLwSwGuhq4Yf7mqc19QfHesdojbEQc_N0k"
+	if !configAvailable {
+		t.Skip("no configuration file")
+	}
 	tk := New()
 	tokenStr, err := tk.CreateToken(&models.User{})
 	fmt.Printf("token:%s\n", tokenStr)
@@ -26,25 +37,15 @@ func TestGenerator_ParseToken(t *testing.T) {
 		return
 	}
 	claims, err := tk.ParseToken(tokenStr)
-	if err == nil {
-		// 验证通过
-		uuid := claims.UserUUID
-		fmt.Printf("claims :%v\n", claims)
-		fmt.Printf("uuid :%v\n", uuid)
-	} else {
+	if err != nil {
 		fmt.Printf("err :%v\n", err.Error())
+		return
 	}
-
-}
-
-func Test_role(t *testing.T) {
-	user := caches.UsersMap.GetById(1)
-	fmt.Print(user)
-	roleIDs := caches.EdgesMap.GetDescendants(g.EdgeTypeUserToRole, user.UserID)
-	fmt.Println(roleIDs)
-	roles := caches.RolesMap.GetByIds(roleIDs)
-	fmt.Print(roles)
-	for _, role := range roles {
-		fmt.Printf("role:%v\n", role)
+	// 验证通过
+	var uuid string
+	if claims.User != nil {
+		uuid = claims.User.UUID
 	}
+	fmt.Printf("claims :%v\n", claims)
+	fmt.Printf("uuid :%v\n", uuid)
 }

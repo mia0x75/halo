@@ -58,3 +58,20 @@ func hasStatistic(list []*domain.Statistic, uuid string) bool {
 	}
 	return false
 }
+
+func TestStatisticUpsertIncrement(t *testing.T) {
+	repo := NewStatisticRepo(setupTestDB(t))
+	ctx := context.Background()
+	group := "group-" + newSuffix()
+	key := "key"
+
+	require.NoError(t, repo.UpsertIncrement(ctx, group, key, 5))
+	got, err := repo.GetByKey(ctx, group, key)
+	require.NoError(t, err)
+	require.Equal(t, 5.0, got.Value)
+
+	require.NoError(t, repo.UpsertIncrement(ctx, group, key, -2))
+	got, err = repo.GetByKey(ctx, group, key)
+	require.NoError(t, err)
+	require.Equal(t, 3.0, got.Value)
+}
