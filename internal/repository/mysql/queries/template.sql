@@ -1,11 +1,11 @@
 -- name: CreateTemplate :exec
-INSERT INTO mm_templates (uuid, subject, body, description, version, update_at, create_at) VALUES (?, ?, ?, ?, ?, ?, ?);
+INSERT INTO mm_templates (uuid, subject, body, description, version) VALUES (?, ?, ?, ?, ?);
 
 -- name: GetTemplateByUUID :one
 SELECT uuid, subject, body, description, version, update_at, create_at FROM mm_templates WHERE uuid = ? LIMIT 1;
 
 -- name: UpdateTemplate :exec
-UPDATE mm_templates SET subject = ?, body = ?, description = ?, version = ?, update_at = ? WHERE uuid = ?;
+UPDATE mm_templates SET subject = ?, body = ?, description = ?, version = ? WHERE uuid = ?;
 
 -- name: DeleteTemplateByUUID :exec
 DELETE FROM mm_templates WHERE uuid = ?;

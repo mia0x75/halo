@@ -7,11 +7,10 @@ package mysqlrepo
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createOption = `-- name: CreateOption :exec
-INSERT INTO mm_options (name, uuid, value, description, element, writable, version, update_at, create_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO mm_options (name, uuid, value, description, element, writable, version) VALUES (?, ?, ?, ?, ?, ?, ?)
 `
 
 type CreateOptionParams struct {
@@ -22,8 +21,6 @@ type CreateOptionParams struct {
 	Element     string
 	Writable    uint8
 	Version     uint32
-	UpdateAt    sql.NullInt32
-	CreateAt    uint32
 }
 
 func (q *Queries) CreateOption(ctx context.Context, arg CreateOptionParams) error {
@@ -35,8 +32,6 @@ func (q *Queries) CreateOption(ctx context.Context, arg CreateOptionParams) erro
 		arg.Element,
 		arg.Writable,
 		arg.Version,
-		arg.UpdateAt,
-		arg.CreateAt,
 	)
 	return err
 }
@@ -135,7 +130,7 @@ func (q *Queries) ListOptions(ctx context.Context, arg ListOptionsParams) ([]MmO
 }
 
 const updateOption = `-- name: UpdateOption :exec
-UPDATE mm_options SET value = ?, description = ?, element = ?, writable = ?, version = ?, update_at = ? WHERE uuid = ?
+UPDATE mm_options SET value = ?, description = ?, element = ?, writable = ?, version = ? WHERE uuid = ?
 `
 
 type UpdateOptionParams struct {
@@ -144,7 +139,6 @@ type UpdateOptionParams struct {
 	Element     string
 	Writable    uint8
 	Version     uint32
-	UpdateAt    sql.NullInt32
 	Uuid        string
 }
 
@@ -155,7 +149,6 @@ func (q *Queries) UpdateOption(ctx context.Context, arg UpdateOptionParams) erro
 		arg.Element,
 		arg.Writable,
 		arg.Version,
-		arg.UpdateAt,
 		arg.Uuid,
 	)
 	return err

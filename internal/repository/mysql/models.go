@@ -6,6 +6,7 @@ package mysqlrepo
 
 import (
 	"database/sql"
+	"time"
 )
 
 // 头像表
@@ -19,9 +20,9 @@ type MmAvatar struct {
 	// 版本
 	Version uint32
 	// 修改时间
-	UpdateAt sql.NullInt32
+	UpdateAt sql.NullTime
 	// 创建时间
-	CreateAt uint32
+	CreateAt time.Time
 }
 
 // 群集表
@@ -51,9 +52,9 @@ type MmCluster struct {
 	// 版本
 	Version uint32
 	// 修改时间
-	UpdateAt sql.NullInt32
+	UpdateAt sql.NullTime
 	// 创建时间
-	CreateAt uint32
+	CreateAt time.Time
 }
 
 // 审核意见表
@@ -71,9 +72,9 @@ type MmComment struct {
 	// 版本
 	Version uint32
 	// 修改时间
-	UpdateAt sql.NullInt32
+	UpdateAt sql.NullTime
 	// 创建时间
-	CreateAt uint32
+	CreateAt time.Time
 }
 
 // 计划任务表
@@ -105,9 +106,9 @@ type MmCron struct {
 	// 版本
 	Version uint32
 	// 修改时间
-	UpdateAt sql.NullInt32
+	UpdateAt sql.NullTime
 	// 创建时间
-	CreateAt uint32
+	CreateAt time.Time
 }
 
 // 多对多关联表
@@ -125,9 +126,9 @@ type MmEdge struct {
 	// 版本
 	Version uint32
 	// 修改时间
-	UpdateAt sql.NullInt32
+	UpdateAt sql.NullTime
 	// 创建时间
-	CreateAt uint32
+	CreateAt time.Time
 }
 
 // 字典表
@@ -145,9 +146,9 @@ type MmGlossary struct {
 	// 版本
 	Version uint32
 	// 修改时间
-	UpdateAt sql.NullInt32
+	UpdateAt sql.NullTime
 	// 创建时间
-	CreateAt uint32
+	CreateAt time.Time
 }
 
 // 日志表
@@ -163,7 +164,7 @@ type MmLog struct {
 	// 版本
 	Version uint32
 	// 创建时间
-	CreateAt uint32
+	CreateAt time.Time
 }
 
 // 系统选项表
@@ -183,9 +184,9 @@ type MmOption struct {
 	// 版本
 	Version uint32
 	// 修改时间
-	UpdateAt sql.NullInt32
+	UpdateAt sql.NullTime
 	// 创建时间
-	CreateAt uint32
+	CreateAt time.Time
 }
 
 // 查询表
@@ -209,9 +210,9 @@ type MmQuery struct {
 	// 版本
 	Version uint32
 	// 修改时间
-	UpdateAt sql.NullInt32
+	UpdateAt sql.NullTime
 	// 创建时间
-	CreateAt uint32
+	CreateAt time.Time
 }
 
 // 角色表
@@ -227,9 +228,9 @@ type MmRole struct {
 	// 版本
 	Version uint32
 	// 修改时间
-	UpdateAt sql.NullInt32
+	UpdateAt sql.NullTime
 	// 创建时间
-	CreateAt uint32
+	CreateAt time.Time
 }
 
 // 规则表
@@ -261,9 +262,9 @@ type MmRule struct {
 	// 版本
 	Version uint32
 	// 修改时间
-	UpdateAt sql.NullInt32
+	UpdateAt sql.NullTime
 	// 创建时间
-	CreateAt uint32
+	CreateAt time.Time
 }
 
 // 工单分解表
@@ -291,9 +292,9 @@ type MmStatement struct {
 	// 版本
 	Version uint32
 	// 修改时间
-	UpdateAt sql.NullInt32
+	UpdateAt sql.NullTime
 	// 创建时间
-	CreateAt uint32
+	CreateAt time.Time
 }
 
 // 统计表
@@ -309,9 +310,9 @@ type MmStatistic struct {
 	// 版本
 	Version uint32
 	// 修改时间
-	UpdateAt sql.NullInt32
+	UpdateAt sql.NullTime
 	// 创建时间
-	CreateAt uint32
+	CreateAt time.Time
 }
 
 // 邮件模板表
@@ -327,9 +328,9 @@ type MmTemplate struct {
 	// 版本
 	Version uint32
 	// 修改时间
-	UpdateAt sql.NullInt32
+	UpdateAt sql.NullTime
 	// 创建时间
-	CreateAt uint32
+	CreateAt time.Time
 }
 
 // 工单表
@@ -357,9 +358,9 @@ type MmTicket struct {
 	// 版本
 	Version uint32
 	// 修改时间
-	UpdateAt sql.NullInt32
+	UpdateAt sql.NullTime
 	// 创建时间
-	CreateAt uint32
+	CreateAt time.Time
 }
 
 // 用户表
@@ -383,7 +384,7 @@ type MmUser struct {
 	// 版本
 	Version uint32
 	// 修改时间
-	UpdateAt sql.NullInt32
+	UpdateAt sql.NullTime
 	// 创建时间
-	CreateAt uint32
+	CreateAt time.Time
 }

@@ -31,8 +31,8 @@ func cronFromRow(r MmCron) *domain.Cron {
 		Recurrent: uint8FromNull(r.Recurrent),
 		Hash:      stringFromNull(r.Hash),
 		Version:   int(r.Version),
-		UpdateAt:  uintFromNull(r.UpdateAt),
-		CreateAt:  uint(r.CreateAt),
+		UpdateAt:  timeFromNull(r.UpdateAt),
+		CreateAt:  timeToUnix(r.CreateAt),
 	}
 }
 
@@ -50,8 +50,6 @@ func (r *CronRepo) Create(ctx context.Context, c *domain.Cron) (int64, error) {
 		Recurrent: nullFromUint8(c.Recurrent),
 		Hash:      nullFromString(c.Hash),
 		Version:   uint32(c.Version),
-		UpdateAt:  nullFromUint(c.UpdateAt),
-		CreateAt:  uint32(c.CreateAt),
 	})
 	if err != nil {
 		return 0, wrap("cron.Create", err)
@@ -89,7 +87,6 @@ func (r *CronRepo) Update(ctx context.Context, c *domain.Cron) error {
 		Recurrent: nullFromUint8(c.Recurrent),
 		Hash:      nullFromString(c.Hash),
 		Version:   uint32(c.Version),
-		UpdateAt:  nullFromUint(c.UpdateAt),
 		CronID:    uint32(c.CronID),
 	})
 	return wrap("cron.Update", err)

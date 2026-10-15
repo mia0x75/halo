@@ -11,7 +11,7 @@ import (
 )
 
 const createTicket = `-- name: CreateTicket :execlastid
-INSERT INTO mm_tickets (uuid, cluster_id, ` + "`" + `database` + "`" + `, subject, content, status, user_id, reviewer_id, cron_id, version, update_at, create_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO mm_tickets (uuid, cluster_id, ` + "`" + `database` + "`" + `, subject, content, status, user_id, reviewer_id, cron_id, version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
 type CreateTicketParams struct {
@@ -25,8 +25,6 @@ type CreateTicketParams struct {
 	ReviewerID uint32
 	CronID     sql.NullInt32
 	Version    uint32
-	UpdateAt   sql.NullInt32
-	CreateAt   uint32
 }
 
 func (q *Queries) CreateTicket(ctx context.Context, arg CreateTicketParams) (int64, error) {
@@ -41,8 +39,6 @@ func (q *Queries) CreateTicket(ctx context.Context, arg CreateTicketParams) (int
 		arg.ReviewerID,
 		arg.CronID,
 		arg.Version,
-		arg.UpdateAt,
-		arg.CreateAt,
 	)
 	if err != nil {
 		return 0, err
@@ -231,7 +227,7 @@ func (q *Queries) ListTicketsByUser(ctx context.Context, userID uint32) ([]MmTic
 }
 
 const updateTicket = `-- name: UpdateTicket :exec
-UPDATE mm_tickets SET uuid = ?, cluster_id = ?, ` + "`" + `database` + "`" + ` = ?, subject = ?, content = ?, status = ?, user_id = ?, reviewer_id = ?, cron_id = ?, version = ?, update_at = ? WHERE ticket_id = ?
+UPDATE mm_tickets SET uuid = ?, cluster_id = ?, ` + "`" + `database` + "`" + ` = ?, subject = ?, content = ?, status = ?, user_id = ?, reviewer_id = ?, cron_id = ?, version = ? WHERE ticket_id = ?
 `
 
 type UpdateTicketParams struct {
@@ -245,7 +241,6 @@ type UpdateTicketParams struct {
 	ReviewerID uint32
 	CronID     sql.NullInt32
 	Version    uint32
-	UpdateAt   sql.NullInt32
 	TicketID   uint32
 }
 
@@ -261,7 +256,6 @@ func (q *Queries) UpdateTicket(ctx context.Context, arg UpdateTicketParams) erro
 		arg.ReviewerID,
 		arg.CronID,
 		arg.Version,
-		arg.UpdateAt,
 		arg.TicketID,
 	)
 	return err

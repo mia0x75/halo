@@ -30,8 +30,8 @@ func clusterFromRow(r MmCluster) *domain.Cluster {
 		Fingerprint: r.Fingerprint,
 		Status:      domain.ClusterStatus(r.Status),
 		Version:     int(r.Version),
-		UpdateAt:    uintFromNull(r.UpdateAt),
-		CreateAt:    uint(r.CreateAt),
+		UpdateAt:    timeFromNull(r.UpdateAt),
+		CreateAt:    timeToUnix(r.CreateAt),
 	}
 }
 
@@ -48,8 +48,6 @@ func (r *ClusterRepo) Create(ctx context.Context, c *domain.Cluster) (int64, err
 		Fingerprint: c.Fingerprint,
 		Status:      uint8(c.Status),
 		Version:     uint32(c.Version),
-		UpdateAt:    nullFromUint(c.UpdateAt),
-		CreateAt:    uint32(c.CreateAt),
 	})
 	if err != nil {
 		return 0, wrap("cluster.Create", err)
@@ -86,7 +84,6 @@ func (r *ClusterRepo) Update(ctx context.Context, c *domain.Cluster) error {
 		Fingerprint: c.Fingerprint,
 		Status:      uint8(c.Status),
 		Version:     uint32(c.Version),
-		UpdateAt:    nullFromUint(c.UpdateAt),
 		ClusterID:   uint32(c.ClusterID),
 	})
 	return wrap("cluster.Update", err)

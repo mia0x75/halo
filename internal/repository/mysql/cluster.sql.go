@@ -7,11 +7,10 @@ package mysqlrepo
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createCluster = `-- name: CreateCluster :execlastid
-INSERT INTO mm_clusters (uuid, host, alias, ip, port, ` + "`" + `user` + "`" + `, ` + "`" + `type` + "`" + `, password, fingerprint, status, version, update_at, create_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO mm_clusters (uuid, host, alias, ip, port, ` + "`" + `user` + "`" + `, ` + "`" + `type` + "`" + `, password, fingerprint, status, version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
 type CreateClusterParams struct {
@@ -26,8 +25,6 @@ type CreateClusterParams struct {
 	Fingerprint []byte
 	Status      uint8
 	Version     uint32
-	UpdateAt    sql.NullInt32
-	CreateAt    uint32
 }
 
 func (q *Queries) CreateCluster(ctx context.Context, arg CreateClusterParams) (int64, error) {
@@ -43,8 +40,6 @@ func (q *Queries) CreateCluster(ctx context.Context, arg CreateClusterParams) (i
 		arg.Fingerprint,
 		arg.Status,
 		arg.Version,
-		arg.UpdateAt,
-		arg.CreateAt,
 	)
 	if err != nil {
 		return 0, err
@@ -170,7 +165,7 @@ func (q *Queries) ListClusters(ctx context.Context, arg ListClustersParams) ([]M
 }
 
 const updateCluster = `-- name: UpdateCluster :exec
-UPDATE mm_clusters SET uuid = ?, host = ?, alias = ?, ip = ?, port = ?, ` + "`" + `user` + "`" + ` = ?, ` + "`" + `type` + "`" + ` = ?, password = ?, fingerprint = ?, status = ?, version = ?, update_at = ? WHERE cluster_id = ?
+UPDATE mm_clusters SET uuid = ?, host = ?, alias = ?, ip = ?, port = ?, ` + "`" + `user` + "`" + ` = ?, ` + "`" + `type` + "`" + ` = ?, password = ?, fingerprint = ?, status = ?, version = ? WHERE cluster_id = ?
 `
 
 type UpdateClusterParams struct {
@@ -185,7 +180,6 @@ type UpdateClusterParams struct {
 	Fingerprint []byte
 	Status      uint8
 	Version     uint32
-	UpdateAt    sql.NullInt32
 	ClusterID   uint32
 }
 
@@ -202,7 +196,6 @@ func (q *Queries) UpdateCluster(ctx context.Context, arg UpdateClusterParams) er
 		arg.Fingerprint,
 		arg.Status,
 		arg.Version,
-		arg.UpdateAt,
 		arg.ClusterID,
 	)
 	return err

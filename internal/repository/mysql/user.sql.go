@@ -7,11 +7,10 @@ package mysqlrepo
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createUser = `-- name: CreateUser :execlastid
-INSERT INTO mm_users (uuid, email, password, status, name, phone, avatar_id, version, update_at, create_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO mm_users (uuid, email, password, status, name, phone, avatar_id, version) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 `
 
 type CreateUserParams struct {
@@ -23,8 +22,6 @@ type CreateUserParams struct {
 	Phone    uint64
 	AvatarID uint32
 	Version  uint32
-	UpdateAt sql.NullInt32
-	CreateAt uint32
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (int64, error) {
@@ -37,8 +34,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (int64, 
 		arg.Phone,
 		arg.AvatarID,
 		arg.Version,
-		arg.UpdateAt,
-		arg.CreateAt,
 	)
 	if err != nil {
 		return 0, err
@@ -155,7 +150,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]MmUser,
 }
 
 const updateUser = `-- name: UpdateUser :exec
-UPDATE mm_users SET uuid = ?, email = ?, password = ?, status = ?, name = ?, phone = ?, avatar_id = ?, version = ?, update_at = ? WHERE user_id = ?
+UPDATE mm_users SET uuid = ?, email = ?, password = ?, status = ?, name = ?, phone = ?, avatar_id = ?, version = ? WHERE user_id = ?
 `
 
 type UpdateUserParams struct {
@@ -167,7 +162,6 @@ type UpdateUserParams struct {
 	Phone    uint64
 	AvatarID uint32
 	Version  uint32
-	UpdateAt sql.NullInt32
 	UserID   uint32
 }
 
@@ -181,7 +175,6 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 		arg.Phone,
 		arg.AvatarID,
 		arg.Version,
-		arg.UpdateAt,
 		arg.UserID,
 	)
 	return err

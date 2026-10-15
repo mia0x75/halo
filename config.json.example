@@ -6,13 +6,13 @@
   "key": "certs/key.pem",
   "listen": ":443",
   "database": {
-    "addr": "halo:password@tcp(127.0.0.1:3306)/halo?charset=utf8mb4&parseTime=true&loc=Local",
+    "addr": "halo:password@tcp(127.0.0.1:3306)/halo?charset=utf8mb4&parseTime=true&loc=UTC&time_zone=%27%2B00%3A00%27",
     "max_idle": 10,
     "max_connections": 100,
     "wait_timeout": 300
   },
   "backup": {
-    "addr": "halo:password@tcp(127.0.0.1:3306)/halo?charset=utf8mb4&parseTime=true&loc=Local",
+    "addr": "halo:password@tcp(127.0.0.1:3306)/halo?charset=utf8mb4&parseTime=true&loc=UTC&time_zone=%27%2B00%3A00%27",
     "max_idle": 5,
     "max_connections": 20,
     "wait_timeout": 300

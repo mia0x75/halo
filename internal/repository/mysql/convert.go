@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/go-sql-driver/mysql"
 
@@ -30,9 +31,24 @@ func wrap(op string, err error) error {
 	return fmt.Errorf("%s: %w", op, err)
 }
 
+// Timestamps are stored as DATETIME but the domain keeps the legacy Unix-second
+// contract, so every repo converts at the row boundary. Reads return the instant
+// in UTC; writes treat the domain value as an absolute Unix second.
+func timeFromNull(t sql.NullTime) *uint {
+	if !t.Valid {
+		return nil
+	}
+	s := uint(t.Time.Unix())
+	return &s
+}
+
+func timeToUnix(t time.Time) uint {
+	return uint(t.Unix())
+}
+
 // The domain models nullable unsigned ints as *uint while sqlc uses
 // sql.NullInt32 (MySQL UNSIGNED INT fits in int32 for the values this metadata
-// schema stores: versions, timestamps, foreign keys).
+// schema stores: versions, foreign keys).
 
 func uintFromNull(v sql.NullInt32) *uint {
 	if !v.Valid {

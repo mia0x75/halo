@@ -24,8 +24,8 @@ func glossaryFromRow(r MmGlossary) *domain.Glossary {
 		UUID:        r.Uuid,
 		Description: r.Description,
 		Version:     int(r.Version),
-		UpdateAt:    uintFromNull(r.UpdateAt),
-		CreateAt:    uint(r.CreateAt),
+		UpdateAt:    timeFromNull(r.UpdateAt),
+		CreateAt:    timeToUnix(r.CreateAt),
 	}
 }
 
@@ -37,8 +37,6 @@ func (r *GlossaryRepo) Create(ctx context.Context, g *domain.Glossary) error {
 		Uuid:        g.UUID,
 		Description: g.Description,
 		Version:     uint32(g.Version),
-		UpdateAt:    nullFromUint(g.UpdateAt),
-		CreateAt:    uint32(g.CreateAt),
 	}))
 }
 
@@ -64,7 +62,6 @@ func (r *GlossaryRepo) Update(ctx context.Context, g *domain.Glossary) error {
 		Value:       g.Value,
 		Description: g.Description,
 		Version:     uint32(g.Version),
-		UpdateAt:    nullFromUint(g.UpdateAt),
 		Uuid:        g.UUID,
 	}))
 }

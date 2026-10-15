@@ -11,7 +11,7 @@ import (
 )
 
 const createCron = `-- name: CreateCron :execlastid
-INSERT INTO mm_crons (uuid, status, name, cmd, params, last_run, next_run, ` + "`" + `interval` + "`" + `, duration, recurrent, hash, version, update_at, create_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO mm_crons (uuid, status, name, cmd, params, last_run, next_run, ` + "`" + `interval` + "`" + `, duration, recurrent, hash, version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
 type CreateCronParams struct {
@@ -27,8 +27,6 @@ type CreateCronParams struct {
 	Recurrent sql.NullInt16
 	Hash      sql.NullString
 	Version   uint32
-	UpdateAt  sql.NullInt32
-	CreateAt  uint32
 }
 
 func (q *Queries) CreateCron(ctx context.Context, arg CreateCronParams) (int64, error) {
@@ -45,8 +43,6 @@ func (q *Queries) CreateCron(ctx context.Context, arg CreateCronParams) (int64, 
 		arg.Recurrent,
 		arg.Hash,
 		arg.Version,
-		arg.UpdateAt,
-		arg.CreateAt,
 	)
 	if err != nil {
 		return 0, err
@@ -218,7 +214,7 @@ func (q *Queries) ListSchedulableCrons(ctx context.Context) ([]MmCron, error) {
 }
 
 const updateCron = `-- name: UpdateCron :exec
-UPDATE mm_crons SET uuid = ?, status = ?, name = ?, cmd = ?, params = ?, last_run = ?, next_run = ?, ` + "`" + `interval` + "`" + ` = ?, duration = ?, recurrent = ?, hash = ?, version = ?, update_at = ? WHERE cron_id = ?
+UPDATE mm_crons SET uuid = ?, status = ?, name = ?, cmd = ?, params = ?, last_run = ?, next_run = ?, ` + "`" + `interval` + "`" + ` = ?, duration = ?, recurrent = ?, hash = ?, version = ? WHERE cron_id = ?
 `
 
 type UpdateCronParams struct {
@@ -234,7 +230,6 @@ type UpdateCronParams struct {
 	Recurrent sql.NullInt16
 	Hash      sql.NullString
 	Version   uint32
-	UpdateAt  sql.NullInt32
 	CronID    uint32
 }
 
@@ -252,7 +247,6 @@ func (q *Queries) UpdateCron(ctx context.Context, arg UpdateCronParams) error {
 		arg.Recurrent,
 		arg.Hash,
 		arg.Version,
-		arg.UpdateAt,
 		arg.CronID,
 	)
 	return err

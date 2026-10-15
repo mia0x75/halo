@@ -1,5 +1,5 @@
 -- name: CreateRule :exec
-INSERT INTO mm_rules (name, uuid, `group`, description, level, vldr_group, operator, `values`, bitwise, func, message, element, version, update_at, create_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO mm_rules (name, uuid, `group`, description, level, vldr_group, operator, `values`, bitwise, func, message, element, version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: GetRuleByUUID :one
 SELECT name, uuid, `group`, description, level, vldr_group, operator, `values`, bitwise, func, message, element, version, update_at, create_at FROM mm_rules WHERE uuid = ? LIMIT 1;
@@ -8,7 +8,7 @@ SELECT name, uuid, `group`, description, level, vldr_group, operator, `values`, 
 SELECT name, uuid, `group`, description, level, vldr_group, operator, `values`, bitwise, func, message, element, version, update_at, create_at FROM mm_rules WHERE name = ? LIMIT 1;
 
 -- name: UpdateRule :exec
-UPDATE mm_rules SET `group` = ?, description = ?, level = ?, vldr_group = ?, operator = ?, `values` = ?, bitwise = ?, func = ?, message = ?, element = ?, version = ?, update_at = ? WHERE uuid = ?;
+UPDATE mm_rules SET `group` = ?, description = ?, level = ?, vldr_group = ?, operator = ?, `values` = ?, bitwise = ?, func = ?, message = ?, element = ?, version = ? WHERE uuid = ?;
 
 -- name: DeleteRuleByUUID :exec
 DELETE FROM mm_rules WHERE uuid = ?;

@@ -1,5 +1,5 @@
 -- name: CreateQuery :execlastid
-INSERT INTO mm_queries (uuid, `type`, cluster_id, `database`, content, plan, user_id, version, update_at, create_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO mm_queries (uuid, `type`, cluster_id, `database`, content, plan, user_id, version) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: GetQueryByID :one
 SELECT query_id, uuid, `type`, cluster_id, `database`, content, plan, user_id, version, update_at, create_at FROM mm_queries WHERE query_id = ? LIMIT 1;
@@ -8,7 +8,7 @@ SELECT query_id, uuid, `type`, cluster_id, `database`, content, plan, user_id, v
 SELECT query_id, uuid, `type`, cluster_id, `database`, content, plan, user_id, version, update_at, create_at FROM mm_queries WHERE uuid = ? LIMIT 1;
 
 -- name: UpdateQuery :exec
-UPDATE mm_queries SET uuid = ?, `type` = ?, cluster_id = ?, `database` = ?, content = ?, plan = ?, user_id = ?, version = ?, update_at = ? WHERE query_id = ?;
+UPDATE mm_queries SET uuid = ?, `type` = ?, cluster_id = ?, `database` = ?, content = ?, plan = ?, user_id = ?, version = ? WHERE query_id = ?;
 
 -- name: DeleteQueryByID :exec
 DELETE FROM mm_queries WHERE query_id = ?;

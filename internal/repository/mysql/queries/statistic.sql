@@ -1,5 +1,5 @@
 -- name: CreateStatistic :exec
-INSERT INTO mm_statistics (`group`, `key`, uuid, value, version, update_at, create_at) VALUES (?, ?, ?, ?, ?, ?, ?);
+INSERT INTO mm_statistics (`group`, `key`, uuid, value, version) VALUES (?, ?, ?, ?, ?);
 
 -- name: GetStatisticByUUID :one
 SELECT `group`, `key`, uuid, value, version, update_at, create_at FROM mm_statistics WHERE uuid = ? LIMIT 1;
@@ -8,7 +8,7 @@ SELECT `group`, `key`, uuid, value, version, update_at, create_at FROM mm_statis
 SELECT `group`, `key`, uuid, value, version, update_at, create_at FROM mm_statistics WHERE `group` = ? AND `key` = ? LIMIT 1;
 
 -- name: UpdateStatistic :exec
-UPDATE mm_statistics SET value = ?, version = ?, update_at = ? WHERE uuid = ?;
+UPDATE mm_statistics SET value = ?, version = ? WHERE uuid = ?;
 
 -- name: DeleteStatisticByUUID :exec
 DELETE FROM mm_statistics WHERE uuid = ?;
@@ -21,8 +21,8 @@ SELECT `group`, `key`, uuid, value, version, update_at, create_at FROM mm_statis
 -- when the metadata store gains PostgreSQL / SQLite:
 --   PG:     INSERT ... ON CONFLICT (`group`, `key`) DO UPDATE SET value = mm_statistics.value + EXCLUDED.value
 --   SQLite: INSERT ... ON CONFLICT(`group`, `key`) DO UPDATE SET value = value + excluded.value
-INSERT INTO mm_statistics (`group`, `key`, uuid, value, version, update_at, create_at)
-VALUES (?, ?, ?, ?, 0, ?, ?)
+INSERT INTO mm_statistics (`group`, `key`, uuid, value, version)
+    VALUES (?, ?, ?, ?, 0)
 ON DUPLICATE KEY UPDATE
     value = value + VALUES(value),
-    update_at = VALUES(update_at);
+    update_at = CURRENT_TIMESTAMP;

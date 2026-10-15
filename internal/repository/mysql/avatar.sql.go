@@ -7,29 +7,20 @@ package mysqlrepo
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createAvatar = `-- name: CreateAvatar :execlastid
-INSERT INTO mm_avatars (uuid, url, version, update_at, create_at) VALUES (?, ?, ?, ?, ?)
+INSERT INTO mm_avatars (uuid, url, version) VALUES (?, ?, ?)
 `
 
 type CreateAvatarParams struct {
-	Uuid     string
-	Url      string
-	Version  uint32
-	UpdateAt sql.NullInt32
-	CreateAt uint32
+	Uuid    string
+	Url     string
+	Version uint32
 }
 
 func (q *Queries) CreateAvatar(ctx context.Context, arg CreateAvatarParams) (int64, error) {
-	result, err := q.db.ExecContext(ctx, createAvatar,
-		arg.Uuid,
-		arg.Url,
-		arg.Version,
-		arg.UpdateAt,
-		arg.CreateAt,
-	)
+	result, err := q.db.ExecContext(ctx, createAvatar, arg.Uuid, arg.Url, arg.Version)
 	if err != nil {
 		return 0, err
 	}
@@ -130,14 +121,13 @@ func (q *Queries) ListAvatars(ctx context.Context, arg ListAvatarsParams) ([]MmA
 }
 
 const updateAvatar = `-- name: UpdateAvatar :exec
-UPDATE mm_avatars SET uuid = ?, url = ?, version = ?, update_at = ? WHERE avatar_id = ?
+UPDATE mm_avatars SET uuid = ?, url = ?, version = ? WHERE avatar_id = ?
 `
 
 type UpdateAvatarParams struct {
 	Uuid     string
 	Url      string
 	Version  uint32
-	UpdateAt sql.NullInt32
 	AvatarID uint32
 }
 
@@ -146,7 +136,6 @@ func (q *Queries) UpdateAvatar(ctx context.Context, arg UpdateAvatarParams) erro
 		arg.Uuid,
 		arg.Url,
 		arg.Version,
-		arg.UpdateAt,
 		arg.AvatarID,
 	)
 	return err

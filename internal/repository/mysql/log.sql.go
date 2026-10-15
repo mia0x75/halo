@@ -10,7 +10,7 @@ import (
 )
 
 const createLog = `-- name: CreateLog :execlastid
-INSERT INTO mm_logs (uuid, user_id, operation, version, create_at) VALUES (?, ?, ?, ?, ?)
+INSERT INTO mm_logs (uuid, user_id, operation, version) VALUES (?, ?, ?, ?)
 `
 
 type CreateLogParams struct {
@@ -18,7 +18,6 @@ type CreateLogParams struct {
 	UserID    uint32
 	Operation string
 	Version   uint32
-	CreateAt  uint32
 }
 
 func (q *Queries) CreateLog(ctx context.Context, arg CreateLogParams) (int64, error) {
@@ -27,7 +26,6 @@ func (q *Queries) CreateLog(ctx context.Context, arg CreateLogParams) (int64, er
 		arg.UserID,
 		arg.Operation,
 		arg.Version,
-		arg.CreateAt,
 	)
 	if err != nil {
 		return 0, err

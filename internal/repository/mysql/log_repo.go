@@ -23,7 +23,7 @@ func logFromRow(r MmLog) *domain.Log {
 		UserID:    uint(r.UserID),
 		Operation: r.Operation,
 		Version:   int(r.Version),
-		CreateAt:  uint(r.CreateAt),
+		CreateAt:  timeToUnix(r.CreateAt),
 	}
 }
 
@@ -33,7 +33,6 @@ func (r *LogRepo) Create(ctx context.Context, l *domain.Log) (int64, error) {
 		UserID:    uint32(l.UserID),
 		Operation: l.Operation,
 		Version:   uint32(l.Version),
-		CreateAt:  uint32(l.CreateAt),
 	})
 	if err != nil {
 		return 0, wrap("log.Create", err)

@@ -27,8 +27,8 @@ func queryFromRow(r MmQuery) *domain.Query {
 		Plan:      r.Plan,
 		UserID:    uint(r.UserID),
 		Version:   int(r.Version),
-		UpdateAt:  uintFromNull(r.UpdateAt),
-		CreateAt:  uint(r.CreateAt),
+		UpdateAt:  timeFromNull(r.UpdateAt),
+		CreateAt:  timeToUnix(r.CreateAt),
 	}
 }
 
@@ -42,8 +42,6 @@ func (r *QueryRepo) Create(ctx context.Context, q *domain.Query) (int64, error) 
 		Plan:      q.Plan,
 		UserID:    uint32(q.UserID),
 		Version:   uint32(q.Version),
-		UpdateAt:  nullFromUint(q.UpdateAt),
-		CreateAt:  uint32(q.CreateAt),
 	})
 	if err != nil {
 		return 0, wrap("query.Create", err)
@@ -77,7 +75,6 @@ func (r *QueryRepo) Update(ctx context.Context, q *domain.Query) error {
 		Plan:      q.Plan,
 		UserID:    uint32(q.UserID),
 		Version:   uint32(q.Version),
-		UpdateAt:  nullFromUint(q.UpdateAt),
 		QueryID:   uint32(q.QueryID),
 	})
 	return wrap("query.Update", err)

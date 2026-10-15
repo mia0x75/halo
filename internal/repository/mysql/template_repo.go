@@ -23,8 +23,8 @@ func templateFromRow(r MmTemplate) *domain.Template {
 		Body:        r.Body,
 		Description: r.Description,
 		Version:     int(r.Version),
-		UpdateAt:    uintFromNull(r.UpdateAt),
-		CreateAt:    uint(r.CreateAt),
+		UpdateAt:    timeFromNull(r.UpdateAt),
+		CreateAt:    timeToUnix(r.CreateAt),
 	}
 }
 
@@ -35,8 +35,6 @@ func (r *TemplateRepo) Create(ctx context.Context, t *domain.Template) error {
 		Body:        t.Body,
 		Description: t.Description,
 		Version:     uint32(t.Version),
-		UpdateAt:    nullFromUint(t.UpdateAt),
-		CreateAt:    uint32(t.CreateAt),
 	}))
 }
 
@@ -54,7 +52,6 @@ func (r *TemplateRepo) Update(ctx context.Context, t *domain.Template) error {
 		Body:        t.Body,
 		Description: t.Description,
 		Version:     uint32(t.Version),
-		UpdateAt:    nullFromUint(t.UpdateAt),
 		Uuid:        t.UUID,
 	}))
 }

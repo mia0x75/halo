@@ -24,8 +24,8 @@ func edgeFromRow(r MmEdge) *domain.Edge {
 		AncestorID:   uint(r.AncestorID),
 		DescendantID: uint(r.DescendantID),
 		Version:      int(r.Version),
-		UpdateAt:     uintFromNull(r.UpdateAt),
-		CreateAt:     uint(r.CreateAt),
+		UpdateAt:     timeFromNull(r.UpdateAt),
+		CreateAt:     timeToUnix(r.CreateAt),
 	}
 }
 
@@ -36,8 +36,6 @@ func (r *EdgeRepo) Create(ctx context.Context, e *domain.Edge) (int64, error) {
 		AncestorID:   uint32(e.AncestorID),
 		DescendantID: uint32(e.DescendantID),
 		Version:      uint32(e.Version),
-		UpdateAt:     nullFromUint(e.UpdateAt),
-		CreateAt:     uint32(e.CreateAt),
 	})
 	if err != nil {
 		return 0, wrap("edge.Create", err)
@@ -68,7 +66,6 @@ func (r *EdgeRepo) Update(ctx context.Context, e *domain.Edge) error {
 		AncestorID:   uint32(e.AncestorID),
 		DescendantID: uint32(e.DescendantID),
 		Version:      uint32(e.Version),
-		UpdateAt:     nullFromUint(e.UpdateAt),
 		EdgeID:       uint32(e.EdgeID),
 	})
 	return wrap("edge.Update", err)

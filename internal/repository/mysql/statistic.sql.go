@@ -7,21 +7,18 @@ package mysqlrepo
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createStatistic = `-- name: CreateStatistic :exec
-INSERT INTO mm_statistics (` + "`" + `group` + "`" + `, ` + "`" + `key` + "`" + `, uuid, value, version, update_at, create_at) VALUES (?, ?, ?, ?, ?, ?, ?)
+INSERT INTO mm_statistics (` + "`" + `group` + "`" + `, ` + "`" + `key` + "`" + `, uuid, value, version) VALUES (?, ?, ?, ?, ?)
 `
 
 type CreateStatisticParams struct {
-	Group    string
-	Key      string
-	Uuid     string
-	Value    string
-	Version  uint32
-	UpdateAt sql.NullInt32
-	CreateAt uint32
+	Group   string
+	Key     string
+	Uuid    string
+	Value   string
+	Version uint32
 }
 
 func (q *Queries) CreateStatistic(ctx context.Context, arg CreateStatisticParams) error {
@@ -31,8 +28,6 @@ func (q *Queries) CreateStatistic(ctx context.Context, arg CreateStatisticParams
 		arg.Uuid,
 		arg.Value,
 		arg.Version,
-		arg.UpdateAt,
-		arg.CreateAt,
 	)
 	return err
 }
@@ -130,41 +125,33 @@ func (q *Queries) ListStatistics(ctx context.Context, arg ListStatisticsParams) 
 }
 
 const updateStatistic = `-- name: UpdateStatistic :exec
-UPDATE mm_statistics SET value = ?, version = ?, update_at = ? WHERE uuid = ?
+UPDATE mm_statistics SET value = ?, version = ? WHERE uuid = ?
 `
 
 type UpdateStatisticParams struct {
-	Value    string
-	Version  uint32
-	UpdateAt sql.NullInt32
-	Uuid     string
+	Value   string
+	Version uint32
+	Uuid    string
 }
 
 func (q *Queries) UpdateStatistic(ctx context.Context, arg UpdateStatisticParams) error {
-	_, err := q.db.ExecContext(ctx, updateStatistic,
-		arg.Value,
-		arg.Version,
-		arg.UpdateAt,
-		arg.Uuid,
-	)
+	_, err := q.db.ExecContext(ctx, updateStatistic, arg.Value, arg.Version, arg.Uuid)
 	return err
 }
 
 const upsertStatistic = `-- name: UpsertStatistic :exec
-INSERT INTO mm_statistics (` + "`" + `group` + "`" + `, ` + "`" + `key` + "`" + `, uuid, value, version, update_at, create_at)
-VALUES (?, ?, ?, ?, 0, ?, ?)
+INSERT INTO mm_statistics (` + "`" + `group` + "`" + `, ` + "`" + `key` + "`" + `, uuid, value, version)
+    VALUES (?, ?, ?, ?, 0)
 ON DUPLICATE KEY UPDATE
     value = value + VALUES(value),
-    update_at = VALUES(update_at)
+    update_at = CURRENT_TIMESTAMP
 `
 
 type UpsertStatisticParams struct {
-	Group    string
-	Key      string
-	Uuid     string
-	Value    string
-	UpdateAt sql.NullInt32
-	CreateAt uint32
+	Group string
+	Key   string
+	Uuid  string
+	Value string
 }
 
 // TODO(dialect): MySQL/MariaDB-specific upsert. Migrate to the dialect layer
@@ -178,8 +165,6 @@ func (q *Queries) UpsertStatistic(ctx context.Context, arg UpsertStatisticParams
 		arg.Key,
 		arg.Uuid,
 		arg.Value,
-		arg.UpdateAt,
-		arg.CreateAt,
 	)
 	return err
 }

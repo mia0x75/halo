@@ -7,11 +7,10 @@ package mysqlrepo
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createGlossary = `-- name: CreateGlossary :exec
-INSERT INTO mm_glossaries (` + "`" + `group` + "`" + `, ` + "`" + `key` + "`" + `, value, uuid, description, version, update_at, create_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO mm_glossaries (` + "`" + `group` + "`" + `, ` + "`" + `key` + "`" + `, value, uuid, description, version) VALUES (?, ?, ?, ?, ?, ?)
 `
 
 type CreateGlossaryParams struct {
@@ -21,8 +20,6 @@ type CreateGlossaryParams struct {
 	Uuid        string
 	Description string
 	Version     uint32
-	UpdateAt    sql.NullInt32
-	CreateAt    uint32
 }
 
 func (q *Queries) CreateGlossary(ctx context.Context, arg CreateGlossaryParams) error {
@@ -33,8 +30,6 @@ func (q *Queries) CreateGlossary(ctx context.Context, arg CreateGlossaryParams) 
 		arg.Uuid,
 		arg.Description,
 		arg.Version,
-		arg.UpdateAt,
-		arg.CreateAt,
 	)
 	return err
 }
@@ -149,14 +144,13 @@ func (q *Queries) ListGlossaries(ctx context.Context, arg ListGlossariesParams) 
 }
 
 const updateGlossary = `-- name: UpdateGlossary :exec
-UPDATE mm_glossaries SET value = ?, description = ?, version = ?, update_at = ? WHERE uuid = ?
+UPDATE mm_glossaries SET value = ?, description = ?, version = ? WHERE uuid = ?
 `
 
 type UpdateGlossaryParams struct {
 	Value       string
 	Description string
 	Version     uint32
-	UpdateAt    sql.NullInt32
 	Uuid        string
 }
 
@@ -165,7 +159,6 @@ func (q *Queries) UpdateGlossary(ctx context.Context, arg UpdateGlossaryParams) 
 		arg.Value,
 		arg.Description,
 		arg.Version,
-		arg.UpdateAt,
 		arg.Uuid,
 	)
 	return err

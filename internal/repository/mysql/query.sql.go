@@ -7,11 +7,10 @@ package mysqlrepo
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createQuery = `-- name: CreateQuery :execlastid
-INSERT INTO mm_queries (uuid, ` + "`" + `type` + "`" + `, cluster_id, ` + "`" + `database` + "`" + `, content, plan, user_id, version, update_at, create_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO mm_queries (uuid, ` + "`" + `type` + "`" + `, cluster_id, ` + "`" + `database` + "`" + `, content, plan, user_id, version) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 `
 
 type CreateQueryParams struct {
@@ -23,8 +22,6 @@ type CreateQueryParams struct {
 	Plan      string
 	UserID    uint32
 	Version   uint32
-	UpdateAt  sql.NullInt32
-	CreateAt  uint32
 }
 
 func (q *Queries) CreateQuery(ctx context.Context, arg CreateQueryParams) (int64, error) {
@@ -37,8 +34,6 @@ func (q *Queries) CreateQuery(ctx context.Context, arg CreateQueryParams) (int64
 		arg.Plan,
 		arg.UserID,
 		arg.Version,
-		arg.UpdateAt,
-		arg.CreateAt,
 	)
 	if err != nil {
 		return 0, err
@@ -194,7 +189,7 @@ func (q *Queries) ListQueriesByUser(ctx context.Context, userID uint32) ([]MmQue
 }
 
 const updateQuery = `-- name: UpdateQuery :exec
-UPDATE mm_queries SET uuid = ?, ` + "`" + `type` + "`" + ` = ?, cluster_id = ?, ` + "`" + `database` + "`" + ` = ?, content = ?, plan = ?, user_id = ?, version = ?, update_at = ? WHERE query_id = ?
+UPDATE mm_queries SET uuid = ?, ` + "`" + `type` + "`" + ` = ?, cluster_id = ?, ` + "`" + `database` + "`" + ` = ?, content = ?, plan = ?, user_id = ?, version = ? WHERE query_id = ?
 `
 
 type UpdateQueryParams struct {
@@ -206,7 +201,6 @@ type UpdateQueryParams struct {
 	Plan      string
 	UserID    uint32
 	Version   uint32
-	UpdateAt  sql.NullInt32
 	QueryID   uint32
 }
 
@@ -220,7 +214,6 @@ func (q *Queries) UpdateQuery(ctx context.Context, arg UpdateQueryParams) error 
 		arg.Plan,
 		arg.UserID,
 		arg.Version,
-		arg.UpdateAt,
 		arg.QueryID,
 	)
 	return err

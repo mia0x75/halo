@@ -7,11 +7,10 @@ package mysqlrepo
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createComment = `-- name: CreateComment :execlastid
-INSERT INTO mm_comments (uuid, content, ticket_id, user_id, version, update_at, create_at) VALUES (?, ?, ?, ?, ?, ?, ?)
+INSERT INTO mm_comments (uuid, content, ticket_id, user_id, version) VALUES (?, ?, ?, ?, ?)
 `
 
 type CreateCommentParams struct {
@@ -20,8 +19,6 @@ type CreateCommentParams struct {
 	TicketID uint32
 	UserID   uint32
 	Version  uint32
-	UpdateAt sql.NullInt32
-	CreateAt uint32
 }
 
 func (q *Queries) CreateComment(ctx context.Context, arg CreateCommentParams) (int64, error) {
@@ -31,8 +28,6 @@ func (q *Queries) CreateComment(ctx context.Context, arg CreateCommentParams) (i
 		arg.TicketID,
 		arg.UserID,
 		arg.Version,
-		arg.UpdateAt,
-		arg.CreateAt,
 	)
 	if err != nil {
 		return 0, err
@@ -176,7 +171,7 @@ func (q *Queries) ListCommentsByTicket(ctx context.Context, ticketID uint32) ([]
 }
 
 const updateComment = `-- name: UpdateComment :exec
-UPDATE mm_comments SET uuid = ?, content = ?, ticket_id = ?, user_id = ?, version = ?, update_at = ? WHERE comment_id = ?
+UPDATE mm_comments SET uuid = ?, content = ?, ticket_id = ?, user_id = ?, version = ? WHERE comment_id = ?
 `
 
 type UpdateCommentParams struct {
@@ -185,7 +180,6 @@ type UpdateCommentParams struct {
 	TicketID  uint32
 	UserID    uint32
 	Version   uint32
-	UpdateAt  sql.NullInt32
 	CommentID uint32
 }
 
@@ -196,7 +190,6 @@ func (q *Queries) UpdateComment(ctx context.Context, arg UpdateCommentParams) er
 		arg.TicketID,
 		arg.UserID,
 		arg.Version,
-		arg.UpdateAt,
 		arg.CommentID,
 	)
 	return err

@@ -1,5 +1,5 @@
 -- name: CreateTicket :execlastid
-INSERT INTO mm_tickets (uuid, cluster_id, `database`, subject, content, status, user_id, reviewer_id, cron_id, version, update_at, create_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO mm_tickets (uuid, cluster_id, `database`, subject, content, status, user_id, reviewer_id, cron_id, version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: GetTicketByID :one
 SELECT ticket_id, uuid, cluster_id, `database`, subject, content, status, user_id, reviewer_id, cron_id, version, update_at, create_at FROM mm_tickets WHERE ticket_id = ? LIMIT 1;
@@ -11,7 +11,7 @@ SELECT ticket_id, uuid, cluster_id, `database`, subject, content, status, user_i
 SELECT ticket_id, uuid, cluster_id, `database`, subject, content, status, user_id, reviewer_id, cron_id, version, update_at, create_at FROM mm_tickets WHERE cron_id = ? LIMIT 1;
 
 -- name: UpdateTicket :exec
-UPDATE mm_tickets SET uuid = ?, cluster_id = ?, `database` = ?, subject = ?, content = ?, status = ?, user_id = ?, reviewer_id = ?, cron_id = ?, version = ?, update_at = ? WHERE ticket_id = ?;
+UPDATE mm_tickets SET uuid = ?, cluster_id = ?, `database` = ?, subject = ?, content = ?, status = ?, user_id = ?, reviewer_id = ?, cron_id = ?, version = ? WHERE ticket_id = ?;
 
 -- name: DeleteTicketByID :exec
 DELETE FROM mm_tickets WHERE ticket_id = ?;

@@ -29,8 +29,8 @@ func ticketFromRow(r MmTicket) *domain.Ticket {
 		ReviewerID: uint(r.ReviewerID),
 		CronID:     uintFromNull(r.CronID),
 		Version:    int(r.Version),
-		UpdateAt:   uintFromNull(r.UpdateAt),
-		CreateAt:   uint(r.CreateAt),
+		UpdateAt:   timeFromNull(r.UpdateAt),
+		CreateAt:   timeToUnix(r.CreateAt),
 	}
 }
 
@@ -46,8 +46,6 @@ func (r *TicketRepo) Create(ctx context.Context, t *domain.Ticket) (int64, error
 		ReviewerID: uint32(t.ReviewerID),
 		CronID:     nullFromUint(t.CronID),
 		Version:    uint32(t.Version),
-		UpdateAt:   nullFromUint(t.UpdateAt),
-		CreateAt:   uint32(t.CreateAt),
 	})
 	if err != nil {
 		return 0, wrap("ticket.Create", err)
@@ -92,7 +90,6 @@ func (r *TicketRepo) Update(ctx context.Context, t *domain.Ticket) error {
 		ReviewerID: uint32(t.ReviewerID),
 		CronID:     nullFromUint(t.CronID),
 		Version:    uint32(t.Version),
-		UpdateAt:   nullFromUint(t.UpdateAt),
 		TicketID:   uint32(t.TicketID),
 	})
 	return wrap("ticket.Update", err)

@@ -24,8 +24,8 @@ func commentFromRow(r MmComment) *domain.Comment {
 		TicketID:  uint(r.TicketID),
 		UserID:    uint(r.UserID),
 		Version:   int(r.Version),
-		UpdateAt:  uintFromNull(r.UpdateAt),
-		CreateAt:  uint(r.CreateAt),
+		UpdateAt:  timeFromNull(r.UpdateAt),
+		CreateAt:  timeToUnix(r.CreateAt),
 	}
 }
 
@@ -36,8 +36,6 @@ func (r *CommentRepo) Create(ctx context.Context, c *domain.Comment) (int64, err
 		TicketID: uint32(c.TicketID),
 		UserID:   uint32(c.UserID),
 		Version:  uint32(c.Version),
-		UpdateAt: nullFromUint(c.UpdateAt),
-		CreateAt: uint32(c.CreateAt),
 	})
 	if err != nil {
 		return 0, wrap("comment.Create", err)
@@ -68,7 +66,6 @@ func (r *CommentRepo) Update(ctx context.Context, c *domain.Comment) error {
 		TicketID:  uint32(c.TicketID),
 		UserID:    uint32(c.UserID),
 		Version:   uint32(c.Version),
-		UpdateAt:  nullFromUint(c.UpdateAt),
 		CommentID: uint32(c.CommentID),
 	})
 	return wrap("comment.Update", err)

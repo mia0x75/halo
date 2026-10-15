@@ -1,5 +1,5 @@
 -- name: CreateComment :execlastid
-INSERT INTO mm_comments (uuid, content, ticket_id, user_id, version, update_at, create_at) VALUES (?, ?, ?, ?, ?, ?, ?);
+INSERT INTO mm_comments (uuid, content, ticket_id, user_id, version) VALUES (?, ?, ?, ?, ?);
 
 -- name: GetCommentByID :one
 SELECT comment_id, uuid, content, ticket_id, user_id, version, update_at, create_at FROM mm_comments WHERE comment_id = ? LIMIT 1;
@@ -8,7 +8,7 @@ SELECT comment_id, uuid, content, ticket_id, user_id, version, update_at, create
 SELECT comment_id, uuid, content, ticket_id, user_id, version, update_at, create_at FROM mm_comments WHERE uuid = ? LIMIT 1;
 
 -- name: UpdateComment :exec
-UPDATE mm_comments SET uuid = ?, content = ?, ticket_id = ?, user_id = ?, version = ?, update_at = ? WHERE comment_id = ?;
+UPDATE mm_comments SET uuid = ?, content = ?, ticket_id = ?, user_id = ?, version = ? WHERE comment_id = ?;
 
 -- name: DeleteCommentByID :exec
 DELETE FROM mm_comments WHERE comment_id = ?;

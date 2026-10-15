@@ -25,8 +25,8 @@ func optionFromRow(r MmOption) *domain.Option {
 		Element:     r.Element,
 		Writable:    r.Writable,
 		Version:     int(r.Version),
-		UpdateAt:    uintFromNull(r.UpdateAt),
-		CreateAt:    uint(r.CreateAt),
+		UpdateAt:    timeFromNull(r.UpdateAt),
+		CreateAt:    timeToUnix(r.CreateAt),
 	}
 }
 
@@ -39,8 +39,6 @@ func (r *OptionRepo) Create(ctx context.Context, o *domain.Option) error {
 		Element:     o.Element,
 		Writable:    o.Writable,
 		Version:     uint32(o.Version),
-		UpdateAt:    nullFromUint(o.UpdateAt),
-		CreateAt:    uint32(o.CreateAt),
 	}))
 }
 
@@ -68,7 +66,6 @@ func (r *OptionRepo) Update(ctx context.Context, o *domain.Option) error {
 		Element:     o.Element,
 		Writable:    o.Writable,
 		Version:     uint32(o.Version),
-		UpdateAt:    nullFromUint(o.UpdateAt),
 		Uuid:        o.UUID,
 	}))
 }

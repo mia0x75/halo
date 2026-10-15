@@ -23,8 +23,8 @@ func roleFromRow(r MmRole) *domain.Role {
 		Name:        r.Name,
 		Description: r.Description,
 		Version:     int(r.Version),
-		UpdateAt:    uintFromNull(r.UpdateAt),
-		CreateAt:    uint(r.CreateAt),
+		UpdateAt:    timeFromNull(r.UpdateAt),
+		CreateAt:    timeToUnix(r.CreateAt),
 	}
 }
 
@@ -34,8 +34,6 @@ func (r *RoleRepo) Create(ctx context.Context, role *domain.Role) (int64, error)
 		Name:        role.Name,
 		Description: role.Description,
 		Version:     uint32(role.Version),
-		UpdateAt:    nullFromUint(role.UpdateAt),
-		CreateAt:    uint32(role.CreateAt),
 	})
 	if err != nil {
 		return 0, wrap("role.Create", err)
@@ -65,7 +63,6 @@ func (r *RoleRepo) Update(ctx context.Context, role *domain.Role) error {
 		Name:        role.Name,
 		Description: role.Description,
 		Version:     uint32(role.Version),
-		UpdateAt:    nullFromUint(role.UpdateAt),
 		RoleID:      uint32(role.RoleID),
 	})
 	return wrap("role.Update", err)

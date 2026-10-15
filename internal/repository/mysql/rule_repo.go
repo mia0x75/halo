@@ -31,8 +31,8 @@ func ruleFromRow(r MmRule) *domain.Rule {
 		Message:     r.Message,
 		Element:     r.Element,
 		Version:     int(r.Version),
-		UpdateAt:    uintFromNull(r.UpdateAt),
-		CreateAt:    uint(r.CreateAt),
+		UpdateAt:    timeFromNull(r.UpdateAt),
+		CreateAt:    timeToUnix(r.CreateAt),
 	}
 }
 
@@ -51,8 +51,6 @@ func (r *RuleRepo) Create(ctx context.Context, rule *domain.Rule) error {
 		Message:     rule.Message,
 		Element:     rule.Element,
 		Version:     uint32(rule.Version),
-		UpdateAt:    nullFromUint(rule.UpdateAt),
-		CreateAt:    uint32(rule.CreateAt),
 	}))
 }
 
@@ -86,7 +84,6 @@ func (r *RuleRepo) Update(ctx context.Context, rule *domain.Rule) error {
 		Message:     rule.Message,
 		Element:     rule.Element,
 		Version:     uint32(rule.Version),
-		UpdateAt:    nullFromUint(rule.UpdateAt),
 		Uuid:        rule.UUID,
 	}))
 }

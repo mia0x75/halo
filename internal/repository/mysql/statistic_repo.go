@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/google/uuid"
 
@@ -34,20 +33,18 @@ func statisticFromRow(r MmStatistic) (*domain.Statistic, error) {
 		UUID:     r.Uuid,
 		Value:    value,
 		Version:  int(r.Version),
-		UpdateAt: uintFromNull(r.UpdateAt),
-		CreateAt: uint(r.CreateAt),
+		UpdateAt: timeFromNull(r.UpdateAt),
+		CreateAt: timeToUnix(r.CreateAt),
 	}, nil
 }
 
 func (r *StatisticRepo) Create(ctx context.Context, s *domain.Statistic) error {
 	return wrap("statistic.Create", r.q.CreateStatistic(ctx, CreateStatisticParams{
-		Group:    s.Group,
-		Key:      s.Key,
-		Uuid:     s.UUID,
-		Value:    strconv.FormatFloat(s.Value, 'f', -1, 64),
-		Version:  uint32(s.Version),
-		UpdateAt: nullFromUint(s.UpdateAt),
-		CreateAt: uint32(s.CreateAt),
+		Group:   s.Group,
+		Key:     s.Key,
+		Uuid:    s.UUID,
+		Value:   strconv.FormatFloat(s.Value, 'f', -1, 64),
+		Version: uint32(s.Version),
 	}))
 }
 
@@ -70,10 +67,9 @@ func (r *StatisticRepo) GetByKey(ctx context.Context, group, key string) (*domai
 
 func (r *StatisticRepo) Update(ctx context.Context, s *domain.Statistic) error {
 	return wrap("statistic.Update", r.q.UpdateStatistic(ctx, UpdateStatisticParams{
-		Value:    strconv.FormatFloat(s.Value, 'f', -1, 64),
-		Version:  uint32(s.Version),
-		UpdateAt: nullFromUint(s.UpdateAt),
-		Uuid:     s.UUID,
+		Value:   strconv.FormatFloat(s.Value, 'f', -1, 64),
+		Version: uint32(s.Version),
+		Uuid:    s.UUID,
 	}))
 }
 
@@ -104,13 +100,10 @@ func (r *StatisticRepo) List(ctx context.Context, cursor string, limit int) ([]*
 // does not exist yet. Single statement, so concurrent increments never lose an
 // update (the previous read-modify-write could).
 func (r *StatisticRepo) UpsertIncrement(ctx context.Context, group, key string, delta float64) error {
-	now := uint(time.Now().Unix())
 	return wrap("statistic.UpsertIncrement", r.q.UpsertStatistic(ctx, UpsertStatisticParams{
-		Group:    group,
-		Key:      key,
-		Uuid:     uuid.NewString(),
-		Value:    strconv.FormatFloat(delta, 'f', -1, 64),
-		UpdateAt: nullFromUint(&now),
-		CreateAt: uint32(now),
+		Group: group,
+		Key:   key,
+		Uuid:  uuid.NewString(),
+		Value: strconv.FormatFloat(delta, 'f', -1, 64),
 	}))
 }

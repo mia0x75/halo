@@ -1,5 +1,5 @@
 -- name: CreateLog :execlastid
-INSERT INTO mm_logs (uuid, user_id, operation, version, create_at) VALUES (?, ?, ?, ?, ?);
+INSERT INTO mm_logs (uuid, user_id, operation, version) VALUES (?, ?, ?, ?);
 
 -- name: GetLogByID :one
 SELECT log_id, uuid, user_id, operation, version, create_at FROM mm_logs WHERE log_id = ? LIMIT 1;

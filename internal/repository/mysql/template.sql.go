@@ -7,11 +7,10 @@ package mysqlrepo
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createTemplate = `-- name: CreateTemplate :exec
-INSERT INTO mm_templates (uuid, subject, body, description, version, update_at, create_at) VALUES (?, ?, ?, ?, ?, ?, ?)
+INSERT INTO mm_templates (uuid, subject, body, description, version) VALUES (?, ?, ?, ?, ?)
 `
 
 type CreateTemplateParams struct {
@@ -20,8 +19,6 @@ type CreateTemplateParams struct {
 	Body        string
 	Description string
 	Version     uint32
-	UpdateAt    sql.NullInt32
-	CreateAt    uint32
 }
 
 func (q *Queries) CreateTemplate(ctx context.Context, arg CreateTemplateParams) error {
@@ -31,8 +28,6 @@ func (q *Queries) CreateTemplate(ctx context.Context, arg CreateTemplateParams) 
 		arg.Body,
 		arg.Description,
 		arg.Version,
-		arg.UpdateAt,
-		arg.CreateAt,
 	)
 	return err
 }
@@ -106,7 +101,7 @@ func (q *Queries) ListTemplates(ctx context.Context, arg ListTemplatesParams) ([
 }
 
 const updateTemplate = `-- name: UpdateTemplate :exec
-UPDATE mm_templates SET subject = ?, body = ?, description = ?, version = ?, update_at = ? WHERE uuid = ?
+UPDATE mm_templates SET subject = ?, body = ?, description = ?, version = ? WHERE uuid = ?
 `
 
 type UpdateTemplateParams struct {
@@ -114,7 +109,6 @@ type UpdateTemplateParams struct {
 	Body        string
 	Description string
 	Version     uint32
-	UpdateAt    sql.NullInt32
 	Uuid        string
 }
 
@@ -124,7 +118,6 @@ func (q *Queries) UpdateTemplate(ctx context.Context, arg UpdateTemplateParams) 
 		arg.Body,
 		arg.Description,
 		arg.Version,
-		arg.UpdateAt,
 		arg.Uuid,
 	)
 	return err

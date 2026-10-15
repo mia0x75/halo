@@ -7,11 +7,10 @@ package mysqlrepo
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createRule = `-- name: CreateRule :exec
-INSERT INTO mm_rules (name, uuid, ` + "`" + `group` + "`" + `, description, level, vldr_group, operator, ` + "`" + `values` + "`" + `, bitwise, func, message, element, version, update_at, create_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO mm_rules (name, uuid, ` + "`" + `group` + "`" + `, description, level, vldr_group, operator, ` + "`" + `values` + "`" + `, bitwise, func, message, element, version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
 type CreateRuleParams struct {
@@ -28,8 +27,6 @@ type CreateRuleParams struct {
 	Message     string
 	Element     string
 	Version     uint32
-	UpdateAt    sql.NullInt32
-	CreateAt    uint32
 }
 
 func (q *Queries) CreateRule(ctx context.Context, arg CreateRuleParams) error {
@@ -47,8 +44,6 @@ func (q *Queries) CreateRule(ctx context.Context, arg CreateRuleParams) error {
 		arg.Message,
 		arg.Element,
 		arg.Version,
-		arg.UpdateAt,
-		arg.CreateAt,
 	)
 	return err
 }
@@ -165,7 +160,7 @@ func (q *Queries) ListRules(ctx context.Context, arg ListRulesParams) ([]MmRule,
 }
 
 const updateRule = `-- name: UpdateRule :exec
-UPDATE mm_rules SET ` + "`" + `group` + "`" + ` = ?, description = ?, level = ?, vldr_group = ?, operator = ?, ` + "`" + `values` + "`" + ` = ?, bitwise = ?, func = ?, message = ?, element = ?, version = ?, update_at = ? WHERE uuid = ?
+UPDATE mm_rules SET ` + "`" + `group` + "`" + ` = ?, description = ?, level = ?, vldr_group = ?, operator = ?, ` + "`" + `values` + "`" + ` = ?, bitwise = ?, func = ?, message = ?, element = ?, version = ? WHERE uuid = ?
 `
 
 type UpdateRuleParams struct {
@@ -180,7 +175,6 @@ type UpdateRuleParams struct {
 	Message     string
 	Element     string
 	Version     uint32
-	UpdateAt    sql.NullInt32
 	Uuid        string
 }
 
@@ -197,7 +191,6 @@ func (q *Queries) UpdateRule(ctx context.Context, arg UpdateRuleParams) error {
 		arg.Message,
 		arg.Element,
 		arg.Version,
-		arg.UpdateAt,
 		arg.Uuid,
 	)
 	return err

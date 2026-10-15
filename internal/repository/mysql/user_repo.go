@@ -27,8 +27,8 @@ func userFromRow(r MmUser) *domain.User {
 		Phone:    r.Phone,
 		AvatarID: uint(r.AvatarID),
 		Version:  int(r.Version),
-		UpdateAt: uintFromNull(r.UpdateAt),
-		CreateAt: uint(r.CreateAt),
+		UpdateAt: timeFromNull(r.UpdateAt),
+		CreateAt: timeToUnix(r.CreateAt),
 	}
 }
 
@@ -42,8 +42,6 @@ func (r *UserRepo) Create(ctx context.Context, u *domain.User) (int64, error) {
 		Phone:    u.Phone,
 		AvatarID: uint32(u.AvatarID),
 		Version:  uint32(u.Version),
-		UpdateAt: nullFromUint(u.UpdateAt),
-		CreateAt: uint32(u.CreateAt),
 	})
 	if err != nil {
 		return 0, wrap("user.Create", err)
@@ -77,7 +75,6 @@ func (r *UserRepo) Update(ctx context.Context, u *domain.User) error {
 		Phone:    u.Phone,
 		AvatarID: uint32(u.AvatarID),
 		Version:  uint32(u.Version),
-		UpdateAt: nullFromUint(u.UpdateAt),
 		UserID:   uint32(u.UserID),
 	})
 	return wrap("user.Update", err)

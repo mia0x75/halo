@@ -1,5 +1,5 @@
 -- name: CreateRole :execlastid
-INSERT INTO mm_roles (uuid, name, description, version, update_at, create_at) VALUES (?, ?, ?, ?, ?, ?);
+INSERT INTO mm_roles (uuid, name, description, version) VALUES (?, ?, ?, ?);
 
 -- name: GetRoleByID :one
 SELECT role_id, uuid, name, description, version, update_at, create_at FROM mm_roles WHERE role_id = ? LIMIT 1;
@@ -8,7 +8,7 @@ SELECT role_id, uuid, name, description, version, update_at, create_at FROM mm_r
 SELECT role_id, uuid, name, description, version, update_at, create_at FROM mm_roles WHERE uuid = ? LIMIT 1;
 
 -- name: UpdateRole :exec
-UPDATE mm_roles SET uuid = ?, name = ?, description = ?, version = ?, update_at = ? WHERE role_id = ?;
+UPDATE mm_roles SET uuid = ?, name = ?, description = ?, version = ? WHERE role_id = ?;
 
 -- name: DeleteRoleByID :exec
 DELETE FROM mm_roles WHERE role_id = ?;

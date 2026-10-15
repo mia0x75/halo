@@ -22,18 +22,16 @@ func avatarFromRow(r MmAvatar) *domain.Avatar {
 		UUID:     r.Uuid,
 		URL:      r.Url,
 		Version:  int(r.Version),
-		UpdateAt: uintFromNull(r.UpdateAt),
-		CreateAt: uint(r.CreateAt),
+		UpdateAt: timeFromNull(r.UpdateAt),
+		CreateAt: timeToUnix(r.CreateAt),
 	}
 }
 
 func (r *AvatarRepo) Create(ctx context.Context, a *domain.Avatar) (int64, error) {
 	id, err := r.q.CreateAvatar(ctx, CreateAvatarParams{
-		Uuid:     a.UUID,
-		Url:      a.URL,
-		Version:  uint32(a.Version),
-		UpdateAt: nullFromUint(a.UpdateAt),
-		CreateAt: uint32(a.CreateAt),
+		Uuid:    a.UUID,
+		Url:     a.URL,
+		Version: uint32(a.Version),
 	})
 	if err != nil {
 		return 0, wrap("avatar.Create", err)
@@ -62,7 +60,6 @@ func (r *AvatarRepo) Update(ctx context.Context, a *domain.Avatar) error {
 		Uuid:     a.UUID,
 		Url:      a.URL,
 		Version:  uint32(a.Version),
-		UpdateAt: nullFromUint(a.UpdateAt),
 		AvatarID: uint32(a.AvatarID),
 	})
 	return wrap("avatar.Update", err)

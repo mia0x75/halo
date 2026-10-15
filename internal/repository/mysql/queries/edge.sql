@@ -1,5 +1,5 @@
 -- name: CreateEdge :execlastid
-INSERT INTO mm_edges (uuid, `type`, ancestor_id, descendant_id, version, update_at, create_at) VALUES (?, ?, ?, ?, ?, ?, ?);
+INSERT INTO mm_edges (uuid, `type`, ancestor_id, descendant_id, version) VALUES (?, ?, ?, ?, ?);
 
 -- name: GetEdgeByID :one
 SELECT edge_id, uuid, `type`, ancestor_id, descendant_id, version, update_at, create_at FROM mm_edges WHERE edge_id = ? LIMIT 1;
@@ -8,7 +8,7 @@ SELECT edge_id, uuid, `type`, ancestor_id, descendant_id, version, update_at, cr
 SELECT edge_id, uuid, `type`, ancestor_id, descendant_id, version, update_at, create_at FROM mm_edges WHERE uuid = ? LIMIT 1;
 
 -- name: UpdateEdge :exec
-UPDATE mm_edges SET uuid = ?, `type` = ?, ancestor_id = ?, descendant_id = ?, version = ?, update_at = ? WHERE edge_id = ?;
+UPDATE mm_edges SET uuid = ?, `type` = ?, ancestor_id = ?, descendant_id = ?, version = ? WHERE edge_id = ?;
 
 -- name: DeleteEdgeByID :exec
 DELETE FROM mm_edges WHERE edge_id = ?;

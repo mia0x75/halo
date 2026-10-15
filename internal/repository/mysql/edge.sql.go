@@ -7,11 +7,10 @@ package mysqlrepo
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createEdge = `-- name: CreateEdge :execlastid
-INSERT INTO mm_edges (uuid, ` + "`" + `type` + "`" + `, ancestor_id, descendant_id, version, update_at, create_at) VALUES (?, ?, ?, ?, ?, ?, ?)
+INSERT INTO mm_edges (uuid, ` + "`" + `type` + "`" + `, ancestor_id, descendant_id, version) VALUES (?, ?, ?, ?, ?)
 `
 
 type CreateEdgeParams struct {
@@ -20,8 +19,6 @@ type CreateEdgeParams struct {
 	AncestorID   uint32
 	DescendantID uint32
 	Version      uint32
-	UpdateAt     sql.NullInt32
-	CreateAt     uint32
 }
 
 func (q *Queries) CreateEdge(ctx context.Context, arg CreateEdgeParams) (int64, error) {
@@ -31,8 +28,6 @@ func (q *Queries) CreateEdge(ctx context.Context, arg CreateEdgeParams) (int64, 
 		arg.AncestorID,
 		arg.DescendantID,
 		arg.Version,
-		arg.UpdateAt,
-		arg.CreateAt,
 	)
 	if err != nil {
 		return 0, err
@@ -154,7 +149,7 @@ func (q *Queries) ListEdges(ctx context.Context, arg ListEdgesParams) ([]MmEdge,
 }
 
 const updateEdge = `-- name: UpdateEdge :exec
-UPDATE mm_edges SET uuid = ?, ` + "`" + `type` + "`" + ` = ?, ancestor_id = ?, descendant_id = ?, version = ?, update_at = ? WHERE edge_id = ?
+UPDATE mm_edges SET uuid = ?, ` + "`" + `type` + "`" + ` = ?, ancestor_id = ?, descendant_id = ?, version = ? WHERE edge_id = ?
 `
 
 type UpdateEdgeParams struct {
@@ -163,7 +158,6 @@ type UpdateEdgeParams struct {
 	AncestorID   uint32
 	DescendantID uint32
 	Version      uint32
-	UpdateAt     sql.NullInt32
 	EdgeID       uint32
 }
 
@@ -174,7 +168,6 @@ func (q *Queries) UpdateEdge(ctx context.Context, arg UpdateEdgeParams) error {
 		arg.AncestorID,
 		arg.DescendantID,
 		arg.Version,
-		arg.UpdateAt,
 		arg.EdgeID,
 	)
 	return err

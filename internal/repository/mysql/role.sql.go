@@ -7,11 +7,10 @@ package mysqlrepo
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createRole = `-- name: CreateRole :execlastid
-INSERT INTO mm_roles (uuid, name, description, version, update_at, create_at) VALUES (?, ?, ?, ?, ?, ?)
+INSERT INTO mm_roles (uuid, name, description, version) VALUES (?, ?, ?, ?)
 `
 
 type CreateRoleParams struct {
@@ -19,8 +18,6 @@ type CreateRoleParams struct {
 	Name        string
 	Description string
 	Version     uint32
-	UpdateAt    sql.NullInt32
-	CreateAt    uint32
 }
 
 func (q *Queries) CreateRole(ctx context.Context, arg CreateRoleParams) (int64, error) {
@@ -29,8 +26,6 @@ func (q *Queries) CreateRole(ctx context.Context, arg CreateRoleParams) (int64, 
 		arg.Name,
 		arg.Description,
 		arg.Version,
-		arg.UpdateAt,
-		arg.CreateAt,
 	)
 	if err != nil {
 		return 0, err
@@ -135,7 +130,7 @@ func (q *Queries) ListRoles(ctx context.Context, arg ListRolesParams) ([]MmRole,
 }
 
 const updateRole = `-- name: UpdateRole :exec
-UPDATE mm_roles SET uuid = ?, name = ?, description = ?, version = ?, update_at = ? WHERE role_id = ?
+UPDATE mm_roles SET uuid = ?, name = ?, description = ?, version = ? WHERE role_id = ?
 `
 
 type UpdateRoleParams struct {
@@ -143,7 +138,6 @@ type UpdateRoleParams struct {
 	Name        string
 	Description string
 	Version     uint32
-	UpdateAt    sql.NullInt32
 	RoleID      uint32
 }
 
@@ -153,7 +147,6 @@ func (q *Queries) UpdateRole(ctx context.Context, arg UpdateRoleParams) error {
 		arg.Name,
 		arg.Description,
 		arg.Version,
-		arg.UpdateAt,
 		arg.RoleID,
 	)
 	return err

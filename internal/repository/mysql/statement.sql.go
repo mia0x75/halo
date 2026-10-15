@@ -11,7 +11,7 @@ import (
 )
 
 const createStatement = `-- name: CreateStatement :exec
-INSERT INTO mm_statements (ticket_id, sequence, uuid, content, ` + "`" + `type` + "`" + `, status, report, plan, results, rows_affected, version, update_at, create_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO mm_statements (ticket_id, sequence, uuid, content, ` + "`" + `type` + "`" + `, status, report, plan, results, rows_affected, version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
 type CreateStatementParams struct {
@@ -26,8 +26,6 @@ type CreateStatementParams struct {
 	Results      sql.NullString
 	RowsAffected sql.NullInt32
 	Version      uint32
-	UpdateAt     sql.NullInt32
-	CreateAt     uint32
 }
 
 func (q *Queries) CreateStatement(ctx context.Context, arg CreateStatementParams) error {
@@ -43,8 +41,6 @@ func (q *Queries) CreateStatement(ctx context.Context, arg CreateStatementParams
 		arg.Results,
 		arg.RowsAffected,
 		arg.Version,
-		arg.UpdateAt,
-		arg.CreateAt,
 	)
 	return err
 }
@@ -183,7 +179,7 @@ func (q *Queries) ListStatements(ctx context.Context, arg ListStatementsParams) 
 }
 
 const updateStatement = `-- name: UpdateStatement :exec
-UPDATE mm_statements SET content = ?, ` + "`" + `type` + "`" + ` = ?, status = ?, report = ?, plan = ?, results = ?, rows_affected = ?, version = ?, update_at = ? WHERE uuid = ?
+UPDATE mm_statements SET content = ?, ` + "`" + `type` + "`" + ` = ?, status = ?, report = ?, plan = ?, results = ?, rows_affected = ?, version = ? WHERE uuid = ?
 `
 
 type UpdateStatementParams struct {
@@ -195,7 +191,6 @@ type UpdateStatementParams struct {
 	Results      sql.NullString
 	RowsAffected sql.NullInt32
 	Version      uint32
-	UpdateAt     sql.NullInt32
 	Uuid         string
 }
 
@@ -209,7 +204,6 @@ func (q *Queries) UpdateStatement(ctx context.Context, arg UpdateStatementParams
 		arg.Results,
 		arg.RowsAffected,
 		arg.Version,
-		arg.UpdateAt,
 		arg.Uuid,
 	)
 	return err

@@ -29,8 +29,8 @@ func statementFromRow(r MmStatement) *domain.Statement {
 		Results:      stringFromNull(r.Results),
 		RowsAffected: uintFromNull(r.RowsAffected),
 		Version:      int(r.Version),
-		UpdateAt:     uintFromNull(r.UpdateAt),
-		CreateAt:     uint(r.CreateAt),
+		UpdateAt:     timeFromNull(r.UpdateAt),
+		CreateAt:     timeToUnix(r.CreateAt),
 	}
 }
 
@@ -47,8 +47,6 @@ func (r *StatementRepo) Create(ctx context.Context, s *domain.Statement) error {
 		Results:      nullFromString(s.Results),
 		RowsAffected: nullFromUint(s.RowsAffected),
 		Version:      uint32(s.Version),
-		UpdateAt:     nullFromUint(s.UpdateAt),
-		CreateAt:     uint32(s.CreateAt),
 	}))
 }
 
@@ -82,7 +80,6 @@ func (r *StatementRepo) Update(ctx context.Context, s *domain.Statement) error {
 		Results:      nullFromString(s.Results),
 		RowsAffected: nullFromUint(s.RowsAffected),
 		Version:      uint32(s.Version),
-		UpdateAt:     nullFromUint(s.UpdateAt),
 		Uuid:         s.UUID,
 	}))
 }

@@ -13,10 +13,9 @@ CREATE TABLE `mm_avatars` (
    `version`   INT UNSIGNED
                NOT NULL
                COMMENT '版本',
-   `update_at` INT UNSIGNED
+   `update_at` DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
                COMMENT '修改时间',
-   `create_at` INT UNSIGNED
-               NOT NULL
+   `create_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                COMMENT '创建时间',
 
    PRIMARY KEY (`avatar_id`),
@@ -50,10 +49,9 @@ CREATE TABLE `mm_comments` (
   `version`    INT UNSIGNED
                NOT NULL
                COMMENT '版本',
-  `update_at`  INT UNSIGNED
+  `update_at`  DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
                COMMENT '修改时间',
-  `create_at`  INT UNSIGNED
-               NOT NULL
+  `create_at`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                COMMENT '创建时间',
 
   PRIMARY KEY (`comment_id`),
@@ -103,10 +101,9 @@ CREATE TABLE `mm_crons` (
   `version`   INT UNSIGNED
               NOT NULL
               COMMENT '版本',
-  `update_at` INT UNSIGNED
+  `update_at` DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
               COMMENT '修改时间',
-  `create_at` INT UNSIGNED
-              NOT NULL
+  `create_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
               COMMENT '创建时间',
 
   PRIMARY KEY (`cron_id`),
@@ -138,10 +135,9 @@ CREATE TABLE `mm_glossaries` (
   `version`     INT UNSIGNED
                 NOT NULL
                 COMMENT '版本',
-  `update_at`   INT UNSIGNED
+  `update_at`   DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
                 COMMENT '修改时间',
-  `create_at`   INT UNSIGNED
-                NOT NULL
+  `create_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                 COMMENT '创建时间',
 
   PRIMARY KEY (`group`,`key`),
@@ -196,10 +192,9 @@ CREATE TABLE `mm_clusters` (
   `version`     INT UNSIGNED
                 NOT NULL
                 COMMENT '版本',
-  `update_at`   INT UNSIGNED
+  `update_at`   DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
                 COMMENT '修改时间',
-  `create_at`   INT UNSIGNED
-                NOT NULL
+  `create_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                 COMMENT '创建时间',
 
   PRIMARY KEY (`cluster_id`),
@@ -233,8 +228,7 @@ CREATE TABLE `mm_logs` (
   `version`   INT UNSIGNED
               NOT NULL
               COMMENT '版本',
-  `create_at` INT UNSIGNED
-              NOT NULL
+  `create_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
               COMMENT '创建时间',
 
   PRIMARY KEY (`log_id`),
@@ -271,10 +265,9 @@ CREATE TABLE `mm_options` (
   `version`     INT UNSIGNED
                 NOT NULL
                 COMMENT '版本',
-  `update_at`   INT UNSIGNED
+  `update_at`   DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
                 COMMENT '修改时间',
-  `create_at`   INT UNSIGNED
-                NOT NULL
+  `create_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                 COMMENT '创建时间',
 
   PRIMARY KEY (`name`),
@@ -316,10 +309,9 @@ CREATE TABLE `mm_queries` (
   `version`    INT UNSIGNED
                NOT NULL
                COMMENT '版本',
-  `update_at`  INT UNSIGNED
+  `update_at`  DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
                COMMENT '修改时间',
-  `create_at`  INT UNSIGNED
-               NOT NULL
+  `create_at`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                COMMENT '创建时间',
 
   PRIMARY KEY (`query_id`),
@@ -354,10 +346,9 @@ CREATE TABLE `mm_edges` (
   `version`       INT UNSIGNED
                   NOT NULL
                   COMMENT '版本',
-  `update_at`     INT UNSIGNED
+  `update_at`     DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
                   COMMENT '修改时间',
-  `create_at`     INT UNSIGNED
-                  NOT NULL
+  `create_at`     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                   COMMENT '创建时间',
 
   PRIMARY KEY (`edge_id`),
@@ -388,10 +379,9 @@ CREATE TABLE `mm_roles` (
   `version`     INT UNSIGNED
                 NOT NULL
                 COMMENT '版本',
-  `update_at`   INT UNSIGNED
+  `update_at`   DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
                 COMMENT '修改时间',
-  `create_at`   INT UNSIGNED
-                NOT NULL
+  `create_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                 COMMENT '创建时间',
 
   PRIMARY KEY (`role_id`),
@@ -446,10 +436,9 @@ CREATE TABLE `mm_rules` (
   `version`     INT UNSIGNED
                 NOT NULL
                 COMMENT '版本',
-  `update_at`   INT UNSIGNED
+  `update_at`   DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
                 COMMENT '修改时间',
-  `create_at`   INT UNSIGNED
-                NOT NULL
+  `create_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                 COMMENT '创建时间',
 
   PRIMARY KEY (`name`),
@@ -493,10 +482,9 @@ CREATE TABLE `mm_statements` (
   `version`       INT UNSIGNED
                   NOT NULL
                   COMMENT '版本',
-  `update_at`     INT UNSIGNED
+  `update_at`     DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
                   COMMENT '修改时间',
-  `create_at`     INT UNSIGNED
-                  NOT NULL
+  `create_at`     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                   COMMENT '创建时间',
 
   PRIMARY KEY (`ticket_id`,`sequence`),
@@ -525,10 +513,9 @@ CREATE TABLE `mm_statistics` (
   `version`      INT UNSIGNED
                  NOT NULL
                  COMMENT '版本',
-  `update_at`    INT UNSIGNED
+  `update_at`    DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
                  COMMENT '修改时间',
-  `create_at`    INT UNSIGNED
-                 NOT NULL
+  `create_at`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                  COMMENT '创建时间',
 
   PRIMARY KEY (`group`, `key`),
@@ -576,10 +563,9 @@ CREATE TABLE `mm_tickets` (
   `version`     INT UNSIGNED
                 NOT NULL
                 COMMENT '版本',
-  `update_at`   INT UNSIGNED
+  `update_at`   DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
                 COMMENT '修改时间',
-  `create_at`   INT UNSIGNED
-                NOT NULL
+  `create_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                 COMMENT '创建时间',
 
   PRIMARY KEY (`ticket_id`),
@@ -625,10 +611,9 @@ CREATE TABLE `mm_users` (
   `version`   INT UNSIGNED
               NOT NULL
               COMMENT '版本',
-  `update_at` INT UNSIGNED
+  `update_at` DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
               COMMENT '修改时间',
-  `create_at` INT UNSIGNED
-              NOT NULL
+  `create_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
               COMMENT '创建时间',
 
   PRIMARY KEY (`user_id`),
@@ -658,10 +643,9 @@ CREATE TABLE `mm_templates` (
   `version`     INT UNSIGNED
                 NOT NULL
                 COMMENT '版本',
-  `update_at`   INT UNSIGNED
+  `update_at`   DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
                 COMMENT '修改时间',
-  `create_at`   INT UNSIGNED
-                NOT NULL
+  `create_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                 COMMENT '创建时间',
 
   PRIMARY KEY (`uuid`)
