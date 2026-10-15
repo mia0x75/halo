@@ -2,14 +2,11 @@ module github.com/mia0x75/halo
 
 go 1.26.0
 
-replace github.com/go-xorm/core => github.com/mia0x75/xorm-core v0.7.3
-
 require (
 	github.com/99designs/gqlgen v0.17.95
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fatih/structs v1.1.0
 	github.com/go-sql-driver/mysql v1.10.1
-	github.com/go-xorm/core v0.7.3
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/jackc/pgx/v5 v5.6.0
@@ -25,7 +22,6 @@ require (
 	github.com/toolkits/file v0.0.0-20160325033739-a5b3c5147e07
 	github.com/vektah/gqlparser/v2 v2.5.62
 	golang.org/x/crypto v0.58.0
-	xorm.io/xorm v1.4.3
 )
 
 require (
@@ -37,9 +33,7 @@ require (
 	github.com/ebitengine/purego v0.11.1 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
-	github.com/goccy/go-json v0.11.2 // indirect
 	github.com/goccy/go-yaml v1.19.2 // indirect
-	github.com/golang/snappy v1.0.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -56,7 +50,6 @@ require (
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/sosodev/duration v1.4.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
-	github.com/syndtr/goleveldb v1.0.0 // indirect
 	github.com/tklauser/go-sysconf v0.4.0 // indirect
 	github.com/tklauser/numcpus v0.12.0 // indirect
 	github.com/urfave/cli/v3 v3.14.0 // indirect
@@ -67,5 +60,4 @@ require (
 	golang.org/x/sys v0.49.0 // indirect
 	golang.org/x/text v0.43.0 // indirect
 	golang.org/x/tools v0.52.0 // indirect
-	xorm.io/builder v0.3.13 // indirect
 )
