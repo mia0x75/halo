@@ -91,6 +91,7 @@ halo/
 - `domain` 不 import 任何外部库（无 `database/sql` / `echo` / `zap` / `json`），仅标准库。
 - 接口定义在 `domain`，实现在 `repository`。
 - `repository` 是唯一 import `database/sql` 的地方。
+- `models` 是 GraphQL 契约 DTO，`bridge` 只做 models↔domain 转换（被 resolvers / caches 等消费），两者不写业务逻辑。
 - `cmd/server/main.go` 负责组装与依赖注入。
 - 不做：UseCase 类、Presenter、Mapper 层、Event Bus、CQRS。
 

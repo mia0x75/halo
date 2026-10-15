@@ -35,3 +35,17 @@
 
 - ADR 0002（表名前缀例外）
 - ADR 0004（移除 xorm）
+
+## 2D-C-D 重估（保留结论不变）
+
+- `bridge` 被 caches / cli / crons / events / resolvers / validate 共 6 包使用，
+  独立包合理，不内联；命名已是 `XxxToDomain` / `XxxFromDomain`，无需统一；
+  删 5 个零引用函数（Avatar/Glossary/Log/Role/Statistic 的 `ToDomain`）。
+- `models` 的 `BeforeInsert` / `BeforeUpdate` 不是死代码：承载 UUID 生成、
+  TrimSpace、指纹计算、类型缺省，有 20+ 显式调用（resolvers、crons），
+  且结果进 GraphQL 响应与事件。搬到 service 会改变响应/事件载荷，
+  违背"不改业务逻辑"，故保留不动。
+- `models.Violations` 不是被动 DTO：是带 `sync.Mutex` 的并发累加器
+  （`Add`/`Append`/`Marshal`/`Clauses`，`Marshal` 内部用 `encoding/json`），
+  搬入 `domain` 会改变 domain 的性质，故保留。
+- `bridge` 泛型化：评估后不做（32 个函数形状接近但字段映射各异，收益低）。
