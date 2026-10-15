@@ -171,8 +171,8 @@ switch c.Type {
 - **Row Scan 用 sqlx**：`db.GetContext` / `db.SelectContext`
 - **SQL 全部手写**：sqlc 生成，无 ORM
 - **双引擎并行包**：`internal/repository/mysql` 与 `internal/repository/postgres`
-  实现同一套 `domain` 仓储接口，`database.driver`（`mysql`/`postgres`）选择；
-  禁止跨包共享查询与转换代码
+  实现同一套 `domain` 仓储接口，`database.driver`（`mysql`/`postgres`，缺省按
+  DSN 自动识别）选择；禁止跨包共享查询与转换代码
 - **PG 方言**：占位符 `$n`、自增取号用 `RETURNING`、upsert 用 `ON CONFLICT`、
   保留字双引号、时间列 `TIMESTAMPTZ`、UPDATE 显式 `update_at = NOW()`
  （MySQL 侧靠 `ON UPDATE CURRENT_TIMESTAMP`）

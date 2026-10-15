@@ -7,7 +7,7 @@ type Config struct {
 	MaxIdle        int
 	MaxConnections int
 	WaitTimeout    int
-	// Driver selects the metadata engine: "mysql" (default) or "postgres".
-	// It mirrors cfg.Database.Driver.
+	// Driver selects the metadata engine: "mysql" or "postgres".
+	// Empty means auto-detect from Addr. It mirrors cfg.Database.Driver.
 	Driver string
 }

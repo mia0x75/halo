@@ -14,8 +14,9 @@
 
 1. **并行包**：新增 `internal/repository/postgres`（独立 sqlc 生成 +
    手写 repo），与 mysql 包实现同一套 `domain` 接口；
-   `database.driver`（`mysql` 缺省 / `postgres`）在
-   `internal/app` 选择，禁止跨包共享查询与转换代码。
+   `database.driver`（`mysql` 缺省 / `postgres`，为空时按 DSN 自动识别，
+   与 DSN 矛盾则启动报错）在 `internal/app` 选择，
+   禁止跨包共享查询与转换代码。
 2. **驱动**：`database/sql` + `github.com/jackc/pgx/v5/stdlib`
   （`db.go` blank import，`sqlx.Open("pgx", ...)`），无 CGO，单二进制不受影响。
 3. **类型映射**（MySQL→PG）：`INT UNSIGNED`→`BIGINT`；
