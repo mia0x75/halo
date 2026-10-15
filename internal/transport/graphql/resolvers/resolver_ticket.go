@@ -29,7 +29,7 @@ import (
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 	"github.com/mia0x75/halo/internal/transport/graphql/models"
 	"github.com/mia0x75/halo/internal/worker"
-	"github.com/mia0x75/halo/validate"
+	"github.com/mia0x75/halo/internal/validate"
 )
 
 // 保留，不可以删除

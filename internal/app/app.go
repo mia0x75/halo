@@ -16,7 +16,7 @@ import (
 	mysqlrepo "github.com/mia0x75/halo/internal/repository/mysql"
 	postgresrepo "github.com/mia0x75/halo/internal/repository/postgres"
 	"github.com/mia0x75/halo/internal/service"
-	"github.com/mia0x75/halo/validate"
+	"github.com/mia0x75/halo/internal/validate"
 )
 
 // App is the dependency container.

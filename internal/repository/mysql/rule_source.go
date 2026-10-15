@@ -6,7 +6,7 @@ import (
 
 	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/transport/graphql/models"
-	"github.com/mia0x75/halo/validate"
+	"github.com/mia0x75/halo/internal/validate"
 )
 
 // ruleSourceLimit pages in every rule in one shot. The rule set is seed data
