@@ -20,6 +20,7 @@
 | 认证 | golang-jwt/jwt | v5 | JWT |
 | 日志 | go.uber.org/zap | latest | 结构化日志 |
 | SQL parser（MySQL） | mia0x75/parser | latest | TiDB fork |
+| 主机信息采集 | gopsutil/v4 | latest | 纯 Go，无 CGO；CPU/内存/主机/进程 |
 | 规则引擎 | mia0x75/yql | latest | 规则匹配 |
 | 测试 | stretchr/testify | latest | assert / require / mock |
 | 热重载 | air-verse/air | latest | 开发期 |
