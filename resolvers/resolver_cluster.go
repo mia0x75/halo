@@ -17,8 +17,8 @@ import (
 	"github.com/mia0x75/halo/internal/agent/meta"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/platform/crypto"
+	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/models"
-	"github.com/mia0x75/halo/tools"
 )
 
 // TestCluster 测试群集的连接性
@@ -54,7 +54,7 @@ func (r *queryRootResolver) Databases(ctx context.Context, clusterUUID string) (
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		user := credential.User
 		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
 			return elem.UUID == clusterUUID
@@ -228,7 +228,7 @@ func (r *queryRootResolver) Metadata(ctx context.Context, clusterUUID string, da
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		user := credential.User
 		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
 			return elem.UUID == clusterUUID
@@ -328,7 +328,7 @@ L:
 		cluster.Alias = input.Alias
 		cluster.BeforeInsert()
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		newID, createErr := r.app.Services.Cluster.Create(ctx, bridge.ClusterToDomain(cluster), credential.User.UserID)
 		if createErr != nil {
 			cluster = nil
@@ -408,7 +408,7 @@ L:
 		cluster.Status = input.Status
 		cluster.BeforeUpdate()
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		if updErr := r.app.Services.Cluster.Update(ctx, bridge.ClusterToDomain(cluster), credential.User.UserID); updErr != nil {
 			cluster = nil
 			rc = gqlapi.ReturnCodeUnknowError
@@ -440,7 +440,7 @@ func (r *mutationRootResolver) RemoveCluster(ctx context.Context, id string) (ok
 			err = fmt.Errorf("错误代码: %s, 错误信息: 群集(uuid=%s)不存在。", rc, id)
 			break
 		}
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		if delErr := r.app.Services.Cluster.Delete(ctx, cluster.ClusterID, credential.User.UserID); delErr != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, delErr.Error())
@@ -484,7 +484,7 @@ func (r *mutationRootResolver) PatchClusterStatus(ctx context.Context, input mod
 			break
 		}
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		if cluster.Status != input.Status {
 			cluster.Status = input.Status
 			cluster.BeforeUpdate()

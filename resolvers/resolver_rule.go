@@ -11,8 +11,8 @@ import (
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/bridge"
+	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/models"
-	"github.com/mia0x75/halo/tools"
 )
 
 // PatchRuleValues 修改规则值
@@ -34,7 +34,7 @@ func (r *mutationRootResolver) PatchRuleValues(ctx context.Context, input models
 		}
 		rule.Values = input.Values
 		rule.BeforeUpdate()
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		if err = r.app.Services.Rule.Update(ctx, bridge.RuleToDomain(rule), credential.User.UserID); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
@@ -80,7 +80,7 @@ func (r *mutationRootResolver) PatchRuleBitwise(ctx context.Context, input model
 		rule.Bitwise = rule.Bitwise | value
 		rule.BeforeUpdate()
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		if err = r.app.Services.Rule.Update(ctx, bridge.RuleToDomain(rule), credential.User.UserID); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())

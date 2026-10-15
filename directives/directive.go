@@ -10,7 +10,7 @@ import (
 
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
-	"github.com/mia0x75/halo/tools"
+	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 )
 
 // Auth 权限验证的directive
@@ -24,7 +24,7 @@ func Auth(ctx context.Context, obj interface{}, next graphql.Resolver, requires 
 
 	// TODO: 考虑给tokens增加一个方法，从Context中返回*tokens.Credential
 	if value := ctx.Value(g.CREDENTIAL_KEY); value != nil {
-		if credential, ok := value.(tools.Credential); ok {
+		if credential, ok := value.(transportauth.Credential); ok {
 			switch credential.User.Status {
 			case gqlapi.UserStatusEnumMap[gqlapi.UserStatusEnumNormal]:
 				// 有令牌，但是找不到匹配的角色

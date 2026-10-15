@@ -18,6 +18,7 @@ import (
 
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
+	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/tools"
 )
 
@@ -192,11 +193,11 @@ func Context(next http.Handler) http.Handler {
 			if strings.TrimSpace(token) == "" {
 				break
 			}
-			credential, err := tools.New().ParseToken(token)
+			credential, err := transportauth.Authenticate(token)
 			if err != nil {
 				break
 			}
-			ctx := context.WithValue(r.Context(), g.CREDENTIAL_KEY, credential)
+			ctx := context.WithValue(r.Context(), g.CREDENTIAL_KEY, *credential)
 			r = r.WithContext(ctx)
 
 			break

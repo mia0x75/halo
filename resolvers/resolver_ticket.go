@@ -26,6 +26,7 @@ import (
 	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/platform/crypto"
 	"github.com/mia0x75/halo/internal/service"
+	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
 	"github.com/mia0x75/halo/validate"
@@ -39,7 +40,7 @@ func (r *mutationRootResolver) CreateTicket(ctx context.Context, input models.Cr
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		statements := []*models.Statement{}
 		user := credential.User
 
@@ -211,7 +212,7 @@ func (r *mutationRootResolver) UpdateTicket(ctx context.Context, input models.Up
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		statements := []*models.Statement{}
 		user := credential.User
 		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
@@ -399,7 +400,7 @@ L:
 func (r *mutationRootResolver) RemoveTicket(ctx context.Context, id string) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		user := credential.User
 
 		if strings.TrimSpace(user.Name) == "" {
@@ -455,7 +456,7 @@ func (r *mutationRootResolver) RemoveTicket(ctx context.Context, id string) (ok 
 func (r *mutationRootResolver) PatchTicketStatus(ctx context.Context, input models.PatchTicketStatusInput) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		user := credential.User
 
 		statusValue, valid := gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnum(input.Status)]
@@ -536,7 +537,7 @@ func (r *mutationRootResolver) ExecuteTicket(ctx context.Context, id string) (ok
 func (r *mutationRootResolver) ScheduleTicket(ctx context.Context, input models.ScheduleTicketInput) (cron *models.Cron, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		user := credential.User
 
 		if strings.TrimSpace(user.Name) == "" {

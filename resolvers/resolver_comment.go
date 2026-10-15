@@ -11,15 +11,15 @@ import (
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/domain"
+	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/models"
-	"github.com/mia0x75/halo/tools"
 )
 
 // CreateComment 添加审核意见
 func (r *mutationRootResolver) CreateComment(ctx context.Context, input models.CreateCommentInput) (comment *models.Comment, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		user := credential.User
 
 		t, getErr := r.app.Services.Ticket.GetByUUID(ctx, input.TicketUUID)

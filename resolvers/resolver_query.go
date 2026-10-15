@@ -21,6 +21,7 @@ import (
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/platform/crypto"
+	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
 )
@@ -139,7 +140,7 @@ func (r *mutationRootResolver) CreateQuery(ctx context.Context, input models.Cre
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		user := credential.User
 
 		if strings.TrimSpace(user.Name) == "" {
@@ -227,7 +228,7 @@ L:
 		switch stmt.(type) {
 		case *ast.SelectStmt, *ast.ShowStmt:
 		case *ast.KillStmt, *ast.AlterUserStmt, *ast.CreateUserStmt, *ast.ExplainStmt, *ast.GrantStmt, *ast.SetPwdStmt, *ast.SetStmt, *ast.FlushStmt:
-			isAdmin := func(cred tools.Credential) bool {
+			isAdmin := func(cred transportauth.Credential) bool {
 				for _, role := range cred.Roles {
 					if role.RoleID == gqlapi.RoleEnumMap[gqlapi.RoleEnumAdmin] {
 						return true
@@ -284,7 +285,7 @@ func (r *mutationRootResolver) AnalyzeQuery(ctx context.Context, input models.So
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		user := credential.User
 		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
 			return elem.UUID == input.ClusterUUID
@@ -384,7 +385,7 @@ func (r *mutationRootResolver) RewriteQuery(ctx context.Context, input models.So
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		user := credential.User
 		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
 			return elem.UUID == input.ClusterUUID

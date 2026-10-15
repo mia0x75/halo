@@ -9,8 +9,8 @@ import (
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/bridge"
+	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/models"
-	"github.com/mia0x75/halo/tools"
 )
 
 // Option 获取某一具体的选项信息
@@ -51,7 +51,7 @@ func (r *mutationRootResolver) PatchOptionValues(ctx context.Context, input mode
 		}
 		option.Value = input.Value
 		option.BeforeUpdate()
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		if err = r.app.Services.Option.Update(ctx, bridge.OptionToDomain(option), credential.User.UserID); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())

@@ -16,7 +16,7 @@ import (
 func (r *mutationRootResolver) UpdateTemplate(ctx context.Context, input *models.UpdateTemplateInput) (template *models.Template, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
-		// credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		// credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		t, getErr := r.app.Services.Template.GetByUUID(ctx, input.TemplateUUID)
 		if getErr != nil {
 			if errors.Is(getErr, domain.ErrNotFound) {

@@ -22,14 +22,14 @@ import (
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/platform/crypto"
 	"github.com/mia0x75/halo/internal/service"
+	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/models"
-	"github.com/mia0x75/halo/tools"
 )
 
 // Me 当前登陆用户信息
 func (r *queryRootResolver) Me(ctx context.Context) (user *models.User, err error) {
 	// Directive.Auth确保了一定可以获得正确的凭证
-	credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+	credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 	user = credential.User
 	return
 }
@@ -461,8 +461,7 @@ L:
 
 		var token string
 		token, err = func(user *models.User) (string, error) {
-			token := tools.New()
-			return token.CreateToken(user)
+			return transportauth.Issue(user.UUID)
 		}(user)
 
 		if err != nil {
@@ -495,9 +494,9 @@ L:
 // Logout 退出登陆
 func (r *mutationRootResolver) Logout(ctx context.Context) (bool, error) {
 	// 通过上下文获得用户凭证，此处凭证经过auth的检测，必然是有效的
-	credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+	credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 	user := credential.User
-	tools.New().Delete(user.UUID)
+	transportauth.Revoke(user.UUID)
 
 	events.Fire(events.EventUserLogout, &events.UserLogoutArgs{
 		User: *user,
@@ -511,7 +510,7 @@ func (r *mutationRootResolver) UpdateProfile(ctx context.Context, input models.U
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		user = credential.User
 
 		avatar := caches.AvatarsMap.Any(func(elem *models.Avatar) bool {
@@ -559,7 +558,7 @@ L:
 			break L
 		}
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		user := credential.User
 
 		if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.OldPassword)); err != nil {
@@ -594,7 +593,7 @@ L:
 	for {
 		rc := gqlapi.ReturnCodeOK
 		// 通过上下文获得用户凭证，此处凭证经过auth的检测，必然是有效的
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		user := credential.User
 
 		if user.Email == input.NewEmail {
@@ -683,7 +682,7 @@ L:
 		// 主动刷新缓存
 		caches.EdgesMap.Reload()
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		events.Fire(events.EventReviewerGranted, &events.ReviewerGrantedArgs{
 			Manager: *credential.User,
 			User:    *user,
@@ -731,7 +730,7 @@ L:
 				return false
 			})
 			if edge != nil {
-				manager := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+				manager := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 				if err = r.app.Services.Edge.Delete(ctx, edge.EdgeID, manager.User.UserID); err != nil {
 					rc = gqlapi.ReturnCodeUnknowError
 					err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
@@ -743,7 +742,7 @@ L:
 		// 主动刷新缓存
 		caches.EdgesMap.Reload()
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		events.Fire(events.EventReviewerRevoked, &events.ReviewerRevokedArgs{
 			Manager: *credential.User,
 			User:    *user,
@@ -806,7 +805,7 @@ L:
 		// 主动刷新缓存
 		caches.EdgesMap.Reload()
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		events.Fire(events.EventClusterGranted, &events.ClusterGrantedArgs{
 			Manager: *credential.User,
 			User:    *user,
@@ -854,7 +853,7 @@ L:
 				return false
 			})
 			if edge != nil {
-				manager := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+				manager := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 				if err = r.app.Services.Edge.Delete(ctx, edge.EdgeID, manager.User.UserID); err != nil {
 					rc = gqlapi.ReturnCodeUnknowError
 					err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
@@ -866,7 +865,7 @@ L:
 		// 主动刷新缓存
 		caches.EdgesMap.Reload()
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		events.Fire(events.EventClusterRevoked, &events.ClusterRevokedArgs{
 			Manager: *credential.User,
 			User:    *user,
@@ -922,7 +921,7 @@ L:
 		// 主动刷新缓存
 		caches.EdgesMap.Reload()
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		events.Fire(events.EventRoleGranted, &events.RoleGrantedArgs{
 			Manager: *credential.User,
 			User:    *user,
@@ -971,7 +970,7 @@ L:
 			})
 
 			if edge != nil {
-				manager := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+				manager := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 				if err = r.app.Services.Edge.Delete(ctx, edge.EdgeID, manager.User.UserID); err != nil {
 					rc = gqlapi.ReturnCodeUnknowError
 					err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
@@ -983,7 +982,7 @@ L:
 		// 主动刷新缓存
 		caches.EdgesMap.Reload()
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		events.Fire(events.EventRoleRevoked, &events.RoleRevokedArgs{
 			Manager: *credential.User,
 			User:    *user,
@@ -1140,7 +1139,7 @@ L:
 		caches.UsersMap.Append(user)
 		caches.EdgesMap.Reload()
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		events.Fire(events.EventUserCreated, &events.UserCreatedArgs{
 			Manager: *credential.User,
 			User:    *user,
@@ -1210,7 +1209,7 @@ L:
 		}
 		user.BeforeUpdate()
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		if err = r.app.Services.User.Update(ctx, bridge.UserToDomain(user), credential.User.UserID); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
@@ -1218,7 +1217,7 @@ L:
 		}
 
 		// 后台更新用户，同步清理该用户的令牌，如果有的话
-		tools.New().Delete(input.UserUUID)
+		transportauth.Revoke(input.UserUUID)
 
 		defer events.Fire(events.EventUserUpdated, &events.UserUpdatedArgs{
 			Manager: *credential.User,
@@ -1261,7 +1260,7 @@ L:
 
 		user.Status = input.Status
 		user.BeforeUpdate()
-		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
+		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
 		if err = r.app.Services.User.Update(ctx, bridge.UserToDomain(user), credential.User.UserID); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
@@ -1269,7 +1268,7 @@ L:
 		}
 
 		// 后台更新用户，同步清理该用户的令牌，如果有的话
-		tools.New().Delete(input.UserUUID)
+		transportauth.Revoke(input.UserUUID)
 
 		events.Fire(events.EventUserStatusPatched, &events.UserStatusPatchedArgs{
 			Manager: *credential.User,
