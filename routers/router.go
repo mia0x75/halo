@@ -16,10 +16,10 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/vektah/gqlparser/v2/ast"
 
-	"github.com/mia0x75/halo/directives"
-	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/app"
-	"github.com/mia0x75/halo/resolvers"
+	"github.com/mia0x75/halo/internal/transport/graphql/directives"
+	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
+	"github.com/mia0x75/halo/internal/transport/graphql/resolvers"
 )
 
 var cfg = gqlapi.Config{}

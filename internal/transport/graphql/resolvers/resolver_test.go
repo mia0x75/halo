@@ -13,11 +13,11 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/app"
 	"github.com/mia0x75/halo/internal/platform/cache"
 	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/db"
+	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 	"github.com/mia0x75/halo/models"
 )
 
@@ -25,7 +25,7 @@ var LoginData struct {
 	Login *gqlapi.LoginPayload
 }
 
-var cfg = flag.String("c", "../cfg.json", "configuration file")
+var cfg = flag.String("c", "../../../cfg.json", "configuration file")
 
 // TestMain wires the integration suite: it needs a config file and a live
 // server. When either is missing the whole package is skipped rather than

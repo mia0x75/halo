@@ -3,7 +3,7 @@ package resolvers
 import (
 	"context"
 
-	"github.com/mia0x75/halo/gqlapi"
+	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 )
 
 // TicketStatusChanged 工单状态变化通知，TODO: 目前调不通，主要是WebSocket连接会主动断开

@@ -9,7 +9,6 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 
-	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/agent"
 	"github.com/mia0x75/halo/internal/app"
 	"github.com/mia0x75/halo/internal/bridge"
@@ -17,6 +16,7 @@ import (
 	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/tools"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
+	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 	"github.com/mia0x75/halo/models"
 )
 

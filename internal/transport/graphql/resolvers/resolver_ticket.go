@@ -19,7 +19,6 @@ import (
 
 	"github.com/mia0x75/halo/crons"
 	"github.com/mia0x75/halo/events"
-	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/platform/cache"
@@ -28,6 +27,7 @@ import (
 	"github.com/mia0x75/halo/internal/service"
 	"github.com/mia0x75/halo/internal/tools"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
+	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/validate"
 )

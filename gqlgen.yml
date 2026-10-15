@@ -4,20 +4,20 @@
 # for detailed .gqlgen.yml documentation.
 
 schema:
-- gqlapi/schema.graphql
+- internal/transport/graphql/gqlapi/schema.graphql
 
 exec:
-  dir: gqlapi
-  filename: gqlapi/generated.go
+  dir: internal/transport/graphql/gqlapi
+  filename: internal/transport/graphql/gqlapi/generated.go
   package: gqlapi
 
 model:
-  filename: gqlapi/models.go
+  filename: internal/transport/graphql/gqlapi/models.go
   package: gqlapi
 
 resolver:
   layout: follow-schema
-  filename_template: "resolvers/{name}.resolvers.go"
+  filename_template: "internal/transport/graphql/resolvers/{name}.resolvers.go"
   package: resolvers
   type: Resolver
 
@@ -85,31 +85,31 @@ models:
     model: github.com/mia0x75/halo/models.MemStats
 
   Int8:
-    model: github.com/mia0x75/halo/gqlapi.Int8
+    model: github.com/mia0x75/halo/internal/transport/graphql/gqlapi.Int8
 
   UInt8:
-    model: github.com/mia0x75/halo/gqlapi.UInt8
+    model: github.com/mia0x75/halo/internal/transport/graphql/gqlapi.UInt8
 
   Int16:
-    model: github.com/mia0x75/halo/gqlapi.Int16
+    model: github.com/mia0x75/halo/internal/transport/graphql/gqlapi.Int16
 
   UInt16:
-    model: github.com/mia0x75/halo/gqlapi.UInt16
+    model: github.com/mia0x75/halo/internal/transport/graphql/gqlapi.UInt16
 
   UInt:
-    model: github.com/mia0x75/halo/gqlapi.UInt
+    model: github.com/mia0x75/halo/internal/transport/graphql/gqlapi.UInt
 
   Int32:
-    model: github.com/mia0x75/halo/gqlapi.Int32
+    model: github.com/mia0x75/halo/internal/transport/graphql/gqlapi.Int32
 
   UInt32:
-    model: github.com/mia0x75/halo/gqlapi.UInt32
+    model: github.com/mia0x75/halo/internal/transport/graphql/gqlapi.UInt32
 
   Int64:
-    model: github.com/mia0x75/halo/gqlapi.Int64
+    model: github.com/mia0x75/halo/internal/transport/graphql/gqlapi.Int64
 
   UInt64:
-    model: github.com/mia0x75/halo/gqlapi.UInt64
+    model: github.com/mia0x75/halo/internal/transport/graphql/gqlapi.UInt64
 
   UpdateTemplateInput:
     model: github.com/mia0x75/halo/models.UpdateTemplateInput

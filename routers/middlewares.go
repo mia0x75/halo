@@ -16,11 +16,11 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/app"
 	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/tools"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
+	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 )
 
 const (

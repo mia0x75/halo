@@ -8,10 +8,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/auth"
 	"github.com/mia0x75/halo/internal/platform/cache"
 	"github.com/mia0x75/halo/internal/platform/config"
+	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 	"github.com/mia0x75/halo/models"
 )
 

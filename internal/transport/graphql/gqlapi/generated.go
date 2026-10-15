@@ -3745,7 +3745,7 @@ func (ec *executionContext) dir_auth_args(ctx context.Context, rawArgs map[strin
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "requires",
 		func(ctx context.Context, v any) ([]RoleEnum, error) {
-			return ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, v)
+			return ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -6008,7 +6008,7 @@ func (ec *executionContext) _ClusterConnection_pageInfo(ctx context.Context, fie
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *PageInfo) graphql.Marshaler {
-			return ec.marshalNPageInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐPageInfo(ctx, selections, v)
+			return ec.marshalNPageInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐPageInfo(ctx, selections, v)
 		},
 		true,
 		true,
@@ -6040,7 +6040,7 @@ func (ec *executionContext) _ClusterConnection_edges(ctx context.Context, field 
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*ClusterEdge) graphql.Marshaler {
-			return ec.marshalOClusterEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐClusterEdgeᚄ(ctx, selections, v)
+			return ec.marshalOClusterEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐClusterEdgeᚄ(ctx, selections, v)
 		},
 		true,
 		false,
@@ -6324,7 +6324,7 @@ func (ec *executionContext) _CommentConnection_pageInfo(ctx context.Context, fie
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *PageInfo) graphql.Marshaler {
-			return ec.marshalNPageInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐPageInfo(ctx, selections, v)
+			return ec.marshalNPageInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐPageInfo(ctx, selections, v)
 		},
 		true,
 		true,
@@ -6356,7 +6356,7 @@ func (ec *executionContext) _CommentConnection_edges(ctx context.Context, field 
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*CommentEdge) graphql.Marshaler {
-			return ec.marshalOCommentEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐCommentEdgeᚄ(ctx, selections, v)
+			return ec.marshalOCommentEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐCommentEdgeᚄ(ctx, selections, v)
 		},
 		true,
 		false,
@@ -6760,7 +6760,7 @@ func (ec *executionContext) _CronConnection_pageInfo(ctx context.Context, field 
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *PageInfo) graphql.Marshaler {
-			return ec.marshalNPageInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐPageInfo(ctx, selections, v)
+			return ec.marshalNPageInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐPageInfo(ctx, selections, v)
 		},
 		true,
 		true,
@@ -6792,7 +6792,7 @@ func (ec *executionContext) _CronConnection_edges(ctx context.Context, field gra
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*CronEdge) graphql.Marshaler {
-			return ec.marshalOCronEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐCronEdgeᚄ(ctx, selections, v)
+			return ec.marshalOCronEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐCronEdgeᚄ(ctx, selections, v)
 		},
 		true,
 		false,
@@ -7645,7 +7645,7 @@ func (ec *executionContext) _LogConnection_pageInfo(ctx context.Context, field g
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *PageInfo) graphql.Marshaler {
-			return ec.marshalNPageInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐPageInfo(ctx, selections, v)
+			return ec.marshalNPageInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐPageInfo(ctx, selections, v)
 		},
 		true,
 		true,
@@ -7677,7 +7677,7 @@ func (ec *executionContext) _LogConnection_edges(ctx context.Context, field grap
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*LogEdge) graphql.Marshaler {
-			return ec.marshalOLogEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐLogEdgeᚄ(ctx, selections, v)
+			return ec.marshalOLogEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐLogEdgeᚄ(ctx, selections, v)
 		},
 		true,
 		false,
@@ -8048,7 +8048,7 @@ func (ec *executionContext) _MutationRoot_login(ctx context.Context, field graph
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *LoginPayload) graphql.Marshaler {
-			return ec.marshalOLoginPayload2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐLoginPayload(ctx, selections, v)
+			return ec.marshalOLoginPayload2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐLoginPayload(ctx, selections, v)
 		},
 		true,
 		false,
@@ -8093,7 +8093,7 @@ func (ec *executionContext) _MutationRoot_logout(ctx context.Context, field grap
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -8135,7 +8135,7 @@ func (ec *executionContext) _MutationRoot_updateProfile(ctx context.Context, fie
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal *models.User
 					return zeroVal, err
@@ -8197,7 +8197,7 @@ func (ec *executionContext) _MutationRoot_updatePassword(ctx context.Context, fi
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -8259,7 +8259,7 @@ func (ec *executionContext) _MutationRoot_updateEmail(ctx context.Context, field
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -8321,7 +8321,7 @@ func (ec *executionContext) _MutationRoot_grantReviewers(ctx context.Context, fi
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -8383,7 +8383,7 @@ func (ec *executionContext) _MutationRoot_revokeReviewers(ctx context.Context, f
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -8445,7 +8445,7 @@ func (ec *executionContext) _MutationRoot_grantClusters(ctx context.Context, fie
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -8507,7 +8507,7 @@ func (ec *executionContext) _MutationRoot_revokeClusters(ctx context.Context, fi
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -8569,7 +8569,7 @@ func (ec *executionContext) _MutationRoot_grantRoles(ctx context.Context, field 
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -8631,7 +8631,7 @@ func (ec *executionContext) _MutationRoot_revokeRoles(ctx context.Context, field
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -8693,7 +8693,7 @@ func (ec *executionContext) _MutationRoot_createUser(ctx context.Context, field 
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal *models.User
 					return zeroVal, err
@@ -8755,7 +8755,7 @@ func (ec *executionContext) _MutationRoot_updateUser(ctx context.Context, field 
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal *models.User
 					return zeroVal, err
@@ -8817,7 +8817,7 @@ func (ec *executionContext) _MutationRoot_patchUserStatus(ctx context.Context, f
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -8879,7 +8879,7 @@ func (ec *executionContext) _MutationRoot_createCluster(ctx context.Context, fie
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal *models.Cluster
 					return zeroVal, err
@@ -8941,7 +8941,7 @@ func (ec *executionContext) _MutationRoot_updateCluster(ctx context.Context, fie
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal *models.Cluster
 					return zeroVal, err
@@ -9003,7 +9003,7 @@ func (ec *executionContext) _MutationRoot_removeCluster(ctx context.Context, fie
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -9065,7 +9065,7 @@ func (ec *executionContext) _MutationRoot_patchClusterStatus(ctx context.Context
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -9127,7 +9127,7 @@ func (ec *executionContext) _MutationRoot_updateTemplate(ctx context.Context, fi
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal *models.Template
 					return zeroVal, err
@@ -9189,7 +9189,7 @@ func (ec *executionContext) _MutationRoot_createTicket(ctx context.Context, fiel
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER"})
 				if err != nil {
 					var zeroVal *models.Ticket
 					return zeroVal, err
@@ -9251,7 +9251,7 @@ func (ec *executionContext) _MutationRoot_updateTicket(ctx context.Context, fiel
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER"})
 				if err != nil {
 					var zeroVal *models.Ticket
 					return zeroVal, err
@@ -9313,7 +9313,7 @@ func (ec *executionContext) _MutationRoot_removeTicket(ctx context.Context, fiel
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -9375,7 +9375,7 @@ func (ec *executionContext) _MutationRoot_patchTicketStatus(ctx context.Context,
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -9437,7 +9437,7 @@ func (ec *executionContext) _MutationRoot_executeTicket(ctx context.Context, fie
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"REVIEWER"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"REVIEWER"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -9499,7 +9499,7 @@ func (ec *executionContext) _MutationRoot_scheduleTicket(ctx context.Context, fi
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"REVIEWER"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"REVIEWER"})
 				if err != nil {
 					var zeroVal *models.Cron
 					return zeroVal, err
@@ -9561,7 +9561,7 @@ func (ec *executionContext) _MutationRoot_cancelCron(ctx context.Context, field 
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -9623,7 +9623,7 @@ func (ec *executionContext) _MutationRoot_createComment(ctx context.Context, fie
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal *models.Comment
 					return zeroVal, err
@@ -9685,7 +9685,7 @@ func (ec *executionContext) _MutationRoot_patchOptionValues(ctx context.Context,
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -9747,7 +9747,7 @@ func (ec *executionContext) _MutationRoot_patchRuleValues(ctx context.Context, f
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -9809,7 +9809,7 @@ func (ec *executionContext) _MutationRoot_patchRuleBitwise(ctx context.Context, 
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -9871,7 +9871,7 @@ func (ec *executionContext) _MutationRoot_createQuery(ctx context.Context, field
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER"})
 				if err != nil {
 					var zeroVal string
 					return zeroVal, err
@@ -9933,7 +9933,7 @@ func (ec *executionContext) _MutationRoot_analyzeQuery(ctx context.Context, fiel
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal string
 					return zeroVal, err
@@ -9995,7 +9995,7 @@ func (ec *executionContext) _MutationRoot_rewriteQuery(ctx context.Context, fiel
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal string
 					return zeroVal, err
@@ -10055,7 +10055,7 @@ func (ec *executionContext) _MutationRoot_activate(ctx context.Context, field gr
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *ActivatePayload) graphql.Marshaler {
-			return ec.marshalOActivatePayload2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐActivatePayload(ctx, selections, v)
+			return ec.marshalOActivatePayload2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐActivatePayload(ctx, selections, v)
 		},
 		true,
 		false,
@@ -11007,7 +11007,7 @@ func (ec *executionContext) _QueryConnection_pageInfo(ctx context.Context, field
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *PageInfo) graphql.Marshaler {
-			return ec.marshalNPageInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐPageInfo(ctx, selections, v)
+			return ec.marshalNPageInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐPageInfo(ctx, selections, v)
 		},
 		true,
 		true,
@@ -11039,7 +11039,7 @@ func (ec *executionContext) _QueryConnection_edges(ctx context.Context, field gr
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*QueryEdge) graphql.Marshaler {
-			return ec.marshalOQueryEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐQueryEdgeᚄ(ctx, selections, v)
+			return ec.marshalOQueryEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐQueryEdgeᚄ(ctx, selections, v)
 		},
 		true,
 		false,
@@ -11152,7 +11152,7 @@ func (ec *executionContext) _QueryRoot_cluster(ctx context.Context, field graphq
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "ADMIN"})
 				if err != nil {
 					var zeroVal *models.Cluster
 					return zeroVal, err
@@ -11214,7 +11214,7 @@ func (ec *executionContext) _QueryRoot_clusters(ctx context.Context, field graph
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal *ClusterConnection
 					return zeroVal, err
@@ -11230,7 +11230,7 @@ func (ec *executionContext) _QueryRoot_clusters(ctx context.Context, field graph
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *ClusterConnection) graphql.Marshaler {
-			return ec.marshalOClusterConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐClusterConnection(ctx, selections, v)
+			return ec.marshalOClusterConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐClusterConnection(ctx, selections, v)
 		},
 		true,
 		false,
@@ -11276,7 +11276,7 @@ func (ec *executionContext) _QueryRoot_clusterSearch(ctx context.Context, field 
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal *ClusterConnection
 					return zeroVal, err
@@ -11292,7 +11292,7 @@ func (ec *executionContext) _QueryRoot_clusterSearch(ctx context.Context, field 
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *ClusterConnection) graphql.Marshaler {
-			return ec.marshalOClusterConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐClusterConnection(ctx, selections, v)
+			return ec.marshalOClusterConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐClusterConnection(ctx, selections, v)
 		},
 		true,
 		false,
@@ -11338,7 +11338,7 @@ func (ec *executionContext) _QueryRoot_logs(ctx context.Context, field graphql.C
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal *LogConnection
 					return zeroVal, err
@@ -11354,7 +11354,7 @@ func (ec *executionContext) _QueryRoot_logs(ctx context.Context, field graphql.C
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *LogConnection) graphql.Marshaler {
-			return ec.marshalOLogConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐLogConnection(ctx, selections, v)
+			return ec.marshalOLogConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐLogConnection(ctx, selections, v)
 		},
 		true,
 		false,
@@ -11399,7 +11399,7 @@ func (ec *executionContext) _QueryRoot_me(ctx context.Context, field graphql.Col
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal *models.User
 					return zeroVal, err
@@ -11449,7 +11449,7 @@ func (ec *executionContext) _QueryRoot_options(ctx context.Context, field graphq
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal []*models.Option
 					return zeroVal, err
@@ -11544,7 +11544,7 @@ func (ec *executionContext) _QueryRoot_query(ctx context.Context, field graphql.
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER"})
 				if err != nil {
 					var zeroVal *models.Query
 					return zeroVal, err
@@ -11606,7 +11606,7 @@ func (ec *executionContext) _QueryRoot_queries(ctx context.Context, field graphq
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "ADMIN"})
 				if err != nil {
 					var zeroVal *QueryConnection
 					return zeroVal, err
@@ -11622,7 +11622,7 @@ func (ec *executionContext) _QueryRoot_queries(ctx context.Context, field graphq
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *QueryConnection) graphql.Marshaler {
-			return ec.marshalOQueryConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐQueryConnection(ctx, selections, v)
+			return ec.marshalOQueryConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐQueryConnection(ctx, selections, v)
 		},
 		true,
 		false,
@@ -11668,7 +11668,7 @@ func (ec *executionContext) _QueryRoot_querySearch(ctx context.Context, field gr
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "ADMIN"})
 				if err != nil {
 					var zeroVal *QueryConnection
 					return zeroVal, err
@@ -11684,7 +11684,7 @@ func (ec *executionContext) _QueryRoot_querySearch(ctx context.Context, field gr
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *QueryConnection) graphql.Marshaler {
-			return ec.marshalOQueryConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐQueryConnection(ctx, selections, v)
+			return ec.marshalOQueryConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐQueryConnection(ctx, selections, v)
 		},
 		true,
 		false,
@@ -11729,7 +11729,7 @@ func (ec *executionContext) _QueryRoot_templates(ctx context.Context, field grap
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal []*models.Template
 					return zeroVal, err
@@ -11780,7 +11780,7 @@ func (ec *executionContext) _QueryRoot_ticket(ctx context.Context, field graphql
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal *models.Ticket
 					return zeroVal, err
@@ -11842,7 +11842,7 @@ func (ec *executionContext) _QueryRoot_tickets(ctx context.Context, field graphq
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal *TicketConnection
 					return zeroVal, err
@@ -11858,7 +11858,7 @@ func (ec *executionContext) _QueryRoot_tickets(ctx context.Context, field graphq
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *TicketConnection) graphql.Marshaler {
-			return ec.marshalOTicketConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐTicketConnection(ctx, selections, v)
+			return ec.marshalOTicketConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTicketConnection(ctx, selections, v)
 		},
 		true,
 		false,
@@ -11904,7 +11904,7 @@ func (ec *executionContext) _QueryRoot_ticketSearch(ctx context.Context, field g
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal *TicketConnection
 					return zeroVal, err
@@ -11920,7 +11920,7 @@ func (ec *executionContext) _QueryRoot_ticketSearch(ctx context.Context, field g
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *TicketConnection) graphql.Marshaler {
-			return ec.marshalOTicketConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐTicketConnection(ctx, selections, v)
+			return ec.marshalOTicketConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTicketConnection(ctx, selections, v)
 		},
 		true,
 		false,
@@ -11966,7 +11966,7 @@ func (ec *executionContext) _QueryRoot_user(ctx context.Context, field graphql.C
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal *models.User
 					return zeroVal, err
@@ -12028,7 +12028,7 @@ func (ec *executionContext) _QueryRoot_users(ctx context.Context, field graphql.
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal *UserConnection
 					return zeroVal, err
@@ -12044,7 +12044,7 @@ func (ec *executionContext) _QueryRoot_users(ctx context.Context, field graphql.
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *UserConnection) graphql.Marshaler {
-			return ec.marshalOUserConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐUserConnection(ctx, selections, v)
+			return ec.marshalOUserConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐUserConnection(ctx, selections, v)
 		},
 		true,
 		false,
@@ -12090,7 +12090,7 @@ func (ec *executionContext) _QueryRoot_userSearch(ctx context.Context, field gra
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal *UserConnection
 					return zeroVal, err
@@ -12106,7 +12106,7 @@ func (ec *executionContext) _QueryRoot_userSearch(ctx context.Context, field gra
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *UserConnection) graphql.Marshaler {
-			return ec.marshalOUserConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐUserConnection(ctx, selections, v)
+			return ec.marshalOUserConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐUserConnection(ctx, selections, v)
 		},
 		true,
 		false,
@@ -12151,7 +12151,7 @@ func (ec *executionContext) _QueryRoot_avatars(ctx context.Context, field graphq
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"GUEST", "USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"GUEST", "USER", "DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal []*models.Avatar
 					return zeroVal, err
@@ -12202,7 +12202,7 @@ func (ec *executionContext) _QueryRoot_rule(ctx context.Context, field graphql.C
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal *models.Rule
 					return zeroVal, err
@@ -12263,7 +12263,7 @@ func (ec *executionContext) _QueryRoot_rules(ctx context.Context, field graphql.
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal []*models.Rule
 					return zeroVal, err
@@ -12314,7 +12314,7 @@ func (ec *executionContext) _QueryRoot_role(ctx context.Context, field graphql.C
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"GUEST", "USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"GUEST", "USER", "DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal *models.Role
 					return zeroVal, err
@@ -12375,7 +12375,7 @@ func (ec *executionContext) _QueryRoot_roles(ctx context.Context, field graphql.
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"GUEST", "USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"GUEST", "USER", "DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal []*models.Role
 					return zeroVal, err
@@ -12426,7 +12426,7 @@ func (ec *executionContext) _QueryRoot_glossaries(ctx context.Context, field gra
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"GUEST", "USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"GUEST", "USER", "DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal []*models.Glossary
 					return zeroVal, err
@@ -12488,7 +12488,7 @@ func (ec *executionContext) _QueryRoot_cron(ctx context.Context, field graphql.C
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal *models.Cron
 					return zeroVal, err
@@ -12550,7 +12550,7 @@ func (ec *executionContext) _QueryRoot_crons(ctx context.Context, field graphql.
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal *CronConnection
 					return zeroVal, err
@@ -12566,7 +12566,7 @@ func (ec *executionContext) _QueryRoot_crons(ctx context.Context, field graphql.
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *CronConnection) graphql.Marshaler {
-			return ec.marshalOCronConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐCronConnection(ctx, selections, v)
+			return ec.marshalOCronConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐCronConnection(ctx, selections, v)
 		},
 		true,
 		false,
@@ -12611,7 +12611,7 @@ func (ec *executionContext) _QueryRoot_tasks(ctx context.Context, field graphql.
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal []*models.Cron
 					return zeroVal, err
@@ -12662,7 +12662,7 @@ func (ec *executionContext) _QueryRoot_databases(ctx context.Context, field grap
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal []*Database
 					return zeroVal, err
@@ -12678,7 +12678,7 @@ func (ec *executionContext) _QueryRoot_databases(ctx context.Context, field grap
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v []*Database) graphql.Marshaler {
-			return ec.marshalODatabase2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐDatabaseᚄ(ctx, selections, v)
+			return ec.marshalODatabase2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐDatabaseᚄ(ctx, selections, v)
 		},
 		true,
 		false,
@@ -12765,7 +12765,7 @@ func (ec *executionContext) _QueryRoot_environments(ctx context.Context, field g
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *Environments) graphql.Marshaler {
-			return ec.marshalOEnvironments2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐEnvironments(ctx, selections, v)
+			return ec.marshalOEnvironments2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐEnvironments(ctx, selections, v)
 		},
 		true,
 		false,
@@ -12800,7 +12800,7 @@ func (ec *executionContext) _QueryRoot_metadata(ctx context.Context, field graph
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal string
 					return zeroVal, err
@@ -12862,7 +12862,7 @@ func (ec *executionContext) _QueryRoot_testCluster(ctx context.Context, field gr
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -12924,7 +12924,7 @@ func (ec *executionContext) _QueryRoot_testRegexp(ctx context.Context, field gra
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -13165,7 +13165,7 @@ func (ec *executionContext) _Role_Users(ctx context.Context, field graphql.Colle
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *UserConnection) graphql.Marshaler {
-			return ec.marshalOUserConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐUserConnection(ctx, selections, v)
+			return ec.marshalOUserConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐUserConnection(ctx, selections, v)
 		},
 		true,
 		false,
@@ -14075,7 +14075,7 @@ func (ec *executionContext) _StatementConnection_pageInfo(ctx context.Context, f
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *PageInfo) graphql.Marshaler {
-			return ec.marshalNPageInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐPageInfo(ctx, selections, v)
+			return ec.marshalNPageInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐPageInfo(ctx, selections, v)
 		},
 		true,
 		true,
@@ -14107,7 +14107,7 @@ func (ec *executionContext) _StatementConnection_edges(ctx context.Context, fiel
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*StatementEdge) graphql.Marshaler {
-			return ec.marshalOStatementEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐStatementEdgeᚄ(ctx, selections, v)
+			return ec.marshalOStatementEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐStatementEdgeᚄ(ctx, selections, v)
 		},
 		true,
 		false,
@@ -14373,7 +14373,7 @@ func (ec *executionContext) _SubscriptionRoot_ticketStatusChanged(ctx context.Co
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *TicketStatusChangePayload) graphql.Marshaler {
-			return ec.marshalNTicketStatusChangePayload2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐTicketStatusChangePayload(ctx, selections, v)
+			return ec.marshalNTicketStatusChangePayload2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTicketStatusChangePayload(ctx, selections, v)
 		},
 		true,
 		true,
@@ -14864,7 +14864,7 @@ func (ec *executionContext) _Ticket_Statements(ctx context.Context, field graphq
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *StatementConnection) graphql.Marshaler {
-			return ec.marshalNStatementConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐStatementConnection(ctx, selections, v)
+			return ec.marshalNStatementConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐStatementConnection(ctx, selections, v)
 		},
 		true,
 		true,
@@ -14908,7 +14908,7 @@ func (ec *executionContext) _Ticket_Comments(ctx context.Context, field graphql.
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *CommentConnection) graphql.Marshaler {
-			return ec.marshalOCommentConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐCommentConnection(ctx, selections, v)
+			return ec.marshalOCommentConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐCommentConnection(ctx, selections, v)
 		},
 		true,
 		false,
@@ -14997,7 +14997,7 @@ func (ec *executionContext) _TicketConnection_pageInfo(ctx context.Context, fiel
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *PageInfo) graphql.Marshaler {
-			return ec.marshalNPageInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐPageInfo(ctx, selections, v)
+			return ec.marshalNPageInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐPageInfo(ctx, selections, v)
 		},
 		true,
 		true,
@@ -15029,7 +15029,7 @@ func (ec *executionContext) _TicketConnection_edges(ctx context.Context, field g
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*TicketEdge) graphql.Marshaler {
-			return ec.marshalOTicketEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐTicketEdgeᚄ(ctx, selections, v)
+			return ec.marshalOTicketEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTicketEdgeᚄ(ctx, selections, v)
 		},
 		true,
 		false,
@@ -15500,7 +15500,7 @@ func (ec *executionContext) _User_Clusters(ctx context.Context, field graphql.Co
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *ClusterConnection) graphql.Marshaler {
-			return ec.marshalOClusterConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐClusterConnection(ctx, selections, v)
+			return ec.marshalOClusterConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐClusterConnection(ctx, selections, v)
 		},
 		true,
 		false,
@@ -15544,7 +15544,7 @@ func (ec *executionContext) _User_Tickets(ctx context.Context, field graphql.Col
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *TicketConnection) graphql.Marshaler {
-			return ec.marshalOTicketConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐTicketConnection(ctx, selections, v)
+			return ec.marshalOTicketConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTicketConnection(ctx, selections, v)
 		},
 		true,
 		false,
@@ -15588,7 +15588,7 @@ func (ec *executionContext) _User_Queries(ctx context.Context, field graphql.Col
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *QueryConnection) graphql.Marshaler {
-			return ec.marshalOQueryConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐQueryConnection(ctx, selections, v)
+			return ec.marshalOQueryConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐQueryConnection(ctx, selections, v)
 		},
 		true,
 		false,
@@ -15677,7 +15677,7 @@ func (ec *executionContext) _UserConnection_pageInfo(ctx context.Context, field 
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *PageInfo) graphql.Marshaler {
-			return ec.marshalNPageInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐPageInfo(ctx, selections, v)
+			return ec.marshalNPageInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐPageInfo(ctx, selections, v)
 		},
 		true,
 		true,
@@ -15709,7 +15709,7 @@ func (ec *executionContext) _UserConnection_edges(ctx context.Context, field gra
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*UserEdge) graphql.Marshaler {
-			return ec.marshalOUserEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐUserEdgeᚄ(ctx, selections, v)
+			return ec.marshalOUserEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐUserEdgeᚄ(ctx, selections, v)
 		},
 		true,
 		false,
@@ -24138,7 +24138,7 @@ func (ec *executionContext) marshalNCluster2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋm
 	return ec._Cluster(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNClusterEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐClusterEdge(ctx context.Context, sel ast.SelectionSet, v *ClusterEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNClusterEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐClusterEdge(ctx context.Context, sel ast.SelectionSet, v *ClusterEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -24148,7 +24148,7 @@ func (ec *executionContext) marshalNClusterEdge2ᚖgithubᚗcomᚋmia0x75ᚋhalo
 	return ec._ClusterEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNCommentEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐCommentEdge(ctx context.Context, sel ast.SelectionSet, v *CommentEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNCommentEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐCommentEdge(ctx context.Context, sel ast.SelectionSet, v *CommentEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -24183,7 +24183,7 @@ func (ec *executionContext) unmarshalNCreateUserInput2githubᚗcomᚋmia0x75ᚋh
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNCronEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐCronEdge(ctx context.Context, sel ast.SelectionSet, v *CronEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNCronEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐCronEdge(ctx context.Context, sel ast.SelectionSet, v *CronEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -24193,7 +24193,7 @@ func (ec *executionContext) marshalNCronEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋ
 	return ec._CronEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNDatabase2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐDatabase(ctx context.Context, sel ast.SelectionSet, v *Database) graphql.Marshaler {
+func (ec *executionContext) marshalNDatabase2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐDatabase(ctx context.Context, sel ast.SelectionSet, v *Database) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -24276,7 +24276,7 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNLogEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐLogEdge(ctx context.Context, sel ast.SelectionSet, v *LogEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNLogEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐLogEdge(ctx context.Context, sel ast.SelectionSet, v *LogEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -24301,7 +24301,7 @@ func (ec *executionContext) marshalNMemStats2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋ
 	return ec._MemStats(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNPageInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v *PageInfo) graphql.Marshaler {
+func (ec *executionContext) marshalNPageInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v *PageInfo) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -24361,7 +24361,7 @@ func (ec *executionContext) marshalNProcessStats2ᚖgithubᚗcomᚋmia0x75ᚋhal
 	return ec._ProcessStats(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNQueryEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐQueryEdge(ctx context.Context, sel ast.SelectionSet, v *QueryEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNQueryEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐQueryEdge(ctx context.Context, sel ast.SelectionSet, v *QueryEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -24391,23 +24391,23 @@ func (ec *executionContext) unmarshalNRevokeRolesInput2githubᚗcomᚋmia0x75ᚋ
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNRoleEnum2githubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnum(ctx context.Context, v any) (RoleEnum, error) {
+func (ec *executionContext) unmarshalNRoleEnum2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnum(ctx context.Context, v any) (RoleEnum, error) {
 	var res RoleEnum
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNRoleEnum2githubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnum(ctx context.Context, sel ast.SelectionSet, v RoleEnum) graphql.Marshaler {
+func (ec *executionContext) marshalNRoleEnum2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnum(ctx context.Context, sel ast.SelectionSet, v RoleEnum) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx context.Context, v any) ([]RoleEnum, error) {
+func (ec *executionContext) unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx context.Context, v any) ([]RoleEnum, error) {
 	vSlice := graphql.CoerceList(v)
 	var err error
 	res := make([]RoleEnum, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNRoleEnum2githubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnum(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNRoleEnum2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnum(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -24415,11 +24415,11 @@ func (ec *executionContext) unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhalo�
 	return res, nil
 }
 
-func (ec *executionContext) marshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnumᚄ(ctx context.Context, sel ast.SelectionSet, v []RoleEnum) graphql.Marshaler {
+func (ec *executionContext) marshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx context.Context, sel ast.SelectionSet, v []RoleEnum) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNRoleEnum2githubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐRoleEnum(ctx, sel, v[i])
+		return ec.marshalNRoleEnum2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnum(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -24441,7 +24441,7 @@ func (ec *executionContext) unmarshalNSoarQueryInput2githubᚗcomᚋmia0x75ᚋha
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNStatementConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐStatementConnection(ctx context.Context, sel ast.SelectionSet, v *StatementConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNStatementConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐStatementConnection(ctx context.Context, sel ast.SelectionSet, v *StatementConnection) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -24451,7 +24451,7 @@ func (ec *executionContext) marshalNStatementConnection2ᚖgithubᚗcomᚋmia0x7
 	return ec._StatementConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNStatementEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐStatementEdge(ctx context.Context, sel ast.SelectionSet, v *StatementEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNStatementEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐStatementEdge(ctx context.Context, sel ast.SelectionSet, v *StatementEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -24526,7 +24526,7 @@ func (ec *executionContext) marshalNTicket2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmo
 	return ec._Ticket(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNTicketEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐTicketEdge(ctx context.Context, sel ast.SelectionSet, v *TicketEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNTicketEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTicketEdge(ctx context.Context, sel ast.SelectionSet, v *TicketEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -24536,7 +24536,7 @@ func (ec *executionContext) marshalNTicketEdge2ᚖgithubᚗcomᚋmia0x75ᚋhalo�
 	return ec._TicketEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNTicketStatusChangePayload2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐTicketStatusChangePayload(ctx context.Context, sel ast.SelectionSet, v *TicketStatusChangePayload) graphql.Marshaler {
+func (ec *executionContext) marshalNTicketStatusChangePayload2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTicketStatusChangePayload(ctx context.Context, sel ast.SelectionSet, v *TicketStatusChangePayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -24624,7 +24624,7 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmode
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNUserEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐUserEdge(ctx context.Context, sel ast.SelectionSet, v *UserEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNUserEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐUserEdge(ctx context.Context, sel ast.SelectionSet, v *UserEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -24784,7 +24784,7 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) marshalOActivatePayload2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐActivatePayload(ctx context.Context, sel ast.SelectionSet, v *ActivatePayload) graphql.Marshaler {
+func (ec *executionContext) marshalOActivatePayload2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐActivatePayload(ctx context.Context, sel ast.SelectionSet, v *ActivatePayload) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -24848,21 +24848,21 @@ func (ec *executionContext) marshalOCluster2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋm
 	return ec._Cluster(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOClusterConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐClusterConnection(ctx context.Context, sel ast.SelectionSet, v *ClusterConnection) graphql.Marshaler {
+func (ec *executionContext) marshalOClusterConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐClusterConnection(ctx context.Context, sel ast.SelectionSet, v *ClusterConnection) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._ClusterConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOClusterEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐClusterEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*ClusterEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOClusterEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐClusterEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*ClusterEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNClusterEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐClusterEdge(ctx, sel, v[i])
+		return ec.marshalNClusterEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐClusterEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -24881,21 +24881,21 @@ func (ec *executionContext) marshalOComment2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋm
 	return ec._Comment(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOCommentConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐCommentConnection(ctx context.Context, sel ast.SelectionSet, v *CommentConnection) graphql.Marshaler {
+func (ec *executionContext) marshalOCommentConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐCommentConnection(ctx context.Context, sel ast.SelectionSet, v *CommentConnection) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._CommentConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOCommentEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐCommentEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*CommentEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOCommentEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐCommentEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*CommentEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNCommentEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐCommentEdge(ctx, sel, v[i])
+		return ec.marshalNCommentEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐCommentEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -24927,21 +24927,21 @@ func (ec *executionContext) marshalOCron2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmode
 	return ec._Cron(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOCronConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐCronConnection(ctx context.Context, sel ast.SelectionSet, v *CronConnection) graphql.Marshaler {
+func (ec *executionContext) marshalOCronConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐCronConnection(ctx context.Context, sel ast.SelectionSet, v *CronConnection) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._CronConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOCronEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐCronEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*CronEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOCronEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐCronEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*CronEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNCronEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐCronEdge(ctx, sel, v[i])
+		return ec.marshalNCronEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐCronEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -24953,14 +24953,14 @@ func (ec *executionContext) marshalOCronEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhalo
 	return ret
 }
 
-func (ec *executionContext) marshalODatabase2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐDatabaseᚄ(ctx context.Context, sel ast.SelectionSet, v []*Database) graphql.Marshaler {
+func (ec *executionContext) marshalODatabase2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐDatabaseᚄ(ctx context.Context, sel ast.SelectionSet, v []*Database) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNDatabase2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐDatabase(ctx, sel, v[i])
+		return ec.marshalNDatabase2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐDatabase(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -24972,7 +24972,7 @@ func (ec *executionContext) marshalODatabase2ᚕᚖgithubᚗcomᚋmia0x75ᚋhalo
 	return ret
 }
 
-func (ec *executionContext) marshalOEnvironments2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐEnvironments(ctx context.Context, sel ast.SelectionSet, v *Environments) graphql.Marshaler {
+func (ec *executionContext) marshalOEnvironments2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐEnvironments(ctx context.Context, sel ast.SelectionSet, v *Environments) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -25024,21 +25024,21 @@ func (ec *executionContext) marshalOLog2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmodel
 	return ec._Log(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOLogConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐLogConnection(ctx context.Context, sel ast.SelectionSet, v *LogConnection) graphql.Marshaler {
+func (ec *executionContext) marshalOLogConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐLogConnection(ctx context.Context, sel ast.SelectionSet, v *LogConnection) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._LogConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOLogEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐLogEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*LogEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOLogEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐLogEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*LogEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNLogEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐLogEdge(ctx, sel, v[i])
+		return ec.marshalNLogEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐLogEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -25050,7 +25050,7 @@ func (ec *executionContext) marshalOLogEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhalo�
 	return ret
 }
 
-func (ec *executionContext) marshalOLoginPayload2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐLoginPayload(ctx context.Context, sel ast.SelectionSet, v *LoginPayload) graphql.Marshaler {
+func (ec *executionContext) marshalOLoginPayload2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐLoginPayload(ctx context.Context, sel ast.SelectionSet, v *LoginPayload) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -25084,21 +25084,21 @@ func (ec *executionContext) marshalOQuery2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmod
 	return ec._Query(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOQueryConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐQueryConnection(ctx context.Context, sel ast.SelectionSet, v *QueryConnection) graphql.Marshaler {
+func (ec *executionContext) marshalOQueryConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐQueryConnection(ctx context.Context, sel ast.SelectionSet, v *QueryConnection) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._QueryConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOQueryEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐQueryEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*QueryEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOQueryEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐQueryEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*QueryEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNQueryEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐQueryEdge(ctx, sel, v[i])
+		return ec.marshalNQueryEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐQueryEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -25157,14 +25157,14 @@ func (ec *executionContext) marshalOStatement2ᚖgithubᚗcomᚋmia0x75ᚋhalo�
 	return ec._Statement(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOStatementEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐStatementEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*StatementEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOStatementEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐStatementEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*StatementEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNStatementEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐStatementEdge(ctx, sel, v[i])
+		return ec.marshalNStatementEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐStatementEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -25282,21 +25282,21 @@ func (ec *executionContext) marshalOTicket2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmo
 	return ec._Ticket(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOTicketConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐTicketConnection(ctx context.Context, sel ast.SelectionSet, v *TicketConnection) graphql.Marshaler {
+func (ec *executionContext) marshalOTicketConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTicketConnection(ctx context.Context, sel ast.SelectionSet, v *TicketConnection) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._TicketConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOTicketEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐTicketEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*TicketEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOTicketEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTicketEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*TicketEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNTicketEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐTicketEdge(ctx, sel, v[i])
+		return ec.marshalNTicketEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTicketEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -25372,21 +25372,21 @@ func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋmode
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOUserConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐUserConnection(ctx context.Context, sel ast.SelectionSet, v *UserConnection) graphql.Marshaler {
+func (ec *executionContext) marshalOUserConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐUserConnection(ctx context.Context, sel ast.SelectionSet, v *UserConnection) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._UserConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOUserEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐUserEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*UserEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOUserEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐUserEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*UserEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNUserEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋgqlapiᚐUserEdge(ctx, sel, v[i])
+		return ec.marshalNUserEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐUserEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
