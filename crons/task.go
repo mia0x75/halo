@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/mia0x75/halo/internal/tools"
 	"github.com/mia0x75/halo/models"
-	"github.com/mia0x75/halo/tools"
 )
 
 // Task holds information about task

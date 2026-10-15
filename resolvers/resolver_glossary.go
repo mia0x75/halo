@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/mia0x75/halo/caches"
+	"github.com/mia0x75/halo/internal/tools"
 	"github.com/mia0x75/halo/models"
-	"github.com/mia0x75/halo/tools"
 )
 
 // Glossaries 根据分组信息获取字典信息

@@ -11,7 +11,7 @@ import (
 // TimeoutedExec executes a timeouted command.
 // The program path is defined by the name arguments, args are passed as arguments to the program.
 //
-// TimeoutedExec returns process output as a string (stdout) , and stderr as an error.
+// TimeoutedExec returns process output as a string (stdout), and stderr as an error.
 func TimeoutedExec(timeout time.Duration, name string, arg ...string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
