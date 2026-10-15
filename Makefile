@@ -58,7 +58,7 @@ build: fmt
 	@echo "$(CGREEN)Building ...$(CEND)"
 	@bash ./genver.sh $(GO_VERSION_MIN)
 	@ret=0 && for d in $$(go list -f '{{if (eq .Name "main")}}{{.ImportPath}}{{end}}' ./); do \
-		GOOS=linux GOARCH=amd64 go build -mod=readonly -ldflags="-s -w" -race -o bin/$(BINARY) $$d || ret=$$? ; \
+		GOOS=linux GOARCH=amd64 go build -trimpath -mod=readonly -ldflags="-s -w" -race -o bin/$(BINARY) $$d || ret=$$? ; \
 	done ; exit $$ret
 	@echo "build Success!"
 

@@ -13,6 +13,10 @@ import (
 )
 
 // ghostCmd represents the execute command
+// TODO:
+// integrate the following 2 open source tools in the future
+// 1. https://github.com/github/gh-ost
+// 2. https://github.com/xataio/pgroll
 var ghostCmd = &cobra.Command{
 	Use:   "ghost",
 	Short: "Gh-ost hooks",
