@@ -16,7 +16,7 @@ import (
 func (r *mutationRootResolver) UpdateTemplate(ctx context.Context, input *models.UpdateTemplateInput) (template *models.Template, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
-		// credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		// credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		t, getErr := r.app.Services.Template.GetByUUID(ctx, input.TemplateUUID)
 		if getErr != nil {
 			if errors.Is(getErr, domain.ErrNotFound) {
@@ -52,6 +52,6 @@ func (r *mutationRootResolver) UpdateTemplate(ctx context.Context, input *models
 
 // Templates 邮件模板在页面上是一个页面处理所有内容，所以不需要考虑分页
 func (r *queryRootResolver) Templates(ctx context.Context) (L []*models.Template, err error) {
-	L = caches.TemplatesMap.All()
+	L = cache.TemplatesMap.All()
 	return
 }

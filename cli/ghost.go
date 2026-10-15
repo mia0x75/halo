@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
-	"github.com/mia0x75/halo/g"
+	"github.com/mia0x75/halo/internal/platform/config"
 )
 
 // ghostCmd represents the execute command
@@ -77,7 +77,7 @@ func ghost(cmd *cobra.Command, args []string) {
 			err = fmt.Errorf("Missing halo config")
 			break
 		} else {
-			g.ParseConfig(cfg)
+			config.ParseConfig(cfg)
 		}
 
 		application, appErr := newApp()

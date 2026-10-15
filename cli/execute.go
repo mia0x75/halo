@@ -11,9 +11,9 @@ import (
 
 	"github.com/mia0x75/halo/crons"
 	"github.com/mia0x75/halo/events"
-	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/crypto"
 	"github.com/mia0x75/halo/internal/service"
 	"github.com/mia0x75/halo/models"
@@ -43,7 +43,7 @@ func execute(cmd *cobra.Command, args []string) {
 			break
 		} else {
 			buf.WriteString(cfg)
-			g.ParseConfig(cfg)
+			config.ParseConfig(cfg)
 		}
 
 		application, appErr := newApp()
@@ -95,7 +95,7 @@ func execute(cmd *cobra.Command, args []string) {
 		}
 		cluster := bridge.ClusterFromDomain(domainCluster)
 
-		password, _ := crypto.DecryptAES(cluster.Password, g.Config().Secret.Crypto)
+		password, _ := crypto.DecryptAES(cluster.Password, config.Config().Secret.Crypto)
 		target := bridge.ClusterToDomain(cluster)
 		target.Database = ticket.Database
 

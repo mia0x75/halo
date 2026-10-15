@@ -8,10 +8,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/mia0x75/halo/caches"
-	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/auth"
+	"github.com/mia0x75/halo/internal/platform/cache"
+	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/models"
 )
 
@@ -52,12 +52,12 @@ func Authenticate(input string) (*Credential, error) {
 		return nil, fmt.Errorf("token is obsolete (a newer one was issued)")
 	}
 
-	user := caches.UsersMap.Any(func(elem *models.User) bool { return elem.UUID == uuid })
+	user := cache.UsersMap.Any(func(elem *models.User) bool { return elem.UUID == uuid })
 	if user == nil {
 		return nil, fmt.Errorf("the token owner does not exist in system")
 	}
 
-	edges := caches.EdgesMap.Filter(func(elem *models.Edge) bool {
+	edges := cache.EdgesMap.Filter(func(elem *models.Edge) bool {
 		return elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToRole] &&
 			elem.AncestorID == user.UserID
 	})
@@ -65,7 +65,7 @@ func Authenticate(input string) (*Credential, error) {
 		return nil, fmt.Errorf("there's no role binding the user")
 	}
 
-	roles := caches.RolesMap.Filter(func(elem *models.Role) bool {
+	roles := cache.RolesMap.Filter(func(elem *models.Role) bool {
 		for _, r := range edges {
 			if elem.RoleID == r.DescendantID {
 				return true
@@ -87,7 +87,7 @@ func Revoke(userUUID string) {
 
 // FromContext reads the credential stored by the HTTP middleware.
 func FromContext(ctx context.Context) *Credential {
-	value := ctx.Value(g.CREDENTIAL_KEY)
+	value := ctx.Value(config.CREDENTIAL_KEY)
 	if value == nil {
 		return nil
 	}

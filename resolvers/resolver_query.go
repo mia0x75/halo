@@ -15,11 +15,11 @@ import (
 	"github.com/mia0x75/parser/ast"
 
 	"github.com/mia0x75/halo/events"
-	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/platform/cache"
+	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/crypto"
 	"github.com/mia0x75/halo/internal/tools"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
@@ -140,7 +140,7 @@ func (r *mutationRootResolver) CreateQuery(ctx context.Context, input models.Cre
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		user := credential.User
 
 		if strings.TrimSpace(user.Name) == "" {
@@ -149,7 +149,7 @@ L:
 			break
 		}
 
-		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+		cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 			return elem.UUID == input.ClusterUUID
 		})
 
@@ -166,7 +166,7 @@ L:
 		}
 
 		// 检查群集关联
-		if !caches.EdgesMap.Include(func(elem *models.Edge) bool {
+		if !cache.EdgesMap.Include(func(elem *models.Edge) bool {
 			if elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToCluster] &&
 				elem.AncestorID == user.UserID &&
 				elem.DescendantID == cluster.ClusterID {
@@ -179,7 +179,7 @@ L:
 			break
 		}
 
-		password, _ := crypto.DecryptAES(cluster.Password, g.Config().Secret.Crypto)
+		password, _ := crypto.DecryptAES(cluster.Password, config.Config().Secret.Crypto)
 		target := bridge.ClusterToDomain(cluster)
 		target.Database = input.Database
 
@@ -285,9 +285,9 @@ func (r *mutationRootResolver) AnalyzeQuery(ctx context.Context, input models.So
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		user := credential.User
-		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+		cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 			return elem.UUID == input.ClusterUUID
 		})
 		if cluster == nil {
@@ -303,7 +303,7 @@ L:
 		}
 
 		// 检查群集关联
-		if !caches.EdgesMap.Include(func(elem *models.Edge) bool {
+		if !cache.EdgesMap.Include(func(elem *models.Edge) bool {
 			if elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToCluster] &&
 				elem.AncestorID == user.UserID &&
 				elem.DescendantID == cluster.ClusterID {
@@ -317,7 +317,7 @@ L:
 		}
 
 		passwd := func(c *models.Cluster) []byte {
-			bs, _ := crypto.DecryptAES(c.Password, g.Config().Secret.Crypto)
+			bs, _ := crypto.DecryptAES(c.Password, config.Config().Secret.Crypto)
 			return bs
 		}
 
@@ -385,9 +385,9 @@ func (r *mutationRootResolver) RewriteQuery(ctx context.Context, input models.So
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		user := credential.User
-		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+		cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 			return elem.UUID == input.ClusterUUID
 		})
 		if cluster == nil {
@@ -403,7 +403,7 @@ L:
 		}
 
 		// 检查群集关联
-		if !caches.EdgesMap.Include(func(elem *models.Edge) bool {
+		if !cache.EdgesMap.Include(func(elem *models.Edge) bool {
 			if elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToCluster] &&
 				elem.AncestorID == user.UserID &&
 				elem.DescendantID == cluster.ClusterID {
@@ -417,7 +417,7 @@ L:
 		}
 
 		passwd := func(c *models.Cluster) []byte {
-			bs, _ := crypto.DecryptAES(c.Password, g.Config().Secret.Crypto)
+			bs, _ := crypto.DecryptAES(c.Password, config.Config().Secret.Crypto)
 			return bs
 		}
 
@@ -484,7 +484,7 @@ type queryResolver struct{ *Resolver }
 // Cluster 查询发起的目标群集信息
 func (r *queryResolver) Cluster(ctx context.Context, obj *models.Query) (cluster *models.Cluster, err error) {
 	rc := gqlapi.ReturnCodeOK
-	cluster = caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+	cluster = cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 		return elem.ClusterID == obj.ClusterID
 	})
 	if cluster == nil {
@@ -497,7 +497,7 @@ func (r *queryResolver) Cluster(ctx context.Context, obj *models.Query) (cluster
 // User 查询发起的用户
 func (r *queryResolver) User(ctx context.Context, obj *models.Query) (user *models.User, err error) {
 	rc := gqlapi.ReturnCodeOK
-	user = caches.UsersMap.Any(func(elem *models.User) bool {
+	user = cache.UsersMap.Any(func(elem *models.User) bool {
 		return elem.UserID == obj.UserID
 	})
 

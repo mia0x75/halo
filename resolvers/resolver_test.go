@@ -13,10 +13,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/app"
 	"github.com/mia0x75/halo/internal/platform/cache"
+	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/db"
 	"github.com/mia0x75/halo/models"
 )
@@ -36,11 +36,11 @@ func TestMain(m *testing.M) {
 		fmt.Printf("skipping resolvers integration tests: config %s not found\n", *cfg)
 		os.Exit(0)
 	}
-	g.ParseConfig(*cfg)
+	config.ParseConfig(*cfg)
 
-	application, err := app.New(context.Background(), db.Config{Addr: g.Config().Database.Addr})
+	application, err := app.New(context.Background(), db.Config{Addr: config.Config().Database.Addr})
 	if err == nil {
-		caches.Init(application.Repos)
+		cache.Init(application.Repos)
 	}
 
 	Login()
@@ -263,7 +263,7 @@ func TestUpdateTicket(t *testing.T) {
 				Database: $db,
 				Content:$content,
 				ClusterUUID:$clusterid,
-				ReviewerUUID:$reviewerid 
+				ReviewerUUID:$reviewerid
 			}
 		){
 			Database
@@ -432,7 +432,7 @@ func TestPatchTicket(t *testing.T) {
 				TicketUUID: $id,
 				Status:     $status
 			}
-		) 
+		)
 	}`)
 
 	req.Header.Set("Cache-Control", "no-cache")
@@ -772,7 +772,7 @@ func TestPatchUserStatus(t *testing.T) {
 			input:{
 			UserUUID:$id,
 			Status:$status
-		  } 
+		  }
 	  )
   }
   `)
@@ -1222,7 +1222,7 @@ func TestRevokeRoles(t *testing.T) {
 			input:{
 			  UserUUID:$id,
 			  RoleUUIDs:  $roleid
-			}) 
+			})
 	}`)
 
 	var respData struct {

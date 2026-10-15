@@ -1,4 +1,4 @@
-package g
+package config
 
 const CREDENTIAL_KEY = "Credential"
 

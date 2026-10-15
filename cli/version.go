@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/mia0x75/halo/g"
+	"github.com/mia0x75/halo/internal/app"
 )
 
 // versionCmd represents the bye command
@@ -15,12 +15,12 @@ var versionCmd = &cobra.Command{
 	Long:  `This subcommand shows version information`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n",
-			"Version", g.Version,
-			"Git commit", g.Git,
-			"Compile", g.Compile,
-			"Distro", g.Distro,
-			"Kernel", g.Kernel,
-			"Branch", g.Branch,
+			"Version", app.Version,
+			"Git commit", app.Git,
+			"Compile", app.Compile,
+			"Distro", app.Distro,
+			"Kernel", app.Kernel,
+			"Branch", app.Branch,
 		)
 	},
 }

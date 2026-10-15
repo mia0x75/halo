@@ -16,8 +16,9 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
+	"github.com/mia0x75/halo/internal/app"
+	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/tools"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 )
@@ -180,14 +181,14 @@ func Compress(next http.Handler) http.Handler {
 
 func Headers(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set(HeaderServer, fmt.Sprintf("Golang/mux %s", g.Version))
+		w.Header().Set(HeaderServer, fmt.Sprintf("Golang/mux %s", app.Version))
 		next.ServeHTTP(w, r)
 	})
 }
 
 func Context(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get(g.Config().Secret.Jwt.TokenName)
+		token := r.Header.Get(config.Config().Secret.Jwt.TokenName)
 		for {
 			// 没有提供令牌不处理
 			if strings.TrimSpace(token) == "" {
@@ -197,7 +198,7 @@ func Context(next http.Handler) http.Handler {
 			if err != nil {
 				break
 			}
-			ctx := context.WithValue(r.Context(), g.CREDENTIAL_KEY, *credential)
+			ctx := context.WithValue(r.Context(), config.CREDENTIAL_KEY, *credential)
 			r = r.WithContext(ctx)
 
 			break

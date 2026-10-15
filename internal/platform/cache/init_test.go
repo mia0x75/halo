@@ -1,4 +1,4 @@
-package caches_test
+package cache_test
 
 import (
 	"context"
@@ -34,13 +34,13 @@ func TestInitSmoke(t *testing.T) {
 	}
 	defer func() { _ = application.Close() }()
 
-	caches.Init(application.Repos)
-	defer caches.LoopInit()
+	cache.Init(application.Repos)
+	defer cache.LoopInit()
 
 	t.Logf("users=%d rules=%d clusters=%d options=%d edges=%d avatars=%d",
-		caches.UsersMap.Count(), caches.RulesMap.Count(), caches.ClustersMap.Count(),
-		caches.OptionsMap.Count(), caches.EdgesMap.Count(), caches.AvatarsMap.Count())
-	if caches.UsersMap.Count() == 0 || caches.RulesMap.Count() == 0 {
+		cache.UsersMap.Count(), cache.RulesMap.Count(), cache.ClustersMap.Count(),
+		cache.OptionsMap.Count(), cache.EdgesMap.Count(), cache.AvatarsMap.Count())
+	if cache.UsersMap.Count() == 0 || cache.RulesMap.Count() == 0 {
 		t.Fatal("caches did not load")
 	}
 }

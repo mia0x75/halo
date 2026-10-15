@@ -9,12 +9,12 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 
-	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/agent"
 	"github.com/mia0x75/halo/internal/app"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/domain"
+	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/tools"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/models"
@@ -33,7 +33,7 @@ func SubscriptionAuth(ctx context.Context, requires []gqlapi.RoleEnum) (user *mo
 		credential := transportauth.Credential{}
 		ok := false
 
-		credential, ok = ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential, ok = ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		if !ok {
 			payload := transport.GetInitPayload(ctx)
 			if payload == nil {
@@ -41,7 +41,7 @@ func SubscriptionAuth(ctx context.Context, requires []gqlapi.RoleEnum) (user *mo
 				err = fmt.Errorf("错误代码: %s, 错误信息: 没有提供访问令牌、访问令牌被收回或已过期，访问被拒绝。", rc)
 				break
 			}
-			token := payload[g.Config().Secret.Jwt.TokenName].(string)
+			token := payload[config.Config().Secret.Jwt.TokenName].(string)
 			cred, err := transportauth.Authenticate(token)
 			if err != nil {
 				rc = gqlapi.ReturnCodeUnauthorized

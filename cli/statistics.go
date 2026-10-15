@@ -12,8 +12,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
-	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/internal/domain"
+	"github.com/mia0x75/halo/internal/platform/config"
 )
 
 // statisticsCmd represents the statistics command
@@ -40,7 +40,7 @@ func statistics(cmd *cobra.Command, args []string) {
 			break
 		} else {
 			buf.WriteString(cfg)
-			g.ParseConfig(cfg)
+			config.ParseConfig(cfg)
 		}
 
 		application, appErr := newApp()

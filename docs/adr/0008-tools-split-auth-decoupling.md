@@ -20,7 +20,7 @@ Accepted
 
 ## 关键约束
 
-- `caches` 已 import `service`（`caches.Init(r service.Repos)`），故 `service` 不能反向依赖
+- `caches` 已 import `service`（`cache.Init(r service.Repos)`），故 `service` 不能反向依赖
   `caches`。任务书建议"store 搬 service"会成环，因此解析逻辑归 `internal/transport/auth`。
 - `JWT.issuer`/`secret` 从未从配置接线（历史潜在 bug）。空 secret 保持旧行为不变，避免
   token 全失效（行为变更），待后续接线。

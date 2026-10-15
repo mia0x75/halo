@@ -6,16 +6,16 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/platform/cache"
+	"github.com/mia0x75/halo/internal/platform/env"
 	"github.com/mia0x75/halo/internal/tools"
 	"github.com/mia0x75/halo/models"
 )
 
 // Statistics 根据分组获取统计信息
 func (r *queryRootResolver) Statistics(ctx context.Context, groups []string) (L []*models.Statistic, err error) {
-	L = caches.StatisticsMap.Filter(func(elem *models.Statistic) bool {
+	L = cache.StatisticsMap.Filter(func(elem *models.Statistic) bool {
 		return tools.Contains(groups, elem.Group)
 	})
 
@@ -27,11 +27,11 @@ func (r *queryRootResolver) Statistics(ctx context.Context, groups []string) (L 
 }
 
 // Environments 系统运行环境状态信息（纯 Go 实现，无 CGO 依赖）
-func (r *queryRootResolver) Environments(ctx context.Context) (env *gqlapi.Environments, err error) {
-	env = &gqlapi.Environments{}
-	env.CPUStats = g.GetCPUStats()
-	env.MemStats = g.GetMemStats()
-	env.HostInfos = g.GetHostInfos()
-	env.ProcessStats = g.GetProcessStats()
+func (r *queryRootResolver) Environments(ctx context.Context) (envs *gqlapi.Environments, err error) {
+	envs = &gqlapi.Environments{}
+	envs.CPUStats = env.GetCPUStats()
+	envs.MemStats = env.GetMemStats()
+	envs.HostInfos = env.GetHostInfos()
+	envs.ProcessStats = env.GetProcessStats()
 	return
 }

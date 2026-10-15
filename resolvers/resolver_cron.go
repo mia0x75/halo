@@ -10,9 +10,9 @@ import (
 
 	"github.com/mia0x75/halo/crons"
 	"github.com/mia0x75/halo/events"
-	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/platform/config"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/models"
 )
@@ -28,7 +28,7 @@ func (r *mutationRootResolver) CancelCron(ctx context.Context, id string) (ok bo
 			break
 		}
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		domainCron, cronErr := r.app.Services.Cron.GetByUUID(ctx, id)
 		if cronErr != nil {
 			rc = gqlapi.ReturnCodeUnknowError

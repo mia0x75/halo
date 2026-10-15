@@ -6,11 +6,11 @@ import (
 	"fmt"
 
 	"github.com/mia0x75/halo/events"
-	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/platform/cache"
+	"github.com/mia0x75/halo/internal/platform/config"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/models"
 )
@@ -19,7 +19,7 @@ import (
 func (r *mutationRootResolver) CreateComment(ctx context.Context, input models.CreateCommentInput) (comment *models.Comment, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		user := credential.User
 
 		t, getErr := r.app.Services.Ticket.GetByUUID(ctx, input.TicketUUID)
@@ -76,7 +76,7 @@ type commentResolver struct{ *Resolver }
 // User 审核意见的发起人
 func (r *commentResolver) User(ctx context.Context, obj *models.Comment) (user *models.User, err error) {
 	rc := gqlapi.ReturnCodeOK
-	user = caches.UsersMap.Any(func(elem *models.User) bool {
+	user = cache.UsersMap.Any(func(elem *models.User) bool {
 		return elem.UserID == obj.UserID
 	})
 

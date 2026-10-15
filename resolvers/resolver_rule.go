@@ -7,10 +7,10 @@ import (
 	"strconv"
 
 	"github.com/mia0x75/halo/events"
-	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/platform/cache"
+	"github.com/mia0x75/halo/internal/platform/config"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/models"
 )
@@ -19,7 +19,7 @@ import (
 func (r *mutationRootResolver) PatchRuleValues(ctx context.Context, input models.PatchRuleValuesInput) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
-		rule := caches.RulesMap.Any(func(elem *models.Rule) bool {
+		rule := cache.RulesMap.Any(func(elem *models.Rule) bool {
 			return elem.UUID == input.RuleUUID
 		})
 		if rule == nil {
@@ -34,7 +34,7 @@ func (r *mutationRootResolver) PatchRuleValues(ctx context.Context, input models
 		}
 		rule.Values = input.Values
 		rule.BeforeUpdate()
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		if err = r.app.Services.Rule.Update(ctx, bridge.RuleToDomain(rule), credential.User.UserID); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
@@ -57,7 +57,7 @@ func (r *mutationRootResolver) PatchRuleValues(ctx context.Context, input models
 func (r *mutationRootResolver) PatchRuleBitwise(ctx context.Context, input models.PatchRuleBitwiseInput) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
-		rule := caches.RulesMap.Any(func(elem *models.Rule) bool {
+		rule := cache.RulesMap.Any(func(elem *models.Rule) bool {
 			return elem.UUID == input.RuleUUID
 		})
 		if rule == nil {
@@ -80,7 +80,7 @@ func (r *mutationRootResolver) PatchRuleBitwise(ctx context.Context, input model
 		rule.Bitwise = rule.Bitwise | value
 		rule.BeforeUpdate()
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		if err = r.app.Services.Rule.Update(ctx, bridge.RuleToDomain(rule), credential.User.UserID); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
@@ -116,7 +116,7 @@ func (r *queryRootResolver) TestRegexp(ctx context.Context, input *models.Valida
 // Rule 查看某一个具体的规则信息，好像目前用处不大
 func (r *queryRootResolver) Rule(ctx context.Context, id string) (rule *models.Rule, err error) {
 	rc := gqlapi.ReturnCodeOK
-	rule = caches.RulesMap.Any(func(elem *models.Rule) bool {
+	rule = cache.RulesMap.Any(func(elem *models.Rule) bool {
 		return elem.UUID == id
 	})
 
@@ -129,6 +129,6 @@ func (r *queryRootResolver) Rule(ctx context.Context, id string) (rule *models.R
 
 // Rules 规则在页面上是一个页面处理所有内容，所以不需要考虑分页
 func (r *queryRootResolver) Rules(ctx context.Context) (L []*models.Rule, err error) {
-	L = caches.RulesMap.All()
+	L = cache.RulesMap.All()
 	return
 }

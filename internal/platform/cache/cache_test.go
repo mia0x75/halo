@@ -1,9 +1,9 @@
-package caches_test
+package cache_test
 
 import (
 	"testing"
 
-	"github.com/mia0x75/halo/internal/platform/cache" // 请替换为您的实际包路径
+	"github.com/mia0x75/halo/internal/platform/cache"
 )
 
 type TestType int
@@ -13,8 +13,8 @@ func (t TestType) String() string {
 }
 
 // 辅助函数，初始化缓存
-func newCacheWithItems(items ...TestType) *caches.SafeMap[TestType] {
-	cache := &caches.SafeMap[TestType]{M: []*TestType{}}
+func newCacheWithItems(items ...TestType) *cache.SafeMap[TestType] {
+	cache := &cache.SafeMap[TestType]{M: []*TestType{}}
 	for _, item := range items {
 		cache.Append(&item) // 假设Append是添加元素的方法
 	}
@@ -162,7 +162,7 @@ func TestGetPage(t *testing.T) {
 
 // 提示：Reload方法的测试用例可以考虑添加对错误处理的测试
 func TestReload(t *testing.T) {
-	cache := &caches.SafeMap[TestType]{}
+	cache := &cache.SafeMap[TestType]{}
 	cache.Reload()
 
 	if cache.Count() != 0 {
@@ -172,7 +172,7 @@ func TestReload(t *testing.T) {
 
 // 提示：WithInit方法的测试用例可以考虑添加失败场景的测试，如初始化函数返回错误
 func TestWithInit(t *testing.T) {
-	cache := &caches.SafeMap[TestType]{}
+	cache := &cache.SafeMap[TestType]{}
 
 	item1 := TestType(1)
 	item2 := TestType(2)

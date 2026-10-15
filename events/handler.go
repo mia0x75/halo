@@ -15,11 +15,11 @@ import (
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/platform/cache"
+	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/service"
 	"github.com/mia0x75/halo/models"
 )
@@ -88,7 +88,7 @@ func TicketCreatedLogWriter(e *Event) {
 // TicketCreatedMailSender 创建工单的邮件通知
 func TicketCreatedMailSender(e *Event) {
 	if args, ok := e.Args.(*TicketCreatedArgs); ok {
-		subject, body := renderer(g.TplTicketCreated, args)
+		subject, body := renderer(config.TplTicketCreated, args)
 		MailSender(MailSendArgs{
 			To:      mail.Address{Name: args.User.Name, Address: args.User.Email},
 			Subject: subject,
@@ -130,7 +130,7 @@ func TicketUpdatedLogWriter(e *Event) {
 // TicketUpdatedMailSender 更新工单的邮件通知
 func TicketUpdatedMailSender(e *Event) {
 	if args, ok := e.Args.(*TicketUpdatedArgs); ok {
-		subject, body := renderer(g.TplTicketUpdated, args)
+		subject, body := renderer(config.TplTicketUpdated, args)
 		MailSender(MailSendArgs{
 			To:      mail.Address{Name: args.User.Name, Address: args.User.Email},
 			Subject: subject,
@@ -158,7 +158,7 @@ func TicketRemovedMailSender(e *Event) {
 	if args, ok := e.Args.(*TicketRemovedArgs); ok {
 		// 这个用于邮件模版的时间显示
 		args.Ticket.UpdateAt = uint(time.Now().UTC().Unix())
-		subject, body := renderer(g.TplTicketRemoved, args)
+		subject, body := renderer(config.TplTicketRemoved, args)
 		MailSender(MailSendArgs{
 			To:      mail.Address{Name: args.User.Name, Address: args.User.Email},
 			Subject: subject,
@@ -211,7 +211,7 @@ func TicketExecutedMailSender(e *Event) {
 			}
 			users = append(users, *bridge.UserFromDomain(du))
 		}
-		subject, body := renderer(g.TplTicketExecuted, args)
+		subject, body := renderer(config.TplTicketExecuted, args)
 		for _, user := range users {
 			MailSender(MailSendArgs{
 				To:      mail.Address{Name: user.Name, Address: user.Email},
@@ -250,7 +250,7 @@ func TicketFailedMailSender(e *Event) {
 			}
 			users = append(users, *bridge.UserFromDomain(du))
 		}
-		subject, body := renderer(g.TplTicketFailed, args)
+		subject, body := renderer(config.TplTicketFailed, args)
 		for _, user := range users {
 			MailSender(MailSendArgs{
 				To:      mail.Address{Name: user.Name, Address: user.Email},
@@ -279,13 +279,13 @@ func TicketScheduledLogWriter(e *Event) {
 // TicketScheduledMailSender 工单预约成功的邮件通知
 func TicketScheduledMailSender(e *Event) {
 	if args, ok := e.Args.(*TicketScheduledArgs); ok {
-		users := caches.UsersMap.Filter(func(elem *models.User) bool {
+		users := cache.UsersMap.Filter(func(elem *models.User) bool {
 			if elem.UserID == args.Ticket.UserID || elem.UserID == args.Ticket.ReviewerID {
 				return true
 			}
 			return false
 		})
-		subject, body := renderer(g.TplTicketScheduled, args)
+		subject, body := renderer(config.TplTicketScheduled, args)
 		for _, user := range users {
 			MailSender(MailSendArgs{
 				To:      mail.Address{Name: user.Name, Address: user.Email},
@@ -313,7 +313,7 @@ func TicketStatusPatchedLogWriter(e *Event) {
 // TicketStatusPatchedMailSender 工单状态更新成功邮件通知
 func TicketStatusPatchedMailSender(e *Event) {
 	if args, ok := e.Args.(*TicketStatusPatchedArgs); ok {
-		users := caches.UsersMap.Filter(func(elem *models.User) bool {
+		users := cache.UsersMap.Filter(func(elem *models.User) bool {
 			if elem.UserID == args.Ticket.UserID || elem.UserID == args.Ticket.ReviewerID {
 				return true
 			}
@@ -323,11 +323,11 @@ func TicketStatusPatchedMailSender(e *Event) {
 		switch args.Ticket.Status {
 		case gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumClosed]:
 			users = []*models.User{&args.User}
-			subject, body = renderer(g.TplTicketClosed, args)
+			subject, body = renderer(config.TplTicketClosed, args)
 		case gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumMrvFailure]:
-			subject, body = renderer(g.TplTicketMrvFailure, args)
+			subject, body = renderer(config.TplTicketMrvFailure, args)
 		case gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumLgtm]:
-			subject, body = renderer(g.TplTicketLgtm, args)
+			subject, body = renderer(config.TplTicketLgtm, args)
 		default:
 			return
 		}
@@ -443,7 +443,7 @@ func UserRegisteredLogWriter(e *Event) {
 // UserRegisteredMailSender 用户注册的邮件通知（激活）
 func UserRegisteredMailSender(e *Event) {
 	if args, ok := e.Args.(*UserRegisteredArgs); ok {
-		subject, body := renderer(g.TplUserRegistered, args)
+		subject, body := renderer(config.TplUserRegistered, args)
 		MailSender(MailSendArgs{
 			To:      mail.Address{Name: args.User.Name, Address: args.User.Email},
 			Subject: subject,
@@ -501,7 +501,7 @@ func PasswordUpdatedLogWriter(e *Event) {
 // PasswordUpdatedMailSender 密码更新邮件通知
 func PasswordUpdatedMailSender(e *Event) {
 	if args, ok := e.Args.(*PasswordUpdatedArgs); ok {
-		subject, body := renderer(g.TplPasswordUpdated, args)
+		subject, body := renderer(config.TplPasswordUpdated, args)
 		MailSender(MailSendArgs{
 			To:      mail.Address{Name: args.User.Name, Address: args.User.Email},
 			Subject: subject,
@@ -526,7 +526,7 @@ func EmailUpdatedLogWriter(e *Event) {
 // EmailUpdatedMailSender 账号更新邮件通知
 func EmailUpdatedMailSender(e *Event) {
 	if args, ok := e.Args.(*EmailUpdatedArgs); ok {
-		subject, body := renderer(g.TplEmailUpdated, args)
+		subject, body := renderer(config.TplEmailUpdated, args)
 		// TODO: 把新Email和当前时间加密后，放在验证邮件中
 		MailSender(MailSendArgs{
 			To:      mail.Address{Name: args.User.Name, Address: args.Email},
@@ -551,7 +551,7 @@ func ProfileUpdatedLogWriter(e *Event) {
 // ProfileUpdatedMailSender 用户信息更新邮件通知
 func ProfileUpdatedMailSender(e *Event) {
 	if args, ok := e.Args.(*ProfileUpdatedArgs); ok {
-		subject, body := renderer(g.TplProfileUpdated, args)
+		subject, body := renderer(config.TplProfileUpdated, args)
 		MailSender(MailSendArgs{
 			To:      mail.Address{Name: args.User.Name, Address: args.User.Email},
 			Subject: subject,
@@ -588,7 +588,7 @@ func UserCreatedLogWriter(e *Event) {
 // UserCreatedMailSender 用户创建成功邮件通知
 func UserCreatedMailSender(e *Event) {
 	if args, ok := e.Args.(*UserCreatedArgs); ok {
-		subject, body := renderer(g.TplUserCreated, args)
+		subject, body := renderer(config.TplUserCreated, args)
 		MailSender(MailSendArgs{
 			To:      mail.Address{Name: args.User.Name, Address: args.User.Email},
 			Subject: subject,
@@ -700,13 +700,13 @@ func CommentCreatedStatisticsUpdater(e *Event) {
 // CommentCreatedMailSender 审核意见添加成功邮件通知
 func CommentCreatedMailSender(e *Event) {
 	if args, ok := e.Args.(*CommentCreatedArgs); ok {
-		users := caches.UsersMap.Filter(func(elem *models.User) bool {
+		users := cache.UsersMap.Filter(func(elem *models.User) bool {
 			if elem.UserID == args.Ticket.UserID || elem.UserID == args.Ticket.ReviewerID {
 				return true
 			}
 			return false
 		})
-		subject, body := renderer(g.TplCommentCreated, args)
+		subject, body := renderer(config.TplCommentCreated, args)
 		for _, user := range users {
 			MailSender(MailSendArgs{
 				To:      mail.Address{Name: user.Name, Address: user.Email},
@@ -734,13 +734,13 @@ func CronCancelledLogWriter(e *Event) {
 // CronCancelledMailSender 工单预约取消邮件通知
 func CronCancelledMailSender(e *Event) {
 	if args, ok := e.Args.(*CronCancelledArgs); ok {
-		users := caches.UsersMap.Filter(func(elem *models.User) bool {
+		users := cache.UsersMap.Filter(func(elem *models.User) bool {
 			if elem.UserID == args.Ticket.UserID || elem.UserID == args.Ticket.ReviewerID {
 				return true
 			}
 			return false
 		})
-		subject, body := renderer(g.TplCronCancelled, args)
+		subject, body := renderer(config.TplCronCancelled, args)
 		for _, user := range users {
 			MailSender(MailSendArgs{
 				To:      mail.Address{Name: user.Name, Address: user.Email},
@@ -928,7 +928,7 @@ type MailSendArgs struct {
 
 // MailSender 邮件发送
 func MailSender(args MailSendArgs) {
-	if !g.Config().Mail.Enabled {
+	if !config.Config().Mail.Enabled {
 		return
 	}
 
@@ -942,7 +942,7 @@ func MailSender(args MailSendArgs) {
 		}
 	}()
 
-	from := mail.Address{Name: "系统用户", Address: g.Config().Mail.User}
+	from := mail.Address{Name: "系统用户", Address: config.Config().Mail.User}
 	to := args.To
 
 	// set headers for html email
@@ -965,10 +965,10 @@ func MailSender(args MailSendArgs) {
 	fmt.Fprintf(&buffer, "\r\n%s", args.Body)
 
 	// Connect to the SMTP Server
-	servername := g.Config().Mail.Addr
+	servername := config.Config().Mail.Addr
 
 	host, _, _ := net.SplitHostPort(servername)
-	auth := smtp.PlainAuth("", g.Config().Mail.User, g.Config().Mail.Password, host)
+	auth := smtp.PlainAuth("", config.Config().Mail.User, config.Config().Mail.Password, host)
 
 	// TLS config
 	tlsconfig := &tls.Config{
@@ -1022,8 +1022,8 @@ func MailSender(args MailSendArgs) {
 	_ = c.Quit()
 }
 
-func renderer(id g.Template, data interface{}) (string, string) {
-	tpl := caches.TemplatesMap.Any(func(elem *models.Template) bool {
+func renderer(id config.Template, data interface{}) (string, string) {
+	tpl := cache.TemplatesMap.Any(func(elem *models.Template) bool {
 		if elem.UUID == string(id) {
 			return true
 		}

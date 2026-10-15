@@ -8,8 +8,8 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 
-	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
+	"github.com/mia0x75/halo/internal/platform/config"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 )
 
@@ -23,7 +23,7 @@ func Auth(ctx context.Context, obj interface{}, next graphql.Resolver, requires 
 	}
 
 	// TODO: 考虑给tokens增加一个方法，从Context中返回*tokens.Credential
-	if value := ctx.Value(g.CREDENTIAL_KEY); value != nil {
+	if value := ctx.Value(config.CREDENTIAL_KEY); value != nil {
 		if credential, ok := value.(transportauth.Credential); ok {
 			switch credential.User.Status {
 			case gqlapi.UserStatusEnumMap[gqlapi.UserStatusEnumNormal]:

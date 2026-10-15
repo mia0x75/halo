@@ -19,7 +19,7 @@ type logResolver struct{ *Resolver }
 // User 操作日志的发起人（委托人）
 func (r *logResolver) User(ctx context.Context, obj *models.Log) (user *models.User, err error) {
 	rc := gqlapi.ReturnCodeOK
-	user = caches.UsersMap.Any(func(elem *models.User) bool {
+	user = cache.UsersMap.Any(func(elem *models.User) bool {
 		return elem.UserID == obj.UserID
 	})
 	if user == nil {

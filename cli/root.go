@@ -7,8 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/internal/app"
+	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/db"
 )
 
@@ -16,11 +16,11 @@ import (
 // by the command (g.ParseConfig must have run first).
 func newApp() (*app.App, error) {
 	return app.New(context.Background(), db.Config{
-		Addr:           g.Config().Database.Addr,
-		MaxIdle:        g.Config().Database.MaxIdle,
-		MaxConnections: g.Config().Database.MaxConnections,
-		WaitTimeout:    g.Config().Database.WaitTimeout,
-		Driver:         g.Config().Database.Driver,
+		Addr:           config.Config().Database.Addr,
+		MaxIdle:        config.Config().Database.MaxIdle,
+		MaxConnections: config.Config().Database.MaxConnections,
+		WaitTimeout:    config.Config().Database.WaitTimeout,
+		Driver:         config.Config().Database.Driver,
 	})
 }
 

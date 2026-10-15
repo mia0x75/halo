@@ -15,16 +15,20 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 
 	"github.com/mia0x75/halo/crons"
 	"github.com/mia0x75/halo/events"
-	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/internal/app"
 	"github.com/mia0x75/halo/internal/platform/cache"
+	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/db"
+
+	// "github.com/mia0x75/halo/internal/platform/log"
 	"github.com/mia0x75/halo/routers"
 )
+
+var lg = logrus.New()
 
 const ticketLoaderKey = "ticketloader"
 
@@ -51,50 +55,50 @@ func main() {
 
 	flag.Parse()
 
-	fmt.Print(g.Banner)
+	fmt.Print(app.Banner)
 	fmt.Printf("%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n",
-		"Version", g.Version,
-		"Git commit", g.Git,
-		"Compile", g.Compile,
-		"Distro", g.Distro,
-		"Kernel", g.Kernel,
-		"Branch", g.Branch,
+		"Version", app.Version,
+		"Git commit", app.Git,
+		"Compile", app.Compile,
+		"Distro", app.Distro,
+		"Kernel", app.Kernel,
+		"Branch", app.Branch,
 	)
 	fmt.Println()
 	if *version {
 		os.Exit(0)
 	}
 
-	g.ParseConfig(*cfg)
-	os.Setenv("HALO_CFG", g.ConfigFile)
+	config.ParseConfig(*cfg)
+	os.Setenv("HALO_CFG", config.ConfigFile)
 
-	g.InitLog()
+	// log.InitLog()
 
 	// The new dependency container replaces the legacy ORM engine.
 
 	application, err := app.New(context.Background(), db.Config{
-		Addr:           g.Config().Database.Addr,
-		MaxIdle:        g.Config().Database.MaxIdle,
-		MaxConnections: g.Config().Database.MaxConnections,
-		WaitTimeout:    g.Config().Database.WaitTimeout,
-		Driver:         g.Config().Database.Driver,
+		Addr:           config.Config().Database.Addr,
+		MaxIdle:        config.Config().Database.MaxIdle,
+		MaxConnections: config.Config().Database.MaxConnections,
+		WaitTimeout:    config.Config().Database.WaitTimeout,
+		Driver:         config.Config().Database.Driver,
 	})
 	if err != nil {
-		log.Fatalf("[F] init app fail: %v", err)
+		lg.Fatalf("[F] init app fail: %v", err)
 	}
 	defer func() { _ = application.Close() }()
 
-	caches.Init(application.Repos)
+	cache.Init(application.Repos)
 	crons.Init(application.Repos)
 	events.Init(application.Repos)
 	crons.NewScheduler()
 
-	addr := g.Config().Listen
-	log.Infof("[I] http listening %s", addr)
+	addr := config.Config().Listen
+	lg.Infof("[I] http listening %s", addr)
 
 	r := mux.NewRouter()
 	routers.Routes(r, application)
-	if strings.EqualFold(g.Config().Log.Level, "debug") {
+	if strings.EqualFold(config.Config().Log.Level, "debug") {
 		routers.ProfilerRoutes(r)
 	}
 	srv := &http.Server{
@@ -109,8 +113,8 @@ func main() {
 	// csrf + gzip
 	// Run our server in a goroutine so that it doesn't block.
 	go func() {
-		if err := srv.ListenAndServeTLS(g.Config().Cert, g.Config().Key); err != http.ErrServerClosed {
-			log.Fatalf("错误代码: 1500, 错误信息: %s", err.Error())
+		if err := srv.ListenAndServeTLS(config.Config().Cert, config.Config().Key); err != http.ErrServerClosed {
+			lg.Fatalf("错误代码: 1500, 错误信息: %s", err.Error())
 		}
 	}()
 
@@ -136,6 +140,6 @@ func main() {
 	// Optionally, you could run srv.Shutdown in a goroutine and block on
 	// <-ctx.Done() if your application should wait for other services
 	// to finalize based on context cancellation.
-	log.Println("[I] Shutting down")
+	lg.Println("[I] Shutting down")
 	os.Exit(0)
 }

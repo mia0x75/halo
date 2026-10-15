@@ -12,7 +12,7 @@ import (
 // Role 查看某一个角色信息
 func (r *queryRootResolver) Role(ctx context.Context, id string) (role *models.Role, err error) {
 	rc := gqlapi.ReturnCodeOK
-	role = caches.RolesMap.Any(func(elem *models.Role) bool {
+	role = cache.RolesMap.Any(func(elem *models.Role) bool {
 		return elem.UUID == id
 	})
 	if role == nil {
@@ -24,7 +24,7 @@ func (r *queryRootResolver) Role(ctx context.Context, id string) (role *models.R
 
 // Roles 因为角色不会太多，所以不需要考虑数据分页问题
 func (r *queryRootResolver) Roles(ctx context.Context) (L []*models.Role, err error) {
-	L = caches.RolesMap.All()
+	L = cache.RolesMap.All()
 	return
 }
 
@@ -44,7 +44,7 @@ func (r *roleResolver) Users(ctx context.Context, obj *models.Role, after *strin
 	}
 
 	// TODO: 从光标解出来用户ID，然后根据ID查询，前提缓存数据需要排序
-	edges := caches.EdgesMap.Filter(func(elem *models.Edge) bool {
+	edges := cache.EdgesMap.Filter(func(elem *models.Edge) bool {
 		if elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToRole] &&
 			elem.DescendantID == obj.RoleID {
 			return true
@@ -56,7 +56,7 @@ func (r *roleResolver) Users(ctx context.Context, obj *models.Role, after *strin
 		return &gqlapi.UserConnection{}, nil
 	}
 
-	users := caches.UsersMap.Filter(func(elem *models.User) bool {
+	users := cache.UsersMap.Filter(func(elem *models.User) bool {
 		for _, r := range edges {
 			if elem.UserID == r.AncestorID {
 				return true

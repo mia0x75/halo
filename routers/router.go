@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/http/pprof"
 	"time"
-	//	"strings"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
@@ -18,7 +17,6 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 
 	"github.com/mia0x75/halo/directives"
-	//	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/app"
 	"github.com/mia0x75/halo/resolvers"
@@ -123,7 +121,7 @@ func Routes(r *mux.Router, application *app.App) {
 	srv.Use(extension.Introspection{})
 
 	/* RequestMiddleware signature error ??
-	if strings.EqualFold(g.Config().Log.Level, "debug") {
+	if strings.EqualFold(config.Config().Log.Level, "debug") {
 		// 性能跟踪，DEBUG模式时打开
 		// 自省功能，DEBUG模式时打开
 		// TODO: 处理复杂度

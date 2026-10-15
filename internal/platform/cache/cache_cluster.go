@@ -1,4 +1,4 @@
-package caches
+package cache
 
 import (
 	"github.com/mia0x75/halo/internal/bridge"

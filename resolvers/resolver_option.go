@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	"github.com/mia0x75/halo/events"
-	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/platform/cache"
+	"github.com/mia0x75/halo/internal/platform/config"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/models"
 )
@@ -16,7 +16,7 @@ import (
 // Option 获取某一具体的选项信息
 func (r *queryRootResolver) Option(ctx context.Context, id string) (option *models.Option, err error) {
 	rc := gqlapi.ReturnCodeOK
-	option = caches.OptionsMap.Any(func(elem *models.Option) bool {
+	option = cache.OptionsMap.Any(func(elem *models.Option) bool {
 		return elem.UUID == id
 	})
 	if option == nil {
@@ -28,7 +28,7 @@ func (r *queryRootResolver) Option(ctx context.Context, id string) (option *mode
 
 // Options 查看全部系统选项
 func (r *queryRootResolver) Options(ctx context.Context) (L []*models.Option, err error) {
-	L = caches.OptionsMap.All()
+	L = cache.OptionsMap.All()
 	return
 }
 
@@ -36,7 +36,7 @@ func (r *queryRootResolver) Options(ctx context.Context) (L []*models.Option, er
 func (r *mutationRootResolver) PatchOptionValues(ctx context.Context, input models.PatchOptionValueInput) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
-		option := caches.OptionsMap.Any(func(elem *models.Option) bool {
+		option := cache.OptionsMap.Any(func(elem *models.Option) bool {
 			return elem.UUID == input.OptionUUID
 		})
 		if option == nil {
@@ -51,7 +51,7 @@ func (r *mutationRootResolver) PatchOptionValues(ctx context.Context, input mode
 		}
 		option.Value = input.Value
 		option.BeforeUpdate()
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		if err = r.app.Services.Option.Update(ctx, bridge.OptionToDomain(option), credential.User.UserID); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())

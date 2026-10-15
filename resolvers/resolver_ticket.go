@@ -19,11 +19,11 @@ import (
 
 	"github.com/mia0x75/halo/crons"
 	"github.com/mia0x75/halo/events"
-	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/platform/cache"
+	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/crypto"
 	"github.com/mia0x75/halo/internal/service"
 	"github.com/mia0x75/halo/internal/tools"
@@ -40,7 +40,7 @@ func (r *mutationRootResolver) CreateTicket(ctx context.Context, input models.Cr
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		statements := []*models.Statement{}
 		user := credential.User
 
@@ -51,7 +51,7 @@ L:
 		}
 
 		// 查询缓存
-		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+		cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 			return elem.UUID == input.ClusterUUID
 		})
 
@@ -68,7 +68,7 @@ L:
 		}
 
 		// 检查群集关联
-		if !caches.EdgesMap.Include(func(elem *models.Edge) bool {
+		if !cache.EdgesMap.Include(func(elem *models.Edge) bool {
 			if elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToCluster] &&
 				elem.AncestorID == user.UserID &&
 				elem.DescendantID == cluster.ClusterID {
@@ -81,7 +81,7 @@ L:
 			break
 		}
 
-		password, _ := crypto.DecryptAES(cluster.Password, g.Config().Secret.Crypto)
+		password, _ := crypto.DecryptAES(cluster.Password, config.Config().Secret.Crypto)
 		target := bridge.ClusterToDomain(cluster)
 		target.Database = input.Database
 
@@ -92,7 +92,7 @@ L:
 		}
 
 		// 查询缓存
-		reviewer := caches.UsersMap.Any(func(elem *models.User) bool {
+		reviewer := cache.UsersMap.Any(func(elem *models.User) bool {
 			return elem.UUID == input.ReviewerUUID
 		})
 		if reviewer == nil {
@@ -108,7 +108,7 @@ L:
 		}
 
 		// 检查审核人关联
-		if !caches.EdgesMap.Include(func(elem *models.Edge) bool {
+		if !cache.EdgesMap.Include(func(elem *models.Edge) bool {
 			if elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToReviewer] &&
 				elem.AncestorID == user.UserID &&
 				elem.DescendantID == reviewer.UserID {
@@ -212,10 +212,10 @@ func (r *mutationRootResolver) UpdateTicket(ctx context.Context, input models.Up
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		statements := []*models.Statement{}
 		user := credential.User
-		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+		cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 			return elem.UUID == input.ClusterUUID
 		})
 
@@ -238,7 +238,7 @@ L:
 		}
 
 		// 检查群集关联
-		if !caches.EdgesMap.Include(func(elem *models.Edge) bool {
+		if !cache.EdgesMap.Include(func(elem *models.Edge) bool {
 			if elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToCluster] &&
 				elem.AncestorID == user.UserID &&
 				elem.DescendantID == cluster.ClusterID {
@@ -251,7 +251,7 @@ L:
 			break
 		}
 
-		password, _ := crypto.DecryptAES(cluster.Password, g.Config().Secret.Crypto)
+		password, _ := crypto.DecryptAES(cluster.Password, config.Config().Secret.Crypto)
 		target := bridge.ClusterToDomain(cluster)
 		target.Database = input.Database
 
@@ -262,7 +262,7 @@ L:
 		}
 
 		// 查询缓存
-		reviewer := caches.UsersMap.Any(func(elem *models.User) bool {
+		reviewer := cache.UsersMap.Any(func(elem *models.User) bool {
 			return elem.UUID == input.ReviewerUUID
 		})
 
@@ -279,7 +279,7 @@ L:
 		}
 
 		// 检查审核人关联
-		if !caches.EdgesMap.Include(func(elem *models.Edge) bool {
+		if !cache.EdgesMap.Include(func(elem *models.Edge) bool {
 			if elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToReviewer] &&
 				elem.AncestorID == user.UserID &&
 				elem.DescendantID == reviewer.UserID {
@@ -400,7 +400,7 @@ L:
 func (r *mutationRootResolver) RemoveTicket(ctx context.Context, id string) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		user := credential.User
 
 		if strings.TrimSpace(user.Name) == "" {
@@ -427,7 +427,7 @@ func (r *mutationRootResolver) RemoveTicket(ctx context.Context, id string) (ok 
 			break
 		}
 
-		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+		cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 			return elem.ClusterID == removed.ClusterID
 		})
 		events.Fire(events.EventTicketRemoved, &events.TicketRemovedArgs{
@@ -456,7 +456,7 @@ func (r *mutationRootResolver) RemoveTicket(ctx context.Context, id string) (ok 
 func (r *mutationRootResolver) PatchTicketStatus(ctx context.Context, input models.PatchTicketStatusInput) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		user := credential.User
 
 		statusValue, valid := gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnum(input.Status)]
@@ -491,7 +491,7 @@ func (r *mutationRootResolver) PatchTicketStatus(ctx context.Context, input mode
 		}
 		ticket := bridge.TicketFromDomain(t)
 
-		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+		cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 			return elem.ClusterID == ticket.ClusterID
 		})
 		events.Fire(events.EventTicketStatusPatched, &events.TicketStatusPatchedArgs{
@@ -537,7 +537,7 @@ func (r *mutationRootResolver) ExecuteTicket(ctx context.Context, id string) (ok
 func (r *mutationRootResolver) ScheduleTicket(ctx context.Context, input models.ScheduleTicketInput) (cron *models.Cron, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		user := credential.User
 
 		if strings.TrimSpace(user.Name) == "" {
@@ -580,7 +580,7 @@ func (r *mutationRootResolver) ScheduleTicket(ctx context.Context, input models.
 		}
 
 		// 是否需要判断群集的状态
-		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+		cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 			return elem.ClusterID == ticket.ClusterID
 		})
 		if cluster == nil {
@@ -759,7 +759,7 @@ type ticketResolver struct{ *Resolver }
 // Cluster 工单的目标群集
 func (r *ticketResolver) Cluster(ctx context.Context, obj *models.Ticket) (cluster *models.Cluster, err error) {
 	rc := gqlapi.ReturnCodeOK
-	cluster = caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+	cluster = cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 		return elem.ClusterID == obj.ClusterID
 	})
 	if cluster == nil {
@@ -772,7 +772,7 @@ func (r *ticketResolver) Cluster(ctx context.Context, obj *models.Ticket) (clust
 // User 工单的发起人
 func (r *ticketResolver) User(ctx context.Context, obj *models.Ticket) (user *models.User, err error) {
 	rc := gqlapi.ReturnCodeOK
-	user = caches.UsersMap.Any(func(elem *models.User) bool {
+	user = cache.UsersMap.Any(func(elem *models.User) bool {
 		return elem.UserID == obj.UserID
 	})
 
@@ -786,7 +786,7 @@ func (r *ticketResolver) User(ctx context.Context, obj *models.Ticket) (user *mo
 // Reviewer 工单的审核人
 func (r *ticketResolver) Reviewer(ctx context.Context, obj *models.Ticket) (user *models.User, err error) {
 	rc := gqlapi.ReturnCodeOK
-	user = caches.UsersMap.Any(func(elem *models.User) bool {
+	user = cache.UsersMap.Any(func(elem *models.User) bool {
 		return elem.UserID == obj.ReviewerID
 	})
 

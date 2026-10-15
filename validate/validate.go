@@ -8,11 +8,11 @@ import (
 	"regexp"
 	"sync"
 
-	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/internal/agent"
 	"github.com/mia0x75/halo/internal/agent/meta"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/platform/cache"
+	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/crypto"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/parser/ast"
@@ -109,7 +109,7 @@ func Run(stmts []*models.Statement, cluster *models.Cluster, ticket *models.Tick
 		Stmts:   stmts,
 	}
 	passwd := func(c *models.Cluster) string {
-		bs, _ := crypto.DecryptAES(c.Password, g.Config().Secret.Crypto)
+		bs, _ := crypto.DecryptAES(c.Password, config.Config().Secret.Crypto)
 		return string(bs)
 	}
 	exec := agent.LocalExecutor{}
@@ -130,7 +130,7 @@ func Run(stmts []*models.Statement, cluster *models.Cluster, ticket *models.Tick
 			})
 		}
 	}
-	ctx.Rules = caches.RulesMap.All()
+	ctx.Rules = cache.RulesMap.All()
 
 	// Each validator group pulls its rules from the process-wide cache. This
 	// global wiring is deliberately kept here (never in RunRegistry) and is
@@ -151,7 +151,7 @@ type Violation struct {
 
 // RunRegistry is the pure rule engine: it runs every enabled validator group
 // over c and returns the aggregated hits. It performs no IO and never reads
-// caches.RulesMap; callers must wire each group's rules (SetGroup) beforehand.
+// cache.RulesMap; callers must wire each group's rules (SetGroup) beforehand.
 func RunRegistry(c *Context) []Violation {
 	wg := &sync.WaitGroup{}
 	for _, v := range registry {
@@ -238,7 +238,7 @@ func (v *vldr) GetRules() []*models.Rule {
 
 // SetGroup 设置验证分组，并初始化验证规则
 func (v *vldr) SetGroup(gid uint16) {
-	rules := caches.RulesMap.Filter(func(elem *models.Rule) bool {
+	rules := cache.RulesMap.Filter(func(elem *models.Rule) bool {
 		return elem.VldrGroup == gid
 	})
 	v.Rules = rules

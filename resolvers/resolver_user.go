@@ -16,10 +16,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/mia0x75/halo/events"
-	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/platform/cache"
+	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/crypto"
 	"github.com/mia0x75/halo/internal/service"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
@@ -29,7 +29,7 @@ import (
 // Me 当前登陆用户信息
 func (r *queryRootResolver) Me(ctx context.Context) (user *models.User, err error) {
 	// Directive.Auth确保了一定可以获得正确的凭证
-	credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+	credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 	user = credential.User
 	return
 }
@@ -37,7 +37,7 @@ func (r *queryRootResolver) Me(ctx context.Context) (user *models.User, err erro
 // User 根据ID查看用户详细信息
 func (r *queryRootResolver) User(ctx context.Context, id string) (user *models.User, err error) {
 	rc := gqlapi.ReturnCodeOK
-	user = caches.UsersMap.Any(func(elem *models.User) bool {
+	user = cache.UsersMap.Any(func(elem *models.User) bool {
 		return elem.UUID == id
 	})
 	if user == nil {
@@ -150,7 +150,7 @@ L:
 			err = fmt.Errorf("错误代码: %s, 错误信息: 语法错误，请参考帮助文档。", rc)
 			break L
 		}
-		users := caches.UsersMap.Filter(func(elem *models.User) bool {
+		users := cache.UsersMap.Filter(func(elem *models.User) bool {
 			// yql最好可以使用反射，直接操作struct对象，而不是map[string]interface{}
 			data := structs.Map(elem)
 			if matched, _ := rule.Match(data); matched {
@@ -194,7 +194,7 @@ func (r *mutationRootResolver) Register(ctx context.Context, input models.UserRe
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
-		user = caches.UsersMap.Any(func(elem *models.User) bool {
+		user = cache.UsersMap.Any(func(elem *models.User) bool {
 			return elem.Email == input.Email
 		})
 
@@ -248,8 +248,8 @@ L:
 		}
 
 		// 主动同步缓存
-		caches.UsersMap.Append(user)
-		caches.EdgesMap.Reload()
+		cache.UsersMap.Append(user)
+		cache.EdgesMap.Reload()
 
 		events.Fire(events.EventUserRegistered, &events.UserRegisteredArgs{
 			User: *user,
@@ -277,7 +277,7 @@ L:
 		}
 		data := map[string]string{}
 
-		bs, err = crypto.DecryptAES(bs, g.Config().Secret.Crypto)
+		bs, err = crypto.DecryptAES(bs, config.Config().Secret.Crypto)
 		if err != nil {
 			break L
 		}
@@ -321,7 +321,7 @@ L:
 			break L
 		}
 
-		user := caches.UsersMap.Any(func(elem *models.User) bool {
+		user := cache.UsersMap.Any(func(elem *models.User) bool {
 			return elem.Email == email
 		})
 
@@ -358,7 +358,7 @@ L:
 func (r *mutationRootResolver) LostPasswd(ctx context.Context, input models.LostPasswdInput) (ok bool, err error) {
 L:
 	for {
-		user := caches.UsersMap.Any(func(elem *models.User) bool {
+		user := cache.UsersMap.Any(func(elem *models.User) bool {
 			return elem.Email == input.Email
 		})
 
@@ -429,7 +429,7 @@ L:
 	for {
 		rc := gqlapi.ReturnCodeOK
 
-		user := caches.UsersMap.Any(func(elem *models.User) bool {
+		user := cache.UsersMap.Any(func(elem *models.User) bool {
 			return elem.Email == input.Email
 		})
 
@@ -494,7 +494,7 @@ L:
 // Logout 退出登陆
 func (r *mutationRootResolver) Logout(ctx context.Context) (bool, error) {
 	// 通过上下文获得用户凭证，此处凭证经过auth的检测，必然是有效的
-	credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+	credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 	user := credential.User
 	transportauth.Revoke(user.UUID)
 
@@ -510,10 +510,10 @@ func (r *mutationRootResolver) UpdateProfile(ctx context.Context, input models.U
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		user = credential.User
 
-		avatar := caches.AvatarsMap.Any(func(elem *models.Avatar) bool {
+		avatar := cache.AvatarsMap.Any(func(elem *models.Avatar) bool {
 			return elem.UUID == input.AvatarUUID
 		})
 		if avatar != nil {
@@ -558,7 +558,7 @@ L:
 			break L
 		}
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		user := credential.User
 
 		if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.OldPassword)); err != nil {
@@ -593,7 +593,7 @@ L:
 	for {
 		rc := gqlapi.ReturnCodeOK
 		// 通过上下文获得用户凭证，此处凭证经过auth的检测，必然是有效的
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		user := credential.User
 
 		if user.Email == input.NewEmail {
@@ -604,7 +604,7 @@ L:
 		}
 
 		// 此处用户必然提供了一个不同的邮件地址
-		if caches.UsersMap.Include(func(elem *models.User) bool {
+		if cache.UsersMap.Include(func(elem *models.User) bool {
 			return elem.Email == input.NewEmail
 		}) {
 			rc = gqlapi.ReturnCodeUserEmailTaken
@@ -639,7 +639,7 @@ L:
 	for {
 		rc := gqlapi.ReturnCodeOK
 		edges := []*models.Edge{}
-		user := caches.UsersMap.Any(func(elem *models.User) bool {
+		user := cache.UsersMap.Any(func(elem *models.User) bool {
 			return elem.UUID == input.UserUUID
 		})
 
@@ -650,7 +650,7 @@ L:
 		}
 
 		for _, reviewerUUID := range input.ReviewerUUIDs {
-			reviewer := caches.UsersMap.Any(func(elem *models.User) bool {
+			reviewer := cache.UsersMap.Any(func(elem *models.User) bool {
 				return elem.UUID == reviewerUUID
 			})
 			if reviewer == nil {
@@ -680,9 +680,9 @@ L:
 		}
 
 		// 主动刷新缓存
-		caches.EdgesMap.Reload()
+		cache.EdgesMap.Reload()
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		events.Fire(events.EventReviewerGranted, &events.ReviewerGrantedArgs{
 			Manager: *credential.User,
 			User:    *user,
@@ -701,7 +701,7 @@ func (r *mutationRootResolver) RevokeReviewers(ctx context.Context, input models
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
-		user := caches.UsersMap.Any(func(elem *models.User) bool {
+		user := cache.UsersMap.Any(func(elem *models.User) bool {
 			return elem.UUID == input.UserUUID
 		})
 
@@ -713,7 +713,7 @@ L:
 
 		// TODO: 合并成数组一次删除
 		for _, reviewerUUID := range input.ReviewerUUIDs {
-			reviewer := caches.UsersMap.Any(func(elem *models.User) bool {
+			reviewer := cache.UsersMap.Any(func(elem *models.User) bool {
 				return elem.UUID == reviewerUUID
 			})
 			if reviewer == nil {
@@ -721,7 +721,7 @@ L:
 				err = fmt.Errorf("错误代码: %s, 错误信息: 账号(uuid=%s)不存在。", rc, reviewerUUID)
 				break L
 			}
-			edge := caches.EdgesMap.Any(func(elem *models.Edge) bool {
+			edge := cache.EdgesMap.Any(func(elem *models.Edge) bool {
 				if elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToReviewer] &&
 					elem.AncestorID == user.UserID &&
 					elem.DescendantID == reviewer.UserID {
@@ -730,7 +730,7 @@ L:
 				return false
 			})
 			if edge != nil {
-				manager := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+				manager := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 				if err = r.app.Services.Edge.Delete(ctx, edge.EdgeID, manager.User.UserID); err != nil {
 					rc = gqlapi.ReturnCodeUnknowError
 					err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
@@ -740,9 +740,9 @@ L:
 		}
 
 		// 主动刷新缓存
-		caches.EdgesMap.Reload()
+		cache.EdgesMap.Reload()
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		events.Fire(events.EventReviewerRevoked, &events.ReviewerRevokedArgs{
 			Manager: *credential.User,
 			User:    *user,
@@ -762,7 +762,7 @@ L:
 	for {
 		edges := []*models.Edge{}
 		rc := gqlapi.ReturnCodeOK
-		user := caches.UsersMap.Any(func(elem *models.User) bool {
+		user := cache.UsersMap.Any(func(elem *models.User) bool {
 			return elem.UUID == input.UserUUID
 		})
 
@@ -773,7 +773,7 @@ L:
 		}
 
 		for _, clusterUUID := range input.ClusterUUIDs {
-			cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+			cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 				return elem.UUID == clusterUUID
 			})
 			if cluster == nil {
@@ -803,9 +803,9 @@ L:
 		}
 
 		// 主动刷新缓存
-		caches.EdgesMap.Reload()
+		cache.EdgesMap.Reload()
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		events.Fire(events.EventClusterGranted, &events.ClusterGrantedArgs{
 			Manager: *credential.User,
 			User:    *user,
@@ -824,7 +824,7 @@ func (r *mutationRootResolver) RevokeClusters(ctx context.Context, input models.
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
-		user := caches.UsersMap.Any(func(elem *models.User) bool {
+		user := cache.UsersMap.Any(func(elem *models.User) bool {
 			return elem.UUID == input.UserUUID
 		})
 
@@ -836,7 +836,7 @@ L:
 
 		// TODO: 合并成数组一次删除
 		for _, clusterUUID := range input.ClusterUUIDs {
-			cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+			cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 				return elem.UUID == clusterUUID
 			})
 			if cluster == nil {
@@ -844,7 +844,7 @@ L:
 				err = fmt.Errorf("错误代码: %s, 错误信息: 群集(uuid=%s)不存在。", rc, clusterUUID)
 				break L
 			}
-			edge := caches.EdgesMap.Any(func(elem *models.Edge) bool {
+			edge := cache.EdgesMap.Any(func(elem *models.Edge) bool {
 				if elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToCluster] &&
 					elem.AncestorID == user.UserID &&
 					elem.DescendantID == cluster.ClusterID {
@@ -853,7 +853,7 @@ L:
 				return false
 			})
 			if edge != nil {
-				manager := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+				manager := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 				if err = r.app.Services.Edge.Delete(ctx, edge.EdgeID, manager.User.UserID); err != nil {
 					rc = gqlapi.ReturnCodeUnknowError
 					err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
@@ -863,9 +863,9 @@ L:
 		}
 
 		// 主动刷新缓存
-		caches.EdgesMap.Reload()
+		cache.EdgesMap.Reload()
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		events.Fire(events.EventClusterRevoked, &events.ClusterRevokedArgs{
 			Manager: *credential.User,
 			User:    *user,
@@ -885,7 +885,7 @@ L:
 	for {
 		rc := gqlapi.ReturnCodeOK
 		edges := []*models.Edge{}
-		user := caches.UsersMap.Any(func(elem *models.User) bool {
+		user := cache.UsersMap.Any(func(elem *models.User) bool {
 			return elem.UUID == input.UserUUID
 		})
 
@@ -896,7 +896,7 @@ L:
 		}
 
 		for _, roleUUID := range input.RoleUUIDs {
-			role := caches.RolesMap.Any(func(elem *models.Role) bool {
+			role := cache.RolesMap.Any(func(elem *models.Role) bool {
 				return elem.UUID == roleUUID
 			})
 			if role == nil {
@@ -919,9 +919,9 @@ L:
 		}
 
 		// 主动刷新缓存
-		caches.EdgesMap.Reload()
+		cache.EdgesMap.Reload()
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		events.Fire(events.EventRoleGranted, &events.RoleGrantedArgs{
 			Manager: *credential.User,
 			User:    *user,
@@ -940,7 +940,7 @@ func (r *mutationRootResolver) RevokeRoles(ctx context.Context, input models.Rev
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
-		user := caches.UsersMap.Any(func(elem *models.User) bool {
+		user := cache.UsersMap.Any(func(elem *models.User) bool {
 			return elem.UUID == input.UserUUID
 		})
 
@@ -952,7 +952,7 @@ L:
 
 		// TODO: 合并成数组一次删除
 		for _, roleUUID := range input.RoleUUIDs {
-			role := caches.RolesMap.Any(func(elem *models.Role) bool {
+			role := cache.RolesMap.Any(func(elem *models.Role) bool {
 				return elem.UUID == roleUUID
 			})
 			if role == nil {
@@ -960,7 +960,7 @@ L:
 				err = fmt.Errorf("错误代码: %s, 错误信息: 角色(uuid=%s)不存在。", rc, roleUUID)
 				break L
 			}
-			edge := caches.EdgesMap.Any(func(elem *models.Edge) bool {
+			edge := cache.EdgesMap.Any(func(elem *models.Edge) bool {
 				if elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToRole] &&
 					elem.AncestorID == user.UserID &&
 					elem.DescendantID == role.RoleID {
@@ -970,7 +970,7 @@ L:
 			})
 
 			if edge != nil {
-				manager := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+				manager := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 				if err = r.app.Services.Edge.Delete(ctx, edge.EdgeID, manager.User.UserID); err != nil {
 					rc = gqlapi.ReturnCodeUnknowError
 					err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
@@ -980,9 +980,9 @@ L:
 		}
 
 		// 主动刷新缓存
-		caches.EdgesMap.Reload()
+		cache.EdgesMap.Reload()
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		events.Fire(events.EventRoleRevoked, &events.RoleRevokedArgs{
 			Manager: *credential.User,
 			User:    *user,
@@ -1002,7 +1002,7 @@ L:
 	for {
 		rc := gqlapi.ReturnCodeOK
 
-		if caches.UsersMap.Include(func(elem *models.User) bool {
+		if cache.UsersMap.Include(func(elem *models.User) bool {
 			return elem.Email == input.Email
 		}) {
 			rc = gqlapi.ReturnCodeUserEmailTaken
@@ -1021,7 +1021,7 @@ L:
 		edges := []*models.Edge{}
 
 		for _, roleUUID := range input.RoleUUIDs {
-			role := caches.RolesMap.Any(func(elem *models.Role) bool {
+			role := cache.RolesMap.Any(func(elem *models.Role) bool {
 				return elem.UUID == roleUUID
 			})
 			if role == nil {
@@ -1040,7 +1040,7 @@ L:
 		// 处理参数可选问题
 		if input.ReviewerUUIDs != nil {
 			for _, reviewerUUID := range input.ReviewerUUIDs {
-				reviewer := caches.UsersMap.Any(func(elem *models.User) bool {
+				reviewer := cache.UsersMap.Any(func(elem *models.User) bool {
 					return elem.UUID == reviewerUUID
 				})
 
@@ -1068,7 +1068,7 @@ L:
 		// 处理参数可选问题
 		if input.ClusterUUIDs != nil {
 			for _, clusterUUID := range input.ClusterUUIDs {
-				cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+				cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 					return elem.UUID == clusterUUID
 				})
 				if cluster == nil {
@@ -1100,7 +1100,7 @@ L:
 			Status:   input.Status,
 			Phone:    input.Phone,
 		}
-		avatar := caches.AvatarsMap.Any(func(elem *models.Avatar) bool {
+		avatar := cache.AvatarsMap.Any(func(elem *models.Avatar) bool {
 			return elem.UUID == input.AvatarUUID
 		})
 		if avatar != nil {
@@ -1136,10 +1136,10 @@ L:
 		}
 
 		// 主动刷新缓存
-		caches.UsersMap.Append(user)
-		caches.EdgesMap.Reload()
+		cache.UsersMap.Append(user)
+		cache.EdgesMap.Reload()
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		events.Fire(events.EventUserCreated, &events.UserCreatedArgs{
 			Manager: *credential.User,
 			User:    *user,
@@ -1161,7 +1161,7 @@ func (r *mutationRootResolver) UpdateUser(ctx context.Context, input models.Upda
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
-		user = caches.UsersMap.Any(func(elem *models.User) bool {
+		user = cache.UsersMap.Any(func(elem *models.User) bool {
 			return elem.UUID == input.UserUUID
 		})
 		if user == nil {
@@ -1182,7 +1182,7 @@ L:
 		// 找到，且UserID相同 => 此次没有更新用户邮箱
 		// 找到，且UserID不同 => 此次更新了用户登录邮箱，但是该邮箱被其他账号使用
 		exists := func(uid uint, email string) bool {
-			user := caches.UsersMap.Any(func(elem *models.User) bool {
+			user := cache.UsersMap.Any(func(elem *models.User) bool {
 				return elem.Email == email
 			})
 			return user != nil && user.UserID != uid
@@ -1195,7 +1195,7 @@ L:
 		}
 
 		bs, _ := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
-		avatar := caches.AvatarsMap.Any(func(elem *models.Avatar) bool {
+		avatar := cache.AvatarsMap.Any(func(elem *models.Avatar) bool {
 			return elem.UUID == input.AvatarUUID
 		})
 		user.Email = input.Email
@@ -1209,7 +1209,7 @@ L:
 		}
 		user.BeforeUpdate()
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		if err = r.app.Services.User.Update(ctx, bridge.UserToDomain(user), credential.User.UserID); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
@@ -1243,7 +1243,7 @@ L:
 			err = fmt.Errorf("错误代码: %s, 错误信息: 参数(status=%d)无效。", rc, input.Status)
 			break L
 		}
-		user = caches.UsersMap.Any(func(elem *models.User) bool {
+		user = cache.UsersMap.Any(func(elem *models.User) bool {
 			return elem.UUID == input.UserUUID
 		})
 		if user == nil {
@@ -1260,7 +1260,7 @@ L:
 
 		user.Status = input.Status
 		user.BeforeUpdate()
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		if err = r.app.Services.User.Update(ctx, bridge.UserToDomain(user), credential.User.UserID); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
@@ -1288,7 +1288,7 @@ type userResolver struct{ *Resolver }
 // Avatar 用户的头像
 func (r *userResolver) Avatar(ctx context.Context, obj *models.User) (avatar *models.Avatar, err error) {
 	rc := gqlapi.ReturnCodeOK
-	avatar = caches.AvatarsMap.Any(func(elem *models.Avatar) bool {
+	avatar = cache.AvatarsMap.Any(func(elem *models.Avatar) bool {
 		return elem.AvatarID == obj.AvatarID
 	})
 	if avatar == nil {
@@ -1300,7 +1300,7 @@ func (r *userResolver) Avatar(ctx context.Context, obj *models.User) (avatar *mo
 
 // Roles 用户的角色
 func (r *userResolver) Roles(ctx context.Context, obj *models.User) (L []*models.Role, err error) {
-	edges := caches.EdgesMap.Filter(func(elem *models.Edge) bool {
+	edges := cache.EdgesMap.Filter(func(elem *models.Edge) bool {
 		if elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToRole] &&
 			elem.AncestorID == obj.UserID {
 			return true
@@ -1312,7 +1312,7 @@ func (r *userResolver) Roles(ctx context.Context, obj *models.User) (L []*models
 		return
 	}
 
-	L = caches.RolesMap.Filter(func(elem *models.Role) bool {
+	L = cache.RolesMap.Filter(func(elem *models.Role) bool {
 		for _, r := range edges {
 			if elem.RoleID == r.DescendantID {
 				return true
@@ -1325,7 +1325,7 @@ func (r *userResolver) Roles(ctx context.Context, obj *models.User) (L []*models
 
 // Reviewers 用户的审核人
 func (r *userResolver) Reviewers(ctx context.Context, obj *models.User) (L []*models.User, err error) {
-	edges := caches.EdgesMap.Filter(func(elem *models.Edge) bool {
+	edges := cache.EdgesMap.Filter(func(elem *models.Edge) bool {
 		if elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToReviewer] &&
 			elem.AncestorID == obj.UserID {
 			return true
@@ -1337,7 +1337,7 @@ func (r *userResolver) Reviewers(ctx context.Context, obj *models.User) (L []*mo
 		return
 	}
 
-	L = caches.UsersMap.Filter(func(elem *models.User) bool {
+	L = cache.UsersMap.Filter(func(elem *models.User) bool {
 		for _, r := range edges {
 			if elem.UserID == r.DescendantID {
 				return true
@@ -1361,7 +1361,7 @@ func (r *userResolver) Clusters(ctx context.Context, obj *models.User, after *st
 		return &gqlapi.ClusterConnection{}, fmt.Errorf("错误代码: %s, 错误信息: 参数`after`和`before`只能选择一种。", rc)
 	}
 
-	edges := caches.EdgesMap.Filter(func(elem *models.Edge) bool {
+	edges := cache.EdgesMap.Filter(func(elem *models.Edge) bool {
 		if elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToCluster] &&
 			elem.AncestorID == obj.UserID {
 			return true
@@ -1373,7 +1373,7 @@ func (r *userResolver) Clusters(ctx context.Context, obj *models.User, after *st
 		return &gqlapi.ClusterConnection{}, nil
 	}
 
-	clusters := caches.ClustersMap.Filter(func(elem *models.Cluster) bool {
+	clusters := cache.ClustersMap.Filter(func(elem *models.Cluster) bool {
 		for _, r := range edges {
 			if elem.ClusterID == r.DescendantID {
 				return true
@@ -1500,7 +1500,7 @@ func (r *userResolver) Queries(ctx context.Context, obj *models.User, after *str
 
 // Statistics 用户维度的统计信息
 func (r *userResolver) Statistics(ctx context.Context, obj *models.User) (L []*models.Statistic, err error) {
-	L = caches.StatisticsMap.Filter(func(elem *models.Statistic) bool {
+	L = cache.StatisticsMap.Filter(func(elem *models.Statistic) bool {
 		return elem.Group == obj.UUID
 	})
 

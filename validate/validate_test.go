@@ -13,10 +13,10 @@ import (
 	"github.com/mia0x75/parser/driver"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/internal/agent"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/platform/cache"
+	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/crypto"
 	"github.com/mia0x75/halo/models"
 )
@@ -36,7 +36,7 @@ func TestMain(m *testing.M) {
 	cfg := flag.String("c", "/etc/halo/cfg.json", "configuration file")
 	flag.Parse()
 	if _, err := os.Stat(*cfg); err == nil {
-		g.ParseConfig(*cfg)
+		config.ParseConfig(*cfg)
 	}
 	os.Exit(m.Run())
 }
@@ -47,7 +47,7 @@ func TestMain(m *testing.M) {
 // cycle.
 func requireDB(t *testing.T) {
 	t.Helper()
-	if caches.ClustersMap.Count() == 0 {
+	if cache.ClustersMap.Count() == 0 {
 		t.Skip("requires a live metadata database with loaded caches")
 	}
 }
@@ -70,7 +70,7 @@ func TestSingleSQL(t *testing.T) {
 }
 
 func buildContext() *Context {
-	cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+	cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 		return elem.UUID == "fd577136-24ec-40bb-a792-c70078f075ab"
 	})
 
@@ -90,7 +90,7 @@ func buildContext() *Context {
 	exec := agent.LocalExecutor{}
 	target := bridge.ClusterToDomain(cluster)
 	passwd := func(c *models.Cluster) string {
-		bs, _ := crypto.DecryptAES(c.Password, g.Config().Secret.Crypto)
+		bs, _ := crypto.DecryptAES(c.Password, config.Config().Secret.Crypto)
 		return string(bs)
 	}
 	var err error
@@ -126,7 +126,7 @@ func TestGeneralRules(t *testing.T) {
 	ctx := buildContext()
 
 	for _, c := range cases {
-		r := caches.RulesMap.Any(func(elem *models.Rule) bool {
+		r := cache.RulesMap.Any(func(elem *models.Rule) bool {
 			return elem.Name == c.RuleName
 		})
 		stmt, err := p.ParseOneStmt(c.Text, "", "")
@@ -815,7 +815,7 @@ func TestTableCreateColumnCountLimit(t *testing.T) {
 	}
 
 	for _, c := range Cases {
-		r := caches.RulesMap.Any(func(elem *models.Rule) bool {
+		r := cache.RulesMap.Any(func(elem *models.Rule) bool {
 			return elem.Name == c.RuleName
 		})
 		stmt, err := p.ParseOneStmt(c.Text, "", "")
@@ -1309,7 +1309,7 @@ func TestMergeStatement(t *testing.T) {
 	// assert := assert.New(t)
 	ctx := buildContext()
 	for _, c := range cases {
-		r := caches.RulesMap.Any(func(elem *models.Rule) bool {
+		r := cache.RulesMap.Any(func(elem *models.Rule) bool {
 			return elem.Name == c.RuleName
 		})
 		nodes, _, err := p.Parse(c.Text, "", "")

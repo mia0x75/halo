@@ -11,11 +11,11 @@ import (
 	"github.com/mia0x75/yql"
 
 	"github.com/mia0x75/halo/events"
-	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/agent/meta"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/platform/cache"
+	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/crypto"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/models"
@@ -54,9 +54,9 @@ func (r *queryRootResolver) Databases(ctx context.Context, clusterUUID string) (
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		user := credential.User
-		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+		cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 			return elem.UUID == clusterUUID
 		})
 		if cluster == nil {
@@ -72,7 +72,7 @@ L:
 		}
 
 		// 检查群集关联
-		if !caches.EdgesMap.Include(func(elem *models.Edge) bool {
+		if !cache.EdgesMap.Include(func(elem *models.Edge) bool {
 			if elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToCluster] &&
 				elem.AncestorID == user.UserID &&
 				elem.DescendantID == cluster.ClusterID {
@@ -85,7 +85,7 @@ L:
 			break
 		}
 
-		password, _ := crypto.DecryptAES(cluster.Password, g.Config().Secret.Crypto)
+		password, _ := crypto.DecryptAES(cluster.Password, config.Config().Secret.Crypto)
 
 		var databases []*meta.Database
 		if databases, err = r.app.Agent.Databases(ctx, bridge.ClusterToDomain(cluster), string(password)); err != nil {
@@ -111,7 +111,7 @@ L:
 // Cluster 获取某一指定群集的详细信息
 func (r *queryRootResolver) Cluster(ctx context.Context, id string) (cluster *models.Cluster, err error) {
 	rc := gqlapi.ReturnCodeOK
-	cluster = caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+	cluster = cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 		return elem.UUID == id
 	})
 	if cluster == nil {
@@ -134,7 +134,7 @@ func (r *queryRootResolver) Clusters(ctx context.Context, after *string, before 
 		return nil, fmt.Errorf("错误代码: %s, 错误信息: 参数`after`和`before`只能选择一种。", rc)
 	}
 
-	clusters := caches.ClustersMap.All()
+	clusters := cache.ClustersMap.All()
 	edges := []*gqlapi.ClusterEdge{}
 	for _, cluster := range clusters {
 		edges = append(edges, &gqlapi.ClusterEdge{
@@ -185,7 +185,7 @@ L:
 			err = fmt.Errorf("错误代码: %s, 错误信息: 语法错误，请参考帮助文档。", rc)
 			break L
 		}
-		clusters := caches.ClustersMap.Filter(func(elem *models.Cluster) bool {
+		clusters := cache.ClustersMap.Filter(func(elem *models.Cluster) bool {
 			data := structs.Map(elem)
 			if matched, _ := rule.Match(data); matched {
 				return true
@@ -228,9 +228,9 @@ func (r *queryRootResolver) Metadata(ctx context.Context, clusterUUID string, da
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		user := credential.User
-		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+		cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 			return elem.UUID == clusterUUID
 		})
 
@@ -247,7 +247,7 @@ L:
 		}
 
 		// 检查群集关联
-		if !caches.EdgesMap.Include(func(elem *models.Edge) bool {
+		if !cache.EdgesMap.Include(func(elem *models.Edge) bool {
 			if elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToCluster] &&
 				elem.AncestorID == user.UserID &&
 				elem.DescendantID == cluster.ClusterID {
@@ -260,7 +260,7 @@ L:
 			break
 		}
 
-		password, _ := crypto.DecryptAES(cluster.Password, g.Config().Secret.Crypto)
+		password, _ := crypto.DecryptAES(cluster.Password, config.Config().Secret.Crypto)
 		target := bridge.ClusterToDomain(cluster)
 
 		if err = statDatabase(ctx, r.app.Agent, target, string(password), database); err != nil {
@@ -298,7 +298,7 @@ L:
 	for {
 		rc := gqlapi.ReturnCodeOK
 		// 检查Alias唯一性
-		if caches.ClustersMap.Include(func(elem *models.Cluster) bool {
+		if cache.ClustersMap.Include(func(elem *models.Cluster) bool {
 			return elem.Alias == input.Alias
 		}) {
 			rc = gqlapi.ReturnCodeDuplicateAlias
@@ -306,7 +306,7 @@ L:
 			break L
 		}
 		// 主机+端口唯一性,IP+端口唯一性
-		if caches.ClustersMap.Include(func(elem *models.Cluster) bool {
+		if cache.ClustersMap.Include(func(elem *models.Cluster) bool {
 			return (elem.Host == input.Host || elem.IP == input.IP) && elem.Port == input.Port
 		}) {
 			rc = gqlapi.ReturnCodeDuplicateHost
@@ -314,7 +314,7 @@ L:
 			break L
 		}
 		var passwd []byte
-		passwd, err = crypto.EncryptAES([]byte(input.Password), g.Config().Secret.Crypto)
+		passwd, err = crypto.EncryptAES([]byte(input.Password), config.Config().Secret.Crypto)
 		if err != nil {
 			break L
 		}
@@ -328,7 +328,7 @@ L:
 		cluster.Alias = input.Alias
 		cluster.BeforeInsert()
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		newID, createErr := r.app.Services.Cluster.Create(ctx, bridge.ClusterToDomain(cluster), credential.User.UserID)
 		if createErr != nil {
 			cluster = nil
@@ -339,7 +339,7 @@ L:
 		cluster.ClusterID = uint(newID)
 
 		// 主动同步缓存
-		caches.ClustersMap.Append(cluster)
+		cache.ClustersMap.Append(cluster)
 
 		events.Fire(events.EventClusterCreated, &events.ClusterCreatedArgs{
 			Manager: *credential.User,
@@ -358,7 +358,7 @@ func (r *mutationRootResolver) UpdateCluster(ctx context.Context, input models.U
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
-		cluster = caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+		cluster = cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 			return elem.UUID == input.ClusterUUID
 		})
 		if cluster == nil {
@@ -368,7 +368,7 @@ L:
 		}
 		// 检查Alias唯一性
 		exists := func(clusterID uint, alias string) bool {
-			c := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+			c := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 				return elem.Alias == alias
 			})
 			return c != nil && c.ClusterID != clusterID
@@ -383,7 +383,7 @@ L:
 		if cluster.Host != input.Host || cluster.IP != input.IP || cluster.Port != input.Port {
 			// 主机+端口唯一性
 			// IP+端口唯一性
-			if caches.ClustersMap.Include(func(elem *models.Cluster) bool {
+			if cache.ClustersMap.Include(func(elem *models.Cluster) bool {
 				return (elem.Host == input.Host || elem.IP == input.IP) && elem.Port == input.Port
 			}) {
 				rc = gqlapi.ReturnCodeDuplicateHost
@@ -394,7 +394,7 @@ L:
 
 		var passwd []byte
 
-		passwd, err = crypto.EncryptAES([]byte(input.Password), g.Config().Secret.Crypto)
+		passwd, err = crypto.EncryptAES([]byte(input.Password), config.Config().Secret.Crypto)
 		if err != nil {
 			break L
 		}
@@ -408,7 +408,7 @@ L:
 		cluster.Status = input.Status
 		cluster.BeforeUpdate()
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		if updErr := r.app.Services.Cluster.Update(ctx, bridge.ClusterToDomain(cluster), credential.User.UserID); updErr != nil {
 			cluster = nil
 			rc = gqlapi.ReturnCodeUnknowError
@@ -432,7 +432,7 @@ L:
 func (r *mutationRootResolver) RemoveCluster(ctx context.Context, id string) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
-		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+		cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 			return elem.UUID == id
 		})
 		if cluster == nil {
@@ -440,7 +440,7 @@ func (r *mutationRootResolver) RemoveCluster(ctx context.Context, id string) (ok
 			err = fmt.Errorf("错误代码: %s, 错误信息: 群集(uuid=%s)不存在。", rc, id)
 			break
 		}
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		if delErr := r.app.Services.Cluster.Delete(ctx, cluster.ClusterID, credential.User.UserID); delErr != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, delErr.Error())
@@ -448,7 +448,7 @@ func (r *mutationRootResolver) RemoveCluster(ctx context.Context, id string) (ok
 		}
 
 		// 主动刷新缓存
-		caches.ClustersMap.Remove(func(elem *models.Cluster) bool {
+		cache.ClustersMap.Remove(func(elem *models.Cluster) bool {
 			return elem.UUID == id
 		})
 
@@ -475,7 +475,7 @@ func (r *mutationRootResolver) PatchClusterStatus(ctx context.Context, input mod
 			break
 		}
 
-		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
+		cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 			return elem.UUID == input.ClusterUUID
 		})
 		if cluster == nil {
@@ -484,7 +484,7 @@ func (r *mutationRootResolver) PatchClusterStatus(ctx context.Context, input mod
 			break
 		}
 
-		credential := ctx.Value(g.CREDENTIAL_KEY).(transportauth.Credential)
+		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		if cluster.Status != input.Status {
 			cluster.Status = input.Status
 			cluster.BeforeUpdate()
