@@ -2,7 +2,7 @@
 
 > AI 编码协作契约。指令式，非建议。违反红线一律打回。
 >
-> 阅读顺序：本文件 → `docs/TECH_STACK.md` → `docs/DATABASE_DESIGN.md`。
+> 阅读顺序：本文件 → `docs/adr/` → `scripts/halodb_schema_mysql.sql`。
 
 ---
 
@@ -17,7 +17,7 @@
 - 目标库：MySQL + PostgreSQL
 - 元数据库：MySQL + PostgreSQL
 
-**当前阶段**：v0.1 MVP。5 份文档为权威源，本文件为 AI 协作契约。
+**当前阶段**：v0.1 MVP。本文件为 AI 协作契约，`docs/adr/` 为架构决策权威源。
 
 ---
 
@@ -50,7 +50,7 @@
 | 前端表格 | TanStack Table |
 | 前端测试 | Vitest + Testing Library |
 
-**换栈唯一途径**：改 `docs/TECH_STACK.md` 并由人类确认。AI 不得单方面换栈。
+**换栈唯一途径**：改本文件技术栈表并由人类确认。AI 不得单方面换栈。
 
 ---
 
@@ -195,7 +195,7 @@ switch c.Type {
 
 ### GraphQL
 
-- Schema 在 `internal/graphql/schema.graphql`
+- Schema 在 `gqlapi/schema.graphql`
 - Resolver 只做参数转换 + 调 service
 - **禁止 resolver 写业务逻辑**
 - 分页用 **cursor**（keyset），不用 offset
@@ -231,7 +231,7 @@ GraphQL 标准 `{ data, errors }`。
 - **PostgreSQL**：`pgplex/pgparser`（纯 Go，100% PG 17.7 兼容，Bytebase 支持）
 - **危险操作检测**：通用规则（关键字 / 正则）
 - **规则引擎**：`yql`（保留）
-- **统一 IR**：`internal/analyzer/ir.go`（两套 AST 输出同一结构）
+- **统一 IR**：`internal/analyzer/ir/ir.go`（两套 AST 输出同一结构）
 - **选型依据**：ADR 0003
 
 ---
@@ -273,7 +273,7 @@ GraphQL 标准 `{ data, errors }`。
 
 - 确认对应需求文档章节
 - 与需求冲突 → 先问人类
-- 需要新表 / 新字段 → 先确认 DATABASE_DESIGN.md
+- 需要新表 / 新字段 → 先确认 `scripts/halodb_schema_mysql.sql`（PG 同步改 `scripts/halodb_schema_postgres.sql`）
 
 ### 2. 方案设计
 
@@ -312,7 +312,7 @@ GraphQL 标准 `{ data, errors }`。
 
 | # | 禁止 | 理由 |
 |---|------|------|
-| F1 | 换技术栈 | TECH_STACK.md 已冻结 |
+| F1 | 换技术栈 | 技术栈表已冻结 |
 | F2 | 改需求文档 | 已冻结；硬 bug 先报告 |
 | F3 | 引入 CGO 依赖（中心服务） | 破坏单二进制；Agent 端可 |
 | F4 | 引入多租户 / `tenant_id` | 无多租户 |
@@ -350,17 +350,17 @@ GraphQL 标准 `{ data, errors }`。
 | 注释写"是什么" | 写"为什么" |
 | 注释用中文 | **英文** |
 | 注释 AI 味 | 贴近人类 |
-| 两套 parser AST 直接混用 | 走统一 IR（`internal/analyzer/ir.go`） |
+| 两套 parser AST 直接混用 | 走统一 IR（`internal/analyzer/ir/ir.go`） |
 
 ---
 
 ## 参考文档
 
-- `docs/TECH_STACK.md` — 技术栈
-- `docs/DATABASE_DESIGN.md` — 表结构
-- `docs/REQUIREMENTS.md` — 需求
+- `AGENTS.md` — 本文件（技术栈、规范、红线）
 - `docs/adr/` — 架构决策
-- `docs/api/` — API 文档
+- `gqlapi/schema.graphql` — GraphQL schema
+- `scripts/halodb_schema_mysql.sql` — MySQL 表结构权威源
+- `scripts/halodb_schema_postgres.sql` — PG 表结构
 
 ---
 
