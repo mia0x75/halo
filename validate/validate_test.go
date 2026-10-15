@@ -17,8 +17,8 @@ import (
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/internal/agent"
 	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/platform/crypto"
 	"github.com/mia0x75/halo/models"
-	"github.com/mia0x75/halo/tools"
 )
 
 // 保留，不可以删除
@@ -90,7 +90,7 @@ func buildContext() *Context {
 	exec := agent.LocalExecutor{}
 	target := bridge.ClusterToDomain(cluster)
 	passwd := func(c *models.Cluster) string {
-		bs, _ := tools.DecryptAES(c.Password, g.Config().Secret.Crypto)
+		bs, _ := crypto.DecryptAES(c.Password, g.Config().Secret.Crypto)
 		return string(bs)
 	}
 	var err error

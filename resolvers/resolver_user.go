@@ -20,6 +20,7 @@ import (
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/platform/crypto"
 	"github.com/mia0x75/halo/internal/service"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
@@ -276,7 +277,7 @@ L:
 		}
 		data := map[string]string{}
 
-		bs, err = tools.DecryptAES(bs, g.Config().Secret.Crypto)
+		bs, err = crypto.DecryptAES(bs, g.Config().Secret.Crypto)
 		if err != nil {
 			break L
 		}

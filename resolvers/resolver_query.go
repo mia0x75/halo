@@ -20,6 +20,7 @@ import (
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/domain"
+	"github.com/mia0x75/halo/internal/platform/crypto"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
 )
@@ -177,7 +178,7 @@ L:
 			break
 		}
 
-		password, _ := tools.DecryptAES(cluster.Password, g.Config().Secret.Crypto)
+		password, _ := crypto.DecryptAES(cluster.Password, g.Config().Secret.Crypto)
 		target := bridge.ClusterToDomain(cluster)
 		target.Database = input.Database
 
@@ -315,7 +316,7 @@ L:
 		}
 
 		passwd := func(c *models.Cluster) []byte {
-			bs, _ := tools.DecryptAES(c.Password, g.Config().Secret.Crypto)
+			bs, _ := crypto.DecryptAES(c.Password, g.Config().Secret.Crypto)
 			return bs
 		}
 
@@ -415,7 +416,7 @@ L:
 		}
 
 		passwd := func(c *models.Cluster) []byte {
-			bs, _ := tools.DecryptAES(c.Password, g.Config().Secret.Crypto)
+			bs, _ := crypto.DecryptAES(c.Password, g.Config().Secret.Crypto)
 			return bs
 		}
 

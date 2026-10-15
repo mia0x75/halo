@@ -16,6 +16,7 @@ import (
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/agent/meta"
 	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/platform/crypto"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
 )
@@ -84,7 +85,7 @@ L:
 			break
 		}
 
-		password, _ := tools.DecryptAES(cluster.Password, g.Config().Secret.Crypto)
+		password, _ := crypto.DecryptAES(cluster.Password, g.Config().Secret.Crypto)
 
 		var databases []*meta.Database
 		if databases, err = r.app.Agent.Databases(ctx, bridge.ClusterToDomain(cluster), string(password)); err != nil {
@@ -259,7 +260,7 @@ L:
 			break
 		}
 
-		password, _ := tools.DecryptAES(cluster.Password, g.Config().Secret.Crypto)
+		password, _ := crypto.DecryptAES(cluster.Password, g.Config().Secret.Crypto)
 		target := bridge.ClusterToDomain(cluster)
 
 		if err = statDatabase(ctx, r.app.Agent, target, string(password), database); err != nil {
@@ -313,7 +314,7 @@ L:
 			break L
 		}
 		var passwd []byte
-		passwd, err = tools.EncryptAES([]byte(input.Password), g.Config().Secret.Crypto)
+		passwd, err = crypto.EncryptAES([]byte(input.Password), g.Config().Secret.Crypto)
 		if err != nil {
 			break L
 		}
@@ -393,7 +394,7 @@ L:
 
 		var passwd []byte
 
-		passwd, err = tools.EncryptAES([]byte(input.Password), g.Config().Secret.Crypto)
+		passwd, err = crypto.EncryptAES([]byte(input.Password), g.Config().Secret.Crypto)
 		if err != nil {
 			break L
 		}

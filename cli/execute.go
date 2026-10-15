@@ -14,9 +14,9 @@ import (
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/platform/crypto"
 	"github.com/mia0x75/halo/internal/service"
 	"github.com/mia0x75/halo/models"
-	"github.com/mia0x75/halo/tools"
 )
 
 // executeCmd represents the execute command
@@ -95,7 +95,7 @@ func execute(cmd *cobra.Command, args []string) {
 		}
 		cluster := bridge.ClusterFromDomain(domainCluster)
 
-		password, _ := tools.DecryptAES(cluster.Password, g.Config().Secret.Crypto)
+		password, _ := crypto.DecryptAES(cluster.Password, g.Config().Secret.Crypto)
 		target := bridge.ClusterToDomain(cluster)
 		target.Database = ticket.Database
 

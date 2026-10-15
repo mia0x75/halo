@@ -2,7 +2,10 @@ package tools
 
 import (
 	"context"
+	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
+	"io"
 	"strings"
 	"sync"
 	"time"
@@ -14,6 +17,13 @@ import (
 	"github.com/mia0x75/halo/gqlapi"
 	"github.com/mia0x75/halo/models"
 )
+
+// sha1sum hashes a token before it is stored in memory.
+func sha1sum(data string) string {
+	h := sha1.New()
+	io.WriteString(h, data)
+	return hex.EncodeToString(h.Sum(nil))
+}
 
 var token *JWT     // TODO: 唯一实例，名称不太好
 var once sync.Once // 单例模式
@@ -53,7 +63,7 @@ func (this *JWT) Load(key string) (string, bool) {
 }
 
 func (this *JWT) Store(key string, value string) {
-	this.cache.Store(key, Sha1(value))
+	this.cache.Store(key, sha1sum(value))
 }
 
 func (this *JWT) Delete(key string) {
@@ -110,7 +120,7 @@ func (this *JWT) ParseToken(input string) (cred Credential, err error) {
 		} else {
 			// 找到，比较令牌的签名
 			// 令牌的键存在，但值不同，说明重新登录过，现在提供的是废弃的令牌
-			if !strings.EqualFold(value, Sha1(input)) {
+			if !strings.EqualFold(value, sha1sum(input)) {
 				err = fmt.Errorf("The token is obsolete, a new token is generated on server side, typically it is because of user login from another device")
 				break
 			}

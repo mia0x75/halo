@@ -13,8 +13,8 @@ import (
 	"github.com/mia0x75/halo/internal/agent"
 	"github.com/mia0x75/halo/internal/agent/meta"
 	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/platform/crypto"
 	"github.com/mia0x75/halo/models"
-	"github.com/mia0x75/halo/tools"
 	"github.com/mia0x75/parser/ast"
 )
 
@@ -109,7 +109,7 @@ func Run(stmts []*models.Statement, cluster *models.Cluster, ticket *models.Tick
 		Stmts:   stmts,
 	}
 	passwd := func(c *models.Cluster) string {
-		bs, _ := tools.DecryptAES(c.Password, g.Config().Secret.Crypto)
+		bs, _ := crypto.DecryptAES(c.Password, g.Config().Secret.Crypto)
 		return string(bs)
 	}
 	exec := agent.LocalExecutor{}
