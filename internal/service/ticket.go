@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/google/uuid"
 
@@ -139,7 +138,6 @@ func (s *TicketService) Submit(ctx context.Context, req SubmitRequest) (uint, er
 			UserID:    req.UserID,
 			CronID:    req.CronID,
 			Version:   1,
-			CreateAt:  uint(time.Now().Unix()),
 		}
 		newID, err := repos.Ticket.Create(ctx, tk)
 		if err != nil {
@@ -250,8 +248,6 @@ func (s *TicketService) PatchStatus(ctx context.Context, ticketUUID string, targ
 
 		tk.Status = target
 		tk.Version++
-		now := uint(time.Now().Unix())
-		tk.UpdateAt = &now
 		if err := repos.Ticket.Update(ctx, tk); err != nil {
 			return err
 		}
@@ -273,8 +269,6 @@ func (s *TicketService) UpdateCron(ctx context.Context, ticketUUID string, cronI
 		}
 		tk.CronID = &cronID
 		tk.Version++
-		now := uint(time.Now().Unix())
-		tk.UpdateAt = &now
 		return repos.Ticket.Update(ctx, tk)
 	})
 }
@@ -285,9 +279,6 @@ func (s *TicketService) UpdateCron(ctx context.Context, ticketUUID string, cronI
 func (s *TicketService) Create(ctx context.Context, ticket *domain.Ticket, statements []*domain.Statement) (uint, error) {
 	if ticket.UUID == "" {
 		ticket.UUID = uuid.NewString()
-	}
-	if ticket.CreateAt == 0 {
-		ticket.CreateAt = uint(time.Now().Unix())
 	}
 	var id uint
 	err := s.tx.WithTx(ctx, func(ctx context.Context, repos Repos) error {
@@ -309,8 +300,6 @@ func (s *TicketService) Create(ctx context.Context, ticket *domain.Ticket, state
 
 // Update replaces a ticket and its statements atomically.
 func (s *TicketService) Update(ctx context.Context, ticket *domain.Ticket, statements []*domain.Statement) error {
-	now := uint(time.Now().Unix())
-	ticket.UpdateAt = &now
 	return s.tx.WithTx(ctx, func(ctx context.Context, repos Repos) error {
 		if err := repos.Ticket.Update(ctx, ticket); err != nil {
 			return err
@@ -325,17 +314,13 @@ func (s *TicketService) Update(ctx context.Context, ticket *domain.Ticket, state
 	})
 }
 
-// createStatements assigns the owning ticket and fills UUID/create_at before
-// inserting each statement.
+// createStatements assigns the owning ticket and fills UUID before inserting
+// each statement.
 func createStatements(ctx context.Context, repo domain.StatementRepository, ticketID uint, statements []*domain.Statement) error {
-	now := uint(time.Now().Unix())
 	for _, st := range statements {
 		st.TicketID = ticketID
 		if st.UUID == "" {
 			st.UUID = uuid.NewString()
-		}
-		if st.CreateAt == 0 {
-			st.CreateAt = now
 		}
 		if err := repo.Create(ctx, st); err != nil {
 			return err
@@ -357,8 +342,6 @@ func (s *TicketService) transition(ctx context.Context, ticketID uint, to domain
 		}
 		tk.Status = to
 		tk.Version++
-		now := uint(time.Now().Unix())
-		tk.UpdateAt = &now
 		if apply != nil {
 			apply(tk)
 		}

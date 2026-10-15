@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/mia0x75/halo/internal/agent"
 	"github.com/mia0x75/halo/internal/domain"
@@ -80,8 +79,6 @@ func (s *AgentService) Execute(ctx context.Context, ticketID uint) error {
 				st.RowsAffected = &rows
 			}
 			st.Version++
-			now := uint(time.Now().Unix())
-			st.UpdateAt = &now
 			if err := repos.Statement.Update(ctx, st); err != nil {
 				return err
 			}
@@ -104,8 +101,6 @@ func (s *AgentService) Execute(ctx context.Context, ticketID uint) error {
 		}
 		tk.Status = to
 		tk.Version++
-		now := uint(time.Now().Unix())
-		tk.UpdateAt = &now
 		if err := repos.Ticket.Update(ctx, tk); err != nil {
 			return err
 		}

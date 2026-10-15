@@ -25,7 +25,6 @@ func TestLogServiceFormat(t *testing.T) {
 	require.Equal(t, "ticket.create|ticket:abc|why", e.Operation)
 	require.NotEmpty(t, e.UUID)
 	require.Equal(t, 1, e.Version)
-	require.NotZero(t, e.CreateAt)
 }
 
 func TestLogServicePropagatesError(t *testing.T) {

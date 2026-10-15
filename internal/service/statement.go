@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/google/uuid"
 
@@ -42,7 +41,6 @@ func (s *StatementService) Submit(ctx context.Context, ticketID uint, sql string
 		Type:     domain.StatementTypeSelect,
 		Status:   domain.StatementStatusPending,
 		Version:  1,
-		CreateAt: uint(time.Now().Unix()),
 	}
 
 	if s.analyzer != nil {

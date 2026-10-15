@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/google/uuid"
 
@@ -39,7 +38,6 @@ func (s *LogService) Log(ctx context.Context, e LogEntry) error {
 		UserID:    e.UserID,
 		Operation: fmt.Sprintf("%s|%s|%s", e.Operation, e.Target, e.Detail),
 		Version:   1,
-		CreateAt:  uint(time.Now().Unix()),
 	}
 	if _, err := s.log.Create(ctx, entry); err != nil {
 		return fmt.Errorf("log %s: %w", e.Operation, err)

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"time"
 
 	"github.com/mia0x75/halo/internal/domain"
 )
@@ -67,8 +66,6 @@ func (s *ReviewService) Review(ctx context.Context, ticketID, reviewerID uint) (
 			if canTransition(tk.Status, to) {
 				tk.Status = to
 				tk.Version++
-				now := uint(time.Now().Unix())
-				tk.UpdateAt = &now
 				if err := repos.Ticket.Update(ctx, tk); err != nil {
 					return err
 				}

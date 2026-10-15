@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/google/uuid"
 
@@ -72,14 +71,10 @@ func (s *EdgeService) Replace(ctx context.Context, edgeType uint, ancestorID uin
 		if err := repos.Edge.DeleteByTypeAncestor(ctx, edgeType, ancestorID); err != nil {
 			return err
 		}
-		now := uint(time.Now().Unix())
 		for _, e := range edges {
 			e.AncestorID = ancestorID
 			if e.UUID == "" {
 				e.UUID = uuid.NewString()
-			}
-			if e.CreateAt == 0 {
-				e.CreateAt = now
 			}
 			if _, err := repos.Edge.Create(ctx, e); err != nil {
 				return err
