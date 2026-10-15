@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mia0x75/halo/internal/agent/dialect"
+	"github.com/mia0x75/halo/internal/agent/meta"
 )
 
 // Databases 列举目标库的用户库/模式及默认字符集。
-func (t *Target) Databases(ctx context.Context) ([]*dialect.Database, error) {
-	return t.dialect.LoadDatabases(ctx, t.db)
+func (t *Target) Databases(ctx context.Context) ([]*meta.Database, error) {
+	return t.dialect.Databases(ctx, t.db)
 }
 
 // Query 执行只读查询，结果按列名转成字符串，保持旧 QueryString 的形态。

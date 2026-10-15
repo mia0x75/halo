@@ -94,7 +94,7 @@ func buildContext() *Context {
 		return string(bs)
 	}
 	var err error
-	if ctx.Tables, err = exec.LoadAllSchemas(context.Background(), target, passwd(cluster)); err != nil {
+	if ctx.Tables, err = exec.LoadTables(context.Background(), target, passwd(cluster)); err != nil {
 		fmt.Println(err)
 	}
 	if databases, derr := exec.Databases(context.Background(), target, passwd(cluster)); derr != nil {

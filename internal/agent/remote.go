@@ -3,7 +3,7 @@ package agent
 import (
 	"context"
 
-	"github.com/mia0x75/halo/internal/agent/dialect"
+	"github.com/mia0x75/halo/internal/agent/meta"
 	"github.com/mia0x75/halo/internal/domain"
 )
 
@@ -23,17 +23,12 @@ func (RemoteExecutor) Query(ctx context.Context, c *domain.Cluster, password, qu
 	return nil, ErrNotImplemented
 }
 
-// LoadSchema 暂未实现。
-func (RemoteExecutor) LoadSchema(ctx context.Context, c *domain.Cluster, password string) (*Schema, error) {
-	return nil, ErrNotImplemented
-}
-
-// LoadAllSchemas 暂未实现。
-func (RemoteExecutor) LoadAllSchemas(ctx context.Context, c *domain.Cluster, password string) (map[string][]*dialect.Table, error) {
+// LoadTables 暂未实现。
+func (RemoteExecutor) LoadTables(ctx context.Context, c *domain.Cluster, password string, databases ...string) (map[string][]*meta.Table, error) {
 	return nil, ErrNotImplemented
 }
 
 // Databases 暂未实现。
-func (RemoteExecutor) Databases(ctx context.Context, c *domain.Cluster, password string) ([]*dialect.Database, error) {
+func (RemoteExecutor) Databases(ctx context.Context, c *domain.Cluster, password string) ([]*meta.Database, error) {
 	return nil, ErrNotImplemented
 }

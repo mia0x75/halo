@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/mia0x75/halo/internal/agent/dialect"
+	"github.com/mia0x75/halo/internal/agent/meta"
 	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/models"
 )
@@ -19,11 +19,11 @@ type RuleSource interface {
 	Load(ctx context.Context) ([]*models.Rule, error)
 }
 
-// SchemaSource loads the target database metadata. It returns *dialect.Table so
+// SchemaSource loads the target database metadata. It returns *meta.Table so
 // the rule engine keeps inspecting charset/collate/engine exactly as before;
 // the neutral type preserves the same fields the engine reads.
 type SchemaSource interface {
-	Load(ctx context.Context, cluster *models.Cluster) (map[string][]*dialect.Table, error)
+	Load(ctx context.Context, cluster *models.Cluster) (map[string][]*meta.Table, error)
 }
 
 // Adapter implements domain.Validator on top of the legacy rule engine.

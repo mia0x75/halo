@@ -3017,8 +3017,8 @@ func (v *TableAlterVldr) IndexOnBlobColumnNotAllowed(s *models.Statement, r *mod
 				continue
 			}
 			// 既不是TEXT，也不是BLOB
-			if !ci.SQLType.IsText() &&
-				!ci.SQLType.IsBlob() {
+			if !ci.Type.IsText() &&
+				!ci.Type.IsBlob() {
 				continue
 			}
 			c := &models.Clause{

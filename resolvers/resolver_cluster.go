@@ -14,8 +14,7 @@ import (
 	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
-	"github.com/mia0x75/halo/internal/agent"
-	"github.com/mia0x75/halo/internal/agent/dialect"
+	"github.com/mia0x75/halo/internal/agent/meta"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
@@ -90,7 +89,7 @@ L:
 
 		password, _ := tools.DecryptAES(cluster.Password, g.Config().Secret.Crypto)
 
-		var databases []*dialect.Database
+		var databases []*meta.Database
 		if databases, err = r.app.Agent.Databases(ctx, bridge.ClusterToDomain(cluster), string(password)); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
@@ -271,7 +270,6 @@ L:
 
 		password, _ := tools.DecryptAES(cluster.Password, g.Config().Secret.Crypto)
 		target := bridge.ClusterToDomain(cluster)
-		target.Database = database
 
 		if err = statDatabase(ctx, r.app.Agent, target, string(password), database); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
@@ -279,15 +277,15 @@ L:
 			break L
 		}
 
-		var schema *agent.Schema
-		if schema, err = r.app.Agent.LoadSchema(ctx, target, string(password)); err != nil {
+		var tables map[string][]*meta.Table
+		if tables, err = r.app.Agent.LoadTables(ctx, target, string(password), database); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break L
 		}
 
 		var bs []byte
-		bs, err = json.Marshal(schema.Tables)
+		bs, err = json.Marshal(tables[database])
 		if err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())

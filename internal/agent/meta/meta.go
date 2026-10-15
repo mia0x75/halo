@@ -1,0 +1,87 @@
+// Package meta holds the dialect-neutral metadata model shared by the target-db
+// dialects and their consumers (validate rules, resolvers).
+package meta
+
+// ColumnType names a column type after both dialects normalize it, so the
+// IsText/IsBlob classification used by index rules stays dialect-independent.
+type ColumnType string
+
+// IsText reports whether the type belongs to the text family.
+func (t ColumnType) IsText() bool { return sqlKinds[t] == kindText }
+
+// IsBlob reports whether the type belongs to the binary family.
+func (t ColumnType) IsBlob() bool { return sqlKinds[t] == kindBlob }
+
+type sqlKind int
+
+const (
+	kindOther sqlKind = iota
+	kindText
+	kindBlob
+)
+
+// sqlKinds classifies the canonical (upper-cased) type names both dialects
+// normalize to. Unknown types fall back to kindOther.
+var sqlKinds = map[ColumnType]sqlKind{
+	"ENUM":       kindText,
+	"SET":        kindText,
+	"JSON":       kindText,
+	"JSONB":      kindText,
+	"CHAR":       kindText,
+	"VARCHAR":    kindText,
+	"NCHAR":      kindText,
+	"NVARCHAR":   kindText,
+	"TINYTEXT":   kindText,
+	"TEXT":       kindText,
+	"MEDIUMTEXT": kindText,
+	"LONGTEXT":   kindText,
+
+	"BINARY":     kindBlob,
+	"VARBINARY":  kindBlob,
+	"TINYBLOB":   kindBlob,
+	"BLOB":       kindBlob,
+	"MEDIUMBLOB": kindBlob,
+	"LONGBLOB":   kindBlob,
+	"BYTEA":      kindBlob,
+}
+
+// Column is column-level metadata.
+type Column struct {
+	Name     string
+	Type     ColumnType
+	Nullable bool
+	Default  string
+	Comment  string
+}
+
+// Index is index-level metadata.
+type Index struct {
+	Name   string
+	Unique bool
+	Cols   []string
+}
+
+// Table is table-level metadata. Fields without a counterpart on the target
+// dialect (Engine/Charset on PostgreSQL) stay empty.
+type Table struct {
+	Name    string
+	Engine  string
+	Charset string
+	Collate string
+	Comment string
+	Columns map[string]*Column
+	Indexes map[string]*Index
+}
+
+// GetColumn returns the column metadata by name, nil when absent.
+func (t *Table) GetColumn(name string) *Column {
+	return t.Columns[name]
+}
+
+// Database is database-level metadata. Charset/Collate are dialect defaults and
+// stay empty on PostgreSQL.
+type Database struct {
+	Name    string
+	Charset string
+	Collate string
+}

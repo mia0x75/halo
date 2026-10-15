@@ -246,7 +246,7 @@ func (v *IndexCreateVldr) IndexOnBlobColumnNotAllowed(s *models.Statement, r *mo
 	for _, col := range v.ci.IndexColNames {
 		ci := ti.GetColumn(col.Column.Name.O)
 		if ci != nil {
-			if ci.SQLType.IsText() || ci.SQLType.IsBlob() {
+			if ci.Type.IsText() || ci.Type.IsBlob() {
 				c := &models.Clause{
 					Description: fmt.Sprintf(r.Message, ci.Name),
 					Level:       r.Level,

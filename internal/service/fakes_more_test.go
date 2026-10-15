@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/mia0x75/halo/internal/agent"
-	"github.com/mia0x75/halo/internal/agent/dialect"
+	"github.com/mia0x75/halo/internal/agent/meta"
 	"github.com/mia0x75/halo/internal/domain"
 )
 
@@ -170,11 +170,7 @@ func (f *fakeExecutor) Execute(_ context.Context, _ *domain.Cluster, _, query st
 	return &agent.ExecResult{RowsAffected: 1}, nil
 }
 
-func (f *fakeExecutor) LoadSchema(_ context.Context, _ *domain.Cluster, _ string) (*agent.Schema, error) {
-	return nil, nil
-}
-
-func (f *fakeExecutor) LoadAllSchemas(_ context.Context, _ *domain.Cluster, _ string) (map[string][]*dialect.Table, error) {
+func (f *fakeExecutor) LoadTables(_ context.Context, _ *domain.Cluster, _ string, _ ...string) (map[string][]*meta.Table, error) {
 	return nil, nil
 }
 
@@ -182,7 +178,7 @@ func (f *fakeExecutor) Query(_ context.Context, _ *domain.Cluster, _, _ string) 
 	return nil, nil
 }
 
-func (f *fakeExecutor) Databases(_ context.Context, _ *domain.Cluster, _ string) ([]*dialect.Database, error) {
+func (f *fakeExecutor) Databases(_ context.Context, _ *domain.Cluster, _ string) ([]*meta.Database, error) {
 	return nil, nil
 }
 

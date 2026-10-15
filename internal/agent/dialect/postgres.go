@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/jmoiron/sqlx"
+
+	"github.com/mia0x75/halo/internal/agent/meta"
 )
 
 // Postgres 目标库方言。
@@ -16,13 +18,13 @@ func (Postgres) QuoteIdent(s string) string {
 	return `"` + strings.ReplaceAll(s, `"`, `""`) + `"`
 }
 
-type pgTableRow struct {
+type postgresTableRow struct {
 	Schema  string  `db:"table_schema"`
 	Table   string  `db:"table_name"`
 	Comment *string `db:"comment"`
 }
 
-type pgColumnRow struct {
+type postgresColumnRow struct {
 	Table     string  `db:"table_name"`
 	Column    string  `db:"column_name"`
 	Type      string  `db:"udt_name"`
@@ -32,15 +34,33 @@ type pgColumnRow struct {
 	Collation *string `db:"collation_name"`
 }
 
-type pgIndexRow struct {
+type postgresIndexRow struct {
 	Table  string `db:"table_name"`
 	Index  string `db:"index_name"`
 	Unique bool   `db:"is_unique"`
 	Column string `db:"column_name"`
 }
 
-// LoadTables 读取 information_schema.tables。Engine/Charset 无 PG 对应概念，留空。
-func (Postgres) LoadTables(ctx context.Context, db *sqlx.DB, schema string) ([]*Table, error) {
+// LoadTables 组合表/列/索引，装配成完整元数据。PG 无 Engine/Charset 概念，留空。
+func (p Postgres) LoadTables(ctx context.Context, db *sqlx.DB, database string) ([]*meta.Table, error) {
+	tables, err := p.loadTableHeaders(ctx, db, database)
+	if err != nil {
+		return nil, err
+	}
+	columns, err := p.loadColumns(ctx, db, database)
+	if err != nil {
+		return nil, err
+	}
+	indexes, err := p.loadIndexes(ctx, db, database)
+	if err != nil {
+		return nil, err
+	}
+	assemble(tables, columns, indexes)
+	return tables, nil
+}
+
+// loadTableHeaders 读取 information_schema.tables。Engine/Charset 无 PG 对应概念，留空。
+func (Postgres) loadTableHeaders(ctx context.Context, db *sqlx.DB, database string) ([]*meta.Table, error) {
 	const query = "SELECT c.table_schema, c.table_name, " +
 		"obj_description((quote_ident(c.table_schema) || '.' || quote_ident(c.table_name))::regclass) AS comment " +
 		"FROM information_schema.tables c " +
@@ -48,54 +68,54 @@ func (Postgres) LoadTables(ctx context.Context, db *sqlx.DB, schema string) ([]*
 		"AND c.table_type = 'BASE TABLE' " +
 		"ORDER BY c.table_name"
 
-	var rows []pgTableRow
-	if err := db.SelectContext(ctx, &rows, query, schema); err != nil {
+	var rows []postgresTableRow
+	if err := db.SelectContext(ctx, &rows, query, database); err != nil {
 		return nil, fmt.Errorf("query postgres tables: %w", err)
 	}
 
-	tables := make([]*Table, 0, len(rows))
+	tables := make([]*meta.Table, 0, len(rows))
 	for _, row := range rows {
-		tables = append(tables, &Table{
+		tables = append(tables, &meta.Table{
 			Name:    row.Table,
 			Comment: deref(row.Comment),
-			Columns: make(map[string]*Column),
-			Indexes: make(map[string]*Index),
+			Columns: make(map[string]*meta.Column),
+			Indexes: make(map[string]*meta.Index),
 		})
 	}
 	return tables, nil
 }
 
-// LoadColumns 读取 information_schema.columns，类型取 udt_name 走统一分类。
-func (Postgres) LoadColumns(ctx context.Context, db *sqlx.DB, schema string) (map[string]map[string]*Column, error) {
+// loadColumns 读取 information_schema.columns，类型取 udt_name 走统一分类。
+func (Postgres) loadColumns(ctx context.Context, db *sqlx.DB, database string) (map[string]map[string]*meta.Column, error) {
 	const query = "SELECT table_name, column_name, udt_name, data_type, " +
 		"is_nullable, column_default, collation_name " +
 		"FROM information_schema.columns " +
 		"WHERE table_schema = COALESCE(NULLIF($1, ''), current_schema()) " +
 		"ORDER BY table_name, ordinal_position"
 
-	var rows []pgColumnRow
-	if err := db.SelectContext(ctx, &rows, query, schema); err != nil {
+	var rows []postgresColumnRow
+	if err := db.SelectContext(ctx, &rows, query, database); err != nil {
 		return nil, fmt.Errorf("query postgres columns: %w", err)
 	}
 
-	columns := make(map[string]map[string]*Column, len(rows))
+	columns := make(map[string]map[string]*meta.Column, len(rows))
 	for _, row := range rows {
-		col := &Column{
+		col := &meta.Column{
 			Name:     row.Column,
-			SQLType:  SQLType{Name: normalizePostgresType(row.Schema, row.Type)},
+			Type:     meta.ColumnType(normalizePostgresType(row.Schema, row.Type)),
 			Nullable: row.Nullable == "YES",
 			Default:  deref(row.Default),
 		}
 		if columns[row.Table] == nil {
-			columns[row.Table] = make(map[string]*Column)
+			columns[row.Table] = make(map[string]*meta.Column)
 		}
 		columns[row.Table][col.Name] = col
 	}
 	return columns, nil
 }
 
-// LoadIndexes 走 pg_catalog，按索引内列序保留顺序，忽略主键。
-func (Postgres) LoadIndexes(ctx context.Context, db *sqlx.DB, schema string) (map[string]map[string]*Index, error) {
+// loadIndexes 走 pg_catalog，按索引内列序保留顺序，忽略主键。
+func (Postgres) loadIndexes(ctx context.Context, db *sqlx.DB, database string) (map[string]map[string]*meta.Index, error) {
 	const query = "SELECT t.relname AS table_name, i.relname AS index_name, " +
 		"ix.indisunique AS is_unique, a.attname AS column_name " +
 		"FROM pg_index ix " +
@@ -108,19 +128,19 @@ func (Postgres) LoadIndexes(ctx context.Context, db *sqlx.DB, schema string) (ma
 		"AND NOT ix.indisprimary " +
 		"ORDER BY t.relname, i.relname, s"
 
-	var rows []pgIndexRow
-	if err := db.SelectContext(ctx, &rows, query, schema); err != nil {
+	var rows []postgresIndexRow
+	if err := db.SelectContext(ctx, &rows, query, database); err != nil {
 		return nil, fmt.Errorf("query postgres indexes: %w", err)
 	}
 
-	indexes := make(map[string]map[string]*Index)
+	indexes := make(map[string]map[string]*meta.Index)
 	for _, row := range rows {
 		if indexes[row.Table] == nil {
-			indexes[row.Table] = make(map[string]*Index)
+			indexes[row.Table] = make(map[string]*meta.Index)
 		}
 		idx, ok := indexes[row.Table][row.Index]
 		if !ok {
-			idx = &Index{Name: row.Index, Unique: row.Unique}
+			idx = &meta.Index{Name: row.Index, Unique: row.Unique}
 		}
 		idx.Cols = append(idx.Cols, row.Column)
 		indexes[row.Table][idx.Name] = idx
@@ -128,27 +148,9 @@ func (Postgres) LoadIndexes(ctx context.Context, db *sqlx.DB, schema string) (ma
 	return indexes, nil
 }
 
-// LoadSchema 组合装配。PG 无 Engine/Charset 概念，留空。
-func (p Postgres) LoadSchema(ctx context.Context, db *sqlx.DB, schema string) ([]*Table, error) {
-	tables, err := p.LoadTables(ctx, db, schema)
-	if err != nil {
-		return nil, err
-	}
-	columns, err := p.LoadColumns(ctx, db, schema)
-	if err != nil {
-		return nil, err
-	}
-	indexes, err := p.LoadIndexes(ctx, db, schema)
-	if err != nil {
-		return nil, err
-	}
-	assemble(tables, columns, indexes)
-	return tables, nil
-}
-
-// ListSchemas 只覆盖当前连接的库：PG 的 schema 位于单个 database 内，
+// listSchemas 只覆盖当前连接的库：PG 的 schema 位于单个 database 内，
 // 跨库需另开连接，此处不跨。
-func (Postgres) ListSchemas(ctx context.Context, db *sqlx.DB) ([]string, error) {
+func (Postgres) listSchemas(ctx context.Context, db *sqlx.DB) ([]string, error) {
 	const query = "SELECT schema_name FROM information_schema.schemata " +
 		"WHERE schema_name <> 'information_schema' AND schema_name NOT LIKE 'pg\\_%' " +
 		"ORDER BY schema_name"
@@ -160,15 +162,15 @@ func (Postgres) ListSchemas(ctx context.Context, db *sqlx.DB) ([]string, error) 
 	return names, nil
 }
 
-// LoadDatabases 返回当前库内的用户 schema。PG 无库级默认字符集/排序规则，留空。
-func (Postgres) LoadDatabases(ctx context.Context, db *sqlx.DB) ([]*Database, error) {
-	names, err := Postgres{}.ListSchemas(ctx, db)
+// Databases 返回当前库内的用户 schema。PG 无库级默认字符集/排序规则，留空。
+func (p Postgres) Databases(ctx context.Context, db *sqlx.DB) ([]*meta.Database, error) {
+	names, err := p.listSchemas(ctx, db)
 	if err != nil {
 		return nil, err
 	}
-	dbs := make([]*Database, 0, len(names))
+	dbs := make([]*meta.Database, 0, len(names))
 	for _, name := range names {
-		dbs = append(dbs, &Database{Name: name})
+		dbs = append(dbs, &meta.Database{Name: name})
 	}
 	return dbs, nil
 }
