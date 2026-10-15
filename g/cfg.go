@@ -35,6 +35,8 @@ type DatabaseConfig struct {
 	MaxIdle        int    `json:"max_idle"`
 	MaxConnections int    `json:"max_connections"`
 	WaitTimeout    int    `json:"wait_timeout"`
+	// Driver selects the metadata engine: "mysql" (default) or "postgres".
+	Driver string `json:"driver"`
 }
 
 // MailConfig 邮件发送配置

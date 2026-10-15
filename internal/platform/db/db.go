@@ -6,19 +6,32 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 )
 
-// DB wraps the metadata connection pool. The metadata store is MySQL-only for
-// v0.1 (see TECH_STACK), so the driver is fixed rather than selected here.
+// DB wraps the metadata connection pool. The metadata store runs on MySQL or
+// PostgreSQL (see TECH_STACK); Driver selects the database/sql driver.
 type DB struct {
 	*sqlx.DB
+	// Driver is the canonical metadata engine name ("mysql" or "postgres").
+	Driver string
 }
 
 // New opens and verifies the metadata pool. It does not migrate or seed; callers
 // run migrations separately so a schema drift never starts the service silently.
 func New(ctx context.Context, cfg Config) (*DB, error) {
-	conn, err := sqlx.Open("mysql", cfg.Addr)
+	driver := cfg.Driver
+	if driver == "" {
+		driver = "mysql"
+	}
+	sqlDriver := "mysql"
+	if driver == "postgres" || driver == "pgx" {
+		driver, sqlDriver = "postgres", "pgx"
+	} else if driver != "mysql" {
+		return nil, fmt.Errorf("unknown metadata driver %q: want mysql or postgres", cfg.Driver)
+	}
+	conn, err := sqlx.Open(sqlDriver, cfg.Addr)
 	if err != nil {
 		return nil, fmt.Errorf("open metadata db: %w", err)
 	}
@@ -35,5 +48,5 @@ func New(ctx context.Context, cfg Config) (*DB, error) {
 		return nil, fmt.Errorf("ping metadata db: %w", err)
 	}
 
-	return &DB{DB: conn}, nil
+	return &DB{DB: conn, Driver: driver}, nil
 }

@@ -77,6 +77,7 @@ func main() {
 		MaxIdle:        g.Config().Database.MaxIdle,
 		MaxConnections: g.Config().Database.MaxConnections,
 		WaitTimeout:    g.Config().Database.WaitTimeout,
+		Driver:         g.Config().Database.Driver,
 	})
 	if err != nil {
 		log.Fatalf("[F] init app fail: %v", err)

@@ -15,7 +15,7 @@
 - 多角色（提交人 / 审核人 / 管理员）
 - 执行必经审计
 - 目标库：MySQL + PostgreSQL
-- 元数据库：MySQL（首版）
+- 元数据库：MySQL + PostgreSQL
 
 **当前阶段**：v0.1 MVP。5 份文档为权威源，本文件为 AI 协作契约。
 
@@ -34,10 +34,10 @@
 
 | 层 | 选型 |
 |----|------|
-| 后端语言 | Go 1.24+ |
+| 后端语言 | Go 1.26+ |
 | Web 框架 | Echo v5 |
 | API | GraphQL（gqlgen） |
-| 元数据库 | MySQL |
+| 元数据库 | MySQL + PostgreSQL |
 | 数据访问 | sqlc + sqlx |
 | 目标库 | MySQL + PostgreSQL |
 | 认证 | JWT + RBAC |
@@ -162,7 +162,7 @@ switch c.Type {
 
 ## 数据库
 
-### 元数据库（MySQL）
+### 元数据库（MySQL / PostgreSQL）
 
 - **参数化查询**，禁止字符串拼接 SQL
 - **禁止 `SELECT *`**，显式列出字段
@@ -170,6 +170,12 @@ switch c.Type {
 - **禁止 N+1 查询**，必须批量化
 - **Row Scan 用 sqlx**：`db.GetContext` / `db.SelectContext`
 - **SQL 全部手写**：sqlc 生成，无 ORM
+- **双引擎并行包**：`internal/repository/mysql` 与 `internal/repository/postgres`
+  实现同一套 `domain` 仓储接口，`database.driver`（`mysql`/`postgres`）选择；
+  禁止跨包共享查询与转换代码
+- **PG 方言**：占位符 `$n`、自增取号用 `RETURNING`、upsert 用 `ON CONFLICT`、
+  保留字双引号、时间列 `TIMESTAMPTZ`、UPDATE 显式 `update_at = NOW()`
+ （MySQL 侧靠 `ON UPDATE CURRENT_TIMESTAMP`）
 
 ### 目标库（MySQL / PostgreSQL）
 

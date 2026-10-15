@@ -14,6 +14,7 @@ import (
 	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/platform/db"
 	mysqlrepo "github.com/mia0x75/halo/internal/repository/mysql"
+	postgresrepo "github.com/mia0x75/halo/internal/repository/postgres"
 	"github.com/mia0x75/halo/internal/service"
 	"github.com/mia0x75/halo/validate"
 )
@@ -58,31 +59,61 @@ func New(ctx context.Context, cfg db.Config) (*App, error) {
 
 	// database.DB is the embedded *sqlx.DB; its own embedded *sql.DB feeds the
 	// tx manager, while the *sqlx.DB satisfies the sqlc DBTX interface.
-	tx := mysqlrepo.NewTxManager(database.DB.DB)
-	q := mysqlrepo.New(database.DB)
-
-	repos := service.Repos{
-		Avatar:    mysqlrepo.NewAvatarRepo(q),
-		Cluster:   mysqlrepo.NewClusterRepo(q),
-		Comment:   mysqlrepo.NewCommentRepo(q),
-		Cron:      mysqlrepo.NewCronRepo(q),
-		Edge:      mysqlrepo.NewEdgeRepo(q),
-		Glossary:  mysqlrepo.NewGlossaryRepo(q),
-		Log:       mysqlrepo.NewLogRepo(q),
-		Option:    mysqlrepo.NewOptionRepo(q),
-		Query:     mysqlrepo.NewQueryRepo(q),
-		Role:      mysqlrepo.NewRoleRepo(q),
-		Rule:      mysqlrepo.NewRuleRepo(q),
-		Statement: mysqlrepo.NewStatementRepo(q),
-		Statistic: mysqlrepo.NewStatisticRepo(q),
-		Template:  mysqlrepo.NewTemplateRepo(q),
-		Ticket:    mysqlrepo.NewTicketRepo(q),
-		User:      mysqlrepo.NewUserRepo(q),
+	// The repository package follows the configured metadata engine.
+	var tx service.TxManager
+	var repos service.Repos
+	var ruleSource validate.RuleSource
+	if database.Driver == "postgres" {
+		ptx := postgresrepo.NewTxManager(database.DB.DB)
+		q := postgresrepo.New(database.DB)
+		tx = ptx
+		repos = service.Repos{
+			Avatar:    postgresrepo.NewAvatarRepo(q),
+			Cluster:   postgresrepo.NewClusterRepo(q),
+			Comment:   postgresrepo.NewCommentRepo(q),
+			Cron:      postgresrepo.NewCronRepo(q),
+			Edge:      postgresrepo.NewEdgeRepo(q),
+			Glossary:  postgresrepo.NewGlossaryRepo(q),
+			Log:       postgresrepo.NewLogRepo(q),
+			Option:    postgresrepo.NewOptionRepo(q),
+			Query:     postgresrepo.NewQueryRepo(q),
+			Role:      postgresrepo.NewRoleRepo(q),
+			Rule:      postgresrepo.NewRuleRepo(q),
+			Statement: postgresrepo.NewStatementRepo(q),
+			Statistic: postgresrepo.NewStatisticRepo(q),
+			Template:  postgresrepo.NewTemplateRepo(q),
+			Ticket:    postgresrepo.NewTicketRepo(q),
+			User:      postgresrepo.NewUserRepo(q),
+		}
+		ruleSource = postgresrepo.NewRuleSource(repos.Rule)
+	} else {
+		mtx := mysqlrepo.NewTxManager(database.DB.DB)
+		q := mysqlrepo.New(database.DB)
+		tx = mtx
+		repos = service.Repos{
+			Avatar:    mysqlrepo.NewAvatarRepo(q),
+			Cluster:   mysqlrepo.NewClusterRepo(q),
+			Comment:   mysqlrepo.NewCommentRepo(q),
+			Cron:      mysqlrepo.NewCronRepo(q),
+			Edge:      mysqlrepo.NewEdgeRepo(q),
+			Glossary:  mysqlrepo.NewGlossaryRepo(q),
+			Log:       mysqlrepo.NewLogRepo(q),
+			Option:    mysqlrepo.NewOptionRepo(q),
+			Query:     mysqlrepo.NewQueryRepo(q),
+			Role:      mysqlrepo.NewRoleRepo(q),
+			Rule:      mysqlrepo.NewRuleRepo(q),
+			Statement: mysqlrepo.NewStatementRepo(q),
+			Statistic: mysqlrepo.NewStatisticRepo(q),
+			Template:  mysqlrepo.NewTemplateRepo(q),
+			Ticket:    mysqlrepo.NewTicketRepo(q),
+			User:      mysqlrepo.NewUserRepo(q),
+		}
+		ruleSource = mysqlrepo.NewRuleSource(repos.Rule)
 	}
 
 	logSvc := service.NewLogService(repos.Log)
 	// The schema source is deferred to 2D-B, so the adapter is still a skeleton.
-	validator := validate.NewAdapter(mysqlrepo.NewRuleSource(repos.Rule), nil)
+	validator := validate.NewAdapter(ruleSource, nil)
 	analyzerSvc, err := analyzer.New(domain.ClusterTypeMySQL, validator)
 	if err != nil {
 		_ = database.Close()

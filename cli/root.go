@@ -20,6 +20,7 @@ func newApp() (*app.App, error) {
 		MaxIdle:        g.Config().Database.MaxIdle,
 		MaxConnections: g.Config().Database.MaxConnections,
 		WaitTimeout:    g.Config().Database.WaitTimeout,
+		Driver:         g.Config().Database.Driver,
 	})
 }
 
