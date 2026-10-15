@@ -3,7 +3,7 @@ package validate
 import (
 	"sync"
 
-	"github.com/mia0x75/halo/models"
+	"github.com/mia0x75/halo/internal/transport/graphql/models"
 )
 
 // EventCreateVldr 创建事件语句相关的审核规则

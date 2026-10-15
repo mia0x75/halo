@@ -5,7 +5,7 @@ import (
 
 	"github.com/mia0x75/halo/internal/platform/cache"
 	"github.com/mia0x75/halo/internal/tools"
-	"github.com/mia0x75/halo/models"
+	"github.com/mia0x75/halo/internal/transport/graphql/models"
 )
 
 // Glossaries 根据分组信息获取字典信息

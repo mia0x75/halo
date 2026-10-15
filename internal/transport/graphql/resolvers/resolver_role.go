@@ -6,7 +6,7 @@ import (
 
 	"github.com/mia0x75/halo/internal/platform/cache"
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
-	"github.com/mia0x75/halo/models"
+	"github.com/mia0x75/halo/internal/transport/graphql/models"
 )
 
 // Role 查看某一个角色信息

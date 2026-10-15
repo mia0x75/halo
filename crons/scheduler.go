@@ -11,7 +11,7 @@ import (
 
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/service"
-	"github.com/mia0x75/halo/models"
+	"github.com/mia0x75/halo/internal/transport/graphql/models"
 )
 
 // 1、任务完成或者失败，持久化到数据库

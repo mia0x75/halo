@@ -11,7 +11,7 @@ import (
 	"github.com/mia0x75/parser/charset"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/mia0x75/halo/models"
+	"github.com/mia0x75/halo/internal/transport/graphql/models"
 )
 
 // DatabaseCreateVldr 创建数据库语句相关的审核规则

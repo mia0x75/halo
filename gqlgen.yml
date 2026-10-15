@@ -25,64 +25,64 @@ resolver:
 # graphql. These normally come from the db or a remote api.
 models:
   Avatar:
-    model: github.com/mia0x75/halo/models.Avatar
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.Avatar
 
   Comment:
-    model: github.com/mia0x75/halo/models.Comment
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.Comment
 
   Cron:
-    model: github.com/mia0x75/halo/models.Cron
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.Cron
 
   Glossary:
-    model: github.com/mia0x75/halo/models.Glossary
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.Glossary
 
   Cluster:
-    model: github.com/mia0x75/halo/models.Cluster
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.Cluster
 
   Log:
-    model: github.com/mia0x75/halo/models.Log
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.Log
 
   Option:
-    model: github.com/mia0x75/halo/models.Option
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.Option
 
   Query:
-    model: github.com/mia0x75/halo/models.Query
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.Query
 
   Edge:
-    model: github.com/mia0x75/halo/models.Edge
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.Edge
 
   Role:
-    model: github.com/mia0x75/halo/models.Role
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.Role
 
   Rule:
-    model: github.com/mia0x75/halo/models.Rule
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.Rule
 
   Statement:
-    model: github.com/mia0x75/halo/models.Statement
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.Statement
 
   Template:
-    model: github.com/mia0x75/halo/models.Template
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.Template
 
   Ticket:
-    model: github.com/mia0x75/halo/models.Ticket
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.Ticket
 
   User:
-    model: github.com/mia0x75/halo/models.User
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.User
 
   Statistic:
-    model: github.com/mia0x75/halo/models.Statistic
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.Statistic
 
   CPUStats:
-    model: github.com/mia0x75/halo/models.CPUStats
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.CPUStats
 
   HostInfos:
-    model: github.com/mia0x75/halo/models.HostInfos
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.HostInfos
 
   ProcessStats:
-    model: github.com/mia0x75/halo/models.ProcessStats
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.ProcessStats
 
   MemStats:
-    model: github.com/mia0x75/halo/models.MemStats
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.MemStats
 
   Int8:
     model: github.com/mia0x75/halo/internal/transport/graphql/gqlapi.Int8
@@ -112,103 +112,103 @@ models:
     model: github.com/mia0x75/halo/internal/transport/graphql/gqlapi.UInt64
 
   UpdateTemplateInput:
-    model: github.com/mia0x75/halo/models.UpdateTemplateInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.UpdateTemplateInput
 
   CreateTicketInput:
-    model: github.com/mia0x75/halo/models.CreateTicketInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.CreateTicketInput
 
   UpdateTicketInput:
-    model: github.com/mia0x75/halo/models.UpdateTicketInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.UpdateTicketInput
 
   PatchTicketStatusInput:
-    model: github.com/mia0x75/halo/models.PatchTicketStatusInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.PatchTicketStatusInput
 
   CreateCommentInput:
-    model: github.com/mia0x75/halo/models.CreateCommentInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.CreateCommentInput
 
   CreateUserInput:
-    model: github.com/mia0x75/halo/models.CreateUserInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.CreateUserInput
 
   UpdateUserInput:
-    model: github.com/mia0x75/halo/models.UpdateUserInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.UpdateUserInput
 
   PatchPasswordInput:
-    model: github.com/mia0x75/halo/models.PatchPasswordInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.PatchPasswordInput
 
   PatchEmailInput:
-    model: github.com/mia0x75/halo/models.PatchEmailInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.PatchEmailInput
 
   GrantRolesInput:
-    model: github.com/mia0x75/halo/models.GrantRolesInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.GrantRolesInput
 
   GrantClustersInput:
-    model: github.com/mia0x75/halo/models.GrantClustersInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.GrantClustersInput
 
   RevokeRolesInput:
-    model: github.com/mia0x75/halo/models.RevokeRolesInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.RevokeRolesInput
 
   RevokeClustersInput:
-    model: github.com/mia0x75/halo/models.RevokeClustersInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.RevokeClustersInput
 
   GrantReviewersInput:
-    model: github.com/mia0x75/halo/models.GrantReviewersInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.GrantReviewersInput
 
   RevokeReviewersInput:
-    model: github.com/mia0x75/halo/models.RevokeReviewersInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.RevokeReviewersInput
 
   UserRegisterInput:
-    model: github.com/mia0x75/halo/models.UserRegisterInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.UserRegisterInput
 
   UserLoginInput:
-    model: github.com/mia0x75/halo/models.UserLoginInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.UserLoginInput
 
   CreateClusterInput:
-    model: github.com/mia0x75/halo/models.CreateClusterInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.CreateClusterInput
 
   UpdateClusterInput:
-    model: github.com/mia0x75/halo/models.UpdateClusterInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.UpdateClusterInput
 
   PatchClusterStatusInput:
-    model: github.com/mia0x75/halo/models.PatchClusterStatusInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.PatchClusterStatusInput
 
   ValidateConnectionInput:
-    model: github.com/mia0x75/halo/models.ValidateConnectionInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.ValidateConnectionInput
 
   ValidatePatternInput:
-    model: github.com/mia0x75/halo/models.ValidatePatternInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.ValidatePatternInput
 
   PatchOptionValueInput:
-    model: github.com/mia0x75/halo/models.PatchOptionValueInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.PatchOptionValueInput
 
   CreateQueryInput:
-    model: github.com/mia0x75/halo/models.CreateQueryInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.CreateQueryInput
 
   PatchRuleValuesInput:
-    model: github.com/mia0x75/halo/models.PatchRuleValuesInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.PatchRuleValuesInput
 
   PatchRuleBitwiseInput:
-    model: github.com/mia0x75/halo/models.PatchRuleBitwiseInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.PatchRuleBitwiseInput
 
   PatchUserStatusInput:
-    model: github.com/mia0x75/halo/models.PatchUserStatusInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.PatchUserStatusInput
 
   UpdateProfileInput:
-    model: github.com/mia0x75/halo/models.UpdateProfileInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.UpdateProfileInput
 
   SoarQueryInput:
-    model: github.com/mia0x75/halo/models.SoarQueryInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.SoarQueryInput
 
   ScheduleTicketInput:
-    model: github.com/mia0x75/halo/models.ScheduleTicketInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.ScheduleTicketInput
 
   ActivateInput:
-    model: github.com/mia0x75/halo/models.ActivateInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.ActivateInput
 
   LostPasswdInput:
-    model: github.com/mia0x75/halo/models.LostPasswdInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.LostPasswdInput
 
   ResetPasswdInput:
-    model: github.com/mia0x75/halo/models.ResetPasswdInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.ResetPasswdInput
 
   ResendActivationMailInput:
-    model: github.com/mia0x75/halo/models.ResendActivationMailInput
+    model: github.com/mia0x75/halo/internal/transport/graphql/models.ResendActivationMailInput

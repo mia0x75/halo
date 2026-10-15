@@ -2,7 +2,7 @@ package cache
 
 import (
 	"github.com/mia0x75/halo/internal/bridge"
-	"github.com/mia0x75/halo/models"
+	"github.com/mia0x75/halo/internal/transport/graphql/models"
 )
 
 // RolesMap 线程安全的数据缓存对象，RolesMap 角色缓存对象

@@ -18,7 +18,7 @@ import (
 	"github.com/mia0x75/halo/internal/platform/crypto"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
-	"github.com/mia0x75/halo/models"
+	"github.com/mia0x75/halo/internal/transport/graphql/models"
 )
 
 // TestCluster 测试群集的连接性

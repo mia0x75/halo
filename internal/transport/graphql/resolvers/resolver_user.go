@@ -23,7 +23,7 @@ import (
 	"github.com/mia0x75/halo/internal/service"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
-	"github.com/mia0x75/halo/models"
+	"github.com/mia0x75/halo/internal/transport/graphql/models"
 )
 
 // Me 当前登陆用户信息

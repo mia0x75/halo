@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/mia0x75/halo/internal/domain"
-	"github.com/mia0x75/halo/models"
+	"github.com/mia0x75/halo/internal/transport/graphql/models"
 	"github.com/mia0x75/halo/validate"
 )
 

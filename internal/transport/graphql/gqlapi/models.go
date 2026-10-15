@@ -8,7 +8,7 @@ import (
 	"io"
 	"strconv"
 
-	"github.com/mia0x75/halo/models"
+	"github.com/mia0x75/halo/internal/transport/graphql/models"
 )
 
 // 接口定义

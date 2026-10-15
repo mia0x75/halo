@@ -6,7 +6,7 @@ import (
 
 	"github.com/mia0x75/halo/internal/agent/meta"
 	"github.com/mia0x75/halo/internal/domain"
-	"github.com/mia0x75/halo/models"
+	"github.com/mia0x75/halo/internal/transport/graphql/models"
 )
 
 // ErrNotImplemented marks the 2D-A adapter skeleton. The translation from the

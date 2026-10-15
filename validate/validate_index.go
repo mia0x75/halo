@@ -8,7 +8,7 @@ import (
 	"github.com/mia0x75/parser/ast"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/mia0x75/halo/models"
+	"github.com/mia0x75/halo/internal/transport/graphql/models"
 )
 
 // IndexCreateVldr 创建索引语句相关的审核规则

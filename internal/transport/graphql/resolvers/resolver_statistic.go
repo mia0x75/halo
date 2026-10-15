@@ -10,7 +10,7 @@ import (
 	"github.com/mia0x75/halo/internal/platform/env"
 	"github.com/mia0x75/halo/internal/tools"
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
-	"github.com/mia0x75/halo/models"
+	"github.com/mia0x75/halo/internal/transport/graphql/models"
 )
 
 // Statistics 根据分组获取统计信息

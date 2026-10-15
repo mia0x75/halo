@@ -2,7 +2,7 @@ package bridge
 
 import (
 	"github.com/mia0x75/halo/internal/domain"
-	"github.com/mia0x75/halo/models"
+	"github.com/mia0x75/halo/internal/transport/graphql/models"
 )
 
 // StatementFromDomain converts a domain entity to its legacy model. The legacy

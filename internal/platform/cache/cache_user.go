@@ -2,7 +2,7 @@ package cache
 
 import (
 	"github.com/mia0x75/halo/internal/bridge"
-	"github.com/mia0x75/halo/models"
+	"github.com/mia0x75/halo/internal/transport/graphql/models"
 )
 
 // UsersMap 用户缓存对象

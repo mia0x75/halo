@@ -2,7 +2,7 @@ package cache
 
 import (
 	"github.com/mia0x75/halo/internal/bridge"
-	"github.com/mia0x75/halo/models"
+	"github.com/mia0x75/halo/internal/transport/graphql/models"
 )
 
 // TemplatesMap 线程安全的数据缓存对象，TemplatesMap 规则缓存对象

@@ -8,7 +8,7 @@ import (
 	"github.com/mia0x75/parser/ast"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/mia0x75/halo/models"
+	"github.com/mia0x75/halo/internal/transport/graphql/models"
 )
 
 // InsertVldr 插入数据语句相关的审核规则

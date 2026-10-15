@@ -7,7 +7,7 @@ import (
 	"github.com/mia0x75/parser/ast"
 
 	"github.com/mia0x75/halo/internal/tools"
-	"github.com/mia0x75/halo/models"
+	"github.com/mia0x75/halo/internal/transport/graphql/models"
 )
 
 // MiscVldr 其他各种规则，包含跨语句相关的审核规则，检测一个工单不同语句之间的可能的问题
