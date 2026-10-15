@@ -3,4 +3,4 @@ bin/
 .idea
 *.exe
 cfg.json
-g/g.go
+internal/app/build.go
