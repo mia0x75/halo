@@ -2,7 +2,7 @@ version: "2"
 sql:
   - engine: "mysql"
     queries: "internal/repository/mysql/queries"
-    schema: "scripts/halodb_schema.sql"
+    schema: "scripts/halodb_schema_mysql.sql"
     gen:
       go:
         package: "mysqlrepo"
