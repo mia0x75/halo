@@ -18,7 +18,7 @@ import (
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/models"
-	"github.com/mia0x75/halo/internal/platform/cache"
+	"github.com/mia0x75/halo/internal/cache"
 	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/service"
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"

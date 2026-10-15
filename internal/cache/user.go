@@ -3,10 +3,11 @@ package cache
 import (
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/models"
+	safecache "github.com/mia0x75/halo/internal/platform/cache"
 )
 
 // UsersMap 用户缓存对象
-var UsersMap = SafeMap[models.User]{}
+var UsersMap = safecache.SafeMap[models.User]{}
 
 // Init 缓存初始化
 func UsersInit() (err error) {

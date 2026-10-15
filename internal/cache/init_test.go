@@ -7,12 +7,12 @@ import (
 	"testing"
 
 	"github.com/mia0x75/halo/internal/app"
-	"github.com/mia0x75/halo/internal/platform/cache"
+	"github.com/mia0x75/halo/internal/cache"
 	"github.com/mia0x75/halo/internal/platform/db"
 )
 
 func TestInitSmoke(t *testing.T) {
-	data, err := os.ReadFile("../bin/config.json")
+	data, err := os.ReadFile("../../bin/config.json")
 	if err != nil {
 		t.Skip("no bin/config.json")
 	}

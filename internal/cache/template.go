@@ -3,10 +3,11 @@ package cache
 import (
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/models"
+	safecache "github.com/mia0x75/halo/internal/platform/cache"
 )
 
 // TemplatesMap 线程安全的数据缓存对象，TemplatesMap 规则缓存对象
-var TemplatesMap = SafeMap[models.Template]{}
+var TemplatesMap = safecache.SafeMap[models.Template]{}
 
 // Init 缓存初始化
 func TemplatesInit() (err error) {

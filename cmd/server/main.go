@@ -19,7 +19,7 @@ import (
 
 	"github.com/mia0x75/halo/internal/app"
 	"github.com/mia0x75/halo/internal/event"
-	"github.com/mia0x75/halo/internal/platform/cache"
+	"github.com/mia0x75/halo/internal/cache"
 	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/db"
 	"github.com/mia0x75/halo/internal/worker"

@@ -3,10 +3,11 @@ package cache
 import (
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/models"
+	safecache "github.com/mia0x75/halo/internal/platform/cache"
 )
 
 // EdgesMap 线程安全的数据缓存对象，EdgesMap 关联缓存对象
-var EdgesMap = &SafeMap[models.Edge]{}
+var EdgesMap = &safecache.SafeMap[models.Edge]{}
 
 // Init 缓存初始化
 func EdgesInit() (err error) {

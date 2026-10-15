@@ -9,7 +9,7 @@ import (
 	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/event"
 	"github.com/mia0x75/halo/internal/models"
-	"github.com/mia0x75/halo/internal/platform/cache"
+	"github.com/mia0x75/halo/internal/cache"
 	"github.com/mia0x75/halo/internal/platform/config"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
