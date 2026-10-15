@@ -4,4 +4,4 @@ bin/
 *.exe
 cfg.json
 internal/app/build.go
-BUILD
+.Makefile.swp
