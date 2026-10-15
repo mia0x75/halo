@@ -3,7 +3,6 @@ package cli
 import (
 	"bytes"
 	"context"
-	"database/sql"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -96,33 +95,23 @@ func execute(cmd *cobra.Command, args []string) {
 		}
 		cluster := bridge.ClusterFromDomain(domainCluster)
 
-		passwd := func(c *models.Cluster) []byte {
-			bs, _ := tools.DecryptAES(c.Password, g.Config().Secret.Crypto)
-			return bs
-		}
-
-		engine, connErr := cluster.Connect(ticket.Database, passwd)
-		if connErr != nil {
-			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", connErr.Error())
-			break
-		}
+		password, _ := tools.DecryptAES(cluster.Password, g.Config().Secret.Crypto)
+		target := bridge.ClusterToDomain(cluster)
+		target.Database = ticket.Database
 
 		ticket.Status = gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumDone]
 		for _, stmt := range stmts {
-			var result sql.Result
-			if result, err = engine.Exec(stmt.Content); err != nil {
+			result, execErr := application.Agent.Execute(ctx, target, string(password), stmt.Content)
+			if execErr != nil {
 				stmt.Status = gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumExecFailure]
-				stmt.Results = err.Error()
+				stmt.Results = execErr.Error()
 				ticket.Status = gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumExecFailure]
 				buf.WriteString(stmt.Content)
-				err = fmt.Errorf("错误代码: 1500, 错误信息: %s", err.Error())
+				err = fmt.Errorf("错误代码: 1500, 错误信息: %s", execErr.Error())
 				break
-			} else {
-				stmt.Status = gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumDone]
-				if ra, err := result.RowsAffected(); err == nil {
-					stmt.RowsAffected = uint(ra)
-				}
 			}
+			stmt.Status = gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumDone]
+			stmt.RowsAffected = uint(result.RowsAffected)
 		}
 		if err != nil {
 			events.FireSync(events.EventTicketFailed, &events.TicketFailedArgs{

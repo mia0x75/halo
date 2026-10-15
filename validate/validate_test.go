@@ -1,6 +1,7 @@
 package validate
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -14,6 +15,8 @@ import (
 
 	"github.com/mia0x75/halo/caches"
 	"github.com/mia0x75/halo/g"
+	"github.com/mia0x75/halo/internal/agent"
+	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
 )
@@ -84,16 +87,23 @@ func buildContext() *Context {
 		Ticket:  ticket,
 		Stmts:   nil,
 	}
-	passwd := func(c *models.Cluster) []byte {
+	exec := agent.LocalExecutor{}
+	target := bridge.ClusterToDomain(cluster)
+	passwd := func(c *models.Cluster) string {
 		bs, _ := tools.DecryptAES(c.Password, g.Config().Secret.Crypto)
-		return bs
+		return string(bs)
 	}
 	var err error
-	if ctx.Tables, err = cluster.Metadata("*", passwd); err != nil {
+	if ctx.Tables, err = exec.LoadAllSchemas(context.Background(), target, passwd(cluster)); err != nil {
 		fmt.Println(err)
 	}
-	if ctx.Databases, err = cluster.Databases(passwd); err != nil {
-		fmt.Println(err)
+	if databases, derr := exec.Databases(context.Background(), target, passwd(cluster)); derr != nil {
+		fmt.Println(derr)
+	} else {
+		ctx.Databases = make([]models.Database, 0, len(databases))
+		for _, db := range databases {
+			ctx.Databases = append(ctx.Databases, models.Database{Name: db.Name, Charset: db.Charset, Collate: db.Collate})
+		}
 	}
 	return ctx
 }

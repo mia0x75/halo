@@ -42,3 +42,25 @@ func (LocalExecutor) LoadAllSchemas(ctx context.Context, c *domain.Cluster, pass
 
 	return target.LoadAllSchemas(ctx)
 }
+
+// Query 直连目标库执行只读查询。
+func (LocalExecutor) Query(ctx context.Context, c *domain.Cluster, password, query string) ([]map[string]string, error) {
+	target, err := openTarget(ctx, c, password)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = target.Close() }()
+
+	return target.Query(ctx, query)
+}
+
+// Databases 直连目标库列举用户库。
+func (LocalExecutor) Databases(ctx context.Context, c *domain.Cluster, password string) ([]*dialect.Database, error) {
+	target, err := openTarget(ctx, c, password)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = target.Close() }()
+
+	return target.Databases(ctx)
+}

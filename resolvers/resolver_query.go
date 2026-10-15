@@ -180,12 +180,11 @@ L:
 			break
 		}
 
-		passwd := func(c *models.Cluster) []byte {
-			bs, _ := tools.DecryptAES(c.Password, g.Config().Secret.Crypto)
-			return bs
-		}
+		password, _ := tools.DecryptAES(cluster.Password, g.Config().Secret.Crypto)
+		target := bridge.ClusterToDomain(cluster)
+		target.Database = input.Database
 
-		if _, err = cluster.Stat(input.Database, passwd); err != nil {
+		if err = statDatabase(ctx, r.app.Agent, target, string(password), input.Database); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break L
@@ -255,18 +254,8 @@ L:
 
 		}
 
-		engine, connErr := cluster.Connect(input.Database, func(c *models.Cluster) []byte {
-			bs, _ := tools.DecryptAES(c.Password, g.Config().Secret.Crypto)
-			return bs
-		})
-		if connErr != nil {
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, connErr.Error())
-			break
-		}
-
-		rows := []map[string]string{}
-		if rows, err = engine.QueryString(input.Content); err != nil {
+		var rows []map[string]string
+		if rows, err = r.app.Agent.Query(ctx, target, string(password), input.Content); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break
@@ -336,7 +325,10 @@ L:
 			return bs
 		}
 
-		if _, err = cluster.Stat(input.Database, passwd); err != nil {
+		target := bridge.ClusterToDomain(cluster)
+		target.Database = input.Database
+
+		if err = statDatabase(ctx, r.app.Agent, target, string(passwd(cluster)), input.Database); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break L
@@ -436,7 +428,10 @@ L:
 			return bs
 		}
 
-		if _, err = cluster.Stat(input.Database, passwd); err != nil {
+		target := bridge.ClusterToDomain(cluster)
+		target.Database = input.Database
+
+		if err = statDatabase(ctx, r.app.Agent, target, string(passwd(cluster)), input.Database); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break L

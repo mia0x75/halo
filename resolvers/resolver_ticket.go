@@ -82,12 +82,11 @@ L:
 			break
 		}
 
-		passwd := func(c *models.Cluster) []byte {
-			bs, _ := tools.DecryptAES(c.Password, g.Config().Secret.Crypto)
-			return bs
-		}
+		password, _ := tools.DecryptAES(cluster.Password, g.Config().Secret.Crypto)
+		target := bridge.ClusterToDomain(cluster)
+		target.Database = input.Database
 
-		if _, err = cluster.Stat(input.Database, passwd); err != nil {
+		if err = statDatabase(ctx, r.app.Agent, target, string(password), input.Database); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break L
@@ -259,12 +258,11 @@ L:
 			break
 		}
 
-		passwd := func(c *models.Cluster) []byte {
-			bs, _ := tools.DecryptAES(c.Password, g.Config().Secret.Crypto)
-			return bs
-		}
+		password, _ := tools.DecryptAES(cluster.Password, g.Config().Secret.Crypto)
+		target := bridge.ClusterToDomain(cluster)
+		target.Database = input.Database
 
-		if _, err = cluster.Stat(input.Database, passwd); err != nil {
+		if err = statDatabase(ctx, r.app.Agent, target, string(password), input.Database); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break L

@@ -1,16 +1,18 @@
 package validate
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"reflect"
 	"regexp"
 	"sync"
 
-	"github.com/go-xorm/core"
-
 	"github.com/mia0x75/halo/caches"
 	"github.com/mia0x75/halo/g"
+	"github.com/mia0x75/halo/internal/agent"
+	"github.com/mia0x75/halo/internal/agent/dialect"
+	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
 	"github.com/mia0x75/parser/ast"
@@ -50,11 +52,11 @@ var (
 
 // Context 在不同的验证组中共享内容
 type Context struct {
-	Stmts     []*models.Statement      // 全部等待审核的数据
-	Ticket    *models.Ticket           // 等待审核的工单
-	Cluster   *models.Cluster          // 目标群集
-	Databases []models.Database        // 目标群集所有的用户数据库
-	Tables    map[string][]*core.Table // 目标群集上目标数据库的元数据
+	Stmts     []*models.Statement         // 全部等待审核的数据
+	Ticket    *models.Ticket              // 等待审核的工单
+	Cluster   *models.Cluster             // 目标群集
+	Databases []models.Database           // 目标群集所有的用户数据库
+	Tables    map[string][]*dialect.Table // 目标群集上目标数据库的元数据
 	// Rules is the rule set the engine runs against. It is the future channel
 	// for RunRegistry; the legacy global wiring (SetGroup reading caches) is
 	// still in place and is removed in 2D-B.
@@ -106,16 +108,27 @@ func Run(stmts []*models.Statement, cluster *models.Cluster, ticket *models.Tick
 		Ticket:  ticket,
 		Stmts:   stmts,
 	}
-	passwd := func(c *models.Cluster) []byte {
+	passwd := func(c *models.Cluster) string {
 		bs, _ := tools.DecryptAES(c.Password, g.Config().Secret.Crypto)
-		return bs
+		return string(bs)
 	}
+	exec := agent.LocalExecutor{}
+	target := bridge.ClusterToDomain(cluster)
 	var err error
-	if ctx.Tables, err = cluster.Metadata("*", passwd); err != nil {
+	if ctx.Tables, err = exec.LoadAllSchemas(context.Background(), target, passwd(cluster)); err != nil {
 		fmt.Println(err)
 	}
-	if ctx.Databases, err = cluster.Databases(passwd); err != nil {
-		fmt.Println(err)
+	if databases, derr := exec.Databases(context.Background(), target, passwd(cluster)); derr != nil {
+		fmt.Println(derr)
+	} else {
+		ctx.Databases = make([]models.Database, 0, len(databases))
+		for _, db := range databases {
+			ctx.Databases = append(ctx.Databases, models.Database{
+				Name:    db.Name,
+				Charset: db.Charset,
+				Collate: db.Collate,
+			})
+		}
 	}
 	ctx.Rules = caches.RulesMap.All()
 
@@ -232,7 +245,7 @@ func (v *vldr) SetGroup(gid uint16) {
 }
 
 // IndexInfo 获取表信息
-func (v *vldr) IndexInfo(database, table, index string) *core.Index {
+func (v *vldr) IndexInfo(database, table, index string) *dialect.Index {
 	if ti := v.TableInfo(database, table); ti != nil {
 		for _, idx := range ti.Indexes {
 			if idx.Name == index {
@@ -244,7 +257,7 @@ func (v *vldr) IndexInfo(database, table, index string) *core.Index {
 }
 
 // ColumnInfo 获取表信息
-func (v *vldr) ColumnInfo(database, table, column string) *core.Column {
+func (v *vldr) ColumnInfo(database, table, column string) *dialect.Column {
 	if ti := v.TableInfo(database, table); ti != nil {
 		return ti.GetColumn(column)
 	}
@@ -252,7 +265,7 @@ func (v *vldr) ColumnInfo(database, table, column string) *core.Column {
 }
 
 // TableInfo 获取表信息
-func (v *vldr) TableInfo(database, table string) *core.Table {
+func (v *vldr) TableInfo(database, table string) *dialect.Table {
 	if database == "" {
 		database = v.Ctx.Ticket.Database
 	}

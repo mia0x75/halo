@@ -22,6 +22,7 @@ type App struct {
 	DB       *db.DB
 	Repos    service.Repos
 	Tx       service.TxManager
+	Agent    agent.Executor
 	Services Services
 }
 
@@ -108,7 +109,7 @@ func New(ctx context.Context, cfg db.Config) (*App, error) {
 		User:      service.NewUserService(tx, repos.User),
 	}
 
-	return &App{DB: database, Repos: repos, Tx: tx, Services: services}, nil
+	return &App{DB: database, Repos: repos, Tx: tx, Agent: agent.LocalExecutor{}, Services: services}, nil
 }
 
 // Close releases the metadata pool.

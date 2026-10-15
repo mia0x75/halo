@@ -8,13 +8,14 @@ import (
 	"strconv"
 
 	"github.com/fatih/structs"
-	"github.com/go-xorm/core"
 	"github.com/mia0x75/yql"
 
 	"github.com/mia0x75/halo/caches"
 	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
+	"github.com/mia0x75/halo/internal/agent"
+	"github.com/mia0x75/halo/internal/agent/dialect"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/models"
 	"github.com/mia0x75/halo/tools"
@@ -87,11 +88,10 @@ L:
 			break
 		}
 
-		databases := []models.Database{}
-		if databases, err = cluster.Databases(func(c *models.Cluster) []byte {
-			bs, _ := tools.DecryptAES(c.Password, g.Config().Secret.Crypto)
-			return bs
-		}); err != nil {
+		password, _ := tools.DecryptAES(cluster.Password, g.Config().Secret.Crypto)
+
+		var databases []*dialect.Database
+		if databases, err = r.app.Agent.Databases(ctx, bridge.ClusterToDomain(cluster), string(password)); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break L
@@ -269,26 +269,25 @@ L:
 			break
 		}
 
-		passwd := func(c *models.Cluster) []byte {
-			bs, _ := tools.DecryptAES(c.Password, g.Config().Secret.Crypto)
-			return bs
-		}
+		password, _ := tools.DecryptAES(cluster.Password, g.Config().Secret.Crypto)
+		target := bridge.ClusterToDomain(cluster)
+		target.Database = database
 
-		if _, err = cluster.Stat(database, passwd); err != nil {
+		if err = statDatabase(ctx, r.app.Agent, target, string(password), database); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break L
 		}
 
-		tables := map[string][]*core.Table{}
-		if tables, err = cluster.Metadata(database, passwd); err != nil {
+		var schema *agent.Schema
+		if schema, err = r.app.Agent.LoadSchema(ctx, target, string(password)); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break L
 		}
 
 		var bs []byte
-		bs, err = json.Marshal(cluster.Repack(tables[database]))
+		bs, err = json.Marshal(schema.Tables)
 		if err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())

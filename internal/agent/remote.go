@@ -18,6 +18,11 @@ func (RemoteExecutor) Execute(ctx context.Context, c *domain.Cluster, password, 
 	return nil, ErrNotImplemented
 }
 
+// Query 暂未实现。
+func (RemoteExecutor) Query(ctx context.Context, c *domain.Cluster, password, query string) ([]map[string]string, error) {
+	return nil, ErrNotImplemented
+}
+
 // LoadSchema 暂未实现。
 func (RemoteExecutor) LoadSchema(ctx context.Context, c *domain.Cluster, password string) (*Schema, error) {
 	return nil, ErrNotImplemented
@@ -25,5 +30,10 @@ func (RemoteExecutor) LoadSchema(ctx context.Context, c *domain.Cluster, passwor
 
 // LoadAllSchemas 暂未实现。
 func (RemoteExecutor) LoadAllSchemas(ctx context.Context, c *domain.Cluster, password string) (map[string][]*dialect.Table, error) {
+	return nil, ErrNotImplemented
+}
+
+// Databases 暂未实现。
+func (RemoteExecutor) Databases(ctx context.Context, c *domain.Cluster, password string) ([]*dialect.Database, error) {
 	return nil, ErrNotImplemented
 }

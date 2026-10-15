@@ -4,8 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/go-xorm/core"
-
+	"github.com/mia0x75/halo/internal/agent/dialect"
 	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/models"
 )
@@ -20,11 +19,11 @@ type RuleSource interface {
 	Load(ctx context.Context) ([]*models.Rule, error)
 }
 
-// SchemaSource loads the target database metadata. It returns *core.Table so
+// SchemaSource loads the target database metadata. It returns *dialect.Table so
 // the rule engine keeps inspecting charset/collate/engine exactly as before;
-// swapping this for a neutral domain type would silently change rule semantics.
+// the neutral type preserves the same fields the engine reads.
 type SchemaSource interface {
-	Load(ctx context.Context, cluster *models.Cluster) (map[string][]*core.Table, error)
+	Load(ctx context.Context, cluster *models.Cluster) (map[string][]*dialect.Table, error)
 }
 
 // Adapter implements domain.Validator on top of the legacy rule engine.

@@ -178,6 +178,14 @@ func (f *fakeExecutor) LoadAllSchemas(_ context.Context, _ *domain.Cluster, _ st
 	return nil, nil
 }
 
+func (f *fakeExecutor) Query(_ context.Context, _ *domain.Cluster, _, _ string) ([]map[string]string, error) {
+	return nil, nil
+}
+
+func (f *fakeExecutor) Databases(_ context.Context, _ *domain.Cluster, _ string) ([]*dialect.Database, error) {
+	return nil, nil
+}
+
 type fakeValidator struct {
 	violations []domain.Violation
 	err        error

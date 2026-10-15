@@ -11,6 +11,7 @@ import (
 
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
+	"github.com/mia0x75/halo/internal/agent"
 	"github.com/mia0x75/halo/internal/app"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/domain"
@@ -193,4 +194,19 @@ func isClusterAvalaible() bool {
 
 func isUserAvalaible() bool {
 	return true
+}
+
+// statDatabase verifies the database exists on the target cluster. It mirrors
+// the removed models.Cluster.Stat so callers keep the same error message.
+func statDatabase(ctx context.Context, exec agent.Executor, target *domain.Cluster, password, database string) error {
+	databases, err := exec.Databases(ctx, target, password)
+	if err != nil {
+		return err
+	}
+	for _, db := range databases {
+		if db.Name == database {
+			return nil
+		}
+	}
+	return fmt.Errorf("Unknown database '%s'", database)
 }

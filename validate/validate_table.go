@@ -2793,7 +2793,7 @@ func (v *TableAlterVldr) MaxAllowedColumnCount(s *models.Statement, r *models.Ru
 		}
 	}
 
-	total := len(ti.Columns()) + diff
+	total := len(ti.Columns) + diff
 	if total > threshold {
 		c := &models.Clause{
 			Description: fmt.Sprintf(r.Message, v.at.Table.Name.O, total, threshold),
