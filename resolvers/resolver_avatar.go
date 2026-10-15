@@ -12,5 +12,3 @@ func (r *queryRootResolver) Avatars(ctx context.Context) (L []*models.Avatar, er
 	L = caches.AvatarsMap.All()
 	return
 }
-
-type avatarResolver struct{ *Resolver }

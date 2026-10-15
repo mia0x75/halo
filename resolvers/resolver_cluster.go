@@ -38,7 +38,7 @@ func (r *queryRootResolver) TestCluster(ctx context.Context, input *models.Valid
 			err = fmt.Errorf("错误代码: %s, 错误信息: 无法连接到目标群集: %s", rc, err.Error())
 			break
 		}
-		db.Close()
+		_ = db.Close()
 
 		// 退出for循环
 		ok = true
@@ -56,10 +56,7 @@ L:
 		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
 		user := credential.User
 		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
-			if elem.UUID == clusterUUID {
-				return true
-			}
-			return false
+			return elem.UUID == clusterUUID
 		})
 		if cluster == nil {
 			rc = gqlapi.ReturnCodeNotFound
@@ -114,10 +111,7 @@ L:
 func (r *queryRootResolver) Cluster(ctx context.Context, id string) (cluster *models.Cluster, err error) {
 	rc := gqlapi.ReturnCodeOK
 	cluster = caches.ClustersMap.Any(func(elem *models.Cluster) bool {
-		if elem.UUID == id {
-			return true
-		}
-		return false
+		return elem.UUID == id
 	})
 	if cluster == nil {
 		rc = gqlapi.ReturnCodeNotFound
@@ -236,10 +230,7 @@ L:
 		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
 		user := credential.User
 		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
-			if elem.UUID == clusterUUID {
-				return true
-			}
-			return false
+			return elem.UUID == clusterUUID
 		})
 
 		if cluster == nil {
@@ -307,10 +298,7 @@ L:
 		rc := gqlapi.ReturnCodeOK
 		// 检查Alias唯一性
 		if caches.ClustersMap.Include(func(elem *models.Cluster) bool {
-			if elem.Alias == input.Alias {
-				return true
-			}
-			return false
+			return elem.Alias == input.Alias
 		}) {
 			rc = gqlapi.ReturnCodeDuplicateAlias
 			err = fmt.Errorf("错误代码: %s, 错误信息: 群集(alias=%s)已经存在。", rc, input.Alias)
@@ -318,10 +306,7 @@ L:
 		}
 		// 主机+端口唯一性,IP+端口唯一性
 		if caches.ClustersMap.Include(func(elem *models.Cluster) bool {
-			if (elem.Host == input.Host || elem.IP == input.IP) && elem.Port == input.Port {
-				return true
-			}
-			return false
+			return (elem.Host == input.Host || elem.IP == input.IP) && elem.Port == input.Port
 		}) {
 			rc = gqlapi.ReturnCodeDuplicateHost
 			err = fmt.Errorf("错误代码: %s, 错误信息: 群集(cluster=%s:%d 或 cluster=%s:%d)已经存在。", rc, input.Host, input.Port, input.IP, input.Port)
@@ -373,10 +358,7 @@ L:
 	for {
 		rc := gqlapi.ReturnCodeOK
 		cluster = caches.ClustersMap.Any(func(elem *models.Cluster) bool {
-			if elem.UUID == input.ClusterUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.ClusterUUID
 		})
 		if cluster == nil {
 			rc = gqlapi.ReturnCodeNotFound
@@ -386,15 +368,9 @@ L:
 		// 检查Alias唯一性
 		exists := func(clusterID uint, alias string) bool {
 			c := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
-				if elem.Alias == alias {
-					return true
-				}
-				return false
+				return elem.Alias == alias
 			})
-			if c != nil && c.ClusterID != clusterID {
-				return true
-			}
-			return false
+			return c != nil && c.ClusterID != clusterID
 		}(cluster.ClusterID, input.Alias)
 		if exists {
 			rc = gqlapi.ReturnCodeDuplicateAlias
@@ -407,10 +383,7 @@ L:
 			// 主机+端口唯一性
 			// IP+端口唯一性
 			if caches.ClustersMap.Include(func(elem *models.Cluster) bool {
-				if (elem.Host == input.Host || elem.IP == input.IP) && elem.Port == input.Port {
-					return true
-				}
-				return false
+				return (elem.Host == input.Host || elem.IP == input.IP) && elem.Port == input.Port
 			}) {
 				rc = gqlapi.ReturnCodeDuplicateHost
 				err = fmt.Errorf("错误代码: %s, 错误信息: 群集(cluster=%s:%d 或 cluster=%s:%d)已经存在。", rc, input.Host, input.Port, input.IP, input.Port)
@@ -459,10 +432,7 @@ func (r *mutationRootResolver) RemoveCluster(ctx context.Context, id string) (ok
 	for {
 		rc := gqlapi.ReturnCodeOK
 		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
-			if elem.UUID == id {
-				return true
-			}
-			return false
+			return elem.UUID == id
 		})
 		if cluster == nil {
 			rc = gqlapi.ReturnCodeNotFound
@@ -478,10 +448,7 @@ func (r *mutationRootResolver) RemoveCluster(ctx context.Context, id string) (ok
 
 		// 主动刷新缓存
 		caches.ClustersMap.Remove(func(elem *models.Cluster) bool {
-			if elem.UUID == id {
-				return true
-			}
-			return false
+			return elem.UUID == id
 		})
 
 		events.Fire(events.EventClusterRemoved, &events.ClusterRemovedArgs{
@@ -508,10 +475,7 @@ func (r *mutationRootResolver) PatchClusterStatus(ctx context.Context, input mod
 		}
 
 		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
-			if elem.UUID == input.ClusterUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.ClusterUUID
 		})
 		if cluster == nil {
 			rc = gqlapi.ReturnCodeNotFound
@@ -542,5 +506,3 @@ func (r *mutationRootResolver) PatchClusterStatus(ctx context.Context, input mod
 
 	return
 }
-
-type clusterResolver struct{ *Resolver }

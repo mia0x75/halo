@@ -37,10 +37,7 @@ func (r *queryRootResolver) Me(ctx context.Context) (user *models.User, err erro
 func (r *queryRootResolver) User(ctx context.Context, id string) (user *models.User, err error) {
 	rc := gqlapi.ReturnCodeOK
 	user = caches.UsersMap.Any(func(elem *models.User) bool {
-		if elem.UUID == id {
-			return true
-		}
-		return false
+		return elem.UUID == id
 	})
 	if user == nil {
 		rc = gqlapi.ReturnCodeNotFound
@@ -197,10 +194,7 @@ L:
 	for {
 		rc := gqlapi.ReturnCodeOK
 		user = caches.UsersMap.Any(func(elem *models.User) bool {
-			if elem.Email == input.Email {
-				return true
-			}
-			return false
+			return elem.Email == input.Email
 		})
 
 		if user != nil {
@@ -320,17 +314,14 @@ L:
 			break L
 		}
 
-		diff := time.Now().Sub(dt)
+		diff := time.Since(dt)
 		if int(diff.Seconds()) > 24*60*60 {
 			err = fmt.Errorf("")
 			break L
 		}
 
 		user := caches.UsersMap.Any(func(elem *models.User) bool {
-			if elem.Email == email {
-				return true
-			}
-			return false
+			return elem.Email == email
 		})
 
 		if user == nil {
@@ -367,10 +358,7 @@ func (r *mutationRootResolver) LostPasswd(ctx context.Context, input models.Lost
 L:
 	for {
 		user := caches.UsersMap.Any(func(elem *models.User) bool {
-			if elem.Email == input.Email {
-				return true
-			}
-			return false
+			return elem.Email == input.Email
 		})
 
 		if user == nil {
@@ -441,10 +429,7 @@ L:
 		rc := gqlapi.ReturnCodeOK
 
 		user := caches.UsersMap.Any(func(elem *models.User) bool {
-			if elem.Email == input.Email {
-				return true
-			}
-			return false
+			return elem.Email == input.Email
 		})
 
 		if user == nil {
@@ -529,10 +514,7 @@ L:
 		user = credential.User
 
 		avatar := caches.AvatarsMap.Any(func(elem *models.Avatar) bool {
-			if elem.UUID == input.AvatarUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.AvatarUUID
 		})
 		if avatar != nil {
 			user.AvatarID = avatar.AvatarID
@@ -623,10 +605,7 @@ L:
 
 		// 此处用户必然提供了一个不同的邮件地址
 		if caches.UsersMap.Include(func(elem *models.User) bool {
-			if elem.Email == input.NewEmail {
-				return true
-			}
-			return false
+			return elem.Email == input.NewEmail
 		}) {
 			rc = gqlapi.ReturnCodeUserEmailTaken
 			err = fmt.Errorf("错误代码: %s, 错误信息: 账号(email=%s)已经存在。", rc, input.NewEmail)
@@ -661,10 +640,7 @@ L:
 		rc := gqlapi.ReturnCodeOK
 		edges := []*models.Edge{}
 		user := caches.UsersMap.Any(func(elem *models.User) bool {
-			if elem.UUID == input.UserUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.UserUUID
 		})
 
 		if user == nil {
@@ -675,10 +651,7 @@ L:
 
 		for _, reviewerUUID := range input.ReviewerUUIDs {
 			reviewer := caches.UsersMap.Any(func(elem *models.User) bool {
-				if elem.UUID == reviewerUUID {
-					return true
-				}
-				return false
+				return elem.UUID == reviewerUUID
 			})
 			if reviewer == nil {
 				rc = gqlapi.ReturnCodeNotFound
@@ -729,10 +702,7 @@ L:
 	for {
 		rc := gqlapi.ReturnCodeOK
 		user := caches.UsersMap.Any(func(elem *models.User) bool {
-			if elem.UUID == input.UserUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.UserUUID
 		})
 
 		if user == nil {
@@ -744,10 +714,7 @@ L:
 		// TODO: 合并成数组一次删除
 		for _, reviewerUUID := range input.ReviewerUUIDs {
 			reviewer := caches.UsersMap.Any(func(elem *models.User) bool {
-				if elem.UUID == reviewerUUID {
-					return true
-				}
-				return false
+				return elem.UUID == reviewerUUID
 			})
 			if reviewer == nil {
 				rc = gqlapi.ReturnCodeNotFound
@@ -796,10 +763,7 @@ L:
 		edges := []*models.Edge{}
 		rc := gqlapi.ReturnCodeOK
 		user := caches.UsersMap.Any(func(elem *models.User) bool {
-			if elem.UUID == input.UserUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.UserUUID
 		})
 
 		if user == nil {
@@ -810,10 +774,7 @@ L:
 
 		for _, clusterUUID := range input.ClusterUUIDs {
 			cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
-				if elem.UUID == clusterUUID {
-					return true
-				}
-				return false
+				return elem.UUID == clusterUUID
 			})
 			if cluster == nil {
 				rc = gqlapi.ReturnCodeNotFound
@@ -864,10 +825,7 @@ L:
 	for {
 		rc := gqlapi.ReturnCodeOK
 		user := caches.UsersMap.Any(func(elem *models.User) bool {
-			if elem.UUID == input.UserUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.UserUUID
 		})
 
 		if user == nil {
@@ -879,10 +837,7 @@ L:
 		// TODO: 合并成数组一次删除
 		for _, clusterUUID := range input.ClusterUUIDs {
 			cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
-				if elem.UUID == clusterUUID {
-					return true
-				}
-				return false
+				return elem.UUID == clusterUUID
 			})
 			if cluster == nil {
 				rc = gqlapi.ReturnCodeNotFound
@@ -931,10 +886,7 @@ L:
 		rc := gqlapi.ReturnCodeOK
 		edges := []*models.Edge{}
 		user := caches.UsersMap.Any(func(elem *models.User) bool {
-			if elem.UUID == input.UserUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.UserUUID
 		})
 
 		if user == nil {
@@ -945,10 +897,7 @@ L:
 
 		for _, roleUUID := range input.RoleUUIDs {
 			role := caches.RolesMap.Any(func(elem *models.Role) bool {
-				if elem.UUID == roleUUID {
-					return true
-				}
-				return false
+				return elem.UUID == roleUUID
 			})
 			if role == nil {
 				rc = gqlapi.ReturnCodeNotFound
@@ -992,10 +941,7 @@ L:
 	for {
 		rc := gqlapi.ReturnCodeOK
 		user := caches.UsersMap.Any(func(elem *models.User) bool {
-			if elem.UUID == input.UserUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.UserUUID
 		})
 
 		if user == nil {
@@ -1007,10 +953,7 @@ L:
 		// TODO: 合并成数组一次删除
 		for _, roleUUID := range input.RoleUUIDs {
 			role := caches.RolesMap.Any(func(elem *models.Role) bool {
-				if elem.UUID == roleUUID {
-					return true
-				}
-				return false
+				return elem.UUID == roleUUID
 			})
 			if role == nil {
 				rc = gqlapi.ReturnCodeNotFound
@@ -1060,10 +1003,7 @@ L:
 		rc := gqlapi.ReturnCodeOK
 
 		if caches.UsersMap.Include(func(elem *models.User) bool {
-			if elem.Email == input.Email {
-				return true
-			}
-			return false
+			return elem.Email == input.Email
 		}) {
 			rc = gqlapi.ReturnCodeUserEmailTaken
 			err = fmt.Errorf("错误代码: %s, 错误信息: 账号(email=%s)已经注册。", rc, input.Email)
@@ -1082,10 +1022,7 @@ L:
 
 		for _, roleUUID := range input.RoleUUIDs {
 			role := caches.RolesMap.Any(func(elem *models.Role) bool {
-				if elem.UUID == roleUUID {
-					return true
-				}
-				return false
+				return elem.UUID == roleUUID
 			})
 			if role == nil {
 				rc = gqlapi.ReturnCodeNotFound
@@ -1104,10 +1041,7 @@ L:
 		if input.ReviewerUUIDs != nil {
 			for _, reviewerUUID := range input.ReviewerUUIDs {
 				reviewer := caches.UsersMap.Any(func(elem *models.User) bool {
-					if elem.UUID == reviewerUUID {
-						return true
-					}
-					return false
+					return elem.UUID == reviewerUUID
 				})
 
 				if reviewer == nil {
@@ -1135,10 +1069,7 @@ L:
 		if input.ClusterUUIDs != nil {
 			for _, clusterUUID := range input.ClusterUUIDs {
 				cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
-					if elem.UUID == clusterUUID {
-						return true
-					}
-					return false
+					return elem.UUID == clusterUUID
 				})
 				if cluster == nil {
 					rc = gqlapi.ReturnCodeNotFound
@@ -1170,10 +1101,7 @@ L:
 			Phone:    input.Phone,
 		}
 		avatar := caches.AvatarsMap.Any(func(elem *models.Avatar) bool {
-			if elem.UUID == input.AvatarUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.AvatarUUID
 		})
 		if avatar != nil {
 			user.AvatarID = avatar.AvatarID
@@ -1234,10 +1162,7 @@ L:
 	for {
 		rc := gqlapi.ReturnCodeOK
 		user = caches.UsersMap.Any(func(elem *models.User) bool {
-			if elem.UUID == input.UserUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.UserUUID
 		})
 		if user == nil {
 			rc = gqlapi.ReturnCodeNotFound
@@ -1258,15 +1183,9 @@ L:
 		// 找到，且UserID不同 => 此次更新了用户登录邮箱，但是该邮箱被其他账号使用
 		exists := func(uid uint, email string) bool {
 			user := caches.UsersMap.Any(func(elem *models.User) bool {
-				if elem.Email == email {
-					return true
-				}
-				return false
+				return elem.Email == email
 			})
-			if user != nil && user.UserID != uid {
-				return true
-			}
-			return false
+			return user != nil && user.UserID != uid
 		}(user.UserID, input.Email)
 
 		if exists {
@@ -1277,10 +1196,7 @@ L:
 
 		bs, _ := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 		avatar := caches.AvatarsMap.Any(func(elem *models.Avatar) bool {
-			if elem.UUID == input.AvatarUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.AvatarUUID
 		})
 		user.Email = input.Email
 		user.Password = string(bs)
@@ -1328,10 +1244,7 @@ L:
 			break L
 		}
 		user = caches.UsersMap.Any(func(elem *models.User) bool {
-			if elem.UUID == input.UserUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.UserUUID
 		})
 		if user == nil {
 			rc = gqlapi.ReturnCodeNotFound
@@ -1376,10 +1289,7 @@ type userResolver struct{ *Resolver }
 func (r *userResolver) Avatar(ctx context.Context, obj *models.User) (avatar *models.Avatar, err error) {
 	rc := gqlapi.ReturnCodeOK
 	avatar = caches.AvatarsMap.Any(func(elem *models.Avatar) bool {
-		if elem.AvatarID == obj.AvatarID {
-			return true
-		}
-		return false
+		return elem.AvatarID == obj.AvatarID
 	})
 	if avatar == nil {
 		rc = gqlapi.ReturnCodeNotFound
@@ -1591,10 +1501,7 @@ func (r *userResolver) Queries(ctx context.Context, obj *models.User, after *str
 // Statistics 用户维度的统计信息
 func (r *userResolver) Statistics(ctx context.Context, obj *models.User) (L []*models.Statistic, err error) {
 	L = caches.StatisticsMap.Filter(func(elem *models.Statistic) bool {
-		if elem.Group == obj.UUID {
-			return true
-		}
-		return false
+		return elem.Group == obj.UUID
 	})
 
 	return

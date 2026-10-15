@@ -35,5 +35,3 @@ func (r *queryRootResolver) Environments(ctx context.Context) (env *gqlapi.Envir
 	env.ProcessStats = g.GetProcessStats()
 	return
 }
-
-type statisticResolver struct{ *Resolver }

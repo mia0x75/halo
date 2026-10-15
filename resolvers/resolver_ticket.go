@@ -50,10 +50,7 @@ L:
 
 		// 查询缓存
 		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
-			if elem.UUID == input.ClusterUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.ClusterUUID
 		})
 
 		if cluster == nil {
@@ -94,10 +91,7 @@ L:
 
 		// 查询缓存
 		reviewer := caches.UsersMap.Any(func(elem *models.User) bool {
-			if elem.UUID == input.ReviewerUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.ReviewerUUID
 		})
 		if reviewer == nil {
 			rc = gqlapi.ReturnCodeNotFound
@@ -135,7 +129,7 @@ L:
 
 		// 拆分语句
 		p := parser.New()
-		stmts := []ast.StmtNode{}
+		var stmts []ast.StmtNode
 		stmts, _, err = p.Parse(input.Content, "", "")
 		if err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
@@ -157,7 +151,7 @@ L:
 		i := 1
 		for _, node := range stmts {
 			var sb strings.Builder
-			node.Restore(format.NewRestoreCtx(format.DefaultRestoreFlags, &sb))
+			_ = node.Restore(format.NewRestoreCtx(format.DefaultRestoreFlags, &sb))
 			sql := sb.String()
 			if len(sql) == 0 {
 				sql = strings.TrimSpace(node.Text())
@@ -220,10 +214,7 @@ L:
 		statements := []*models.Statement{}
 		user := credential.User
 		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
-			if elem.UUID == input.ClusterUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.ClusterUUID
 		})
 
 		if strings.TrimSpace(user.Name) == "" {
@@ -270,10 +261,7 @@ L:
 
 		// 查询缓存
 		reviewer := caches.UsersMap.Any(func(elem *models.User) bool {
-			if elem.UUID == input.ReviewerUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.ReviewerUUID
 		})
 
 		if reviewer == nil {
@@ -313,7 +301,7 @@ L:
 		// 拆分语句
 		i := 1
 		p := parser.New()
-		stmts := []ast.StmtNode{}
+		var stmts []ast.StmtNode
 		stmts, _, err = p.Parse(input.Content, "", "")
 		if err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
@@ -355,7 +343,7 @@ L:
 
 		for _, node := range stmts {
 			var sb strings.Builder
-			node.Restore(format.NewRestoreCtx(format.DefaultRestoreFlags, &sb))
+			_ = node.Restore(format.NewRestoreCtx(format.DefaultRestoreFlags, &sb))
 			sql := sb.String()
 			if len(sql) == 0 {
 				sql = strings.TrimSpace(node.Text())
@@ -438,10 +426,7 @@ func (r *mutationRootResolver) RemoveTicket(ctx context.Context, id string) (ok 
 		}
 
 		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
-			if elem.ClusterID == removed.ClusterID {
-				return true
-			}
-			return false
+			return elem.ClusterID == removed.ClusterID
 		})
 		events.Fire(events.EventTicketRemoved, &events.TicketRemovedArgs{
 			User:    *user,
@@ -505,10 +490,7 @@ func (r *mutationRootResolver) PatchTicketStatus(ctx context.Context, input mode
 		ticket := bridge.TicketFromDomain(t)
 
 		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
-			if elem.ClusterID == ticket.ClusterID {
-				return true
-			}
-			return false
+			return elem.ClusterID == ticket.ClusterID
 		})
 		events.Fire(events.EventTicketStatusPatched, &events.TicketStatusPatchedArgs{
 			User:    *user,
@@ -597,10 +579,7 @@ func (r *mutationRootResolver) ScheduleTicket(ctx context.Context, input models.
 
 		// 是否需要判断群集的状态
 		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
-			if elem.ClusterID == ticket.ClusterID {
-				return true
-			}
-			return false
+			return elem.ClusterID == ticket.ClusterID
 		})
 		if cluster == nil {
 			rc = gqlapi.ReturnCodeNotFound
@@ -779,10 +758,7 @@ type ticketResolver struct{ *Resolver }
 func (r *ticketResolver) Cluster(ctx context.Context, obj *models.Ticket) (cluster *models.Cluster, err error) {
 	rc := gqlapi.ReturnCodeOK
 	cluster = caches.ClustersMap.Any(func(elem *models.Cluster) bool {
-		if elem.ClusterID == obj.ClusterID {
-			return true
-		}
-		return false
+		return elem.ClusterID == obj.ClusterID
 	})
 	if cluster == nil {
 		rc = gqlapi.ReturnCodeNotFound
@@ -795,10 +771,7 @@ func (r *ticketResolver) Cluster(ctx context.Context, obj *models.Ticket) (clust
 func (r *ticketResolver) User(ctx context.Context, obj *models.Ticket) (user *models.User, err error) {
 	rc := gqlapi.ReturnCodeOK
 	user = caches.UsersMap.Any(func(elem *models.User) bool {
-		if elem.UserID == obj.UserID {
-			return true
-		}
-		return false
+		return elem.UserID == obj.UserID
 	})
 
 	if user == nil {
@@ -812,10 +785,7 @@ func (r *ticketResolver) User(ctx context.Context, obj *models.Ticket) (user *mo
 func (r *ticketResolver) Reviewer(ctx context.Context, obj *models.Ticket) (user *models.User, err error) {
 	rc := gqlapi.ReturnCodeOK
 	user = caches.UsersMap.Any(func(elem *models.User) bool {
-		if elem.UserID == obj.ReviewerID {
-			return true
-		}
-		return false
+		return elem.UserID == obj.ReviewerID
 	})
 
 	if user == nil {

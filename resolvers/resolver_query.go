@@ -148,10 +148,7 @@ L:
 		}
 
 		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
-			if elem.UUID == input.ClusterUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.ClusterUUID
 		})
 
 		if cluster == nil {
@@ -191,7 +188,7 @@ L:
 		}
 
 		p := parser.New()
-		stmts := []ast.StmtNode{}
+		var stmts []ast.StmtNode
 		stmts, _, err = p.Parse(input.Content, "", "")
 		if err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
@@ -262,7 +259,7 @@ L:
 		}
 
 		// 退出for循环
-		bs := []byte{}
+		var bs []byte
 		if bs, err = json.Marshal(rows); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
@@ -289,10 +286,7 @@ L:
 		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
 		user := credential.User
 		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
-			if elem.UUID == input.ClusterUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.ClusterUUID
 		})
 		if cluster == nil {
 			rc = gqlapi.ReturnCodeNotFound
@@ -392,10 +386,7 @@ L:
 		credential := ctx.Value(g.CREDENTIAL_KEY).(tools.Credential)
 		user := credential.User
 		cluster := caches.ClustersMap.Any(func(elem *models.Cluster) bool {
-			if elem.UUID == input.ClusterUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.ClusterUUID
 		})
 		if cluster == nil {
 			rc = gqlapi.ReturnCodeNotFound
@@ -492,10 +483,7 @@ type queryResolver struct{ *Resolver }
 func (r *queryResolver) Cluster(ctx context.Context, obj *models.Query) (cluster *models.Cluster, err error) {
 	rc := gqlapi.ReturnCodeOK
 	cluster = caches.ClustersMap.Any(func(elem *models.Cluster) bool {
-		if elem.ClusterID == obj.ClusterID {
-			return true
-		}
-		return false
+		return elem.ClusterID == obj.ClusterID
 	})
 	if cluster == nil {
 		rc = gqlapi.ReturnCodeNotFound
@@ -508,10 +496,7 @@ func (r *queryResolver) Cluster(ctx context.Context, obj *models.Query) (cluster
 func (r *queryResolver) User(ctx context.Context, obj *models.Query) (user *models.User, err error) {
 	rc := gqlapi.ReturnCodeOK
 	user = caches.UsersMap.Any(func(elem *models.User) bool {
-		if elem.UserID == obj.UserID {
-			return true
-		}
-		return false
+		return elem.UserID == obj.UserID
 	})
 
 	if user == nil {

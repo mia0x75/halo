@@ -55,5 +55,3 @@ func (r *queryRootResolver) Templates(ctx context.Context) (L []*models.Template
 	L = caches.TemplatesMap.All()
 	return
 }
-
-type templateResolver struct{ *Resolver }

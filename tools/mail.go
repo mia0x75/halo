@@ -16,8 +16,8 @@ type MailDto struct {
 
 func (this *MailDto) Send() (bool, error) {
 	for {
-		from := mail.Address{"发件人名称", "发件人邮箱地址"}
-		to := mail.Address{"收件人名称", "收件人邮箱地址"}
+		from := mail.Address{Name: "发件人名称", Address: "发件人邮箱地址"}
+		to := mail.Address{Name: "收件人名称", Address: "收件人邮箱地址"}
 
 		// Setup headers
 		headers := make(map[string]string)

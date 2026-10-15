@@ -161,5 +161,3 @@ func (r *queryRootResolver) Tasks(ctx context.Context) (L []*models.Cron, err er
 	s := crons.NewScheduler()
 	return s.Crons()
 }
-
-type cronResolver struct{ *Resolver }

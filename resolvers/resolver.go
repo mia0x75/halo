@@ -189,14 +189,6 @@ func notifyTicketStatusChange(userUUID string, ticketUUID string, message string
 	TicketSub.Unlock()
 }
 
-func isClusterAvalaible() bool {
-	return true
-}
-
-func isUserAvalaible() bool {
-	return true
-}
-
 // statDatabase verifies the database exists on the target cluster. It mirrors
 // the removed models.Cluster.Stat existence check.
 func statDatabase(ctx context.Context, exec agent.Executor, target *domain.Cluster, password, database string) error {

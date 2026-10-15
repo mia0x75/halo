@@ -20,10 +20,7 @@ func (r *mutationRootResolver) PatchRuleValues(ctx context.Context, input models
 	for {
 		rc := gqlapi.ReturnCodeOK
 		rule := caches.RulesMap.Any(func(elem *models.Rule) bool {
-			if elem.UUID == input.RuleUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.RuleUUID
 		})
 		if rule == nil {
 			rc = gqlapi.ReturnCodeNotFound
@@ -61,10 +58,7 @@ func (r *mutationRootResolver) PatchRuleBitwise(ctx context.Context, input model
 	for {
 		rc := gqlapi.ReturnCodeOK
 		rule := caches.RulesMap.Any(func(elem *models.Rule) bool {
-			if elem.UUID == input.RuleUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.RuleUUID
 		})
 		if rule == nil {
 			rc = gqlapi.ReturnCodeNotFound
@@ -123,10 +117,7 @@ func (r *queryRootResolver) TestRegexp(ctx context.Context, input *models.Valida
 func (r *queryRootResolver) Rule(ctx context.Context, id string) (rule *models.Rule, err error) {
 	rc := gqlapi.ReturnCodeOK
 	rule = caches.RulesMap.Any(func(elem *models.Rule) bool {
-		if elem.UUID == id {
-			return true
-		}
-		return false
+		return elem.UUID == id
 	})
 
 	if rule == nil {
@@ -141,5 +132,3 @@ func (r *queryRootResolver) Rules(ctx context.Context) (L []*models.Rule, err er
 	L = caches.RulesMap.All()
 	return
 }
-
-type ruleResolver struct{ *Resolver }

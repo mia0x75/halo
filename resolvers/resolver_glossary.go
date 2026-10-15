@@ -15,5 +15,3 @@ func (r *queryRootResolver) Glossaries(ctx context.Context, groups []string) (L 
 	})
 	return
 }
-
-type glossaryResolver struct{ *Resolver }

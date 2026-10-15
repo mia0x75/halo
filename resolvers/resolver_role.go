@@ -13,10 +13,7 @@ import (
 func (r *queryRootResolver) Role(ctx context.Context, id string) (role *models.Role, err error) {
 	rc := gqlapi.ReturnCodeOK
 	role = caches.RolesMap.Any(func(elem *models.Role) bool {
-		if elem.UUID == id {
-			return true
-		}
-		return false
+		return elem.UUID == id
 	})
 	if role == nil {
 		rc = gqlapi.ReturnCodeNotFound

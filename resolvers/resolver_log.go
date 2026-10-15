@@ -20,10 +20,7 @@ type logResolver struct{ *Resolver }
 func (r *logResolver) User(ctx context.Context, obj *models.Log) (user *models.User, err error) {
 	rc := gqlapi.ReturnCodeOK
 	user = caches.UsersMap.Any(func(elem *models.User) bool {
-		if elem.UserID == obj.UserID {
-			return true
-		}
-		return false
+		return elem.UserID == obj.UserID
 	})
 	if user == nil {
 		rc = gqlapi.ReturnCodeNotFound

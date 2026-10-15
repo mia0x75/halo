@@ -17,10 +17,7 @@ import (
 func (r *queryRootResolver) Option(ctx context.Context, id string) (option *models.Option, err error) {
 	rc := gqlapi.ReturnCodeOK
 	option = caches.OptionsMap.Any(func(elem *models.Option) bool {
-		if elem.UUID == id {
-			return true
-		}
-		return false
+		return elem.UUID == id
 	})
 	if option == nil {
 		rc = gqlapi.ReturnCodeNotFound
@@ -35,17 +32,12 @@ func (r *queryRootResolver) Options(ctx context.Context) (L []*models.Option, er
 	return
 }
 
-type optionResolver struct{ *Resolver }
-
 // PatchOptionValues 修改系统选项
 func (r *mutationRootResolver) PatchOptionValues(ctx context.Context, input models.PatchOptionValueInput) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
 		option := caches.OptionsMap.Any(func(elem *models.Option) bool {
-			if elem.UUID == input.OptionUUID {
-				return true
-			}
-			return false
+			return elem.UUID == input.OptionUUID
 		})
 		if option == nil {
 			rc = gqlapi.ReturnCodeNotFound
