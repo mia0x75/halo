@@ -21,3 +21,18 @@ sql:
             go_type: "int64"
           - db_type: "bigint"
             go_type: "int64"
+  - engine: "postgresql"
+    queries: "internal/repository/postgres/queries"
+    schema: "scripts/halodb_schema_postgres.sql"
+    gen:
+      go:
+        package: "postgresrepo"
+        out: "internal/repository/postgres"
+        sql_package: "database/sql"
+        emit_interface: true
+        emit_empty_slices: true
+        emit_json_tags: false
+        emit_db_tags: false
+        overrides:
+          - db_type: "numeric"
+            go_type: "string"
