@@ -10,13 +10,13 @@ import (
 
 // Template 用户模型
 type Template struct {
-	UUID        string `xorm:"'uuid' notnull char(36) pk" db:"uuid"        valid:"-"                            json:"uuid"      gqlgen:"UUID"`               //
-	Subject     string `xorm:"'subject' notnull varchar(100)" db:"subject"    valid:"required,email,length(1|100)" json:"email"     gqlgen:"Subject"`         //
-	Body        string `xorm:"'body' notnull text" db:"body"               valid:"required,length(1|65535)"     json:"-"         gqlgen:"Body"`               //
-	Description string `xorm:"'description' notnull varchar(50)" db:"description" valid:"required,length(1|50)"        json:"-"         gqlgen:"Description"` //
-	Version     int    `xorm:"'version'" db:"version"                         valid:"-"                            json:"version"   gqlgen:"-"`               //
-	UpdateAt    uint   `xorm:"'update_at' notnull int" db:"update_at"           valid:"-"                            json:"update_at" gqlgen:"UpdateAt"`      //
-	CreateAt    uint   `xorm:"'create_at' notnull int" db:"create_at"           valid:"-"                            json:"create_at" gqlgen:"CreateAt"`      //
+	UUID        string `db:"uuid"        valid:"-"                            json:"uuid"      gqlgen:"UUID"`                  //
+	Subject     string `db:"subject"    valid:"required,email,length(1|100)" json:"email"     gqlgen:"Subject"`                //
+	Body        string `db:"body"               valid:"required,length(1|65535)"     json:"-"         gqlgen:"Body"`           //
+	Description string `db:"description" valid:"required,length(1|50)"        json:"-"         gqlgen:"Description"`           //
+	Version     int    `db:"version"                         valid:"-"                            json:"version"   gqlgen:"-"` //
+	UpdateAt    uint   `db:"update_at"           valid:"-"                            json:"update_at" gqlgen:"UpdateAt"`      //
+	CreateAt    uint   `db:"create_at"           valid:"-"                            json:"create_at" gqlgen:"CreateAt"`      //
 }
 
 // TableName 结构体到数据库表名称的映射

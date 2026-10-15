@@ -26,7 +26,8 @@ func New(ctx context.Context, cfg Config) (*DB, error) {
 	conn.SetMaxIdleConns(cfg.MaxIdle)
 	conn.SetMaxOpenConns(cfg.MaxConnections)
 	// WaitTimeout is used as connection lifetime to preserve the behaviour of the
-	// legacy xorm setup in g/database.go.
+	// legacy database initialization in g/database.go.
+
 	conn.SetConnMaxLifetime(time.Duration(cfg.WaitTimeout) * time.Second)
 
 	if err := conn.PingContext(ctx); err != nil {

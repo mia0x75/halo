@@ -9,20 +9,20 @@ import (
 
 // Cron 计划任务的模型
 type Cron struct {
-	CronID    uint   `xorm:"'cron_id' notnull int pk autoincr" db:"cron_id"        valid:"-"                                   json:"cron_id"   gqlgen:"-"`          //
-	UUID      string `xorm:"'uuid' notnull char(36) unique(unique_1)" db:"uuid" valid:"-"                                   json:"uuid"      gqlgen:"UUID"`          //
-	Status    string `xorm:"'status' notnull char(1)" db:"status"                 valid:"required,matches(^(C|D|E|F|P|R|S)$)" json:"status"    gqlgen:"Status"`      //
-	Name      string `xorm:"'name' notnull varchar(75)" db:"name"               valid:"-"                                   json:"name"      gqlgen:"Name"`          //
-	Cmd       string `xorm:"'cmd' notnull varchar(100)" db:"cmd"               valid:"-"                                   json:"cmd"       gqlgen:"Cmd"`            //
-	Params    string `xorm:"'params' notnull varchar(75)" db:"params"             valid:"-"                                   json:"params"    gqlgen:"Params"`      //
-	Interval  string `xorm:"'interval' notnull varchar(20)" db:"interval"           valid:"-"                                   json:"interval"  gqlgen:"Interval"`  //
-	Duration  string `xorm:"'duration' notnull varchar(20)" db:"duration"           valid:"-"                                   json:"duration"  gqlgen:"Duration"`  //
-	LastRun   string `xorm:"'last_run' notnull varchar(20)" db:"last_run"           valid:"-"                                   json:"last_run"  gqlgen:"LastRun"`   //
-	NextRun   string `xorm:"'next_run' notnull varchar(20)" db:"next_run"           valid:"-"                                   json:"next_run"  gqlgen:"NextRun"`   //
-	Recurrent uint8  `xorm:"'recurrent' notnull tinyint" db:"recurrent"              valid:"-"                                   json:"recurrent" gqlgen:"-"`        //
-	Version   int    `xorm:"'version'" db:"version"                                valid:"-"                                   json:"version"   gqlgen:"-"`          //
-	UpdateAt  uint   `xorm:"'update_at' notnull int" db:"update_at"                  valid:"-"                                   json:"update_at" gqlgen:"UpdateAt"` //
-	CreateAt  uint   `xorm:"'create_at' notnull int" db:"create_at"                  valid:"-"                                   json:"create_at" gqlgen:"CreateAt"` //
+	CronID    uint   `db:"cron_id"        valid:"-"                                   json:"cron_id"   gqlgen:"-"`                         //
+	UUID      string `db:"uuid" valid:"-"                                   json:"uuid"      gqlgen:"UUID"`                                //
+	Status    string `db:"status"                 valid:"required,matches(^(C|D|E|F|P|R|S)$)" json:"status"    gqlgen:"Status"`            //
+	Name      string `db:"name"               valid:"-"                                   json:"name"      gqlgen:"Name"`                  //
+	Cmd       string `db:"cmd"               valid:"-"                                   json:"cmd"       gqlgen:"Cmd"`                    //
+	Params    string `db:"params"             valid:"-"                                   json:"params"    gqlgen:"Params"`                //
+	Interval  string `db:"interval"           valid:"-"                                   json:"interval"  gqlgen:"Interval"`              //
+	Duration  string `db:"duration"           valid:"-"                                   json:"duration"  gqlgen:"Duration"`              //
+	LastRun   string `db:"last_run"           valid:"-"                                   json:"last_run"  gqlgen:"LastRun"`               //
+	NextRun   string `db:"next_run"           valid:"-"                                   json:"next_run"  gqlgen:"NextRun"`               //
+	Recurrent uint8  `db:"recurrent"              valid:"-"                                   json:"recurrent" gqlgen:"-"`                 //
+	Version   int    `db:"version"                                valid:"-"                                   json:"version"   gqlgen:"-"` //
+	UpdateAt  uint   `db:"update_at"                  valid:"-"                                   json:"update_at" gqlgen:"UpdateAt"`      //
+	CreateAt  uint   `db:"create_at"                  valid:"-"                                   json:"create_at" gqlgen:"CreateAt"`      //
 }
 
 // TableName 结构体到数据库表名称的映射

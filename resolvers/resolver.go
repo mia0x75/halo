@@ -102,7 +102,8 @@ type Resolver struct {
 }
 
 // NewResolver returns a resolver wired to the application container. During the
-// 2D migration the container runs alongside the legacy xorm engine.
+// 2D migration the container runs alongside the legacy engine.
+
 func NewResolver(a *app.App) *Resolver {
 	return &Resolver{app: a}
 }
@@ -197,7 +198,7 @@ func isUserAvalaible() bool {
 }
 
 // statDatabase verifies the database exists on the target cluster. It mirrors
-// the removed models.Cluster.Stat so callers keep the same error message.
+// the removed models.Cluster.Stat existence check.
 func statDatabase(ctx context.Context, exec agent.Executor, target *domain.Cluster, password, database string) error {
 	databases, err := exec.Databases(ctx, target, password)
 	if err != nil {
@@ -208,5 +209,5 @@ func statDatabase(ctx context.Context, exec agent.Executor, target *domain.Clust
 			return nil
 		}
 	}
-	return fmt.Errorf("Unknown database '%s'", database)
+	return fmt.Errorf("unknown database '%s'", database)
 }

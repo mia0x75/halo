@@ -13,7 +13,8 @@ func (t *Target) Databases(ctx context.Context) ([]*dialect.Database, error) {
 	return t.dialect.LoadDatabases(ctx, t.db)
 }
 
-// Query 执行只读查询，结果按列名转成字符串，保持旧 xorm QueryString 的形态。
+// Query 执行只读查询，结果按列名转成字符串，保持旧 QueryString 的形态。
+
 func (t *Target) Query(ctx context.Context, query string) ([]map[string]string, error) {
 	rows, err := t.db.QueryxContext(ctx, query)
 	if err != nil {

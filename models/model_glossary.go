@@ -9,14 +9,14 @@ import (
 
 // Glossary 系统字典表
 type Glossary struct {
-	Group       string `xorm:"'group' notnull varchar(25) pk unique(unique_1) <-" db:"group" valid:"required,length(1|25)"      json:"group"       gqlgen:"Catalog"`           //
-	Key         uint   `xorm:"'key' notnull tinyint pk <-" db:"key"                        valid:"required,range(0|255)"      json:"key"         gqlgen:"Iota"`                //
-	Value       string `xorm:"'value' notnull varchar(50) unique(unique_1) <-" db:"value"    valid:"required,runelength(1|50)"  json:"value"       gqlgen:"Name"`              //
-	UUID        string `xorm:"'uuid' notnull char(36) unique(unique_2)" db:"uuid"           valid:"-"                          json:"uuid"        gqlgen:"UUID"`               //
-	Description string `xorm:"'description' notnull varchar(100) <-" db:"description"              valid:"required,runelength(1|100)" json:"description" gqlgen:"Description"` //
-	Version     int    `xorm:"'version'" db:"version"                                          valid:"-"                          json:"version"     gqlgen:"-"`               //
-	UpdateAt    uint   `xorm:"'update_at' notnull int" db:"update_at"                            valid:"-"                          json:"update_at"   gqlgen:"UpdateAt"`      //
-	CreateAt    uint   `xorm:"'create_at' notnull int" db:"create_at"                            valid:"-"                          json:"create_at"   gqlgen:"CreateAt"`      //
+	Group       string `db:"group" valid:"required,length(1|25)"      json:"group"       gqlgen:"Catalog"`                                      //
+	Key         uint   `db:"key"                        valid:"required,range(0|255)"      json:"key"         gqlgen:"Iota"`                    //
+	Value       string `db:"value"    valid:"required,runelength(1|50)"  json:"value"       gqlgen:"Name"`                                      //
+	UUID        string `db:"uuid"           valid:"-"                          json:"uuid"        gqlgen:"UUID"`                                //
+	Description string `db:"description"              valid:"required,runelength(1|100)" json:"description" gqlgen:"Description"`               //
+	Version     int    `db:"version"                                          valid:"-"                          json:"version"     gqlgen:"-"` //
+	UpdateAt    uint   `db:"update_at"                            valid:"-"                          json:"update_at"   gqlgen:"UpdateAt"`      //
+	CreateAt    uint   `db:"create_at"                            valid:"-"                          json:"create_at"   gqlgen:"CreateAt"`      //
 }
 
 // TableName 结构体到数据库表名称的映射

@@ -9,12 +9,12 @@ import (
 
 // Avatar 用户可选的头像
 type Avatar struct {
-	AvatarID uint   `xorm:"'avatar_id' notnull int pk autoincr <-" db:"avatar_id"     valid:"-"                     json:"avatar_id" gqlgen:"-"`        //
-	UUID     string `xorm:"'uuid' notnull char(36) unique(unique_1)" db:"uuid"   valid:"-"                     json:"uuid"      gqlgen:"UUID"`          //
-	URL      string `xorm:"'url' notnull tinytext unique(unique_2) <-" db:"url" valid:"required,length(1|75)" json:"url"       gqlgen:"URL"`            //
-	Version  int    `xorm:"'version'" db:"version"                                  valid:"-"                     json:"version"   gqlgen:"-"`          //
-	UpdateAt uint   `xorm:"'update_at' notnull int" db:"update_at"                    valid:"-"                     json:"update_at" gqlgen:"UpdateAt"` //
-	CreateAt uint   `xorm:"'create_at' notnull int" db:"create_at"                    valid:"-"                     json:"create_at" gqlgen:"CreateAt"` //
+	AvatarID uint   `db:"avatar_id"     valid:"-"                     json:"avatar_id" gqlgen:"-"`                            //
+	UUID     string `db:"uuid"   valid:"-"                     json:"uuid"      gqlgen:"UUID"`                                //
+	URL      string `db:"url" valid:"required,length(1|75)" json:"url"       gqlgen:"URL"`                                    //
+	Version  int    `db:"version"                                  valid:"-"                     json:"version"   gqlgen:"-"` //
+	UpdateAt uint   `db:"update_at"                    valid:"-"                     json:"update_at" gqlgen:"UpdateAt"`      //
+	CreateAt uint   `db:"create_at"                    valid:"-"                     json:"create_at" gqlgen:"CreateAt"`      //
 }
 
 // TableName 结构体到数据库表名称的映射

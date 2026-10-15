@@ -9,12 +9,12 @@ import (
 
 // Log 日志表，记录谁在什么时间做了什么事情
 type Log struct {
-	LogID     int    `xorm:"'log_id' notnull int pk autoincr" db:"log_id"         valid:"-"                                json:"log_id"    gqlgen:"-"`            //
-	UUID      string `xorm:"'uuid' notnull char(36) unique(unique_1)" db:"uuid" valid:"-"                                json:"uuid"      gqlgen:"UUID"`           //
-	UserID    uint   `xorm:"'user_id' notnull int index(index_1)" db:"user_id"     valid:"required,int,range(0|4294967295)" json:"user_id"   gqlgen:"-"`           //
-	Operation string `xorm:"'operation' notnull text" db:"operation"                 valid:"required,runelength(1|255)"       json:"operation" gqlgen:"Operation"` //
-	Version   int    `xorm:"'version'" db:"version"                                valid:"-"                                json:"version"   gqlgen:"-"`           //
-	CreateAt  uint   `xorm:"'create_at' notnull int index(index_1)" db:"create_at"   valid:"-"                                json:"create_at" gqlgen:"CreateAt"`  //
+	LogID     int    `db:"log_id"         valid:"-"                                json:"log_id"    gqlgen:"-"`                         //
+	UUID      string `db:"uuid" valid:"-"                                json:"uuid"      gqlgen:"UUID"`                                //
+	UserID    uint   `db:"user_id"     valid:"required,int,range(0|4294967295)" json:"user_id"   gqlgen:"-"`                            //
+	Operation string `db:"operation"                 valid:"required,runelength(1|255)"       json:"operation" gqlgen:"Operation"`      //
+	Version   int    `db:"version"                                valid:"-"                                json:"version"   gqlgen:"-"` //
+	CreateAt  uint   `db:"create_at"   valid:"-"                                json:"create_at" gqlgen:"CreateAt"`                     //
 }
 
 // TableName 结构体到数据库表名称的映射

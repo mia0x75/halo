@@ -15,20 +15,20 @@ import (
 
 // Cluster 群集的模型
 type Cluster struct {
-	ClusterID   uint   `xorm:"'cluster_id' notnull int pk autoincr" db:"cluster_id"                      valid:"-"                                json:"cluster_id"  gqlgen:"-"`       //
-	UUID        string `xorm:"'uuid' notnull char(36) unique(unique_1)" db:"uuid"                  valid:"-"                                json:"uuid"        gqlgen:"UUID"`          //
-	Host        string `xorm:"'host' notnull varchar(150) unique(unique_2)" db:"host"              valid:"required,length(1|100),alphanum"  json:"host"        gqlgen:"Host"`          //
-	IP          string `xorm:"'ip' notnull varchar(15) unique(unique_3)" db:"ip"                 valid:"required,int,range(0|4294967295)" json:"ip"          gqlgen:"Ip"`              //
-	Port        uint16 `xorm:"'port' notnull smallint unique(unique_2) unique(unique_3)" db:"port" valid:"required,port"                    json:"port"        gqlgen:"Port"`          //
-	Alias       string `xorm:"'alias' notnull varchar(75) unique(unique_4)" db:"alias"              valid:"required,runelength(1|100)"       json:"alias"       gqlgen:"Alias"`        //
-	User        string `xorm:"'user' notnull varchar(50)" db:"user"                                valid:"required,length(1|50),alphanum"   json:"user"        gqlgen:"User"`          //
-	Type        string `xorm:"'type' notnull varchar(20)" db:"type"                                 valid:"required,in(mysql|postgres)"      json:"type"        gqlgen:"Type"`         // 目标库类型
-	Password    []byte `xorm:"'password' notnull varbinary(48)" db:"password"                          valid:"required"                         json:"-"           gqlgen:"-"`         // 双向加密
-	FingerPrint []byte `xorm:"'fingerprint' notnull varbinary(16)" db:"fingerprint"                       valid:"required"                         json:"-"           gqlgen:"-"`      //
-	Status      uint8  `xorm:"'status' notnull tinyint" db:"status"                                  valid:"required,matches(^[0-9]$)"        json:"status"      gqlgen:"Status"`      //
-	Version     int    `xorm:"'version'" db:"version"                                                 valid:"-"                                json:"version"     gqlgen:"-"`          //
-	UpdateAt    uint   `xorm:"'update_at' notnull int" db:"update_at"                                   valid:"-"                                json:"update_at"   gqlgen:"UpdateAt"` //
-	CreateAt    uint   `xorm:"'create_at' notnull int" db:"create_at"                                   valid:"-"                                json:"create_at"   gqlgen:"CreateAt"` //
+	ClusterID   uint   `db:"cluster_id"                      valid:"-"                                json:"cluster_id"  gqlgen:"-"`                         //
+	UUID        string `db:"uuid"                  valid:"-"                                json:"uuid"        gqlgen:"UUID"`                                //
+	Host        string `db:"host"              valid:"required,length(1|100),alphanum"  json:"host"        gqlgen:"Host"`                                    //
+	IP          string `db:"ip"                 valid:"required,int,range(0|4294967295)" json:"ip"          gqlgen:"Ip"`                                     //
+	Port        uint16 `db:"port" valid:"required,port"                    json:"port"        gqlgen:"Port"`                                                 //
+	Alias       string `db:"alias"              valid:"required,runelength(1|100)"       json:"alias"       gqlgen:"Alias"`                                  //
+	User        string `db:"user"                                valid:"required,length(1|50),alphanum"   json:"user"        gqlgen:"User"`                  //
+	Type        string `db:"type"                                 valid:"required,in(mysql|postgres)"      json:"type"        gqlgen:"Type"`                 // 目标库类型
+	Password    []byte `db:"password"                          valid:"required"                         json:"-"           gqlgen:"-"`                       // 双向加密
+	FingerPrint []byte `db:"fingerprint"                       valid:"required"                         json:"-"           gqlgen:"-"`                       //
+	Status      uint8  `db:"status"                                  valid:"required,matches(^[0-9]$)"        json:"status"      gqlgen:"Status"`            //
+	Version     int    `db:"version"                                                 valid:"-"                                json:"version"     gqlgen:"-"` //
+	UpdateAt    uint   `db:"update_at"                                   valid:"-"                                json:"update_at"   gqlgen:"UpdateAt"`      //
+	CreateAt    uint   `db:"create_at"                                   valid:"-"                                json:"create_at"   gqlgen:"CreateAt"`      //
 }
 
 // TableName 结构体到数据库表名称的映射

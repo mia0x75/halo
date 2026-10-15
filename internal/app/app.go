@@ -1,7 +1,8 @@
 // Package app is the dependency container. It owns the metadata connection
 // pool and wires the repositories and services built on top of it. During the
-// 2D migration it runs alongside the legacy xorm engine (g.Engine); main.go
-// initialises both and this container is additive until 2D-B.11 removes xorm.
+// 2D migration it runs alongside the legacy engine; main.go
+// initialises both and this container is additive until 2D cleanup completes.
+
 package app
 
 import (

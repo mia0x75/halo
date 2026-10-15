@@ -12,7 +12,8 @@ import (
 )
 
 // repos is injected once at startup via Init. The caches read their rows
-// through the repository layer instead of the legacy xorm engine.
+// through the repository layer.
+
 var repos service.Repos
 
 // The caches hold whole tables in memory. List is keyset-paginated, so a single

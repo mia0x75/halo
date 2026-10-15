@@ -1,8 +1,9 @@
 package dialect
 
 // Dialect-neutral metadata descriptors. They mirror the subset of
-// go-xorm/core's Table/Column/Index that validate/ and the Metadata resolver
-// actually consume, so the rule engine keeps its semantics after xorm removal.
+// Previous ORM's core.Table/Column/Index that validate/ and the Metadata resolver
+// actually consume, so the rule engine keeps its semantics after ORM removal.
+
 //
 // core.* -> dialect.* mapping:
 //   core.Table.Name         -> Table.Name
@@ -23,7 +24,8 @@ package dialect
 //
 // Fields with no dialect equivalent (Engine/Charset on PostgreSQL) stay empty.
 
-// SQLType names a column type the way xorm's core.SQLType did, so the
+// SQLType names a column type the way the previous ORM's core.SQLType did, so the
+
 // IsText/IsBlob classification used by index rules keeps working.
 type SQLType struct {
 	Name string
@@ -44,7 +46,8 @@ const (
 )
 
 // sqlKinds classifies the canonical (upper-cased) type names both dialects
-// normalize to. Unknown types fall back to kindOther, same as xorm did.
+// normalize to. Unknown types fall back to kindOther, same as the previous ORM did.
+
 var sqlKinds = map[string]sqlKind{
 	"ENUM":       kindText,
 	"SET":        kindText,

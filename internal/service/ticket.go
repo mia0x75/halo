@@ -280,7 +280,8 @@ func (s *TicketService) UpdateCron(ctx context.Context, ticketUUID string, cronI
 }
 
 // Create persists a new ticket and its statements atomically. UUIDs and the
-// create timestamp are filled in when absent, mirroring the legacy xorm hooks.
+// create timestamp are filled in when absent, mirroring the legacy ORM hooks.
+
 func (s *TicketService) Create(ctx context.Context, ticket *domain.Ticket, statements []*domain.Statement) (uint, error) {
 	if ticket.UUID == "" {
 		ticket.UUID = uuid.NewString()

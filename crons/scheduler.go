@@ -23,7 +23,8 @@ var (
 )
 
 // repos is injected once at startup via Init so the scheduler reloads and
-// persists tasks through the repository layer instead of the xorm engine.
+// persists tasks through the repository layer.
+
 var repos service.Repos
 
 // Init injects the repositories the scheduler reads and writes crons with. It

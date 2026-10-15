@@ -9,14 +9,14 @@ import (
 
 // Edge 根据图论，Edge是连接不同对象的线
 type Edge struct {
-	EdgeID       uint   `xorm:"'edge_id' notnull int pk autoincr" db:"edge_id"            valid:"-"                                json:"edge_id"       gqlgen:"-"`                  //
-	UUID         string `xorm:"'uuid' notnull char(36) unique(unique_1)" db:"uuid"     valid:"-"                                json:"uuid"          gqlgen:"UUID"`                  //
-	Type         uint   `xorm:"'type' notnull int unique(unique_2)" db:"type"          valid:"required,int,range(0|4294967295)" json:"type"          gqlgen:"Type"`                  //
-	AncestorID   uint   `xorm:"'ancestor_id' notnull int unique(unique_2)" db:"ancestor_id"   valid:"required,int,range(0|4294967295)" json:"ancestor_id"   gqlgen:"AncestorID"`     //
-	DescendantID uint   `xorm:"'descendant_id' notnull int unique(unique_2)" db:"descendant_id" valid:"required,int,range(0|4294967295)" json:"descendant_id" gqlgen:"DescendantID"` //
-	Version      int    `xorm:"'version'" db:"version"                                    valid:"-"                                json:"version"       gqlgen:"-"`                  //
-	UpdateAt     uint   `xorm:"'update_at' notnull int" db:"update_at"                      valid:"-"                                json:"update_at"     gqlgen:"UpdateAt"`         //
-	CreateAt     uint   `xorm:"'create_at' notnull int" db:"create_at"                      valid:"-"                                json:"create_at"     gqlgen:"CreateAt"`         //
+	EdgeID       uint   `db:"edge_id"            valid:"-"                                json:"edge_id"       gqlgen:"-"`                         //
+	UUID         string `db:"uuid"     valid:"-"                                json:"uuid"          gqlgen:"UUID"`                                //
+	Type         uint   `db:"type"          valid:"required,int,range(0|4294967295)" json:"type"          gqlgen:"Type"`                           //
+	AncestorID   uint   `db:"ancestor_id"   valid:"required,int,range(0|4294967295)" json:"ancestor_id"   gqlgen:"AncestorID"`                     //
+	DescendantID uint   `db:"descendant_id" valid:"required,int,range(0|4294967295)" json:"descendant_id" gqlgen:"DescendantID"`                   //
+	Version      int    `db:"version"                                    valid:"-"                                json:"version"       gqlgen:"-"` //
+	UpdateAt     uint   `db:"update_at"                      valid:"-"                                json:"update_at"     gqlgen:"UpdateAt"`      //
+	CreateAt     uint   `db:"create_at"                      valid:"-"                                json:"create_at"     gqlgen:"CreateAt"`      //
 }
 
 // TableName 结构体到数据库表名称的映射

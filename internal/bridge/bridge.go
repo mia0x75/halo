@@ -1,7 +1,8 @@
-// Package bridge converts between the legacy models.* structs (xorm-tagged and
-// still consumed by caches and resolvers) and the internal/domain entities.
+// Package bridge converts between the legacy models.* structs (now tag-cleaned
+// and still consumed by caches and resolvers) and the internal/domain entities.
 // It is a temporary shim for the 2D migration: once models.* is deleted the
 // converters go with it.
+
 package bridge
 
 import "database/sql"

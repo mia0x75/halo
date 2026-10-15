@@ -11,19 +11,19 @@ import (
 
 // Ticket 工单模型
 type Ticket struct {
-	TicketID   uint          `xorm:"'ticket_id' notnull int pk autoincr" db:"ticket_id"      valid:"-"                                 json:"ticket_id"   gqlgen:"-"`        //
-	UUID       string        `xorm:"'uuid' notnull char(36) unique(unique_1)" db:"uuid" valid:"-"                                 json:"uuid"        gqlgen:"UUID"`          //
-	ClusterID  uint          `xorm:"'cluster_id' notnull int index(index_1)" db:"cluster_id"  valid:"required,int,range(0|4294967295)"  json:"cluster_id"  gqlgen:"-"`       //
-	Database   string        `xorm:"'database' notnull varchar(50)" db:"database"           valid:"required,length(1|50)"             json:"database"    gqlgen:"Database"`  //
-	Subject    string        `xorm:"'subject' notnull varchar(50)" db:"subject"            valid:"required,runelength(1|50)"         json:"subject"     gqlgen:"Subject"`    //
-	Content    string        `xorm:"'content' notnull text" db:"content"                   valid:"required,runelength(1|65535)"      json:"content"     gqlgen:"Content"`    //
-	Status     uint8         `xorm:"'status' notnull int" db:"status"                     valid:"required,matches(^([1-9]?[0-9])$)" json:"status"      gqlgen:"Status"`      // 状态 0-99
-	UserID     uint          `xorm:"'user_id' notnull int index(index_2)" db:"user_id"     valid:"required,int,range(0|4294967295)"  json:"user_id"     gqlgen:"-"`          //
-	ReviewerID uint          `xorm:"'reviewer_id' notnull int index(index_3)" db:"reviewer_id" valid:"required,int,range(0|4294967295)"  json:"reviewer_id" gqlgen:"-"`      //
-	CronID     sql.NullInt64 `xorm:"'cron_id' notnull int index(index_4)" db:"cron_id"     valid:"required,int,range(0|4294967295)"  json:"cron_id"     gqlgen:"-"`          //
-	Version    int           `xorm:"'version'" db:"version"                                valid:"-"                                 json:"version"     gqlgen:"-"`          //
-	UpdateAt   uint          `xorm:"'update_at' notnull int" db:"update_at"                  valid:"-"                                 json:"update_at"   gqlgen:"UpdateAt"` //
-	CreateAt   uint          `xorm:"'create_at' notnull int" db:"create_at"                  valid:"-"                                 json:"create_at"   gqlgen:"CreateAt"` //
+	TicketID   uint          `db:"ticket_id"      valid:"-"                                 json:"ticket_id"   gqlgen:"-"`                         //
+	UUID       string        `db:"uuid" valid:"-"                                 json:"uuid"        gqlgen:"UUID"`                                //
+	ClusterID  uint          `db:"cluster_id"  valid:"required,int,range(0|4294967295)"  json:"cluster_id"  gqlgen:"-"`                            //
+	Database   string        `db:"database"           valid:"required,length(1|50)"             json:"database"    gqlgen:"Database"`              //
+	Subject    string        `db:"subject"            valid:"required,runelength(1|50)"         json:"subject"     gqlgen:"Subject"`               //
+	Content    string        `db:"content"                   valid:"required,runelength(1|65535)"      json:"content"     gqlgen:"Content"`        //
+	Status     uint8         `db:"status"                     valid:"required,matches(^([1-9]?[0-9])$)" json:"status"      gqlgen:"Status"`        // 状态 0-99
+	UserID     uint          `db:"user_id"     valid:"required,int,range(0|4294967295)"  json:"user_id"     gqlgen:"-"`                            //
+	ReviewerID uint          `db:"reviewer_id" valid:"required,int,range(0|4294967295)"  json:"reviewer_id" gqlgen:"-"`                            //
+	CronID     sql.NullInt64 `db:"cron_id"     valid:"required,int,range(0|4294967295)"  json:"cron_id"     gqlgen:"-"`                            //
+	Version    int           `db:"version"                                valid:"-"                                 json:"version"     gqlgen:"-"` //
+	UpdateAt   uint          `db:"update_at"                  valid:"-"                                 json:"update_at"   gqlgen:"UpdateAt"`      //
+	CreateAt   uint          `db:"create_at"                  valid:"-"                                 json:"create_at"   gqlgen:"CreateAt"`      //
 }
 
 // TableName 结构体到数据库表名称的映射

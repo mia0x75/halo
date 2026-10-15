@@ -70,7 +70,8 @@ func main() {
 
 	g.InitLog()
 
-	// The new dependency container replaces the legacy xorm engine (g.Engine).
+	// The new dependency container replaces the legacy ORM engine.
+
 	application, err := app.New(context.Background(), db.Config{
 		Addr:           g.Config().Database.Addr,
 		MaxIdle:        g.Config().Database.MaxIdle,

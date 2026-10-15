@@ -9,15 +9,15 @@ import (
 
 // Option 系统选项
 type Option struct {
-	Name        string `xorm:"'name' notnull varchar(50) pk <-" db:"name"         valid:"required,length(1|50),alphanum"  json:"group"       gqlgen:"Group"`              //
-	UUID        string `xorm:"'uuid' notnull char(36) unique(unique_1)" db:"uuid" valid:"-"                               json:"uuid"        gqlgen:"UUID"`               //
-	Value       string `xorm:"'value' notnull tinytext" db:"value"                 valid:"required,length(1|255),alphanum" json:"value"       gqlgen:"Value"`             //
-	Writable    uint8  `xorm:"'writable' notnull tinyint <-" db:"writable"            valid:"required,range(0|1)"             json:"writable"    gqlgen:"Writable"`       //
-	Description string `xorm:"'description' notnull varchar(75) <-" db:"description"     valid:"required,runelength(1|75)"       json:"description" gqlgen:"Description"` //
-	Element     string `xorm:"'element' notnull varchar(15) <-" db:"element"         valid:"required,runelength(1|15)"       json:"element"     gqlgen:"Element"`         //
-	Version     int    `xorm:"'version'" db:"version"                                valid:"-"                               json:"version"     gqlgen:"-"`               //
-	UpdateAt    uint   `xorm:"'update_at' notnull int" db:"update_at"                  valid:"-"                               json:"update_at"   gqlgen:"UpdateAt"`      //
-	CreateAt    uint   `xorm:"'create_at' notnull int" db:"create_at"                  valid:"-"                               json:"create_at"   gqlgen:"CreateAt"`      //
+	Name        string `db:"name"         valid:"required,length(1|50),alphanum"  json:"group"       gqlgen:"Group"`                       //
+	UUID        string `db:"uuid" valid:"-"                               json:"uuid"        gqlgen:"UUID"`                                //
+	Value       string `db:"value"                 valid:"required,length(1|255),alphanum" json:"value"       gqlgen:"Value"`              //
+	Writable    uint8  `db:"writable"            valid:"required,range(0|1)"             json:"writable"    gqlgen:"Writable"`             //
+	Description string `db:"description"     valid:"required,runelength(1|75)"       json:"description" gqlgen:"Description"`              //
+	Element     string `db:"element"         valid:"required,runelength(1|15)"       json:"element"     gqlgen:"Element"`                  //
+	Version     int    `db:"version"                                valid:"-"                               json:"version"     gqlgen:"-"` //
+	UpdateAt    uint   `db:"update_at"                  valid:"-"                               json:"update_at"   gqlgen:"UpdateAt"`      //
+	CreateAt    uint   `db:"create_at"                  valid:"-"                               json:"create_at"   gqlgen:"CreateAt"`      //
 }
 
 // TableName 结构体到数据库表名称的映射
