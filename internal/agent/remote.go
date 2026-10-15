@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 
+	"github.com/mia0x75/halo/internal/agent/dialect"
 	"github.com/mia0x75/halo/internal/domain"
 )
 
@@ -19,5 +20,10 @@ func (RemoteExecutor) Execute(ctx context.Context, c *domain.Cluster, password, 
 
 // LoadSchema 暂未实现。
 func (RemoteExecutor) LoadSchema(ctx context.Context, c *domain.Cluster, password string) (*Schema, error) {
+	return nil, ErrNotImplemented
+}
+
+// LoadAllSchemas 暂未实现。
+func (RemoteExecutor) LoadAllSchemas(ctx context.Context, c *domain.Cluster, password string) (map[string][]*dialect.Table, error) {
 	return nil, ErrNotImplemented
 }

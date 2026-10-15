@@ -16,12 +16,20 @@ func (Postgres) QuoteIdent(s string) string {
 	return `"` + strings.ReplaceAll(s, `"`, `""`) + `"`
 }
 
+type pgTableRow struct {
+	Schema  string  `db:"table_schema"`
+	Table   string  `db:"table_name"`
+	Comment *string `db:"comment"`
+}
+
 type pgColumnRow struct {
-	Table    string  `db:"table_name"`
-	Column   string  `db:"column_name"`
-	Type     string  `db:"data_type"`
-	Nullable string  `db:"is_nullable"`
-	Default  *string `db:"column_default"`
+	Table     string  `db:"table_name"`
+	Column    string  `db:"column_name"`
+	Type      string  `db:"udt_name"`
+	Schema    string  `db:"data_type"`
+	Nullable  string  `db:"is_nullable"`
+	Default   *string `db:"column_default"`
+	Collation *string `db:"collation_name"`
 }
 
 type pgIndexRow struct {
@@ -31,9 +39,36 @@ type pgIndexRow struct {
 	Column string `db:"column_name"`
 }
 
-// LoadColumns 读取 information_schema.columns。schema 为空时用 current_schema()。
-func (Postgres) LoadColumns(ctx context.Context, db *sqlx.DB, schema string) (map[string]map[string]ColumnInfo, error) {
-	const query = "SELECT table_name, column_name, data_type, is_nullable, column_default " +
+// LoadTables 读取 information_schema.tables。Engine/Charset 无 PG 对应概念，留空。
+func (Postgres) LoadTables(ctx context.Context, db *sqlx.DB, schema string) ([]*Table, error) {
+	const query = "SELECT c.table_schema, c.table_name, " +
+		"obj_description((quote_ident(c.table_schema) || '.' || quote_ident(c.table_name))::regclass) AS comment " +
+		"FROM information_schema.tables c " +
+		"WHERE c.table_schema = COALESCE(NULLIF($1, ''), current_schema()) " +
+		"AND c.table_type = 'BASE TABLE' " +
+		"ORDER BY c.table_name"
+
+	var rows []pgTableRow
+	if err := db.SelectContext(ctx, &rows, query, schema); err != nil {
+		return nil, fmt.Errorf("query postgres tables: %w", err)
+	}
+
+	tables := make([]*Table, 0, len(rows))
+	for _, row := range rows {
+		tables = append(tables, &Table{
+			Name:    row.Table,
+			Comment: deref(row.Comment),
+			Columns: make(map[string]*Column),
+			Indexes: make(map[string]*Index),
+		})
+	}
+	return tables, nil
+}
+
+// LoadColumns 读取 information_schema.columns，类型取 udt_name 走统一分类。
+func (Postgres) LoadColumns(ctx context.Context, db *sqlx.DB, schema string) (map[string]map[string]*Column, error) {
+	const query = "SELECT table_name, column_name, udt_name, data_type, " +
+		"is_nullable, column_default, collation_name " +
 		"FROM information_schema.columns " +
 		"WHERE table_schema = COALESCE(NULLIF($1, ''), current_schema()) " +
 		"ORDER BY table_name, ordinal_position"
@@ -43,24 +78,24 @@ func (Postgres) LoadColumns(ctx context.Context, db *sqlx.DB, schema string) (ma
 		return nil, fmt.Errorf("query postgres columns: %w", err)
 	}
 
-	columns := make(map[string]map[string]ColumnInfo, len(rows))
+	columns := make(map[string]map[string]*Column, len(rows))
 	for _, row := range rows {
-		info := ColumnInfo{
+		col := &Column{
 			Name:     row.Column,
-			Type:     row.Type,
+			SQLType:  SQLType{Name: normalizePostgresType(row.Schema, row.Type)},
 			Nullable: row.Nullable == "YES",
-			Default:  row.Default,
+			Default:  deref(row.Default),
 		}
 		if columns[row.Table] == nil {
-			columns[row.Table] = make(map[string]ColumnInfo)
+			columns[row.Table] = make(map[string]*Column)
 		}
-		columns[row.Table][row.Column] = info
+		columns[row.Table][col.Name] = col
 	}
 	return columns, nil
 }
 
 // LoadIndexes 走 pg_catalog，按索引内列序保留顺序，忽略主键。
-func (Postgres) LoadIndexes(ctx context.Context, db *sqlx.DB, schema string) (map[string]map[string]IndexInfo, error) {
+func (Postgres) LoadIndexes(ctx context.Context, db *sqlx.DB, schema string) (map[string]map[string]*Index, error) {
 	const query = "SELECT t.relname AS table_name, i.relname AS index_name, " +
 		"ix.indisunique AS is_unique, a.attname AS column_name " +
 		"FROM pg_index ix " +
@@ -78,17 +113,82 @@ func (Postgres) LoadIndexes(ctx context.Context, db *sqlx.DB, schema string) (ma
 		return nil, fmt.Errorf("query postgres indexes: %w", err)
 	}
 
-	indexes := make(map[string]map[string]IndexInfo)
+	indexes := make(map[string]map[string]*Index)
 	for _, row := range rows {
 		if indexes[row.Table] == nil {
-			indexes[row.Table] = make(map[string]IndexInfo)
+			indexes[row.Table] = make(map[string]*Index)
 		}
-		info, ok := indexes[row.Table][row.Index]
+		idx, ok := indexes[row.Table][row.Index]
 		if !ok {
-			info = IndexInfo{Name: row.Index, Unique: row.Unique}
+			idx = &Index{Name: row.Index, Unique: row.Unique}
 		}
-		info.Columns = append(info.Columns, row.Column)
-		indexes[row.Table][row.Index] = info
+		idx.Cols = append(idx.Cols, row.Column)
+		indexes[row.Table][idx.Name] = idx
 	}
 	return indexes, nil
+}
+
+// LoadSchema 组合装配。PG 无 Engine/Charset 概念，留空。
+func (p Postgres) LoadSchema(ctx context.Context, db *sqlx.DB, schema string) ([]*Table, error) {
+	tables, err := p.LoadTables(ctx, db, schema)
+	if err != nil {
+		return nil, err
+	}
+	columns, err := p.LoadColumns(ctx, db, schema)
+	if err != nil {
+		return nil, err
+	}
+	indexes, err := p.LoadIndexes(ctx, db, schema)
+	if err != nil {
+		return nil, err
+	}
+	assemble(tables, columns, indexes)
+	return tables, nil
+}
+
+// ListSchemas 只覆盖当前连接的库：PG 的 schema 位于单个 database 内，
+// 跨库需另开连接，此处不跨。
+func (Postgres) ListSchemas(ctx context.Context, db *sqlx.DB) ([]string, error) {
+	const query = "SELECT schema_name FROM information_schema.schemata " +
+		"WHERE schema_name <> 'information_schema' AND schema_name NOT LIKE 'pg\\_%' " +
+		"ORDER BY schema_name"
+
+	var names []string
+	if err := db.SelectContext(ctx, &names, query); err != nil {
+		return nil, fmt.Errorf("query postgres schemas: %w", err)
+	}
+	return names, nil
+}
+
+// LoadDatabases 返回当前库内的用户 schema。PG 无库级默认字符集/排序规则，留空。
+func (Postgres) LoadDatabases(ctx context.Context, db *sqlx.DB) ([]*Database, error) {
+	names, err := Postgres{}.ListSchemas(ctx, db)
+	if err != nil {
+		return nil, err
+	}
+	dbs := make([]*Database, 0, len(names))
+	for _, name := range names {
+		dbs = append(dbs, &Database{Name: name})
+	}
+	return dbs, nil
+}
+
+// normalizePostgresType maps a few information_schema data_type spellings onto
+// the canonical names the shared sqlKinds table classifies; udt_name is upper
+// cased otherwise.
+func normalizePostgresType(dataType, udtName string) string {
+	switch dataType {
+	case "character varying":
+		return "VARCHAR"
+	case "character":
+		return "CHAR"
+	case "bytea":
+		return "BYTEA"
+	case "text":
+		return "TEXT"
+	case "ARRAY":
+		// element type keeps the classification meaningful
+		return strings.ToUpper(udtName)
+	}
+	return strings.ToUpper(udtName)
 }

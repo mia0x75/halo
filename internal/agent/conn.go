@@ -37,7 +37,7 @@ func openTarget(ctx context.Context, c *domain.Cluster, password string) (*Targe
 			return nil, fmt.Errorf("open mysql target %s: %w", c.Alias, err)
 		}
 		if err := db.PingContext(ctx); err != nil {
-			db.Close()
+			_ = db.Close()
 			return nil, fmt.Errorf("ping mysql target %s: %w", c.Alias, err)
 		}
 		return &Target{db: db, dialect: dialect.MySQL{}}, nil
@@ -49,7 +49,7 @@ func openTarget(ctx context.Context, c *domain.Cluster, password string) (*Targe
 			return nil, fmt.Errorf("open postgres target %s: %w", c.Alias, err)
 		}
 		if err := db.PingContext(ctx); err != nil {
-			db.Close()
+			_ = db.Close()
 			return nil, fmt.Errorf("ping postgres target %s: %w", c.Alias, err)
 		}
 		return &Target{db: db, dialect: dialect.Postgres{}}, nil

@@ -13,6 +13,8 @@ import (
 type Executor interface {
 	Execute(ctx context.Context, c *domain.Cluster, password, query string) (*ExecResult, error)
 	LoadSchema(ctx context.Context, c *domain.Cluster, password string) (*Schema, error)
+	// LoadAllSchemas 拉取目标实例全部用户库的元数据，外层键为库名。
+	LoadAllSchemas(ctx context.Context, c *domain.Cluster, password string) (map[string][]*dialect.Table, error)
 }
 
 // ExecResult 单条语句在目标库上的执行结果。
@@ -22,18 +24,7 @@ type ExecResult struct {
 	Error        string
 }
 
-// Schema 目标库的元数据快照。外层键统一为表名。
+// Schema 单库的元数据快照。
 type Schema struct {
-	Tables  map[string]TableInfo
-	Columns map[string]map[string]dialect.ColumnInfo
-	Indexes map[string]map[string]dialect.IndexInfo
-}
-
-// TableInfo 表级元数据。
-type TableInfo struct {
-	Name    string
-	Engine  string
-	Comment string
-	Charset string
-	Collate string
+	Tables []*dialect.Table
 }

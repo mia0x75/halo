@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/mia0x75/halo/internal/agent"
+	"github.com/mia0x75/halo/internal/agent/dialect"
 	"github.com/mia0x75/halo/internal/domain"
 )
 
@@ -170,6 +171,10 @@ func (f *fakeExecutor) Execute(_ context.Context, _ *domain.Cluster, _, query st
 }
 
 func (f *fakeExecutor) LoadSchema(_ context.Context, _ *domain.Cluster, _ string) (*agent.Schema, error) {
+	return nil, nil
+}
+
+func (f *fakeExecutor) LoadAllSchemas(_ context.Context, _ *domain.Cluster, _ string) (map[string][]*dialect.Table, error) {
 	return nil, nil
 }
 

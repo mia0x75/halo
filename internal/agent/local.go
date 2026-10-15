@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 
+	"github.com/mia0x75/halo/internal/agent/dialect"
 	"github.com/mia0x75/halo/internal/domain"
 )
 
@@ -15,7 +16,7 @@ func (LocalExecutor) Execute(ctx context.Context, c *domain.Cluster, password, q
 	if err != nil {
 		return nil, err
 	}
-	defer target.Close()
+	defer func() { _ = target.Close() }()
 
 	return target.Execute(ctx, query)
 }
@@ -26,7 +27,18 @@ func (LocalExecutor) LoadSchema(ctx context.Context, c *domain.Cluster, password
 	if err != nil {
 		return nil, err
 	}
-	defer target.Close()
+	defer func() { _ = target.Close() }()
 
 	return target.LoadSchema(ctx)
+}
+
+// LoadAllSchemas 直连目标库拉取实例内全部用户库的元数据。
+func (LocalExecutor) LoadAllSchemas(ctx context.Context, c *domain.Cluster, password string) (map[string][]*dialect.Table, error) {
+	target, err := openTarget(ctx, c, password)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = target.Close() }()
+
+	return target.LoadAllSchemas(ctx)
 }
