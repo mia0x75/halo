@@ -22,17 +22,3 @@ func StatisticFromDomain(s *domain.Statistic) *models.Statistic {
 }
 
 // StatisticToDomain converts a legacy model to its domain entity.
-func StatisticToDomain(s *models.Statistic) *domain.Statistic {
-	if s == nil {
-		return nil
-	}
-	return &domain.Statistic{
-		Group:    s.Group,
-		Key:      s.Key,
-		UUID:     s.UUID,
-		Value:    s.Value,
-		Version:  s.Version,
-		UpdateAt: uintPtr(s.UpdateAt),
-		CreateAt: s.CreateAt,
-	}
-}

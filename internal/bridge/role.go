@@ -22,17 +22,3 @@ func RoleFromDomain(r *domain.Role) *models.Role {
 }
 
 // RoleToDomain converts a legacy model to its domain entity.
-func RoleToDomain(r *models.Role) *domain.Role {
-	if r == nil {
-		return nil
-	}
-	return &domain.Role{
-		RoleID:      r.RoleID,
-		UUID:        r.UUID,
-		Name:        r.Name,
-		Description: r.Description,
-		Version:     r.Version,
-		UpdateAt:    uintPtr(r.UpdateAt),
-		CreateAt:    r.CreateAt,
-	}
-}

@@ -21,16 +21,3 @@ func AvatarFromDomain(a *domain.Avatar) *models.Avatar {
 }
 
 // AvatarToDomain converts a legacy model to its domain entity.
-func AvatarToDomain(a *models.Avatar) *domain.Avatar {
-	if a == nil {
-		return nil
-	}
-	return &domain.Avatar{
-		AvatarID: a.AvatarID,
-		UUID:     a.UUID,
-		URL:      a.URL,
-		Version:  a.Version,
-		UpdateAt: uintPtr(a.UpdateAt),
-		CreateAt: a.CreateAt,
-	}
-}

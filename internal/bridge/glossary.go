@@ -23,18 +23,3 @@ func GlossaryFromDomain(g *domain.Glossary) *models.Glossary {
 }
 
 // GlossaryToDomain converts a legacy model to its domain entity.
-func GlossaryToDomain(g *models.Glossary) *domain.Glossary {
-	if g == nil {
-		return nil
-	}
-	return &domain.Glossary{
-		Group:       g.Group,
-		Key:         uint8(g.Key),
-		Value:       g.Value,
-		UUID:        g.UUID,
-		Description: g.Description,
-		Version:     g.Version,
-		UpdateAt:    uintPtr(g.UpdateAt),
-		CreateAt:    g.CreateAt,
-	}
-}

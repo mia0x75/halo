@@ -21,16 +21,3 @@ func LogFromDomain(l *domain.Log) *models.Log {
 }
 
 // LogToDomain converts a legacy model to its domain entity.
-func LogToDomain(l *models.Log) *domain.Log {
-	if l == nil {
-		return nil
-	}
-	return &domain.Log{
-		LogID:     uint(l.LogID),
-		UUID:      l.UUID,
-		UserID:    l.UserID,
-		Operation: l.Operation,
-		Version:   l.Version,
-		CreateAt:  l.CreateAt,
-	}
-}
