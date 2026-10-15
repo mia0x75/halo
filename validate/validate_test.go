@@ -13,10 +13,10 @@ import (
 	"github.com/mia0x75/parser/driver"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/mia0x75/halo/caches"
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/internal/agent"
 	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/platform/cache"
 	"github.com/mia0x75/halo/internal/platform/crypto"
 	"github.com/mia0x75/halo/models"
 )

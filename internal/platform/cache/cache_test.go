@@ -3,7 +3,7 @@ package caches_test
 import (
 	"testing"
 
-	"github.com/mia0x75/halo/caches" // 请替换为您的实际包路径
+	"github.com/mia0x75/halo/internal/platform/cache" // 请替换为您的实际包路径
 )
 
 type TestType int

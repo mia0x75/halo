@@ -17,11 +17,11 @@ import (
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/mia0x75/halo/caches"
 	"github.com/mia0x75/halo/crons"
 	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/internal/app"
+	"github.com/mia0x75/halo/internal/platform/cache"
 	"github.com/mia0x75/halo/internal/platform/db"
 	"github.com/mia0x75/halo/routers"
 )

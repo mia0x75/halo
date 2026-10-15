@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/mia0x75/halo/caches"
 	"github.com/mia0x75/halo/g"
 	"github.com/mia0x75/halo/gqlapi"
+	"github.com/mia0x75/halo/internal/platform/cache"
 	"github.com/mia0x75/halo/internal/tools"
 	"github.com/mia0x75/halo/models"
 )

@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/mia0x75/halo/caches"
 	"github.com/mia0x75/halo/internal/app"
+	"github.com/mia0x75/halo/internal/platform/cache"
 	"github.com/mia0x75/halo/internal/platform/db"
 )
 
