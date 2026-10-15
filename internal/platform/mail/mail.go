@@ -1,4 +1,5 @@
-package tools
+// Package mail provides SMTP delivery.
+package mail
 
 import (
 	"crypto/tls"
@@ -8,44 +9,37 @@ import (
 	"net/smtp"
 )
 
-// TODO: 读取配置，代码重构
+// TODO: 读取配置，代码重构（发件人/收件人/SMTP 地址当前为占位符）
 type MailDto struct {
 	Subject string
 	Body    string
 }
 
-func (this *MailDto) Send() (bool, error) {
+func (m *MailDto) Send() (bool, error) {
 	for {
 		from := mail.Address{Name: "发件人名称", Address: "发件人邮箱地址"}
 		to := mail.Address{Name: "收件人名称", Address: "收件人邮箱地址"}
 
-		// Setup headers
 		headers := make(map[string]string)
 		headers["From"] = from.String()
 		headers["To"] = to.String()
-		headers["Subject"] = this.Subject
+		headers["Subject"] = m.Subject
 
-		// Setup message
 		message := ""
 		for k, v := range headers {
 			message += fmt.Sprintf("%s: %s\r\n", k, v)
 		}
-		message += "\r\n" + this.Body
+		message += "\r\n" + m.Body
 
-		// Connect to the SMTP Server
 		servername := "smtp.server:smtp.port"
 		host, _, _ := net.SplitHostPort(servername)
 		auth := smtp.PlainAuth("", "smtp.user", "smtp.password", host)
 
-		// TLS config
 		tlsconfig := &tls.Config{
 			InsecureSkipVerify: true,
 			ServerName:         host,
 		}
 
-		// Here is the key, you need to call tls.Dial instead of smtp.Dial
-		// for smtp servers running on 465 that require an ssl connection
-		// from the very beginning (no starttls)
 		conn, err := tls.Dial("tcp", servername, tlsconfig)
 		if err != nil {
 			break
@@ -57,12 +51,10 @@ func (this *MailDto) Send() (bool, error) {
 			break
 		}
 
-		// Auth
 		if err = c.Auth(auth); err != nil {
 			break
 		}
 
-		// To && From
 		if err = c.Mail(from.Address); err != nil {
 			break
 		}
@@ -71,7 +63,6 @@ func (this *MailDto) Send() (bool, error) {
 			break
 		}
 
-		// Data
 		w, err := c.Data()
 		if err != nil {
 			break

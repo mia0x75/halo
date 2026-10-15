@@ -137,8 +137,9 @@ CREATE TABLE `t1` (`id` INT) CHARSET = 'utf8mb4' COLLATE = 'utf8mb4_unicode_ci';
 * [x] 终端程序
 * [x] 单元测试
 * [ ] Gh-ost整合
+* [ ] pgroll整合
 * [ ] 用户界面
-  * [ ] 数据查询(SOAR整合)
+  * [ ] 数据查询 [SOAR整合](https://github.com/XiaoMi/soar)
   * [ ] 工单列表
   * [ ] 工单查看
   * [ ] 工单提交
