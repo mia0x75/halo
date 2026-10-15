@@ -5,8 +5,8 @@ import "runtime"
 
 const (
 	Version = "2.0.1248"
-	Git     = "2026-10-15 17:01:02 +0800 c91a973"
-	Compile = "2026-10-15 17:06:26 +0800 by go version go1.26.8-X:nodwarf5 linux/amd64"
+	Git     = "2026-10-15 17:11:20 +0800 4625223"
+	Compile = "2026-10-15 17:11:52 +0800 by go version go1.26.8-X:nodwarf5 linux/amd64"
 	Branch  = "master"
 	Distro  = "Fedora release 43 (Forty Three)"
 	Kernel  = "7.2.4-100.fc43.x86_64"

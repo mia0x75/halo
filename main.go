@@ -25,7 +25,7 @@ import (
 	"github.com/mia0x75/halo/internal/platform/db"
 
 	// "github.com/mia0x75/halo/internal/platform/log"
-	"github.com/mia0x75/halo/routers"
+	"github.com/mia0x75/halo/internal/transport/http"
 )
 
 var lg = logrus.New()
@@ -97,9 +97,9 @@ func main() {
 	lg.Infof("[I] http listening %s", addr)
 
 	r := mux.NewRouter()
-	routers.Routes(r, application)
+	server.Routes(r, application)
 	if strings.EqualFold(config.Config().Log.Level, "debug") {
-		routers.ProfilerRoutes(r)
+		server.ProfilerRoutes(r)
 	}
 	srv := &http.Server{
 		Addr:         addr,
