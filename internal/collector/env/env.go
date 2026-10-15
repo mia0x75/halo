@@ -12,14 +12,14 @@ import (
 	"github.com/shirou/gopsutil/v4/mem"
 	"github.com/shirou/gopsutil/v4/process"
 
-	"github.com/mia0x75/halo/internal/transport/graphql/models"
+	"github.com/mia0x75/halo/internal/domain"
 )
 
 const envCollectTimeout = 2 * time.Second
 
 // GetCPUStats 纯 Go 实现的 CPU 状态采集，替代 statgo（CGO + libstatgrab）。
-func GetCPUStats() *models.CPUStats {
-	stats := &models.CPUStats{}
+func GetCPUStats() *domain.CPUStats {
+	stats := &domain.CPUStats{}
 	ctx, cancel := context.WithTimeout(context.Background(), envCollectTimeout)
 	defer cancel()
 
@@ -47,8 +47,8 @@ func GetCPUStats() *models.CPUStats {
 }
 
 // GetMemStats 纯 Go 实现的内存状态采集。
-func GetMemStats() *models.MemStats {
-	stats := &models.MemStats{}
+func GetMemStats() *domain.MemStats {
+	stats := &domain.MemStats{}
 	ctx, cancel := context.WithTimeout(context.Background(), envCollectTimeout)
 	defer cancel()
 
@@ -67,8 +67,8 @@ func GetMemStats() *models.MemStats {
 }
 
 // GetHostInfos 纯 Go 实现的主机信息采集。
-func GetHostInfos() *models.HostInfos {
-	info := &models.HostInfos{
+func GetHostInfos() *domain.HostInfos {
+	info := &domain.HostInfos{
 		NCPUs:    runtime.NumCPU(),
 		MaxCPUs:  runtime.NumCPU(),
 		BitWidth: strconv.IntSize,
@@ -91,8 +91,8 @@ func GetHostInfos() *models.HostInfos {
 }
 
 // GetProcessStats 纯 Go 实现的进程状态采集。失败时返回零值，不抛错，保证 GraphQL 查询可用。
-func GetProcessStats() *models.ProcessStats {
-	stats := &models.ProcessStats{}
+func GetProcessStats() *domain.ProcessStats {
+	stats := &domain.ProcessStats{}
 	ctx, cancel := context.WithTimeout(context.Background(), envCollectTimeout)
 	defer cancel()
 
