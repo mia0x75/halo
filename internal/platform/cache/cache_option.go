@@ -2,7 +2,7 @@ package cache
 
 import (
 	"github.com/mia0x75/halo/internal/bridge"
-	"github.com/mia0x75/halo/internal/transport/graphql/models"
+	"github.com/mia0x75/halo/internal/models"
 )
 
 // OptionsMap 线程安全的数据缓存对象，OptionsMap 系统配置缓存对象

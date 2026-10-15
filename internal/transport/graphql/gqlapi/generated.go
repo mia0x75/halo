@@ -14,7 +14,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/mia0x75/halo/internal/transport/graphql/models"
+	"github.com/mia0x75/halo/internal/models"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -3887,7 +3887,7 @@ func (ec *executionContext) field_MutationRoot_activate_args(ctx context.Context
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.ActivateInput, error) {
-			return ec.unmarshalNActivateInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐActivateInput(ctx, v)
+			return ec.unmarshalNActivateInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐActivateInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -3901,7 +3901,7 @@ func (ec *executionContext) field_MutationRoot_analyzeQuery_args(ctx context.Con
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.SoarQueryInput, error) {
-			return ec.unmarshalNSoarQueryInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐSoarQueryInput(ctx, v)
+			return ec.unmarshalNSoarQueryInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐSoarQueryInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -3929,7 +3929,7 @@ func (ec *executionContext) field_MutationRoot_createCluster_args(ctx context.Co
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.CreateClusterInput, error) {
-			return ec.unmarshalNCreateClusterInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCreateClusterInput(ctx, v)
+			return ec.unmarshalNCreateClusterInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCreateClusterInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -3943,7 +3943,7 @@ func (ec *executionContext) field_MutationRoot_createComment_args(ctx context.Co
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.CreateCommentInput, error) {
-			return ec.unmarshalNCreateCommentInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCreateCommentInput(ctx, v)
+			return ec.unmarshalNCreateCommentInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCreateCommentInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -3957,7 +3957,7 @@ func (ec *executionContext) field_MutationRoot_createQuery_args(ctx context.Cont
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.CreateQueryInput, error) {
-			return ec.unmarshalNCreateQueryInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCreateQueryInput(ctx, v)
+			return ec.unmarshalNCreateQueryInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCreateQueryInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -3971,7 +3971,7 @@ func (ec *executionContext) field_MutationRoot_createTicket_args(ctx context.Con
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.CreateTicketInput, error) {
-			return ec.unmarshalNCreateTicketInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCreateTicketInput(ctx, v)
+			return ec.unmarshalNCreateTicketInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCreateTicketInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -3985,7 +3985,7 @@ func (ec *executionContext) field_MutationRoot_createUser_args(ctx context.Conte
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.CreateUserInput, error) {
-			return ec.unmarshalNCreateUserInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCreateUserInput(ctx, v)
+			return ec.unmarshalNCreateUserInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCreateUserInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4013,7 +4013,7 @@ func (ec *executionContext) field_MutationRoot_grantClusters_args(ctx context.Co
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.GrantClustersInput, error) {
-			return ec.unmarshalNGrantClustersInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐGrantClustersInput(ctx, v)
+			return ec.unmarshalNGrantClustersInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐGrantClustersInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4027,7 +4027,7 @@ func (ec *executionContext) field_MutationRoot_grantReviewers_args(ctx context.C
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.GrantReviewersInput, error) {
-			return ec.unmarshalNGrantReviewersInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐGrantReviewersInput(ctx, v)
+			return ec.unmarshalNGrantReviewersInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐGrantReviewersInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4041,7 +4041,7 @@ func (ec *executionContext) field_MutationRoot_grantRoles_args(ctx context.Conte
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.GrantRolesInput, error) {
-			return ec.unmarshalNGrantRolesInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐGrantRolesInput(ctx, v)
+			return ec.unmarshalNGrantRolesInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐGrantRolesInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4055,7 +4055,7 @@ func (ec *executionContext) field_MutationRoot_login_args(ctx context.Context, r
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.UserLoginInput, error) {
-			return ec.unmarshalNUserLoginInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUserLoginInput(ctx, v)
+			return ec.unmarshalNUserLoginInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUserLoginInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4069,7 +4069,7 @@ func (ec *executionContext) field_MutationRoot_lostPasswd_args(ctx context.Conte
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.LostPasswdInput, error) {
-			return ec.unmarshalNLostPasswdInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐLostPasswdInput(ctx, v)
+			return ec.unmarshalNLostPasswdInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐLostPasswdInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4083,7 +4083,7 @@ func (ec *executionContext) field_MutationRoot_patchClusterStatus_args(ctx conte
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.PatchClusterStatusInput, error) {
-			return ec.unmarshalNPatchClusterStatusInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐPatchClusterStatusInput(ctx, v)
+			return ec.unmarshalNPatchClusterStatusInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchClusterStatusInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4097,7 +4097,7 @@ func (ec *executionContext) field_MutationRoot_patchOptionValues_args(ctx contex
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.PatchOptionValueInput, error) {
-			return ec.unmarshalNPatchOptionValueInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐPatchOptionValueInput(ctx, v)
+			return ec.unmarshalNPatchOptionValueInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchOptionValueInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4111,7 +4111,7 @@ func (ec *executionContext) field_MutationRoot_patchRuleBitwise_args(ctx context
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.PatchRuleBitwiseInput, error) {
-			return ec.unmarshalNPatchRuleBitwiseInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐPatchRuleBitwiseInput(ctx, v)
+			return ec.unmarshalNPatchRuleBitwiseInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchRuleBitwiseInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4125,7 +4125,7 @@ func (ec *executionContext) field_MutationRoot_patchRuleValues_args(ctx context.
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.PatchRuleValuesInput, error) {
-			return ec.unmarshalNPatchRuleValuesInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐPatchRuleValuesInput(ctx, v)
+			return ec.unmarshalNPatchRuleValuesInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchRuleValuesInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4139,7 +4139,7 @@ func (ec *executionContext) field_MutationRoot_patchTicketStatus_args(ctx contex
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.PatchTicketStatusInput, error) {
-			return ec.unmarshalNPatchTicketStatusInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐPatchTicketStatusInput(ctx, v)
+			return ec.unmarshalNPatchTicketStatusInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchTicketStatusInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4153,7 +4153,7 @@ func (ec *executionContext) field_MutationRoot_patchUserStatus_args(ctx context.
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.PatchUserStatusInput, error) {
-			return ec.unmarshalNPatchUserStatusInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐPatchUserStatusInput(ctx, v)
+			return ec.unmarshalNPatchUserStatusInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchUserStatusInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4167,7 +4167,7 @@ func (ec *executionContext) field_MutationRoot_register_args(ctx context.Context
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.UserRegisterInput, error) {
-			return ec.unmarshalNUserRegisterInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUserRegisterInput(ctx, v)
+			return ec.unmarshalNUserRegisterInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUserRegisterInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4209,7 +4209,7 @@ func (ec *executionContext) field_MutationRoot_resendActivationMail_args(ctx con
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.ActivateInput, error) {
-			return ec.unmarshalNActivateInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐActivateInput(ctx, v)
+			return ec.unmarshalNActivateInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐActivateInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4223,7 +4223,7 @@ func (ec *executionContext) field_MutationRoot_resetPasswd_args(ctx context.Cont
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.ResetPasswdInput, error) {
-			return ec.unmarshalNResetPasswdInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐResetPasswdInput(ctx, v)
+			return ec.unmarshalNResetPasswdInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐResetPasswdInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4237,7 +4237,7 @@ func (ec *executionContext) field_MutationRoot_revokeClusters_args(ctx context.C
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.RevokeClustersInput, error) {
-			return ec.unmarshalNRevokeClustersInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐRevokeClustersInput(ctx, v)
+			return ec.unmarshalNRevokeClustersInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRevokeClustersInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4251,7 +4251,7 @@ func (ec *executionContext) field_MutationRoot_revokeReviewers_args(ctx context.
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.RevokeReviewersInput, error) {
-			return ec.unmarshalNRevokeReviewersInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐRevokeReviewersInput(ctx, v)
+			return ec.unmarshalNRevokeReviewersInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRevokeReviewersInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4265,7 +4265,7 @@ func (ec *executionContext) field_MutationRoot_revokeRoles_args(ctx context.Cont
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.RevokeRolesInput, error) {
-			return ec.unmarshalNRevokeRolesInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐRevokeRolesInput(ctx, v)
+			return ec.unmarshalNRevokeRolesInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRevokeRolesInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4279,7 +4279,7 @@ func (ec *executionContext) field_MutationRoot_rewriteQuery_args(ctx context.Con
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.SoarQueryInput, error) {
-			return ec.unmarshalNSoarQueryInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐSoarQueryInput(ctx, v)
+			return ec.unmarshalNSoarQueryInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐSoarQueryInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4293,7 +4293,7 @@ func (ec *executionContext) field_MutationRoot_scheduleTicket_args(ctx context.C
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.ScheduleTicketInput, error) {
-			return ec.unmarshalNScheduleTicketInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐScheduleTicketInput(ctx, v)
+			return ec.unmarshalNScheduleTicketInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐScheduleTicketInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4307,7 +4307,7 @@ func (ec *executionContext) field_MutationRoot_updateCluster_args(ctx context.Co
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.UpdateClusterInput, error) {
-			return ec.unmarshalNUpdateClusterInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUpdateClusterInput(ctx, v)
+			return ec.unmarshalNUpdateClusterInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUpdateClusterInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4321,7 +4321,7 @@ func (ec *executionContext) field_MutationRoot_updateEmail_args(ctx context.Cont
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.PatchEmailInput, error) {
-			return ec.unmarshalNPatchEmailInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐPatchEmailInput(ctx, v)
+			return ec.unmarshalNPatchEmailInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchEmailInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4335,7 +4335,7 @@ func (ec *executionContext) field_MutationRoot_updatePassword_args(ctx context.C
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.PatchPasswordInput, error) {
-			return ec.unmarshalNPatchPasswordInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐPatchPasswordInput(ctx, v)
+			return ec.unmarshalNPatchPasswordInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchPasswordInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4349,7 +4349,7 @@ func (ec *executionContext) field_MutationRoot_updateProfile_args(ctx context.Co
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.UpdateProfileInput, error) {
-			return ec.unmarshalNUpdateProfileInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUpdateProfileInput(ctx, v)
+			return ec.unmarshalNUpdateProfileInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUpdateProfileInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4363,7 +4363,7 @@ func (ec *executionContext) field_MutationRoot_updateTemplate_args(ctx context.C
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (*models.UpdateTemplateInput, error) {
-			return ec.unmarshalOUpdateTemplateInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUpdateTemplateInput(ctx, v)
+			return ec.unmarshalOUpdateTemplateInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUpdateTemplateInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4377,7 +4377,7 @@ func (ec *executionContext) field_MutationRoot_updateTicket_args(ctx context.Con
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.UpdateTicketInput, error) {
-			return ec.unmarshalNUpdateTicketInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUpdateTicketInput(ctx, v)
+			return ec.unmarshalNUpdateTicketInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUpdateTicketInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4391,7 +4391,7 @@ func (ec *executionContext) field_MutationRoot_updateUser_args(ctx context.Conte
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.UpdateUserInput, error) {
-			return ec.unmarshalNUpdateUserInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUpdateUserInput(ctx, v)
+			return ec.unmarshalNUpdateUserInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUpdateUserInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4811,7 +4811,7 @@ func (ec *executionContext) field_QueryRoot_testCluster_args(ctx context.Context
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (*models.ValidateConnectionInput, error) {
-			return ec.unmarshalOValidateConnectionInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐValidateConnectionInput(ctx, v)
+			return ec.unmarshalOValidateConnectionInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐValidateConnectionInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4825,7 +4825,7 @@ func (ec *executionContext) field_QueryRoot_testRegexp_args(ctx context.Context,
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (*models.ValidatePatternInput, error) {
-			return ec.unmarshalOValidatePatternInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐValidatePatternInput(ctx, v)
+			return ec.unmarshalOValidatePatternInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐValidatePatternInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -6095,7 +6095,7 @@ func (ec *executionContext) _ClusterEdge_node(ctx context.Context, field graphql
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Cluster) graphql.Marshaler {
-			return ec.marshalOCluster2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCluster(ctx, selections, v)
+			return ec.marshalOCluster2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCluster(ctx, selections, v)
 		},
 		true,
 		false,
@@ -6214,7 +6214,7 @@ func (ec *executionContext) _Comment_User(ctx context.Context, field graphql.Col
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.User) graphql.Marshaler {
-			return ec.marshalNUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUser(ctx, selections, v)
+			return ec.marshalNUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUser(ctx, selections, v)
 		},
 		true,
 		true,
@@ -6246,7 +6246,7 @@ func (ec *executionContext) _Comment_Ticket(ctx context.Context, field graphql.C
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Ticket) graphql.Marshaler {
-			return ec.marshalNTicket2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐTicket(ctx, selections, v)
+			return ec.marshalNTicket2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐTicket(ctx, selections, v)
 		},
 		true,
 		true,
@@ -6411,7 +6411,7 @@ func (ec *executionContext) _CommentEdge_node(ctx context.Context, field graphql
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Comment) graphql.Marshaler {
-			return ec.marshalOComment2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐComment(ctx, selections, v)
+			return ec.marshalOComment2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐComment(ctx, selections, v)
 		},
 		true,
 		false,
@@ -6847,7 +6847,7 @@ func (ec *executionContext) _CronEdge_node(ctx context.Context, field graphql.Co
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Cron) graphql.Marshaler {
-			return ec.marshalOCron2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCron(ctx, selections, v)
+			return ec.marshalOCron2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCron(ctx, selections, v)
 		},
 		true,
 		false,
@@ -6971,7 +6971,7 @@ func (ec *executionContext) _Environments_CPUStats(ctx context.Context, field gr
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.CPUStats) graphql.Marshaler {
-			return ec.marshalNCPUStats2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCPUStats(ctx, selections, v)
+			return ec.marshalNCPUStats2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCPUStats(ctx, selections, v)
 		},
 		true,
 		true,
@@ -7003,7 +7003,7 @@ func (ec *executionContext) _Environments_HostInfos(ctx context.Context, field g
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.HostInfos) graphql.Marshaler {
-			return ec.marshalNHostInfos2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐHostInfos(ctx, selections, v)
+			return ec.marshalNHostInfos2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐHostInfos(ctx, selections, v)
 		},
 		true,
 		true,
@@ -7035,7 +7035,7 @@ func (ec *executionContext) _Environments_ProcessStats(ctx context.Context, fiel
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.ProcessStats) graphql.Marshaler {
-			return ec.marshalNProcessStats2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐProcessStats(ctx, selections, v)
+			return ec.marshalNProcessStats2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐProcessStats(ctx, selections, v)
 		},
 		true,
 		true,
@@ -7067,7 +7067,7 @@ func (ec *executionContext) _Environments_MemStats(ctx context.Context, field gr
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.MemStats) graphql.Marshaler {
-			return ec.marshalNMemStats2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐMemStats(ctx, selections, v)
+			return ec.marshalNMemStats2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐMemStats(ctx, selections, v)
 		},
 		true,
 		true,
@@ -7567,7 +7567,7 @@ func (ec *executionContext) _Log_User(ctx context.Context, field graphql.Collect
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.User) graphql.Marshaler {
-			return ec.marshalNUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUser(ctx, selections, v)
+			return ec.marshalNUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUser(ctx, selections, v)
 		},
 		true,
 		true,
@@ -7732,7 +7732,7 @@ func (ec *executionContext) _LogEdge_node(ctx context.Context, field graphql.Col
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Log) graphql.Marshaler {
-			return ec.marshalOLog2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐLog(ctx, selections, v)
+			return ec.marshalOLog2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐLog(ctx, selections, v)
 		},
 		true,
 		false,
@@ -7787,7 +7787,7 @@ func (ec *executionContext) _LoginPayload_Me(ctx context.Context, field graphql.
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.User) graphql.Marshaler {
-			return ec.marshalNUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUser(ctx, selections, v)
+			return ec.marshalNUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUser(ctx, selections, v)
 		},
 		true,
 		true,
@@ -8004,7 +8004,7 @@ func (ec *executionContext) _MutationRoot_register(ctx context.Context, field gr
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.User) graphql.Marshaler {
-			return ec.marshalNUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUser(ctx, selections, v)
+			return ec.marshalNUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUser(ctx, selections, v)
 		},
 		true,
 		true,
@@ -8151,7 +8151,7 @@ func (ec *executionContext) _MutationRoot_updateProfile(ctx context.Context, fie
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *models.User) graphql.Marshaler {
-			return ec.marshalOUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUser(ctx, selections, v)
+			return ec.marshalOUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUser(ctx, selections, v)
 		},
 		true,
 		false,
@@ -8709,7 +8709,7 @@ func (ec *executionContext) _MutationRoot_createUser(ctx context.Context, field 
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *models.User) graphql.Marshaler {
-			return ec.marshalOUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUser(ctx, selections, v)
+			return ec.marshalOUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUser(ctx, selections, v)
 		},
 		true,
 		false,
@@ -8771,7 +8771,7 @@ func (ec *executionContext) _MutationRoot_updateUser(ctx context.Context, field 
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *models.User) graphql.Marshaler {
-			return ec.marshalOUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUser(ctx, selections, v)
+			return ec.marshalOUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUser(ctx, selections, v)
 		},
 		true,
 		false,
@@ -8895,7 +8895,7 @@ func (ec *executionContext) _MutationRoot_createCluster(ctx context.Context, fie
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Cluster) graphql.Marshaler {
-			return ec.marshalOCluster2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCluster(ctx, selections, v)
+			return ec.marshalOCluster2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCluster(ctx, selections, v)
 		},
 		true,
 		false,
@@ -8957,7 +8957,7 @@ func (ec *executionContext) _MutationRoot_updateCluster(ctx context.Context, fie
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Cluster) graphql.Marshaler {
-			return ec.marshalOCluster2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCluster(ctx, selections, v)
+			return ec.marshalOCluster2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCluster(ctx, selections, v)
 		},
 		true,
 		false,
@@ -9143,7 +9143,7 @@ func (ec *executionContext) _MutationRoot_updateTemplate(ctx context.Context, fi
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Template) graphql.Marshaler {
-			return ec.marshalNTemplate2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐTemplate(ctx, selections, v)
+			return ec.marshalNTemplate2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐTemplate(ctx, selections, v)
 		},
 		true,
 		true,
@@ -9205,7 +9205,7 @@ func (ec *executionContext) _MutationRoot_createTicket(ctx context.Context, fiel
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Ticket) graphql.Marshaler {
-			return ec.marshalOTicket2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐTicket(ctx, selections, v)
+			return ec.marshalOTicket2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐTicket(ctx, selections, v)
 		},
 		true,
 		false,
@@ -9267,7 +9267,7 @@ func (ec *executionContext) _MutationRoot_updateTicket(ctx context.Context, fiel
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Ticket) graphql.Marshaler {
-			return ec.marshalOTicket2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐTicket(ctx, selections, v)
+			return ec.marshalOTicket2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐTicket(ctx, selections, v)
 		},
 		true,
 		false,
@@ -9515,7 +9515,7 @@ func (ec *executionContext) _MutationRoot_scheduleTicket(ctx context.Context, fi
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Cron) graphql.Marshaler {
-			return ec.marshalOCron2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCron(ctx, selections, v)
+			return ec.marshalOCron2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCron(ctx, selections, v)
 		},
 		true,
 		false,
@@ -9639,7 +9639,7 @@ func (ec *executionContext) _MutationRoot_createComment(ctx context.Context, fie
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Comment) graphql.Marshaler {
-			return ec.marshalOComment2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐComment(ctx, selections, v)
+			return ec.marshalOComment2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐComment(ctx, selections, v)
 		},
 		true,
 		false,
@@ -10774,7 +10774,7 @@ func (ec *executionContext) _Query_Cluster(ctx context.Context, field graphql.Co
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Cluster) graphql.Marshaler {
-			return ec.marshalNCluster2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCluster(ctx, selections, v)
+			return ec.marshalNCluster2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCluster(ctx, selections, v)
 		},
 		true,
 		true,
@@ -10929,7 +10929,7 @@ func (ec *executionContext) _Query_User(ctx context.Context, field graphql.Colle
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.User) graphql.Marshaler {
-			return ec.marshalNUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUser(ctx, selections, v)
+			return ec.marshalNUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUser(ctx, selections, v)
 		},
 		true,
 		true,
@@ -11094,7 +11094,7 @@ func (ec *executionContext) _QueryEdge_node(ctx context.Context, field graphql.C
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Query) graphql.Marshaler {
-			return ec.marshalOQuery2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐQuery(ctx, selections, v)
+			return ec.marshalOQuery2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐQuery(ctx, selections, v)
 		},
 		true,
 		false,
@@ -11168,7 +11168,7 @@ func (ec *executionContext) _QueryRoot_cluster(ctx context.Context, field graphq
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Cluster) graphql.Marshaler {
-			return ec.marshalOCluster2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCluster(ctx, selections, v)
+			return ec.marshalOCluster2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCluster(ctx, selections, v)
 		},
 		true,
 		false,
@@ -11415,7 +11415,7 @@ func (ec *executionContext) _QueryRoot_me(ctx context.Context, field graphql.Col
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *models.User) graphql.Marshaler {
-			return ec.marshalNUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUser(ctx, selections, v)
+			return ec.marshalNUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUser(ctx, selections, v)
 		},
 		true,
 		true,
@@ -11465,7 +11465,7 @@ func (ec *executionContext) _QueryRoot_options(ctx context.Context, field graphq
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v []*models.Option) graphql.Marshaler {
-			return ec.marshalOOption2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐOption(ctx, selections, v)
+			return ec.marshalOOption2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐOption(ctx, selections, v)
 		},
 		true,
 		false,
@@ -11498,7 +11498,7 @@ func (ec *executionContext) _QueryRoot_option(ctx context.Context, field graphql
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Option) graphql.Marshaler {
-			return ec.marshalOOption2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐOption(ctx, selections, v)
+			return ec.marshalOOption2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐOption(ctx, selections, v)
 		},
 		true,
 		false,
@@ -11560,7 +11560,7 @@ func (ec *executionContext) _QueryRoot_query(ctx context.Context, field graphql.
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Query) graphql.Marshaler {
-			return ec.marshalOQuery2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐQuery(ctx, selections, v)
+			return ec.marshalOQuery2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐQuery(ctx, selections, v)
 		},
 		true,
 		false,
@@ -11745,7 +11745,7 @@ func (ec *executionContext) _QueryRoot_templates(ctx context.Context, field grap
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v []*models.Template) graphql.Marshaler {
-			return ec.marshalOTemplate2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐTemplate(ctx, selections, v)
+			return ec.marshalOTemplate2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐTemplate(ctx, selections, v)
 		},
 		true,
 		false,
@@ -11796,7 +11796,7 @@ func (ec *executionContext) _QueryRoot_ticket(ctx context.Context, field graphql
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Ticket) graphql.Marshaler {
-			return ec.marshalOTicket2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐTicket(ctx, selections, v)
+			return ec.marshalOTicket2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐTicket(ctx, selections, v)
 		},
 		true,
 		false,
@@ -11982,7 +11982,7 @@ func (ec *executionContext) _QueryRoot_user(ctx context.Context, field graphql.C
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *models.User) graphql.Marshaler {
-			return ec.marshalOUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUser(ctx, selections, v)
+			return ec.marshalOUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUser(ctx, selections, v)
 		},
 		true,
 		false,
@@ -12167,7 +12167,7 @@ func (ec *executionContext) _QueryRoot_avatars(ctx context.Context, field graphq
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v []*models.Avatar) graphql.Marshaler {
-			return ec.marshalOAvatar2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐAvatar(ctx, selections, v)
+			return ec.marshalOAvatar2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐAvatar(ctx, selections, v)
 		},
 		true,
 		false,
@@ -12218,7 +12218,7 @@ func (ec *executionContext) _QueryRoot_rule(ctx context.Context, field graphql.C
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Rule) graphql.Marshaler {
-			return ec.marshalORule2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐRule(ctx, selections, v)
+			return ec.marshalORule2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRule(ctx, selections, v)
 		},
 		true,
 		false,
@@ -12279,7 +12279,7 @@ func (ec *executionContext) _QueryRoot_rules(ctx context.Context, field graphql.
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v []*models.Rule) graphql.Marshaler {
-			return ec.marshalORule2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐRule(ctx, selections, v)
+			return ec.marshalORule2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRule(ctx, selections, v)
 		},
 		true,
 		false,
@@ -12330,7 +12330,7 @@ func (ec *executionContext) _QueryRoot_role(ctx context.Context, field graphql.C
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Role) graphql.Marshaler {
-			return ec.marshalORole2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐRole(ctx, selections, v)
+			return ec.marshalORole2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRole(ctx, selections, v)
 		},
 		true,
 		false,
@@ -12391,7 +12391,7 @@ func (ec *executionContext) _QueryRoot_roles(ctx context.Context, field graphql.
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v []*models.Role) graphql.Marshaler {
-			return ec.marshalORole2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐRole(ctx, selections, v)
+			return ec.marshalORole2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRole(ctx, selections, v)
 		},
 		true,
 		false,
@@ -12442,7 +12442,7 @@ func (ec *executionContext) _QueryRoot_glossaries(ctx context.Context, field gra
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v []*models.Glossary) graphql.Marshaler {
-			return ec.marshalOGlossary2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐGlossary(ctx, selections, v)
+			return ec.marshalOGlossary2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐGlossary(ctx, selections, v)
 		},
 		true,
 		false,
@@ -12504,7 +12504,7 @@ func (ec *executionContext) _QueryRoot_cron(ctx context.Context, field graphql.C
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Cron) graphql.Marshaler {
-			return ec.marshalOCron2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCron(ctx, selections, v)
+			return ec.marshalOCron2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCron(ctx, selections, v)
 		},
 		true,
 		false,
@@ -12627,7 +12627,7 @@ func (ec *executionContext) _QueryRoot_tasks(ctx context.Context, field graphql.
 			return next
 		},
 		func(ctx context.Context, selections ast.SelectionSet, v []*models.Cron) graphql.Marshaler {
-			return ec.marshalOCron2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCron(ctx, selections, v)
+			return ec.marshalOCron2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCron(ctx, selections, v)
 		},
 		true,
 		false,
@@ -12722,7 +12722,7 @@ func (ec *executionContext) _QueryRoot_statistics(ctx context.Context, field gra
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*models.Statistic) graphql.Marshaler {
-			return ec.marshalOStatistic2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐStatistic(ctx, selections, v)
+			return ec.marshalOStatistic2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐStatistic(ctx, selections, v)
 		},
 		true,
 		false,
@@ -13974,7 +13974,7 @@ func (ec *executionContext) _Statement_Ticket(ctx context.Context, field graphql
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Ticket) graphql.Marshaler {
-			return ec.marshalNTicket2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐTicket(ctx, selections, v)
+			return ec.marshalNTicket2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐTicket(ctx, selections, v)
 		},
 		true,
 		true,
@@ -14162,7 +14162,7 @@ func (ec *executionContext) _StatementEdge_node(ctx context.Context, field graph
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Statement) graphql.Marshaler {
-			return ec.marshalOStatement2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐStatement(ctx, selections, v)
+			return ec.marshalOStatement2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐStatement(ctx, selections, v)
 		},
 		true,
 		false,
@@ -14566,7 +14566,7 @@ func (ec *executionContext) _Ticket_Cluster(ctx context.Context, field graphql.C
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Cluster) graphql.Marshaler {
-			return ec.marshalNCluster2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCluster(ctx, selections, v)
+			return ec.marshalNCluster2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCluster(ctx, selections, v)
 		},
 		true,
 		true,
@@ -14767,7 +14767,7 @@ func (ec *executionContext) _Ticket_User(ctx context.Context, field graphql.Coll
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.User) graphql.Marshaler {
-			return ec.marshalNUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUser(ctx, selections, v)
+			return ec.marshalNUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUser(ctx, selections, v)
 		},
 		true,
 		true,
@@ -14799,7 +14799,7 @@ func (ec *executionContext) _Ticket_Reviewer(ctx context.Context, field graphql.
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.User) graphql.Marshaler {
-			return ec.marshalNUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUser(ctx, selections, v)
+			return ec.marshalNUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUser(ctx, selections, v)
 		},
 		true,
 		true,
@@ -14831,7 +14831,7 @@ func (ec *executionContext) _Ticket_Cron(ctx context.Context, field graphql.Coll
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Cron) graphql.Marshaler {
-			return ec.marshalOCron2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCron(ctx, selections, v)
+			return ec.marshalOCron2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCron(ctx, selections, v)
 		},
 		true,
 		false,
@@ -15084,7 +15084,7 @@ func (ec *executionContext) _TicketEdge_node(ctx context.Context, field graphql.
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Ticket) graphql.Marshaler {
-			return ec.marshalOTicket2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐTicket(ctx, selections, v)
+			return ec.marshalOTicket2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐTicket(ctx, selections, v)
 		},
 		true,
 		false,
@@ -15371,7 +15371,7 @@ func (ec *executionContext) _User_Avatar(ctx context.Context, field graphql.Coll
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Avatar) graphql.Marshaler {
-			return ec.marshalNAvatar2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐAvatar(ctx, selections, v)
+			return ec.marshalNAvatar2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐAvatar(ctx, selections, v)
 		},
 		true,
 		true,
@@ -15403,7 +15403,7 @@ func (ec *executionContext) _User_Roles(ctx context.Context, field graphql.Colle
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*models.Role) graphql.Marshaler {
-			return ec.marshalORole2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐRole(ctx, selections, v)
+			return ec.marshalORole2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRole(ctx, selections, v)
 		},
 		true,
 		false,
@@ -15435,7 +15435,7 @@ func (ec *executionContext) _User_Reviewers(ctx context.Context, field graphql.C
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*models.User) graphql.Marshaler {
-			return ec.marshalOUser2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUser(ctx, selections, v)
+			return ec.marshalOUser2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUser(ctx, selections, v)
 		},
 		true,
 		false,
@@ -15467,7 +15467,7 @@ func (ec *executionContext) _User_Statistics(ctx context.Context, field graphql.
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*models.Statistic) graphql.Marshaler {
-			return ec.marshalOStatistic2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐStatistic(ctx, selections, v)
+			return ec.marshalOStatistic2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐStatistic(ctx, selections, v)
 		},
 		true,
 		false,
@@ -15764,7 +15764,7 @@ func (ec *executionContext) _UserEdge_node(ctx context.Context, field graphql.Co
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *models.User) graphql.Marshaler {
-			return ec.marshalOUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUser(ctx, selections, v)
+			return ec.marshalOUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUser(ctx, selections, v)
 		},
 		true,
 		false,
@@ -24087,12 +24087,12 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNActivateInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐActivateInput(ctx context.Context, v any) (models.ActivateInput, error) {
+func (ec *executionContext) unmarshalNActivateInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐActivateInput(ctx context.Context, v any) (models.ActivateInput, error) {
 	res, err := ec.unmarshalInputActivateInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNAvatar2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐAvatar(ctx context.Context, sel ast.SelectionSet, v *models.Avatar) graphql.Marshaler {
+func (ec *executionContext) marshalNAvatar2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐAvatar(ctx context.Context, sel ast.SelectionSet, v *models.Avatar) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -24118,7 +24118,7 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNCPUStats2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCPUStats(ctx context.Context, sel ast.SelectionSet, v *models.CPUStats) graphql.Marshaler {
+func (ec *executionContext) marshalNCPUStats2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCPUStats(ctx context.Context, sel ast.SelectionSet, v *models.CPUStats) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -24128,7 +24128,7 @@ func (ec *executionContext) marshalNCPUStats2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋ
 	return ec._CPUStats(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNCluster2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCluster(ctx context.Context, sel ast.SelectionSet, v *models.Cluster) graphql.Marshaler {
+func (ec *executionContext) marshalNCluster2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCluster(ctx context.Context, sel ast.SelectionSet, v *models.Cluster) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -24158,27 +24158,27 @@ func (ec *executionContext) marshalNCommentEdge2ᚖgithubᚗcomᚋmia0x75ᚋhalo
 	return ec._CommentEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNCreateClusterInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCreateClusterInput(ctx context.Context, v any) (models.CreateClusterInput, error) {
+func (ec *executionContext) unmarshalNCreateClusterInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCreateClusterInput(ctx context.Context, v any) (models.CreateClusterInput, error) {
 	res, err := ec.unmarshalInputCreateClusterInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCreateCommentInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCreateCommentInput(ctx context.Context, v any) (models.CreateCommentInput, error) {
+func (ec *executionContext) unmarshalNCreateCommentInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCreateCommentInput(ctx context.Context, v any) (models.CreateCommentInput, error) {
 	res, err := ec.unmarshalInputCreateCommentInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCreateQueryInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCreateQueryInput(ctx context.Context, v any) (models.CreateQueryInput, error) {
+func (ec *executionContext) unmarshalNCreateQueryInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCreateQueryInput(ctx context.Context, v any) (models.CreateQueryInput, error) {
 	res, err := ec.unmarshalInputCreateQueryInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCreateTicketInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCreateTicketInput(ctx context.Context, v any) (models.CreateTicketInput, error) {
+func (ec *executionContext) unmarshalNCreateTicketInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCreateTicketInput(ctx context.Context, v any) (models.CreateTicketInput, error) {
 	res, err := ec.unmarshalInputCreateTicketInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCreateUserInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCreateUserInput(ctx context.Context, v any) (models.CreateUserInput, error) {
+func (ec *executionContext) unmarshalNCreateUserInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCreateUserInput(ctx context.Context, v any) (models.CreateUserInput, error) {
 	res, err := ec.unmarshalInputCreateUserInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -24219,22 +24219,22 @@ func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.S
 	return graphql.WrapContextMarshaler(ctx, res)
 }
 
-func (ec *executionContext) unmarshalNGrantClustersInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐGrantClustersInput(ctx context.Context, v any) (models.GrantClustersInput, error) {
+func (ec *executionContext) unmarshalNGrantClustersInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐGrantClustersInput(ctx context.Context, v any) (models.GrantClustersInput, error) {
 	res, err := ec.unmarshalInputGrantClustersInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNGrantReviewersInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐGrantReviewersInput(ctx context.Context, v any) (models.GrantReviewersInput, error) {
+func (ec *executionContext) unmarshalNGrantReviewersInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐGrantReviewersInput(ctx context.Context, v any) (models.GrantReviewersInput, error) {
 	res, err := ec.unmarshalInputGrantReviewersInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNGrantRolesInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐGrantRolesInput(ctx context.Context, v any) (models.GrantRolesInput, error) {
+func (ec *executionContext) unmarshalNGrantRolesInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐGrantRolesInput(ctx context.Context, v any) (models.GrantRolesInput, error) {
 	res, err := ec.unmarshalInputGrantRolesInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNHostInfos2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐHostInfos(ctx context.Context, sel ast.SelectionSet, v *models.HostInfos) graphql.Marshaler {
+func (ec *executionContext) marshalNHostInfos2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐHostInfos(ctx context.Context, sel ast.SelectionSet, v *models.HostInfos) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -24286,12 +24286,12 @@ func (ec *executionContext) marshalNLogEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋi
 	return ec._LogEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNLostPasswdInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐLostPasswdInput(ctx context.Context, v any) (models.LostPasswdInput, error) {
+func (ec *executionContext) unmarshalNLostPasswdInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐLostPasswdInput(ctx context.Context, v any) (models.LostPasswdInput, error) {
 	res, err := ec.unmarshalInputLostPasswdInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNMemStats2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐMemStats(ctx context.Context, sel ast.SelectionSet, v *models.MemStats) graphql.Marshaler {
+func (ec *executionContext) marshalNMemStats2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐMemStats(ctx context.Context, sel ast.SelectionSet, v *models.MemStats) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -24311,47 +24311,47 @@ func (ec *executionContext) marshalNPageInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋ
 	return ec._PageInfo(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNPatchClusterStatusInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐPatchClusterStatusInput(ctx context.Context, v any) (models.PatchClusterStatusInput, error) {
+func (ec *executionContext) unmarshalNPatchClusterStatusInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchClusterStatusInput(ctx context.Context, v any) (models.PatchClusterStatusInput, error) {
 	res, err := ec.unmarshalInputPatchClusterStatusInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNPatchEmailInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐPatchEmailInput(ctx context.Context, v any) (models.PatchEmailInput, error) {
+func (ec *executionContext) unmarshalNPatchEmailInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchEmailInput(ctx context.Context, v any) (models.PatchEmailInput, error) {
 	res, err := ec.unmarshalInputPatchEmailInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNPatchOptionValueInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐPatchOptionValueInput(ctx context.Context, v any) (models.PatchOptionValueInput, error) {
+func (ec *executionContext) unmarshalNPatchOptionValueInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchOptionValueInput(ctx context.Context, v any) (models.PatchOptionValueInput, error) {
 	res, err := ec.unmarshalInputPatchOptionValueInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNPatchPasswordInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐPatchPasswordInput(ctx context.Context, v any) (models.PatchPasswordInput, error) {
+func (ec *executionContext) unmarshalNPatchPasswordInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchPasswordInput(ctx context.Context, v any) (models.PatchPasswordInput, error) {
 	res, err := ec.unmarshalInputPatchPasswordInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNPatchRuleBitwiseInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐPatchRuleBitwiseInput(ctx context.Context, v any) (models.PatchRuleBitwiseInput, error) {
+func (ec *executionContext) unmarshalNPatchRuleBitwiseInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchRuleBitwiseInput(ctx context.Context, v any) (models.PatchRuleBitwiseInput, error) {
 	res, err := ec.unmarshalInputPatchRuleBitwiseInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNPatchRuleValuesInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐPatchRuleValuesInput(ctx context.Context, v any) (models.PatchRuleValuesInput, error) {
+func (ec *executionContext) unmarshalNPatchRuleValuesInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchRuleValuesInput(ctx context.Context, v any) (models.PatchRuleValuesInput, error) {
 	res, err := ec.unmarshalInputPatchRuleValuesInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNPatchTicketStatusInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐPatchTicketStatusInput(ctx context.Context, v any) (models.PatchTicketStatusInput, error) {
+func (ec *executionContext) unmarshalNPatchTicketStatusInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchTicketStatusInput(ctx context.Context, v any) (models.PatchTicketStatusInput, error) {
 	res, err := ec.unmarshalInputPatchTicketStatusInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNPatchUserStatusInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐPatchUserStatusInput(ctx context.Context, v any) (models.PatchUserStatusInput, error) {
+func (ec *executionContext) unmarshalNPatchUserStatusInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchUserStatusInput(ctx context.Context, v any) (models.PatchUserStatusInput, error) {
 	res, err := ec.unmarshalInputPatchUserStatusInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNProcessStats2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐProcessStats(ctx context.Context, sel ast.SelectionSet, v *models.ProcessStats) graphql.Marshaler {
+func (ec *executionContext) marshalNProcessStats2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐProcessStats(ctx context.Context, sel ast.SelectionSet, v *models.ProcessStats) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -24371,22 +24371,22 @@ func (ec *executionContext) marshalNQueryEdge2ᚖgithubᚗcomᚋmia0x75ᚋhalo�
 	return ec._QueryEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNResetPasswdInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐResetPasswdInput(ctx context.Context, v any) (models.ResetPasswdInput, error) {
+func (ec *executionContext) unmarshalNResetPasswdInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐResetPasswdInput(ctx context.Context, v any) (models.ResetPasswdInput, error) {
 	res, err := ec.unmarshalInputResetPasswdInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNRevokeClustersInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐRevokeClustersInput(ctx context.Context, v any) (models.RevokeClustersInput, error) {
+func (ec *executionContext) unmarshalNRevokeClustersInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRevokeClustersInput(ctx context.Context, v any) (models.RevokeClustersInput, error) {
 	res, err := ec.unmarshalInputRevokeClustersInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNRevokeReviewersInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐRevokeReviewersInput(ctx context.Context, v any) (models.RevokeReviewersInput, error) {
+func (ec *executionContext) unmarshalNRevokeReviewersInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRevokeReviewersInput(ctx context.Context, v any) (models.RevokeReviewersInput, error) {
 	res, err := ec.unmarshalInputRevokeReviewersInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNRevokeRolesInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐRevokeRolesInput(ctx context.Context, v any) (models.RevokeRolesInput, error) {
+func (ec *executionContext) unmarshalNRevokeRolesInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRevokeRolesInput(ctx context.Context, v any) (models.RevokeRolesInput, error) {
 	res, err := ec.unmarshalInputRevokeRolesInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -24431,12 +24431,12 @@ func (ec *executionContext) marshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋ
 	return ret
 }
 
-func (ec *executionContext) unmarshalNScheduleTicketInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐScheduleTicketInput(ctx context.Context, v any) (models.ScheduleTicketInput, error) {
+func (ec *executionContext) unmarshalNScheduleTicketInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐScheduleTicketInput(ctx context.Context, v any) (models.ScheduleTicketInput, error) {
 	res, err := ec.unmarshalInputScheduleTicketInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNSoarQueryInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐSoarQueryInput(ctx context.Context, v any) (models.SoarQueryInput, error) {
+func (ec *executionContext) unmarshalNSoarQueryInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐSoarQueryInput(ctx context.Context, v any) (models.SoarQueryInput, error) {
 	res, err := ec.unmarshalInputSoarQueryInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -24506,7 +24506,7 @@ func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel
 	return ret
 }
 
-func (ec *executionContext) marshalNTemplate2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐTemplate(ctx context.Context, sel ast.SelectionSet, v *models.Template) graphql.Marshaler {
+func (ec *executionContext) marshalNTemplate2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐTemplate(ctx context.Context, sel ast.SelectionSet, v *models.Template) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -24516,7 +24516,7 @@ func (ec *executionContext) marshalNTemplate2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋ
 	return ec._Template(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNTicket2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐTicket(ctx context.Context, sel ast.SelectionSet, v *models.Ticket) graphql.Marshaler {
+func (ec *executionContext) marshalNTicket2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐTicket(ctx context.Context, sel ast.SelectionSet, v *models.Ticket) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -24594,27 +24594,27 @@ func (ec *executionContext) marshalNUInt82uint8(ctx context.Context, sel ast.Sel
 	return res
 }
 
-func (ec *executionContext) unmarshalNUpdateClusterInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUpdateClusterInput(ctx context.Context, v any) (models.UpdateClusterInput, error) {
+func (ec *executionContext) unmarshalNUpdateClusterInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUpdateClusterInput(ctx context.Context, v any) (models.UpdateClusterInput, error) {
 	res, err := ec.unmarshalInputUpdateClusterInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateProfileInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUpdateProfileInput(ctx context.Context, v any) (models.UpdateProfileInput, error) {
+func (ec *executionContext) unmarshalNUpdateProfileInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUpdateProfileInput(ctx context.Context, v any) (models.UpdateProfileInput, error) {
 	res, err := ec.unmarshalInputUpdateProfileInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateTicketInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUpdateTicketInput(ctx context.Context, v any) (models.UpdateTicketInput, error) {
+func (ec *executionContext) unmarshalNUpdateTicketInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUpdateTicketInput(ctx context.Context, v any) (models.UpdateTicketInput, error) {
 	res, err := ec.unmarshalInputUpdateTicketInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateUserInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUpdateUserInput(ctx context.Context, v any) (models.UpdateUserInput, error) {
+func (ec *executionContext) unmarshalNUpdateUserInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUpdateUserInput(ctx context.Context, v any) (models.UpdateUserInput, error) {
 	res, err := ec.unmarshalInputUpdateUserInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v *models.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v *models.User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -24634,12 +24634,12 @@ func (ec *executionContext) marshalNUserEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋ
 	return ec._UserEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNUserLoginInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUserLoginInput(ctx context.Context, v any) (models.UserLoginInput, error) {
+func (ec *executionContext) unmarshalNUserLoginInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUserLoginInput(ctx context.Context, v any) (models.UserLoginInput, error) {
 	res, err := ec.unmarshalInputUserLoginInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUserRegisterInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUserRegisterInput(ctx context.Context, v any) (models.UserRegisterInput, error) {
+func (ec *executionContext) unmarshalNUserRegisterInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUserRegisterInput(ctx context.Context, v any) (models.UserRegisterInput, error) {
 	res, err := ec.unmarshalInputUserRegisterInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -24791,20 +24791,20 @@ func (ec *executionContext) marshalOActivatePayload2ᚖgithubᚗcomᚋmia0x75ᚋ
 	return ec._ActivatePayload(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOAvatar2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐAvatar(ctx context.Context, sel ast.SelectionSet, v []*models.Avatar) graphql.Marshaler {
+func (ec *executionContext) marshalOAvatar2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐAvatar(ctx context.Context, sel ast.SelectionSet, v []*models.Avatar) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalOAvatar2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐAvatar(ctx, sel, v[i])
+		return ec.marshalOAvatar2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐAvatar(ctx, sel, v[i])
 	})
 
 	return ret
 }
 
-func (ec *executionContext) marshalOAvatar2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐAvatar(ctx context.Context, sel ast.SelectionSet, v *models.Avatar) graphql.Marshaler {
+func (ec *executionContext) marshalOAvatar2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐAvatar(ctx context.Context, sel ast.SelectionSet, v *models.Avatar) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -24841,7 +24841,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) marshalOCluster2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCluster(ctx context.Context, sel ast.SelectionSet, v *models.Cluster) graphql.Marshaler {
+func (ec *executionContext) marshalOCluster2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCluster(ctx context.Context, sel ast.SelectionSet, v *models.Cluster) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -24874,7 +24874,7 @@ func (ec *executionContext) marshalOClusterEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋh
 	return ret
 }
 
-func (ec *executionContext) marshalOComment2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐComment(ctx context.Context, sel ast.SelectionSet, v *models.Comment) graphql.Marshaler {
+func (ec *executionContext) marshalOComment2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐComment(ctx context.Context, sel ast.SelectionSet, v *models.Comment) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -24907,20 +24907,20 @@ func (ec *executionContext) marshalOCommentEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋh
 	return ret
 }
 
-func (ec *executionContext) marshalOCron2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCron(ctx context.Context, sel ast.SelectionSet, v []*models.Cron) graphql.Marshaler {
+func (ec *executionContext) marshalOCron2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCron(ctx context.Context, sel ast.SelectionSet, v []*models.Cron) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalOCron2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCron(ctx, sel, v[i])
+		return ec.marshalOCron2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCron(ctx, sel, v[i])
 	})
 
 	return ret
 }
 
-func (ec *executionContext) marshalOCron2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐCron(ctx context.Context, sel ast.SelectionSet, v *models.Cron) graphql.Marshaler {
+func (ec *executionContext) marshalOCron2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCron(ctx context.Context, sel ast.SelectionSet, v *models.Cron) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -24979,20 +24979,20 @@ func (ec *executionContext) marshalOEnvironments2ᚖgithubᚗcomᚋmia0x75ᚋhal
 	return ec._Environments(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOGlossary2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐGlossary(ctx context.Context, sel ast.SelectionSet, v []*models.Glossary) graphql.Marshaler {
+func (ec *executionContext) marshalOGlossary2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐGlossary(ctx context.Context, sel ast.SelectionSet, v []*models.Glossary) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalOGlossary2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐGlossary(ctx, sel, v[i])
+		return ec.marshalOGlossary2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐGlossary(ctx, sel, v[i])
 	})
 
 	return ret
 }
 
-func (ec *executionContext) marshalOGlossary2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐGlossary(ctx context.Context, sel ast.SelectionSet, v *models.Glossary) graphql.Marshaler {
+func (ec *executionContext) marshalOGlossary2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐGlossary(ctx context.Context, sel ast.SelectionSet, v *models.Glossary) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -25017,7 +25017,7 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return res
 }
 
-func (ec *executionContext) marshalOLog2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐLog(ctx context.Context, sel ast.SelectionSet, v *models.Log) graphql.Marshaler {
+func (ec *executionContext) marshalOLog2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐLog(ctx context.Context, sel ast.SelectionSet, v *models.Log) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -25057,27 +25057,27 @@ func (ec *executionContext) marshalOLoginPayload2ᚖgithubᚗcomᚋmia0x75ᚋhal
 	return ec._LoginPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOOption2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐOption(ctx context.Context, sel ast.SelectionSet, v []*models.Option) graphql.Marshaler {
+func (ec *executionContext) marshalOOption2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐOption(ctx context.Context, sel ast.SelectionSet, v []*models.Option) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalOOption2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐOption(ctx, sel, v[i])
+		return ec.marshalOOption2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐOption(ctx, sel, v[i])
 	})
 
 	return ret
 }
 
-func (ec *executionContext) marshalOOption2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐOption(ctx context.Context, sel ast.SelectionSet, v *models.Option) graphql.Marshaler {
+func (ec *executionContext) marshalOOption2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐOption(ctx context.Context, sel ast.SelectionSet, v *models.Option) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Option(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOQuery2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐQuery(ctx context.Context, sel ast.SelectionSet, v *models.Query) graphql.Marshaler {
+func (ec *executionContext) marshalOQuery2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐQuery(ctx context.Context, sel ast.SelectionSet, v *models.Query) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -25110,47 +25110,47 @@ func (ec *executionContext) marshalOQueryEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhal
 	return ret
 }
 
-func (ec *executionContext) marshalORole2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐRole(ctx context.Context, sel ast.SelectionSet, v []*models.Role) graphql.Marshaler {
+func (ec *executionContext) marshalORole2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRole(ctx context.Context, sel ast.SelectionSet, v []*models.Role) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalORole2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐRole(ctx, sel, v[i])
+		return ec.marshalORole2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRole(ctx, sel, v[i])
 	})
 
 	return ret
 }
 
-func (ec *executionContext) marshalORole2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐRole(ctx context.Context, sel ast.SelectionSet, v *models.Role) graphql.Marshaler {
+func (ec *executionContext) marshalORole2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRole(ctx context.Context, sel ast.SelectionSet, v *models.Role) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Role(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalORule2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐRule(ctx context.Context, sel ast.SelectionSet, v []*models.Rule) graphql.Marshaler {
+func (ec *executionContext) marshalORule2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRule(ctx context.Context, sel ast.SelectionSet, v []*models.Rule) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalORule2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐRule(ctx, sel, v[i])
+		return ec.marshalORule2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRule(ctx, sel, v[i])
 	})
 
 	return ret
 }
 
-func (ec *executionContext) marshalORule2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐRule(ctx context.Context, sel ast.SelectionSet, v *models.Rule) graphql.Marshaler {
+func (ec *executionContext) marshalORule2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRule(ctx context.Context, sel ast.SelectionSet, v *models.Rule) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Rule(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOStatement2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐStatement(ctx context.Context, sel ast.SelectionSet, v *models.Statement) graphql.Marshaler {
+func (ec *executionContext) marshalOStatement2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐStatement(ctx context.Context, sel ast.SelectionSet, v *models.Statement) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -25176,20 +25176,20 @@ func (ec *executionContext) marshalOStatementEdge2ᚕᚖgithubᚗcomᚋmia0x75�
 	return ret
 }
 
-func (ec *executionContext) marshalOStatistic2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐStatistic(ctx context.Context, sel ast.SelectionSet, v []*models.Statistic) graphql.Marshaler {
+func (ec *executionContext) marshalOStatistic2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐStatistic(ctx context.Context, sel ast.SelectionSet, v []*models.Statistic) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalOStatistic2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐStatistic(ctx, sel, v[i])
+		return ec.marshalOStatistic2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐStatistic(ctx, sel, v[i])
 	})
 
 	return ret
 }
 
-func (ec *executionContext) marshalOStatistic2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐStatistic(ctx context.Context, sel ast.SelectionSet, v *models.Statistic) graphql.Marshaler {
+func (ec *executionContext) marshalOStatistic2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐStatistic(ctx context.Context, sel ast.SelectionSet, v *models.Statistic) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -25255,27 +25255,27 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalOTemplate2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐTemplate(ctx context.Context, sel ast.SelectionSet, v []*models.Template) graphql.Marshaler {
+func (ec *executionContext) marshalOTemplate2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐTemplate(ctx context.Context, sel ast.SelectionSet, v []*models.Template) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalOTemplate2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐTemplate(ctx, sel, v[i])
+		return ec.marshalOTemplate2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐTemplate(ctx, sel, v[i])
 	})
 
 	return ret
 }
 
-func (ec *executionContext) marshalOTemplate2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐTemplate(ctx context.Context, sel ast.SelectionSet, v *models.Template) graphql.Marshaler {
+func (ec *executionContext) marshalOTemplate2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐTemplate(ctx context.Context, sel ast.SelectionSet, v *models.Template) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Template(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOTicket2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐTicket(ctx context.Context, sel ast.SelectionSet, v *models.Ticket) graphql.Marshaler {
+func (ec *executionContext) marshalOTicket2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐTicket(ctx context.Context, sel ast.SelectionSet, v *models.Ticket) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -25344,7 +25344,7 @@ func (ec *executionContext) marshalOUInt82uint8(ctx context.Context, sel ast.Sel
 	return res
 }
 
-func (ec *executionContext) unmarshalOUpdateTemplateInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUpdateTemplateInput(ctx context.Context, v any) (*models.UpdateTemplateInput, error) {
+func (ec *executionContext) unmarshalOUpdateTemplateInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUpdateTemplateInput(ctx context.Context, v any) (*models.UpdateTemplateInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -25352,20 +25352,20 @@ func (ec *executionContext) unmarshalOUpdateTemplateInput2ᚖgithubᚗcomᚋmia0
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v []*models.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v []*models.User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalOUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUser(ctx, sel, v[i])
+		return ec.marshalOUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUser(ctx, sel, v[i])
 	})
 
 	return ret
 }
 
-func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v *models.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v *models.User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -25398,7 +25398,7 @@ func (ec *executionContext) marshalOUserEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhalo
 	return ret
 }
 
-func (ec *executionContext) unmarshalOValidateConnectionInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐValidateConnectionInput(ctx context.Context, v any) (*models.ValidateConnectionInput, error) {
+func (ec *executionContext) unmarshalOValidateConnectionInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐValidateConnectionInput(ctx context.Context, v any) (*models.ValidateConnectionInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -25406,7 +25406,7 @@ func (ec *executionContext) unmarshalOValidateConnectionInput2ᚖgithubᚗcomᚋ
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOValidatePatternInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋmodelsᚐValidatePatternInput(ctx context.Context, v any) (*models.ValidatePatternInput, error) {
+func (ec *executionContext) unmarshalOValidatePatternInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐValidatePatternInput(ctx context.Context, v any) (*models.ValidatePatternInput, error) {
 	if v == nil {
 		return nil, nil
 	}

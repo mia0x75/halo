@@ -13,11 +13,11 @@ import (
 	"github.com/mia0x75/halo/internal/app"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/domain"
+	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/tools"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
-	"github.com/mia0x75/halo/internal/transport/graphql/models"
 )
 
 // TicketSub 为每个订阅的用户分配一个通道，所以用UserUUID做键就可以了

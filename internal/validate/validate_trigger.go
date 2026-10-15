@@ -3,7 +3,7 @@ package validate
 import (
 	"sync"
 
-	"github.com/mia0x75/halo/internal/transport/graphql/models"
+	"github.com/mia0x75/halo/internal/models"
 )
 
 // TriggerCreateVldr 创建触发器语句相关的审核规则

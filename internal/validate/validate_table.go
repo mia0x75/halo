@@ -13,7 +13,7 @@ import (
 	"github.com/mia0x75/parser/types"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/mia0x75/halo/internal/transport/graphql/models"
+	"github.com/mia0x75/halo/internal/models"
 )
 
 // TableCreateVldr 创建表语句相关的审核规则

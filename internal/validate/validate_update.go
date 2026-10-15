@@ -7,7 +7,7 @@ import (
 	"github.com/mia0x75/parser/ast"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/mia0x75/halo/internal/transport/graphql/models"
+	"github.com/mia0x75/halo/internal/models"
 )
 
 // UpdateVldr 数据更新语句相关的审核规则
