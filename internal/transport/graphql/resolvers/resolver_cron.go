@@ -8,20 +8,20 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mia0x75/halo/crons"
-	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/event"
 	"github.com/mia0x75/halo/internal/platform/config"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 	"github.com/mia0x75/halo/internal/transport/graphql/models"
+	"github.com/mia0x75/halo/internal/worker"
 )
 
 // CancelCron 取消一个预约（工单关闭）
 func (r *mutationRootResolver) CancelCron(ctx context.Context, id string) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
-		s := crons.NewScheduler()
+		s := worker.NewScheduler()
 		if err = s.Cancel(id); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
@@ -45,7 +45,7 @@ func (r *mutationRootResolver) CancelCron(ctx context.Context, id string) (ok bo
 		}
 		ticket := bridge.TicketFromDomain(domainTicket)
 
-		events.Fire(events.EventCronCancelled, &events.CronCancelledArgs{
+		event.Fire(event.EventCronCancelled, &event.CronCancelledArgs{
 			User:   *credential.User,
 			Cron:   *cron,
 			Ticket: *ticket,
@@ -158,6 +158,6 @@ func (r *queryRootResolver) Crons(ctx context.Context, after *string, before *st
 
 // Tasks 返回所有正在等待执行的计划任务
 func (r *queryRootResolver) Tasks(ctx context.Context) (L []*models.Cron, err error) {
-	s := crons.NewScheduler()
+	s := worker.NewScheduler()
 	return s.Crons()
 }

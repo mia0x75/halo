@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/domain"
+	"github.com/mia0x75/halo/internal/event"
 	"github.com/mia0x75/halo/internal/platform/cache"
 	"github.com/mia0x75/halo/internal/platform/config"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
@@ -59,7 +59,7 @@ func (r *mutationRootResolver) CreateComment(ctx context.Context, input models.C
 		}
 		comment.CommentID = uint(newID)
 
-		events.Fire(events.EventCommentCreated, &events.CommentCreatedArgs{
+		event.Fire(event.EventCommentCreated, &event.CommentCreatedArgs{
 			User:    *credential.User,
 			Ticket:  *ticket,
 			Comment: *comment,

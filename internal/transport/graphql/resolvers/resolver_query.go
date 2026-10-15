@@ -14,9 +14,9 @@ import (
 	"github.com/mia0x75/parser"
 	"github.com/mia0x75/parser/ast"
 
-	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/domain"
+	"github.com/mia0x75/halo/internal/event"
 	"github.com/mia0x75/halo/internal/platform/cache"
 	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/crypto"
@@ -269,7 +269,7 @@ L:
 		}
 		rs = string(bs)
 
-		events.Fire(events.EventQueryCreated, &events.QueryCreatedArgs{
+		event.Fire(event.EventQueryCreated, &event.QueryCreatedArgs{
 			User:  *user,
 			Query: *query,
 		})
@@ -369,7 +369,7 @@ L:
 			break L
 		}
 
-		events.Fire(events.EventQueryAnalyzed, &events.QueryAnalyzedArgs{
+		event.Fire(event.EventQueryAnalyzed, &event.QueryAnalyzedArgs{
 			User:  *user,
 			Query: *query,
 		})
@@ -468,7 +468,7 @@ L:
 			break L
 		}
 
-		events.Fire(events.EventQueryRewrited, &events.QueryRewritedArgs{
+		event.Fire(event.EventQueryRewrited, &event.QueryRewritedArgs{
 			User:  *user,
 			Query: *query,
 		})

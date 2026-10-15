@@ -17,10 +17,9 @@ import (
 	"github.com/mia0x75/parser/format"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/mia0x75/halo/crons"
-	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/domain"
+	"github.com/mia0x75/halo/internal/event"
 	"github.com/mia0x75/halo/internal/platform/cache"
 	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/crypto"
@@ -29,6 +28,7 @@ import (
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 	"github.com/mia0x75/halo/internal/transport/graphql/models"
+	"github.com/mia0x75/halo/internal/worker"
 	"github.com/mia0x75/halo/validate"
 )
 
@@ -190,7 +190,7 @@ L:
 		notifyTicketStatusChange(user.UUID, ticket.UUID, fmt.Sprintf("新建工单(uuid=%s)成功，系统正在开始启动自动化审核。", ticket.UUID))
 		go r.validation(statements, cluster, ticket)
 
-		events.Fire(events.EventTicketCreated, &events.TicketCreatedArgs{
+		event.Fire(event.EventTicketCreated, &event.TicketCreatedArgs{
 			User:    *user,
 			Ticket:  *ticket,
 			Cluster: *cluster,
@@ -379,7 +379,7 @@ L:
 		notifyTicketStatusChange(user.UUID, ticket.UUID, fmt.Sprintf("更新工单(uuid=%s)成功，系统正在开始启动自动化审核。", ticket.UUID))
 		go r.validation(statements, cluster, ticket)
 
-		events.Fire(events.EventTicketUpdated, &events.TicketUpdatedArgs{
+		event.Fire(event.EventTicketUpdated, &event.TicketUpdatedArgs{
 			User:    *user,
 			Ticket:  *ticket,
 			Cluster: *cluster,
@@ -430,7 +430,7 @@ func (r *mutationRootResolver) RemoveTicket(ctx context.Context, id string) (ok 
 		cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 			return elem.ClusterID == removed.ClusterID
 		})
-		events.Fire(events.EventTicketRemoved, &events.TicketRemovedArgs{
+		event.Fire(event.EventTicketRemoved, &event.TicketRemovedArgs{
 			User:    *user,
 			Ticket:  *bridge.TicketFromDomain(removed),
 			Cluster: *cluster,
@@ -494,7 +494,7 @@ func (r *mutationRootResolver) PatchTicketStatus(ctx context.Context, input mode
 		cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 			return elem.ClusterID == ticket.ClusterID
 		})
-		events.Fire(events.EventTicketStatusPatched, &events.TicketStatusPatchedArgs{
+		event.Fire(event.EventTicketStatusPatched, &event.TicketStatusPatchedArgs{
 			User:    *user,
 			Ticket:  *ticket,
 			Cluster: *cluster,
@@ -596,7 +596,7 @@ func (r *mutationRootResolver) ScheduleTicket(ctx context.Context, input models.
 		}
 
 		// 启动一个计划
-		s := crons.NewScheduler()
+		s := worker.NewScheduler()
 		local, _ := time.LoadLocation("Local")
 		when, _ := time.ParseInLocation("2006-01-02 15:04:05", input.Schedule, local)
 		cronUUID, _ := s.RunAt(when, ticket.Subject, "execute", "-T", ticket.UUID)
@@ -620,7 +620,7 @@ func (r *mutationRootResolver) ScheduleTicket(ctx context.Context, input models.
 			Valid: true,
 		}
 
-		events.Fire(events.EventTicketScheduled, &events.TicketScheduledArgs{
+		event.Fire(event.EventTicketScheduled, &event.TicketScheduledArgs{
 			User:    *user,
 			Ticket:  *ticket,
 			Cluster: *cluster,

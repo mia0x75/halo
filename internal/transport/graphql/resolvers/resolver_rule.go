@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/event"
 	"github.com/mia0x75/halo/internal/platform/cache"
 	"github.com/mia0x75/halo/internal/platform/config"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
@@ -40,7 +40,7 @@ func (r *mutationRootResolver) PatchRuleValues(ctx context.Context, input models
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 		}
 
-		events.Fire(events.EventRuleValuesPatched, &events.RuleValuesPatchedArgs{
+		event.Fire(event.EventRuleValuesPatched, &event.RuleValuesPatchedArgs{
 			Manager: *credential.User,
 			Rule:    *rule,
 		})
@@ -87,7 +87,7 @@ func (r *mutationRootResolver) PatchRuleBitwise(ctx context.Context, input model
 			break
 		}
 
-		events.Fire(events.EventRuleBitwisePatched, &events.RuleBitwisePatchedArgs{
+		event.Fire(event.EventRuleBitwisePatched, &event.RuleBitwisePatchedArgs{
 			Manager: *credential.User,
 			Rule:    *rule,
 		})

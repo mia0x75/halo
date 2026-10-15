@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/event"
 	"github.com/mia0x75/halo/internal/platform/cache"
 	"github.com/mia0x75/halo/internal/platform/config"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
@@ -58,7 +58,7 @@ func (r *mutationRootResolver) PatchOptionValues(ctx context.Context, input mode
 			break
 		}
 
-		events.Fire(events.EventOptionValuePatched, &events.OptionValuePatchedArgs{
+		event.Fire(event.EventOptionValuePatched, &event.OptionValuePatchedArgs{
 			Manager: *credential.User,
 			Option:  *option,
 		})

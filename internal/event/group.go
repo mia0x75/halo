@@ -1,4 +1,4 @@
-package events
+package event
 
 import (
 	"reflect"
@@ -38,7 +38,7 @@ func (g *Group) Flush() {
 }
 
 // Add adds channels which were already subscribed to
-// some events.
+// some event.
 func (g *Group) Add(channels ...<-chan Event) {
 	g.mu.Lock()
 	defer g.listen()

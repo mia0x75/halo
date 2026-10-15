@@ -9,14 +9,14 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/mia0x75/halo/crons"
-	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/event"
 	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/crypto"
 	"github.com/mia0x75/halo/internal/service"
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 	"github.com/mia0x75/halo/internal/transport/graphql/models"
+	"github.com/mia0x75/halo/internal/worker"
 )
 
 // executeCmd represents the execute command
@@ -51,8 +51,8 @@ func execute(cmd *cobra.Command, args []string) {
 			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", appErr.Error())
 			break
 		}
-		events.Init(application.Repos)
-		crons.Init(application.Repos)
+		event.Init(application.Repos)
+		worker.Init(application.Repos)
 
 		if ticketUUID, err = cmd.Flags().GetString("ticket"); err != nil {
 			break
@@ -114,12 +114,12 @@ func execute(cmd *cobra.Command, args []string) {
 			stmt.RowsAffected = uint(result.RowsAffected)
 		}
 		if err != nil {
-			events.FireSync(events.EventTicketFailed, &events.TicketFailedArgs{
+			event.FireSync(event.EventTicketFailed, &event.TicketFailedArgs{
 				Ticket:  *ticket,
 				Cluster: *cluster,
 			})
 		} else {
-			events.FireSync(events.EventTicketExecuted, &events.TicketExecutedArgs{
+			event.FireSync(event.EventTicketExecuted, &event.TicketExecutedArgs{
 				Ticket:  *ticket,
 				Cluster: *cluster,
 			})

@@ -1,4 +1,4 @@
-package events
+package event
 
 var ee = New(1024, DefaultMatcher())
 

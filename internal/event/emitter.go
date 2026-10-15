@@ -5,7 +5,7 @@ The design goals are:
   - simple to understand and use
   - make the code readable, maintainable and minimalistic
 */
-package events
+package event
 
 import (
 	"log"
@@ -120,7 +120,7 @@ func (e *Emitter) Use(pattern string, middlewares ...func(*Event)) {
 	}
 }
 
-// On returns a channel that will receive events. As optional second
+// On returns a channel that will receive event. As optional second
 // argument it takes middlewares.
 func (e *Emitter) On(topic string, middlewares ...func(*Event)) <-chan Event {
 	e.mu.Lock()

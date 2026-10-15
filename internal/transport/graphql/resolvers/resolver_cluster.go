@@ -10,9 +10,9 @@ import (
 	"github.com/fatih/structs"
 	"github.com/mia0x75/yql"
 
-	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/internal/agent/meta"
 	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/event"
 	"github.com/mia0x75/halo/internal/platform/cache"
 	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/crypto"
@@ -341,7 +341,7 @@ L:
 		// 主动同步缓存
 		cache.ClustersMap.Append(cluster)
 
-		events.Fire(events.EventClusterCreated, &events.ClusterCreatedArgs{
+		event.Fire(event.EventClusterCreated, &event.ClusterCreatedArgs{
 			Manager: *credential.User,
 			Cluster: *cluster,
 		})
@@ -416,7 +416,7 @@ L:
 			break L
 		}
 
-		events.Fire(events.EventClusterUpdated, &events.ClusterUpdatedArgs{
+		event.Fire(event.EventClusterUpdated, &event.ClusterUpdatedArgs{
 			Manager: *credential.User,
 			Cluster: *cluster,
 		})
@@ -452,7 +452,7 @@ func (r *mutationRootResolver) RemoveCluster(ctx context.Context, id string) (ok
 			return elem.UUID == id
 		})
 
-		events.Fire(events.EventClusterRemoved, &events.ClusterRemovedArgs{
+		event.Fire(event.EventClusterRemoved, &event.ClusterRemovedArgs{
 			Manager: *credential.User,
 			Cluster: *cluster,
 		})
@@ -495,7 +495,7 @@ func (r *mutationRootResolver) PatchClusterStatus(ctx context.Context, input mod
 			}
 		}
 
-		events.Fire(events.EventClusterStatusPatched, &events.ClusterStatusPatchedArgs{
+		event.Fire(event.EventClusterStatusPatched, &event.ClusterStatusPatchedArgs{
 			Manager: *credential.User,
 			Cluster: *cluster,
 		})

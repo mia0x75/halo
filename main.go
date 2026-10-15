@@ -17,12 +17,12 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 
-	"github.com/mia0x75/halo/crons"
-	"github.com/mia0x75/halo/events"
 	"github.com/mia0x75/halo/internal/app"
+	"github.com/mia0x75/halo/internal/event"
 	"github.com/mia0x75/halo/internal/platform/cache"
 	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/db"
+	"github.com/mia0x75/halo/internal/worker"
 
 	// "github.com/mia0x75/halo/internal/platform/log"
 	"github.com/mia0x75/halo/internal/transport/http"
@@ -89,9 +89,9 @@ func main() {
 	defer func() { _ = application.Close() }()
 
 	cache.Init(application.Repos)
-	crons.Init(application.Repos)
-	events.Init(application.Repos)
-	crons.NewScheduler()
+	worker.Init(application.Repos)
+	event.Init(application.Repos)
+	worker.NewScheduler()
 
 	addr := config.Config().Listen
 	lg.Infof("[I] http listening %s", addr)
