@@ -15,7 +15,6 @@ func TestDetectDriver(t *testing.T) {
 		{"postgres://halo:pw@10.0.0.7:5432/halo?sslmode=disable", "postgres"},
 		{"postgresql://halo:pw@10.0.0.7:5432/halo", "postgres"},
 		{"  POSTGRES://u@h/db  ", "postgres"},
-		{"mysql://halo:pw@127.0.0.1:3306/halo", "mysql"},
 		{"halo:pw@tcp(127.0.0.1:3306)/halo?charset=utf8mb4&parseTime=true", "mysql"},
 		{"halo:pw@/halo", "mysql"},
 		{"halo:pw@unix(/run/mysqld/mysqld.sock)/halo", "mysql"},
@@ -27,7 +26,12 @@ func TestDetectDriver(t *testing.T) {
 		require.Equal(t, c.want, got, c.addr)
 	}
 
-	_, err := DetectDriver("oracle://u@h/db")
+	// go-sql-driver cannot parse URLs: mysql:// must fail fast instead of
+	// being misread as username "mysql" at connect time.
+	_, err := DetectDriver("mysql://halo:pw@tcp(127.0.0.1:3306)/halo")
+	require.ErrorContains(t, err, "not a URL")
+
+	_, err = DetectDriver("oracle://u@h/db")
 	require.Error(t, err)
 }
 
@@ -45,5 +49,11 @@ func TestNewRejectsDriverMismatch(t *testing.T) {
 	require.ErrorContains(t, err, "conflicts")
 
 	_, err = New(ctx, Config{Addr: myAddr, Driver: "oracle"})
-	require.ErrorContains(t, err, "unknown metadata driver")
+	require.ErrorContains(t, err, "conflicts")
+
+	// URL-form MySQL DSN is unusable under any driver setting.
+	_, err = New(ctx, Config{Addr: "mysql://halo:pw@tcp(127.0.0.1:3306)/halo"})
+	require.ErrorContains(t, err, "not a URL")
+	_, err = New(ctx, Config{Addr: "mysql://halo:pw@tcp(127.0.0.1:3306)/halo", Driver: "mysql"})
+	require.ErrorContains(t, err, "not a URL")
 }
