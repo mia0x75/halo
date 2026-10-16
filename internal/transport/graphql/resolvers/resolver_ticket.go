@@ -183,8 +183,11 @@ L:
 		}
 		ticket.TicketID = uint(newID)
 		ticket.UUID = domainTicket.UUID
-		for _, st := range statements {
+		for i, st := range statements {
 			st.TicketID = uint(newID)
+			// The service assigned each persisted statement its uuid; carry it
+			// back so the async validation can update the rows by uuid.
+			st.UUID = domainStmts[i].UUID
 		}
 
 		notifyTicketStatusChange(user.UUID, ticket.UUID, fmt.Sprintf("新建工单(uuid=%s)成功，系统正在开始启动自动化审核。", ticket.UUID))
@@ -372,8 +375,11 @@ L:
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, updErr.Error())
 			break
 		}
-		for _, st := range statements {
+		for i, st := range statements {
 			st.TicketID = ticket.TicketID
+			// Update re-creates the statements, so pick up the freshly assigned
+			// uuids for the async validation writeback.
+			st.UUID = domainStmts[i].UUID
 		}
 
 		notifyTicketStatusChange(user.UUID, ticket.UUID, fmt.Sprintf("更新工单(uuid=%s)成功，系统正在开始启动自动化审核。", ticket.UUID))
