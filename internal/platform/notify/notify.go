@@ -12,6 +12,7 @@ import (
 	"net/mail"
 	"net/smtp"
 	"net/textproto"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 
@@ -76,15 +77,22 @@ func (EmailNotifier) Send(_ context.Context, msg Message) error {
 		return nil
 	}
 
-	from := mail.Address{Name: "系统用户", Address: cfg.User}
-	to := mail.Address{Name: msg.ToName, Address: msg.ToEmail}
+	// Header values are attacker-influenced (ticket subject, user name/email),
+	// so strip CR/LF to prevent SMTP header injection, and reject a recipient
+	// that is not a valid address.
+	from := mail.Address{Name: sanitizeHeader("系统用户"), Address: cfg.User}
+	to, err := mail.ParseAddress(msg.ToEmail)
+	if err != nil {
+		return fmt.Errorf("invalid recipient %q: %w", msg.ToEmail, err)
+	}
+	to.Name = sanitizeHeader(msg.ToName)
 
 	header := textproto.MIMEHeader{}
 	header.Set(textproto.CanonicalMIMEHeaderKey("from"), fmt.Sprintf("%s <%s>", from.Name, from.Address))
 	header.Set(textproto.CanonicalMIMEHeaderKey("to"), fmt.Sprintf("%s <%s>", to.Name, to.Address))
 	header.Set(textproto.CanonicalMIMEHeaderKey("content-type"), "text/plain; charset=UTF-8")
 	header.Set(textproto.CanonicalMIMEHeaderKey("mime-version"), "1.0")
-	header.Set(textproto.CanonicalMIMEHeaderKey("subject"), msg.Subject)
+	header.Set(textproto.CanonicalMIMEHeaderKey("subject"), sanitizeHeader(msg.Subject))
 
 	var buffer bytes.Buffer
 	for key, value := range header {
@@ -129,6 +137,15 @@ func (EmailNotifier) Send(_ context.Context, msg Message) error {
 		return err
 	}
 	return c.Quit()
+}
+
+// sanitizeHeader strips CR and LF so an attacker-controlled value cannot inject
+// additional SMTP headers or terminate the header block.
+func sanitizeHeader(s string) string {
+	if !strings.ContainsAny(s, "\r\n") {
+		return s
+	}
+	return strings.NewReplacer("\r", "", "\n", "").Replace(s)
 }
 
 // DingTalkNotifier is a placeholder for the DingTalk webhook channel.
