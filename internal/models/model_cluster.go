@@ -2,7 +2,7 @@ package models
 
 import (
 	"bytes"
-	"crypto/sha1"
+	"crypto/sha256"
 	"fmt"
 	"io"
 	"strings"
@@ -46,7 +46,7 @@ func (m *Cluster) BeforeInsert() {
 	m.Host = strings.TrimSpace(m.Host)
 	m.IP = strings.TrimSpace(m.IP)
 	m.User = strings.TrimSpace(m.User)
-	m.FingerPrint = m.Sha1(fmt.Sprintf("%s-%s-%d-%s-%s",
+	m.FingerPrint = m.fingerprintHash(fmt.Sprintf("%s-%s-%d-%s-%s",
 		m.Host,
 		m.IP,
 		m.Port,
@@ -60,13 +60,13 @@ func (m *Cluster) BeforeUpdate() {
 	m.Host = strings.TrimSpace(m.Host)
 	m.IP = strings.TrimSpace(m.IP)
 	m.User = strings.TrimSpace(m.User)
-	fp := m.Sha1(fmt.Sprintf("%s-%s-%d-%s-%s",
+	fp := m.fingerprintHash(fmt.Sprintf("%s-%s-%d-%s-%s",
 		m.Host,
 		m.IP,
 		m.Port,
 		m.User,
 		m.Password))
-	if bytes.Compare(fp, m.FingerPrint) != 0 {
+	if !bytes.Equal(fp, m.FingerPrint) {
 		m.FingerPrint = fp
 	}
 	m.UpdateAt = uint(time.Now().Unix())
@@ -85,10 +85,10 @@ func (m *Cluster) String() string {
 	)
 }
 
-// Sha1 对字符串进行sha1 计算
-func (m *Cluster) Sha1(data string) []byte {
-	t := sha1.New()
-	io.WriteString(t, data)
+// fingerprintHash 对群集连接信息做指纹散列（SHA-256）。
+func (m *Cluster) fingerprintHash(data string) []byte {
+	t := sha256.New()
+	_, _ = io.WriteString(t, data)
 	return t.Sum(nil)
 }
 
