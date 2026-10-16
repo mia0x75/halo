@@ -77,7 +77,7 @@ func (r *GlossaryRepo) DeleteByKey(ctx context.Context, group string, key uint8)
 func (r *GlossaryRepo) List(ctx context.Context, cursor string, limit int) ([]*domain.Glossary, error) {
 	rows, err := r.q.ListGlossaries(ctx, ListGlossariesParams{
 		Uuid:  cursor,
-		Limit: int32(limit),
+		Limit: clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("glossary.List", err)

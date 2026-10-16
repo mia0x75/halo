@@ -100,7 +100,7 @@ func (r *ClusterRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 func (r *ClusterRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain.Cluster, error) {
 	rows, err := r.q.ListClusters(ctx, ListClustersParams{
 		ClusterID: cursor,
-		Limit:     int32(limit),
+		Limit:     clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("cluster.List", err)

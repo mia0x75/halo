@@ -91,7 +91,7 @@ func (r *QueryRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 func (r *QueryRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain.Query, error) {
 	rows, err := r.q.ListQueries(ctx, ListQueriesParams{
 		QueryID: cursor,
-		Limit:   int32(limit),
+		Limit:   clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("query.List", err)

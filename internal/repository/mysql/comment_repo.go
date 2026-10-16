@@ -44,7 +44,7 @@ func (r *CommentRepo) Create(ctx context.Context, c *domain.Comment) (int64, err
 }
 
 func (r *CommentRepo) GetByID(ctx context.Context, id int64) (*domain.Comment, error) {
-	row, err := r.q.GetCommentByID(ctx, uint32(id))
+	row, err := r.q.GetCommentByID(ctx, clampUint32(id))
 	if err != nil {
 		return nil, wrap("comment.GetByID", err)
 	}
@@ -72,7 +72,7 @@ func (r *CommentRepo) Update(ctx context.Context, c *domain.Comment) error {
 }
 
 func (r *CommentRepo) Delete(ctx context.Context, id int64) error {
-	return wrap("comment.Delete", r.q.DeleteCommentByID(ctx, uint32(id)))
+	return wrap("comment.Delete", r.q.DeleteCommentByID(ctx, clampUint32(id)))
 }
 
 func (r *CommentRepo) DeleteByUUID(ctx context.Context, uuid string) error {
@@ -81,8 +81,8 @@ func (r *CommentRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 
 func (r *CommentRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain.Comment, error) {
 	rows, err := r.q.ListComments(ctx, ListCommentsParams{
-		CommentID: uint32(cursor),
-		Limit:     int32(limit),
+		CommentID: clampUint32(cursor),
+		Limit:     clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("comment.List", err)
@@ -96,7 +96,7 @@ func (r *CommentRepo) List(ctx context.Context, cursor int64, limit int) ([]*dom
 
 // ListByTicket returns every comment on a ticket, oldest first.
 func (r *CommentRepo) ListByTicket(ctx context.Context, ticketID uint) ([]*domain.Comment, error) {
-	rows, err := r.q.ListCommentsByTicket(ctx, uint32(ticketID))
+	rows, err := r.q.ListCommentsByTicket(ctx, clampUint(ticketID))
 	if err != nil {
 		return nil, wrap("comment.ListByTicket", err)
 	}

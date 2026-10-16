@@ -76,7 +76,7 @@ func (r *AvatarRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 func (r *AvatarRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain.Avatar, error) {
 	rows, err := r.q.ListAvatars(ctx, ListAvatarsParams{
 		AvatarID: cursor,
-		Limit:    int32(limit),
+		Limit:    clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("avatar.List", err)

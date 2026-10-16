@@ -50,7 +50,7 @@ func (r *UserRepo) Create(ctx context.Context, u *domain.User) (int64, error) {
 }
 
 func (r *UserRepo) GetByID(ctx context.Context, id int64) (*domain.User, error) {
-	row, err := r.q.GetUserByID(ctx, uint32(id))
+	row, err := r.q.GetUserByID(ctx, clampUint32(id))
 	if err != nil {
 		return nil, wrap("user.GetByID", err)
 	}
@@ -81,7 +81,7 @@ func (r *UserRepo) Update(ctx context.Context, u *domain.User) error {
 }
 
 func (r *UserRepo) Delete(ctx context.Context, id int64) error {
-	return wrap("user.Delete", r.q.DeleteUserByID(ctx, uint32(id)))
+	return wrap("user.Delete", r.q.DeleteUserByID(ctx, clampUint32(id)))
 }
 
 func (r *UserRepo) DeleteByUUID(ctx context.Context, uuid string) error {
@@ -90,8 +90,8 @@ func (r *UserRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 
 func (r *UserRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain.User, error) {
 	rows, err := r.q.ListUsers(ctx, ListUsersParams{
-		UserID: uint32(cursor),
-		Limit:  int32(limit),
+		UserID: clampUint32(cursor),
+		Limit:  clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("user.List", err)

@@ -106,7 +106,7 @@ func (r *TicketRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 func (r *TicketRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain.Ticket, error) {
 	rows, err := r.q.ListTickets(ctx, ListTicketsParams{
 		TicketID: cursor,
-		Limit:    int32(limit),
+		Limit:    clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("ticket.List", err)

@@ -41,7 +41,7 @@ func (r *LogRepo) Create(ctx context.Context, l *domain.Log) (int64, error) {
 }
 
 func (r *LogRepo) GetByID(ctx context.Context, id int64) (*domain.Log, error) {
-	row, err := r.q.GetLogByID(ctx, uint32(id))
+	row, err := r.q.GetLogByID(ctx, clampUint32(id))
 	if err != nil {
 		return nil, wrap("log.GetByID", err)
 	}
@@ -68,7 +68,7 @@ func (r *LogRepo) Update(ctx context.Context, l *domain.Log) error {
 }
 
 func (r *LogRepo) Delete(ctx context.Context, id int64) error {
-	return wrap("log.Delete", r.q.DeleteLogByID(ctx, uint32(id)))
+	return wrap("log.Delete", r.q.DeleteLogByID(ctx, clampUint32(id)))
 }
 
 func (r *LogRepo) DeleteByUUID(ctx context.Context, uuid string) error {
@@ -77,8 +77,8 @@ func (r *LogRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 
 func (r *LogRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain.Log, error) {
 	rows, err := r.q.ListLogs(ctx, ListLogsParams{
-		LogID: uint32(cursor),
-		Limit: int32(limit),
+		LogID: clampUint32(cursor),
+		Limit: clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("log.List", err)

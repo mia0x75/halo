@@ -54,7 +54,7 @@ func (r *TicketRepo) Create(ctx context.Context, t *domain.Ticket) (int64, error
 }
 
 func (r *TicketRepo) GetByID(ctx context.Context, id int64) (*domain.Ticket, error) {
-	row, err := r.q.GetTicketByID(ctx, uint32(id))
+	row, err := r.q.GetTicketByID(ctx, clampUint32(id))
 	if err != nil {
 		return nil, wrap("ticket.GetByID", err)
 	}
@@ -96,7 +96,7 @@ func (r *TicketRepo) Update(ctx context.Context, t *domain.Ticket) error {
 }
 
 func (r *TicketRepo) Delete(ctx context.Context, id int64) error {
-	return wrap("ticket.Delete", r.q.DeleteTicketByID(ctx, uint32(id)))
+	return wrap("ticket.Delete", r.q.DeleteTicketByID(ctx, clampUint32(id)))
 }
 
 func (r *TicketRepo) DeleteByUUID(ctx context.Context, uuid string) error {
@@ -105,8 +105,8 @@ func (r *TicketRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 
 func (r *TicketRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain.Ticket, error) {
 	rows, err := r.q.ListTickets(ctx, ListTicketsParams{
-		TicketID: uint32(cursor),
-		Limit:    int32(limit),
+		TicketID: clampUint32(cursor),
+		Limit:    clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("ticket.List", err)
@@ -120,7 +120,7 @@ func (r *TicketRepo) List(ctx context.Context, cursor int64, limit int) ([]*doma
 
 // ListByUser returns every ticket raised by one user, oldest first.
 func (r *TicketRepo) ListByUser(ctx context.Context, userID uint) ([]*domain.Ticket, error) {
-	rows, err := r.q.ListTicketsByUser(ctx, uint32(userID))
+	rows, err := r.q.ListTicketsByUser(ctx, clampUint(userID))
 	if err != nil {
 		return nil, wrap("ticket.ListByUser", err)
 	}

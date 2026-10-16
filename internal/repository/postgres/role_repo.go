@@ -79,7 +79,7 @@ func (r *RoleRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 func (r *RoleRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain.Role, error) {
 	rows, err := r.q.ListRoles(ctx, ListRolesParams{
 		RoleID: cursor,
-		Limit:  int32(limit),
+		Limit:  clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("role.List", err)

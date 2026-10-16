@@ -42,7 +42,7 @@ func (r *RoleRepo) Create(ctx context.Context, role *domain.Role) (int64, error)
 }
 
 func (r *RoleRepo) GetByID(ctx context.Context, id int64) (*domain.Role, error) {
-	row, err := r.q.GetRoleByID(ctx, uint32(id))
+	row, err := r.q.GetRoleByID(ctx, clampUint32(id))
 	if err != nil {
 		return nil, wrap("role.GetByID", err)
 	}
@@ -69,7 +69,7 @@ func (r *RoleRepo) Update(ctx context.Context, role *domain.Role) error {
 }
 
 func (r *RoleRepo) Delete(ctx context.Context, id int64) error {
-	return wrap("role.Delete", r.q.DeleteRoleByID(ctx, uint32(id)))
+	return wrap("role.Delete", r.q.DeleteRoleByID(ctx, clampUint32(id)))
 }
 
 func (r *RoleRepo) DeleteByUUID(ctx context.Context, uuid string) error {
@@ -78,8 +78,8 @@ func (r *RoleRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 
 func (r *RoleRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain.Role, error) {
 	rows, err := r.q.ListRoles(ctx, ListRolesParams{
-		RoleID: uint32(cursor),
-		Limit:  int32(limit),
+		RoleID: clampUint32(cursor),
+		Limit:  clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("role.List", err)

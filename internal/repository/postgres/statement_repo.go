@@ -103,7 +103,7 @@ func (r *StatementRepo) DeleteByTicket(ctx context.Context, ticketID uint) error
 func (r *StatementRepo) List(ctx context.Context, cursor string, limit int) ([]*domain.Statement, error) {
 	rows, err := r.q.ListStatements(ctx, ListStatementsParams{
 		Uuid:  cursor,
-		Limit: int32(limit),
+		Limit: clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("statement.List", err)

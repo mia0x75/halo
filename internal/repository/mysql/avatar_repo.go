@@ -40,7 +40,7 @@ func (r *AvatarRepo) Create(ctx context.Context, a *domain.Avatar) (int64, error
 }
 
 func (r *AvatarRepo) GetByID(ctx context.Context, id int64) (*domain.Avatar, error) {
-	row, err := r.q.GetAvatarByID(ctx, uint32(id))
+	row, err := r.q.GetAvatarByID(ctx, clampUint32(id))
 	if err != nil {
 		return nil, wrap("avatar.GetByID", err)
 	}
@@ -66,7 +66,7 @@ func (r *AvatarRepo) Update(ctx context.Context, a *domain.Avatar) error {
 }
 
 func (r *AvatarRepo) Delete(ctx context.Context, id int64) error {
-	return wrap("avatar.Delete", r.q.DeleteAvatarByID(ctx, uint32(id)))
+	return wrap("avatar.Delete", r.q.DeleteAvatarByID(ctx, clampUint32(id)))
 }
 
 func (r *AvatarRepo) DeleteByUUID(ctx context.Context, uuid string) error {
@@ -75,8 +75,8 @@ func (r *AvatarRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 
 func (r *AvatarRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain.Avatar, error) {
 	rows, err := r.q.ListAvatars(ctx, ListAvatarsParams{
-		AvatarID: uint32(cursor),
-		Limit:    int32(limit),
+		AvatarID: clampUint32(cursor),
+		Limit:    clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("avatar.List", err)

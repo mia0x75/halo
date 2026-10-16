@@ -56,7 +56,7 @@ func (r *ClusterRepo) Create(ctx context.Context, c *domain.Cluster) (int64, err
 }
 
 func (r *ClusterRepo) GetByID(ctx context.Context, id int64) (*domain.Cluster, error) {
-	row, err := r.q.GetClusterByID(ctx, uint32(id))
+	row, err := r.q.GetClusterByID(ctx, clampUint32(id))
 	if err != nil {
 		return nil, wrap("cluster.GetByID", err)
 	}
@@ -90,7 +90,7 @@ func (r *ClusterRepo) Update(ctx context.Context, c *domain.Cluster) error {
 }
 
 func (r *ClusterRepo) Delete(ctx context.Context, id int64) error {
-	return wrap("cluster.Delete", r.q.DeleteClusterByID(ctx, uint32(id)))
+	return wrap("cluster.Delete", r.q.DeleteClusterByID(ctx, clampUint32(id)))
 }
 
 func (r *ClusterRepo) DeleteByUUID(ctx context.Context, uuid string) error {
@@ -99,8 +99,8 @@ func (r *ClusterRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 
 func (r *ClusterRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain.Cluster, error) {
 	rows, err := r.q.ListClusters(ctx, ListClustersParams{
-		ClusterID: uint32(cursor),
-		Limit:     int32(limit),
+		ClusterID: clampUint32(cursor),
+		Limit:     clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("cluster.List", err)

@@ -77,7 +77,7 @@ func (r *OptionRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 func (r *OptionRepo) List(ctx context.Context, cursor string, limit int) ([]*domain.Option, error) {
 	rows, err := r.q.ListOptions(ctx, ListOptionsParams{
 		Uuid:  cursor,
-		Limit: int32(limit),
+		Limit: clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("option.List", err)

@@ -61,7 +61,7 @@ func (r *StatementRepo) GetByUUID(ctx context.Context, uuid string) (*domain.Sta
 // GetByTicketSequence resolves the row by its natural composite key.
 func (r *StatementRepo) GetByTicketSequence(ctx context.Context, ticketID uint, sequence uint16) (*domain.Statement, error) {
 	row, err := r.q.GetStatementByTicketSequence(ctx, GetStatementByTicketSequenceParams{
-		TicketID: uint32(ticketID),
+		TicketID: clampUint(ticketID),
 		Sequence: sequence,
 	})
 	if err != nil {
@@ -90,20 +90,20 @@ func (r *StatementRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 
 func (r *StatementRepo) DeleteByTicketSequence(ctx context.Context, ticketID uint, sequence uint16) error {
 	return wrap("statement.DeleteByTicketSequence", r.q.DeleteStatementByTicketSequence(ctx, DeleteStatementByTicketSequenceParams{
-		TicketID: uint32(ticketID),
+		TicketID: clampUint(ticketID),
 		Sequence: sequence,
 	}))
 }
 
 // DeleteByTicket removes every statement of a ticket in one shot.
 func (r *StatementRepo) DeleteByTicket(ctx context.Context, ticketID uint) error {
-	return wrap("statement.DeleteByTicket", r.q.DeleteStatementsByTicket(ctx, uint32(ticketID)))
+	return wrap("statement.DeleteByTicket", r.q.DeleteStatementsByTicket(ctx, clampUint(ticketID)))
 }
 
 func (r *StatementRepo) List(ctx context.Context, cursor string, limit int) ([]*domain.Statement, error) {
 	rows, err := r.q.ListStatements(ctx, ListStatementsParams{
 		Uuid:  cursor,
-		Limit: int32(limit),
+		Limit: clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("statement.List", err)

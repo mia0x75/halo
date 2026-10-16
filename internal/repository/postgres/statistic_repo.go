@@ -80,7 +80,7 @@ func (r *StatisticRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 func (r *StatisticRepo) List(ctx context.Context, cursor string, limit int) ([]*domain.Statistic, error) {
 	rows, err := r.q.ListStatistics(ctx, ListStatisticsParams{
 		Uuid:  cursor,
-		Limit: int32(limit),
+		Limit: clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("statistic.List", err)

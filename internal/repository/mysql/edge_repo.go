@@ -44,7 +44,7 @@ func (r *EdgeRepo) Create(ctx context.Context, e *domain.Edge) (int64, error) {
 }
 
 func (r *EdgeRepo) GetByID(ctx context.Context, id int64) (*domain.Edge, error) {
-	row, err := r.q.GetEdgeByID(ctx, uint32(id))
+	row, err := r.q.GetEdgeByID(ctx, clampUint32(id))
 	if err != nil {
 		return nil, wrap("edge.GetByID", err)
 	}
@@ -72,7 +72,7 @@ func (r *EdgeRepo) Update(ctx context.Context, e *domain.Edge) error {
 }
 
 func (r *EdgeRepo) Delete(ctx context.Context, id int64) error {
-	return wrap("edge.Delete", r.q.DeleteEdgeByID(ctx, uint32(id)))
+	return wrap("edge.Delete", r.q.DeleteEdgeByID(ctx, clampUint32(id)))
 }
 
 func (r *EdgeRepo) DeleteByUUID(ctx context.Context, uuid string) error {
@@ -81,8 +81,8 @@ func (r *EdgeRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 
 func (r *EdgeRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain.Edge, error) {
 	rows, err := r.q.ListEdges(ctx, ListEdgesParams{
-		EdgeID: uint32(cursor),
-		Limit:  int32(limit),
+		EdgeID: clampUint32(cursor),
+		Limit:  clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("edge.List", err)
@@ -98,7 +98,7 @@ func (r *EdgeRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain
 // primitive behind "replace this user's grants".
 func (r *EdgeRepo) DeleteByTypeAncestor(ctx context.Context, edgeType uint, ancestorID uint) error {
 	return wrap("edge.DeleteByTypeAncestor", r.q.DeleteEdgesByTypeAncestor(ctx, DeleteEdgesByTypeAncestorParams{
-		Type:       uint32(edgeType),
-		AncestorID: uint32(ancestorID),
+		Type:       clampUint(edgeType),
+		AncestorID: clampUint(ancestorID),
 	}))
 }

@@ -82,7 +82,7 @@ func (r *CommentRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 func (r *CommentRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain.Comment, error) {
 	rows, err := r.q.ListComments(ctx, ListCommentsParams{
 		CommentID: cursor,
-		Limit:     int32(limit),
+		Limit:     clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("comment.List", err)

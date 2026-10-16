@@ -82,7 +82,7 @@ func (r *EdgeRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 func (r *EdgeRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain.Edge, error) {
 	rows, err := r.q.ListEdges(ctx, ListEdgesParams{
 		EdgeID: cursor,
-		Limit:  int32(limit),
+		Limit:  clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("edge.List", err)

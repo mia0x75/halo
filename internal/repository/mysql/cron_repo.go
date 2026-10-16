@@ -58,7 +58,7 @@ func (r *CronRepo) Create(ctx context.Context, c *domain.Cron) (int64, error) {
 }
 
 func (r *CronRepo) GetByID(ctx context.Context, id int64) (*domain.Cron, error) {
-	row, err := r.q.GetCronByID(ctx, uint32(id))
+	row, err := r.q.GetCronByID(ctx, clampUint32(id))
 	if err != nil {
 		return nil, wrap("cron.GetByID", err)
 	}
@@ -93,7 +93,7 @@ func (r *CronRepo) Update(ctx context.Context, c *domain.Cron) error {
 }
 
 func (r *CronRepo) Delete(ctx context.Context, id int64) error {
-	return wrap("cron.Delete", r.q.DeleteCronByID(ctx, uint32(id)))
+	return wrap("cron.Delete", r.q.DeleteCronByID(ctx, clampUint32(id)))
 }
 
 func (r *CronRepo) DeleteByUUID(ctx context.Context, uuid string) error {
@@ -102,8 +102,8 @@ func (r *CronRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 
 func (r *CronRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain.Cron, error) {
 	rows, err := r.q.ListCrons(ctx, ListCronsParams{
-		CronID: uint32(cursor),
-		Limit:  int32(limit),
+		CronID: clampUint32(cursor),
+		Limit:  clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("cron.List", err)

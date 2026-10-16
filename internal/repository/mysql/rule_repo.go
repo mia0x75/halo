@@ -95,7 +95,7 @@ func (r *RuleRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 func (r *RuleRepo) List(ctx context.Context, cursor string, limit int) ([]*domain.Rule, error) {
 	rows, err := r.q.ListRules(ctx, ListRulesParams{
 		Uuid:  cursor,
-		Limit: int32(limit),
+		Limit: clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("rule.List", err)

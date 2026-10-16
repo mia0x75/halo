@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"time"
 
@@ -49,6 +50,18 @@ func timeToUnix(t time.Time) uint {
 
 // PG has no unsigned integers: BIGINT columns surface as int64 while the
 // domain uses uint, so every repo converts at the row boundary.
+
+// clampInt32 narrows a page size to int32, clamping to [0, MaxInt32] so an
+// oversized limit cannot wrap negative and break the LIMIT clause.
+func clampInt32(v int) int32 {
+	if v <= 0 {
+		return 0
+	}
+	if int64(v) > math.MaxInt32 {
+		return math.MaxInt32
+	}
+	return int32(v)
+}
 
 func uintFromNullInt64(v sql.NullInt64) *uint {
 	if !v.Valid {

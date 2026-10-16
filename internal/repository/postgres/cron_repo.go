@@ -103,7 +103,7 @@ func (r *CronRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 func (r *CronRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain.Cron, error) {
 	rows, err := r.q.ListCrons(ctx, ListCronsParams{
 		CronID: cursor,
-		Limit:  int32(limit),
+		Limit:  clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("cron.List", err)

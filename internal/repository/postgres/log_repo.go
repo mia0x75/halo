@@ -78,7 +78,7 @@ func (r *LogRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 func (r *LogRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain.Log, error) {
 	rows, err := r.q.ListLogs(ctx, ListLogsParams{
 		LogID: cursor,
-		Limit: int32(limit),
+		Limit: clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("log.List", err)

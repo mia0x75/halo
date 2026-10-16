@@ -50,7 +50,7 @@ func (r *QueryRepo) Create(ctx context.Context, q *domain.Query) (int64, error) 
 }
 
 func (r *QueryRepo) GetByID(ctx context.Context, id int64) (*domain.Query, error) {
-	row, err := r.q.GetQueryByID(ctx, uint32(id))
+	row, err := r.q.GetQueryByID(ctx, clampUint32(id))
 	if err != nil {
 		return nil, wrap("query.GetByID", err)
 	}
@@ -81,7 +81,7 @@ func (r *QueryRepo) Update(ctx context.Context, q *domain.Query) error {
 }
 
 func (r *QueryRepo) Delete(ctx context.Context, id int64) error {
-	return wrap("query.Delete", r.q.DeleteQueryByID(ctx, uint32(id)))
+	return wrap("query.Delete", r.q.DeleteQueryByID(ctx, clampUint32(id)))
 }
 
 func (r *QueryRepo) DeleteByUUID(ctx context.Context, uuid string) error {
@@ -90,8 +90,8 @@ func (r *QueryRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 
 func (r *QueryRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain.Query, error) {
 	rows, err := r.q.ListQueries(ctx, ListQueriesParams{
-		QueryID: uint32(cursor),
-		Limit:   int32(limit),
+		QueryID: clampUint32(cursor),
+		Limit:   clampInt32(limit),
 	})
 	if err != nil {
 		return nil, wrap("query.List", err)
@@ -105,7 +105,7 @@ func (r *QueryRepo) List(ctx context.Context, cursor int64, limit int) ([]*domai
 
 // ListByUser returns every query logged for one user, oldest first.
 func (r *QueryRepo) ListByUser(ctx context.Context, userID uint) ([]*domain.Query, error) {
-	rows, err := r.q.ListQueriesByUser(ctx, uint32(userID))
+	rows, err := r.q.ListQueriesByUser(ctx, clampUint(userID))
 	if err != nil {
 		return nil, wrap("query.ListByUser", err)
 	}
