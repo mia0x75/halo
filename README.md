@@ -1,6 +1,6 @@
 [![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
 [![Badge](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu/#/zh_CN)
-[![](https://img.shields.io/badge/go-1.11-brightgreen.svg)](https://golang.org/dl/)
+[![](https://img.shields.io/badge/go-1.26-brightgreen.svg)](https://golang.org/dl/)
 ![](https://img.shields.io/badge/license-GPL--3.0-orange.svg)
 
 基于规则的SQL审核系统
