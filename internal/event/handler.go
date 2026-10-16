@@ -914,6 +914,9 @@ func LogWriter(userID uint, operation string) error {
 		CreateAt:  uint(time.Now().Unix()),
 	}
 	if _, err := repos.Log.Create(context.Background(), entry); err != nil {
+		// Audit is mandatory: never fail silently (E3). Callers that can
+		// propagate (request path) still receive the error.
+		log.Errorf("[E] audit log write failed, user_id=%d: %s", userID, err.Error())
 		return fmt.Errorf("[E] 错误代码: %s, 错误信息: %s", gqlapi.ReturnCodeUnknowError, err.Error())
 	}
 	return nil
@@ -970,9 +973,10 @@ func MailSender(args MailSendArgs) {
 	host, _, _ := net.SplitHostPort(servername)
 	auth := smtp.PlainAuth("", config.Config().Mail.User, config.Config().Mail.Password, host)
 
-	// TLS config
+	// TLS config. Verification stays on by default; operators may opt out via
+	// mail.insecure_skip_verify for self-signed internal relays (E7).
 	tlsconfig := &tls.Config{
-		InsecureSkipVerify: true,
+		InsecureSkipVerify: config.Config().Mail.InsecureSkipVerify,
 		ServerName:         host,
 	}
 

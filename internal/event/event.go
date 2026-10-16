@@ -1,109 +1,150 @@
 package event
 
-var ee = New(1024, DefaultMatcher())
+import "github.com/sirupsen/logrus"
+
+// Audit and notification handlers are registered on separate emitters so the
+// two delivery guarantees can differ: audit is synchronous and mandatory,
+// notifications are asynchronous and droppable.
+//
+// Both use Void, which makes Emit run handlers synchronously in the caller
+// goroutine without touching an (undrained) listener channel. Without it the
+// buffered channels fill up and Emit deadlocks (E1).
+var (
+	auditEE  = New(1024, DefaultMatcher())
+	notifyEE = New(1024, DefaultMatcher())
+)
+
+// fireConcurrency bounds concurrent notification goroutines so an event burst
+// cannot spawn unbounded goroutines (E2).
+const fireConcurrency = 100
+
+var fireSem = make(chan struct{}, fireConcurrency)
 
 // 注册事件处理函数
 func init() {
-	ee.On(EventTicketCreated, TicketCreatedLogWriter)
-	ee.On(EventTicketCreated, TicketCreatedMailSender)
-	ee.On(EventTicketCreated, TicketCreatedStatisticUpdater)
+	auditEE.Use("*", Void)
+	notifyEE.Use("*", Void)
 
-	ee.On(EventTicketUpdated, TicketUpdatedLogWriter)
-	ee.On(EventTicketUpdated, TicketUpdatedMailSender)
+	auditEE.On(EventTicketCreated, TicketCreatedLogWriter)
+	notifyEE.On(EventTicketCreated, TicketCreatedMailSender)
+	notifyEE.On(EventTicketCreated, TicketCreatedStatisticUpdater)
 
-	ee.On(EventTicketRemoved, TicketRemovedLogWriter)
-	ee.On(EventTicketRemoved, TicketRemovedMailSender)
-	ee.On(EventTicketRemoved, TicketRemovedStatisticsUpdater)
+	auditEE.On(EventTicketUpdated, TicketUpdatedLogWriter)
+	notifyEE.On(EventTicketUpdated, TicketUpdatedMailSender)
 
-	ee.On(EventTicketExecuted, TicketExecutedLogWriter)
-	ee.On(EventTicketExecuted, TicketExecutedMailSender)
+	auditEE.On(EventTicketRemoved, TicketRemovedLogWriter)
+	notifyEE.On(EventTicketRemoved, TicketRemovedMailSender)
+	notifyEE.On(EventTicketRemoved, TicketRemovedStatisticsUpdater)
 
-	ee.On(EventTicketFailed, TicketFailedLogWriter)
-	ee.On(EventTicketFailed, TicketFailedMailSender)
+	auditEE.On(EventTicketExecuted, TicketExecutedLogWriter)
+	notifyEE.On(EventTicketExecuted, TicketExecutedMailSender)
 
-	ee.On(EventTicketScheduled, TicketScheduledLogWriter)
-	ee.On(EventTicketScheduled, TicketScheduledMailSender)
+	auditEE.On(EventTicketFailed, TicketFailedLogWriter)
+	notifyEE.On(EventTicketFailed, TicketFailedMailSender)
 
-	ee.On(EventTicketStatusPatched, TicketStatusPatchedLogWriter)
-	ee.On(EventTicketStatusPatched, TicketStatusPatchedMailSender)
+	auditEE.On(EventTicketScheduled, TicketScheduledLogWriter)
+	notifyEE.On(EventTicketScheduled, TicketScheduledMailSender)
 
-	ee.On(EventQueryCreated, QueryCreatedLogWriter)
-	ee.On(EventQueryCreated, QueryCreatedStatisticsUpdater)
+	auditEE.On(EventTicketStatusPatched, TicketStatusPatchedLogWriter)
+	notifyEE.On(EventTicketStatusPatched, TicketStatusPatchedMailSender)
 
-	ee.On(EventQueryAnalyzed, QueryAnalyzedLogWriter)
-	ee.On(EventQueryAnalyzed, QueryAnalyzedStatisticsUpdater)
+	auditEE.On(EventQueryCreated, QueryCreatedLogWriter)
+	notifyEE.On(EventQueryCreated, QueryCreatedStatisticsUpdater)
 
-	ee.On(EventQueryRewrited, QueryRewritedLogWriter)
-	ee.On(EventQueryRewrited, QueryRewritedStatisticsUpdater)
+	auditEE.On(EventQueryAnalyzed, QueryAnalyzedLogWriter)
+	notifyEE.On(EventQueryAnalyzed, QueryAnalyzedStatisticsUpdater)
 
-	ee.On(EventUserRegistered, UserRegisteredLogWriter)
-	ee.On(EventUserRegistered, UserRegisteredMailSender)
-	ee.On(EventUserRegistered, UserRegisteredStatisticsUpdater)
+	auditEE.On(EventQueryRewrited, QueryRewritedLogWriter)
+	notifyEE.On(EventQueryRewrited, QueryRewritedStatisticsUpdater)
 
-	ee.On(EventUserSignedIn, UserSignedInLogWriter)
-	ee.On(EventUserSignedIn, UserSignedInStatisticsUpdater)
+	auditEE.On(EventUserRegistered, UserRegisteredLogWriter)
+	notifyEE.On(EventUserRegistered, UserRegisteredMailSender)
+	notifyEE.On(EventUserRegistered, UserRegisteredStatisticsUpdater)
 
-	ee.On(EventPasswordUpdated, PasswordUpdatedLogWriter)
-	ee.On(EventPasswordUpdated, PasswordUpdatedMailSender)
+	auditEE.On(EventUserSignedIn, UserSignedInLogWriter)
+	notifyEE.On(EventUserSignedIn, UserSignedInStatisticsUpdater)
 
-	ee.On(EventEmailUpdated, EmailUpdatedLogWriter)
-	ee.On(EventEmailUpdated, EmailUpdatedMailSender)
+	auditEE.On(EventPasswordUpdated, PasswordUpdatedLogWriter)
+	notifyEE.On(EventPasswordUpdated, PasswordUpdatedMailSender)
 
-	ee.On(EventProfileUpdated, ProfileUpdatedLogWriter)
-	ee.On(EventProfileUpdated, ProfileUpdatedMailSender)
+	auditEE.On(EventEmailUpdated, EmailUpdatedLogWriter)
+	notifyEE.On(EventEmailUpdated, EmailUpdatedMailSender)
 
-	ee.On(EventUserLogout, UserLogoutLogWriter)
+	auditEE.On(EventProfileUpdated, ProfileUpdatedLogWriter)
+	notifyEE.On(EventProfileUpdated, ProfileUpdatedMailSender)
 
-	ee.On(EventUserCreated, UserCreatedLogWriter)
-	ee.On(EventUserCreated, UserCreatedMailSender)
-	ee.On(EventUserCreated, UserCreatedStatisticsUpdater)
+	auditEE.On(EventUserLogout, UserLogoutLogWriter)
 
-	ee.On(EventUserUpdated, UserUpdatedLogWriter)
+	auditEE.On(EventUserCreated, UserCreatedLogWriter)
+	notifyEE.On(EventUserCreated, UserCreatedMailSender)
+	notifyEE.On(EventUserCreated, UserCreatedStatisticsUpdater)
 
-	ee.On(EventUserStatusPatched, UserStatusPatchedLogWriter)
+	auditEE.On(EventUserUpdated, UserUpdatedLogWriter)
 
-	ee.On(EventRuleValuesPatched, RuleValuesPatchedLogWriter)
+	auditEE.On(EventUserStatusPatched, UserStatusPatchedLogWriter)
 
-	ee.On(EventRuleBitwisePatched, RuleBitwisePatchedLogWriter)
+	auditEE.On(EventRuleValuesPatched, RuleValuesPatchedLogWriter)
 
-	ee.On(EventOptionValuePatched, OptionValuePatchedLogWriter)
+	auditEE.On(EventRuleBitwisePatched, RuleBitwisePatchedLogWriter)
 
-	ee.On(EventCommentCreated, CommentCreatedLogWriter)
-	ee.On(EventCommentCreated, CommentCreatedMailSender)
-	ee.On(EventCommentCreated, CommentCreatedStatisticsUpdater)
+	auditEE.On(EventOptionValuePatched, OptionValuePatchedLogWriter)
 
-	ee.On(EventCronCancelled, CronCancelledLogWriter)
-	ee.On(EventCronCancelled, CronCancelledMailSender)
+	auditEE.On(EventCommentCreated, CommentCreatedLogWriter)
+	notifyEE.On(EventCommentCreated, CommentCreatedMailSender)
+	notifyEE.On(EventCommentCreated, CommentCreatedStatisticsUpdater)
 
-	ee.On(EventClusterStatusPatched, ClusterStatusPatchedLogWriter)
+	auditEE.On(EventCronCancelled, CronCancelledLogWriter)
+	notifyEE.On(EventCronCancelled, CronCancelledMailSender)
 
-	ee.On(EventClusterRemoved, ClusterRemovedLogWriter)
-	ee.On(EventClusterRemoved, ClusterRemovedStatisticsUpdater)
+	auditEE.On(EventClusterStatusPatched, ClusterStatusPatchedLogWriter)
 
-	ee.On(EventClusterUpdated, ClusterUpdatedLogWriter)
+	auditEE.On(EventClusterRemoved, ClusterRemovedLogWriter)
+	notifyEE.On(EventClusterRemoved, ClusterRemovedStatisticsUpdater)
 
-	ee.On(EventClusterCreated, ClusterCreatedLogWriter)
-	ee.On(EventClusterCreated, ClusterCreatedStatisticsUpdater)
+	auditEE.On(EventClusterUpdated, ClusterUpdatedLogWriter)
 
-	ee.On(EventReviewerGranted, ReviewerGrantedLogWriter)
+	auditEE.On(EventClusterCreated, ClusterCreatedLogWriter)
+	notifyEE.On(EventClusterCreated, ClusterCreatedStatisticsUpdater)
 
-	ee.On(EventReviewerRevoked, ReviewerRevokedLogWriter)
+	auditEE.On(EventReviewerGranted, ReviewerGrantedLogWriter)
 
-	ee.On(EventClusterGranted, ClusterGrantedLogWriter)
+	auditEE.On(EventReviewerRevoked, ReviewerRevokedLogWriter)
 
-	ee.On(EventClusterRevoked, ClusterRevokedLogWriter)
+	auditEE.On(EventClusterGranted, ClusterGrantedLogWriter)
 
-	ee.On(EventRoleGranted, RoleGrantedLogWriter)
+	auditEE.On(EventClusterRevoked, ClusterRevokedLogWriter)
 
-	ee.On(EventRoleRevoked, RoleRevokedLogWriter)
+	auditEE.On(EventRoleGranted, RoleGrantedLogWriter)
+
+	auditEE.On(EventRoleRevoked, RoleRevokedLogWriter)
 }
 
-// Fire 触发事件
+// Fire 触发事件。审计同步执行（必达），通知/统计异步执行（有界、可丢）。
 func Fire(topic string, args interface{}) {
-	go ee.Emit(topic, args)
+	// Audit first: synchronous, so a write is recorded before the caller
+	// returns and its failure is observable (E3).
+	auditEE.Emit(topic, args)
+	fireAsync(topic, args)
 }
 
-// FireSync 触发事件
+// FireSync 触发事件。审计与通知都同步执行，用于 CLI 执行等要求落库后再返回的路径。
 func FireSync(topic string, args interface{}) {
-	ee.Emit(topic, args)
+	auditEE.Emit(topic, args)
+	notifyEE.Emit(topic, args)
+}
+
+// fireAsync delivers notifications under a bounded limiter. Notifications are
+// best-effort: when the limiter is saturated the event is dropped rather than
+// blocking the caller or spawning unbounded goroutines (E2).
+func fireAsync(topic string, args interface{}) {
+	select {
+	case fireSem <- struct{}{}:
+	default:
+		logrus.Warnf("[W] event fire limiter saturated, dropping topic=%s", topic)
+		return
+	}
+	go func() {
+		defer func() { <-fireSem }()
+		notifyEE.Emit(topic, args)
+	}()
 }

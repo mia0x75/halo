@@ -42,11 +42,12 @@ type DatabaseConfig struct {
 
 // MailConfig 邮件发送配置
 type MailConfig struct {
-	Enabled    bool   `json:"enabled"`
-	Addr       string `json:"addr"`
-	User       string `json:"user"`
-	Password   string `json:"password"`
-	Encryption string `json:"encryption"`
+	Enabled            bool   `json:"enabled"`
+	Addr               string `json:"addr"`
+	User               string `json:"user"`
+	Password           string `json:"password"`
+	Encryption         string `json:"encryption"`
+	InsecureSkipVerify bool   `json:"insecure_skip_verify"`
 }
 
 // GlobalConfig 配置
