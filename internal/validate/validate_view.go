@@ -17,11 +17,6 @@ type ViewCreateVldr struct {
 	cv *ast.CreateViewStmt
 }
 
-// Call 利用反射方法动态调用审核函数
-func (v *ViewCreateVldr) Call(method string, params ...interface{}) {
-	_ = Call(v, method, params...)
-}
-
 // Enabled 当前规则组是否生效
 func (v *ViewCreateVldr) Enabled() bool {
 	return true
@@ -43,14 +38,14 @@ func (v *ViewCreateVldr) Validate(wg *sync.WaitGroup) {
 			if r.Bitwise&1 != 1 {
 				continue
 			}
-			v.Call(r.Func, s, r)
+			Call(v, uint16(r.VldrGroup), r.Func, s, r)
 		}
 	}
 }
 
 // ViewNameQualified 视图名标识符规则
 // RULE: CVW-L2-001
-func (v *ViewCreateVldr) ViewNameQualified(s *Subject, r *Rule) {
+func (v *ViewCreateVldr) createViewViewNameQualified(s *Subject, r *Rule) {
 	viewName := v.cv.ViewName.Name.O
 	if err := Match(r, viewName, viewName, r.Values); err != nil {
 		c := &Clause{
@@ -63,7 +58,7 @@ func (v *ViewCreateVldr) ViewNameQualified(s *Subject, r *Rule) {
 
 // ViewNameLowerCaseRequired 视图名大小写规则
 // RULE: CVW-L2-002
-func (v *ViewCreateVldr) ViewNameLowerCaseRequired(s *Subject, r *Rule) {
+func (v *ViewCreateVldr) createViewViewNameLowerCaseRequired(s *Subject, r *Rule) {
 	viewName := v.cv.ViewName.Name.O
 	if err := Match(r, viewName, viewName); err != nil {
 		c := &Clause{
@@ -76,7 +71,7 @@ func (v *ViewCreateVldr) ViewNameLowerCaseRequired(s *Subject, r *Rule) {
 
 // ViewNameMaxLength 视图名长度规则
 // RULE: CVW-L2-003
-func (v *ViewCreateVldr) ViewNameMaxLength(s *Subject, r *Rule) {
+func (v *ViewCreateVldr) createViewViewNameMaxLength(s *Subject, r *Rule) {
 	viewName := v.cv.ViewName.Name.O
 	threshold, _ := strconv.Atoi(r.Values)
 	if len(viewName) > threshold {
@@ -90,7 +85,7 @@ func (v *ViewCreateVldr) ViewNameMaxLength(s *Subject, r *Rule) {
 
 // ViewNamePrefixRequired 视图名前缀规则
 // RULE: CVW-L2-004
-func (v *ViewCreateVldr) ViewNamePrefixRequired(s *Subject, r *Rule) {
+func (v *ViewCreateVldr) createViewViewNamePrefixRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	viewName := strings.TrimSpace(v.cv.ViewName.Name.O)
 	if len(viewName) > 0 {
@@ -107,7 +102,7 @@ func (v *ViewCreateVldr) ViewNamePrefixRequired(s *Subject, r *Rule) {
 
 // TargetDatabaseDoesNotExist 目标库是否存在
 // RULE: CVW-L3-001
-func (v *ViewCreateVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
+func (v *ViewCreateVldr) createViewTargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, ti := range v.Vi {
 		if v.DatabaseInfo(ti.Database) == nil {
@@ -122,18 +117,13 @@ func (v *ViewCreateVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 
 // TargetViewDoesNotExist 目标视图是否存在
 // RULE: CVW-L3-002
-func (v *ViewCreateVldr) TargetViewDoesNotExist(s *Subject, r *Rule) {
+func (v *ViewCreateVldr) createViewTargetViewDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 }
 
 // ViewAlterVldr 修改视图语句相关的审核规则
 type ViewAlterVldr struct {
 	vldr
-}
-
-// Call 利用反射方法动态调用审核函数
-func (v *ViewAlterVldr) Call(method string, params ...interface{}) {
-	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效
@@ -148,22 +138,17 @@ func (v *ViewAlterVldr) Validate(wg *sync.WaitGroup) {
 
 // TargetDatabaseDoesNotExist 目标库是否存在
 // RULE: MVW-L3-001
-func (v *ViewAlterVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
+func (v *ViewAlterVldr) alterViewTargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 }
 
 // TargetViewDoesNotExist 目标视图是否存在
 // RULE: MVW-L3-002
-func (v *ViewAlterVldr) TargetViewDoesNotExist(s *Subject, r *Rule) {
+func (v *ViewAlterVldr) alterViewTargetViewDoesNotExist(s *Subject, r *Rule) {
 }
 
 // ViewDropVldr 删除视图语句相关的审核规则
 type ViewDropVldr struct {
 	vldr
-}
-
-// Call 利用反射方法动态调用审核函数
-func (v *ViewDropVldr) Call(method string, params ...interface{}) {
-	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效
@@ -178,10 +163,10 @@ func (v *ViewDropVldr) Validate(wg *sync.WaitGroup) {
 
 // TargetDatabaseDoesNotExist 目标库是否存在
 // RULE: DVW-L3-001
-func (v *ViewDropVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
+func (v *ViewDropVldr) dropViewTargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 }
 
 // TargetViewDoesNotExist 目标视图是否存在
 // RULE: DVW-L3-002
-func (v *ViewDropVldr) TargetViewDoesNotExist(s *Subject, r *Rule) {
+func (v *ViewDropVldr) dropViewTargetViewDoesNotExist(s *Subject, r *Rule) {
 }

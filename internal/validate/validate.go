@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"reflect"
 	"regexp"
 	"sync"
 
@@ -17,6 +16,7 @@ import (
 	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/crypto"
 	"github.com/mia0x75/parser/ast"
+	log "github.com/sirupsen/logrus"
 )
 
 // 接口确认，如果有报错表示没有实现接口的全部方法
@@ -726,47 +726,16 @@ func (v *vldr) DatabaseInfo(name string) *models.Database {
 	return nil
 }
 
-// Call 方法反射
-func Call(object interface{}, method string, params ...interface{}) error {
-	defer func() {
-		if err := recover(); err != nil {
-			fmt.Printf("错误代码: 1500, 错误信息: %s\n", err)
-			return
-		}
-	}()
-
-	v := reflect.ValueOf(object)
-	// Check if the passed interface is a pointer
-	if v.Type().Kind() != reflect.Pointer {
-		// Create a new type of Iface, so we have a pointer to work with
-		v = reflect.New(reflect.TypeOf(object))
+// Call runs the rule handler registered for (group, name) against validator v.
+// Unknown handlers are logged and skipped, matching the previous behaviour where
+// reflection failures were swallowed.
+func Call(v Validator, group uint16, name string, s *Subject, r *Rule) {
+	fn, ok := lookup(group, name)
+	if !ok {
+		log.Errorf("validate: unknown rule func: group=%d func=%s", group, name)
+		return
 	}
-	// Get the method by name
-	f := v.MethodByName(method)
-	if !f.IsValid() {
-		return fmt.Errorf("couldn't find method `%s` in interface `%s`, is it exported?", method, v.Type())
-	}
-	// 'dereference' with Elem() and get the field by name
-	// f := ValueIface.Elem().FieldByName(FieldName)
-	// if !f.IsValid() {
-	// 	return fmt.Errorf("Interface `%s` does not have the field `%s`", v.Type(), f)
-	// }
-	// 判断函数参数和传入的参数是否相等
-	if len(params) != f.Type().NumIn() {
-		return fmt.Errorf("")
-	}
-	if f.Type().NumIn() == 0 {
-		f.Call(nil)
-	} else {
-		// 然后将传入参数转为反射类型切片
-		in := make([]reflect.Value, len(params))
-		for k, param := range params {
-			in[k] = reflect.ValueOf(param)
-		}
-		// 利用函数反射对象的call方法调用函数.
-		f.Call(in)
-	}
-	return nil
+	fn(v, s, r)
 }
 
 // Match 正则匹配

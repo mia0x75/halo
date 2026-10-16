@@ -19,11 +19,6 @@ type DatabaseCreateVldr struct {
 	cd *ast.CreateDatabaseStmt
 }
 
-// Call 利用反射方法动态调用审核函数
-func (v *DatabaseCreateVldr) Call(method string, params ...interface{}) {
-	_ = Call(v, method, params...)
-}
-
 // Enabled 当前规则组是否生效
 func (v *DatabaseCreateVldr) Enabled() bool {
 	return true
@@ -46,14 +41,14 @@ func (v *DatabaseCreateVldr) Validate(wg *sync.WaitGroup) {
 			if r.Bitwise&1 != 1 {
 				continue
 			}
-			v.Call(r.Func, s, r)
+			Call(v, uint16(r.VldrGroup), r.Func, s, r)
 		}
 	}
 }
 
 // AvailableCharsets 建库允许的字符集
 // RULE: CDB-L2-001
-func (v *DatabaseCreateVldr) AvailableCharsets(s *Subject, r *Rule) {
+func (v *DatabaseCreateVldr) createDBAvailableCharsets(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var charsets []string
 	_ = json.Unmarshal([]byte(r.Values), &charsets)
@@ -82,7 +77,7 @@ func (v *DatabaseCreateVldr) AvailableCharsets(s *Subject, r *Rule) {
 
 // AvailableCollates 建库允许的排序规则
 // RULE: CDB-L2-002
-func (v *DatabaseCreateVldr) AvailableCollates(s *Subject, r *Rule) {
+func (v *DatabaseCreateVldr) createDBAvailableCollates(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var collates []string
 	_ = json.Unmarshal([]byte(r.Values), &collates)
@@ -112,7 +107,7 @@ func (v *DatabaseCreateVldr) AvailableCollates(s *Subject, r *Rule) {
 
 // CharsetCollateMustMatch 建库的字符集与排序规则必须匹配
 // RULE: CDB-L2-003
-func (v *DatabaseCreateVldr) CharsetCollateMustMatch(s *Subject, r *Rule) {
+func (v *DatabaseCreateVldr) createDBCharsetCollateMustMatch(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	useCharset := ""
 	useCollate := ""
@@ -140,7 +135,7 @@ func (v *DatabaseCreateVldr) CharsetCollateMustMatch(s *Subject, r *Rule) {
 
 // DatabaseNameQualified 库名标识符规则
 // RULE: CDB-L2-004
-func (v *DatabaseCreateVldr) DatabaseNameQualified(s *Subject, r *Rule) {
+func (v *DatabaseCreateVldr) createDBDatabaseNameQualified(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	dbName := v.cd.Name
 	if err := Match(r, dbName, dbName, r.Values); err != nil {
@@ -154,7 +149,7 @@ func (v *DatabaseCreateVldr) DatabaseNameQualified(s *Subject, r *Rule) {
 
 // DatabaseNameLowerCaseRequired 库名大小写规则
 // RULE: CDB-L2-005
-func (v *DatabaseCreateVldr) DatabaseNameLowerCaseRequired(s *Subject, r *Rule) {
+func (v *DatabaseCreateVldr) createDBDatabaseNameLowerCaseRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	dbName := v.cd.Name
 	if err := Match(r, dbName, dbName); err != nil {
@@ -168,7 +163,7 @@ func (v *DatabaseCreateVldr) DatabaseNameLowerCaseRequired(s *Subject, r *Rule) 
 
 // DatabaseNameMaxLength 库名长度规则
 // RULE: CDB-L2-006
-func (v *DatabaseCreateVldr) DatabaseNameMaxLength(s *Subject, r *Rule) {
+func (v *DatabaseCreateVldr) createDBDatabaseNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	dbName := v.cd.Name
 	threshold, _ := strconv.Atoi(r.Values)
@@ -183,7 +178,7 @@ func (v *DatabaseCreateVldr) DatabaseNameMaxLength(s *Subject, r *Rule) {
 
 // TargetDatabaseDoesNotExist 目标数据库已经存在
 // RULE: CDB-L2-007
-func (v *DatabaseCreateVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
+func (v *DatabaseCreateVldr) createDBTargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	database := v.cd.Name
 	if v.DatabaseInfo(database) != nil {
@@ -200,11 +195,6 @@ type DatabaseAlterVldr struct {
 	vldr
 
 	ad *ast.AlterDatabaseStmt
-}
-
-// Call 利用反射方法动态调用审核函数
-func (v *DatabaseAlterVldr) Call(method string, params ...interface{}) {
-	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效
@@ -229,14 +219,14 @@ func (v *DatabaseAlterVldr) Validate(wg *sync.WaitGroup) {
 			if r.Bitwise&1 != 1 {
 				continue
 			}
-			v.Call(r.Func, s, r)
+			Call(v, uint16(r.VldrGroup), r.Func, s, r)
 		}
 	}
 }
 
 // AvailableCharsets 改库允许的字符集
 // RULE: MDB-L2-001
-func (v *DatabaseAlterVldr) AvailableCharsets(s *Subject, r *Rule) {
+func (v *DatabaseAlterVldr) alterDBAvailableCharsets(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var charsets []string
 	_ = json.Unmarshal([]byte(r.Values), &charsets)
@@ -268,7 +258,7 @@ func (v *DatabaseAlterVldr) AvailableCharsets(s *Subject, r *Rule) {
 
 // AvailableCollates 改库允许的排序规则
 // RULE: MDB-L2-002
-func (v *DatabaseAlterVldr) AvailableCollates(s *Subject, r *Rule) {
+func (v *DatabaseAlterVldr) alterDBAvailableCollates(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var collates []string
 	_ = json.Unmarshal([]byte(r.Values), &collates)
@@ -300,7 +290,7 @@ func (v *DatabaseAlterVldr) AvailableCollates(s *Subject, r *Rule) {
 
 // CharsetCollateMustMatch 改库的字符集与排序规则必须匹配
 // RULE: MDB-L2-003
-func (v *DatabaseAlterVldr) CharsetCollateMustMatch(s *Subject, r *Rule) {
+func (v *DatabaseAlterVldr) alterDBCharsetCollateMustMatch(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	useCharset := ""
 	useCollate := ""
@@ -337,7 +327,7 @@ func (v *DatabaseAlterVldr) CharsetCollateMustMatch(s *Subject, r *Rule) {
 
 // TargetDatabaseDoesNotExist 目标库不存在
 // RULE: MDB-L2-004
-func (v *DatabaseAlterVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
+func (v *DatabaseAlterVldr) alterDBTargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	database := v.ad.Name
 	if v.DatabaseInfo(database) == nil {
@@ -354,11 +344,6 @@ type DatabaseDropVldr struct {
 	vldr
 
 	dd *ast.DropDatabaseStmt
-}
-
-// Call 利用反射方法动态调用审核函数
-func (v *DatabaseDropVldr) Call(method string, params ...interface{}) {
-	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效
@@ -383,14 +368,14 @@ func (v *DatabaseDropVldr) Validate(wg *sync.WaitGroup) {
 			if r.Bitwise&1 != 1 {
 				continue
 			}
-			v.Call(r.Func, s, r)
+			Call(v, uint16(r.VldrGroup), r.Func, s, r)
 		}
 	}
 }
 
 // TargetDatabaseDoesNotExist 目标库不存在
 // RULE: DDB-L2-001
-func (v *DatabaseDropVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
+func (v *DatabaseDropVldr) dropDBTargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	database := v.dd.Name
 	if v.DatabaseInfo(database) == nil {

@@ -15,11 +15,6 @@ type SelectVldr struct {
 	sd *ast.SelectStmt
 }
 
-// Call 利用反射方法动态调用审核函数
-func (v *SelectVldr) Call(method string, params ...interface{}) {
-	_ = Call(v, method, params...)
-}
-
 // Enabled 当前规则组是否生效
 func (v *SelectVldr) Enabled() bool {
 	return true
@@ -41,14 +36,14 @@ func (v *SelectVldr) Validate(wg *sync.WaitGroup) {
 			if r.Bitwise&1 != 1 {
 				continue
 			}
-			v.Call(r.Func, s, r)
+			Call(v, uint16(r.VldrGroup), r.Func, s, r)
 		}
 	}
 }
 
 // WithoutWhereNotAllowed 禁止没有WHERE的查询
 // RULE: SEL-L2-001
-func (v *SelectVldr) WithoutWhereNotAllowed(s *Subject, r *Rule) {
+func (v *SelectVldr) selectWithoutWhereNotAllowed(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	if v.sd.Where == nil {
 		c := &Clause{
@@ -61,7 +56,7 @@ func (v *SelectVldr) WithoutWhereNotAllowed(s *Subject, r *Rule) {
 
 // WithoutLimitNotAllowed 禁止没有LIMIT的查询
 // RULE: SEL-L2-002
-func (v *SelectVldr) WithoutLimitNotAllowed(s *Subject, r *Rule) {
+func (v *SelectVldr) selectWithoutLimitNotAllowed(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	if v.sd.Limit == nil {
 		c := &Clause{
@@ -74,7 +69,7 @@ func (v *SelectVldr) WithoutLimitNotAllowed(s *Subject, r *Rule) {
 
 // UseWildcardNotAllowed 禁止SELECT STAR
 // RULE: SEL-L2-003
-func (v *SelectVldr) UseWildcardNotAllowed(s *Subject, r *Rule) {
+func (v *SelectVldr) selectUseWildcardNotAllowed(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, field := range v.sd.Fields.Fields {
 		if field.WildCard != nil {
@@ -90,7 +85,7 @@ func (v *SelectVldr) UseWildcardNotAllowed(s *Subject, r *Rule) {
 
 // UseExplicitLockNotAllowed 禁止指定锁的类型
 // RULE: SEL-L2-004
-func (v *SelectVldr) UseExplicitLockNotAllowed(s *Subject, r *Rule) {
+func (v *SelectVldr) selectUseExplicitLockNotAllowed(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	if v.sd.LockTp != ast.SelectLockNone {
 		c := &Clause{
@@ -103,7 +98,7 @@ func (v *SelectVldr) UseExplicitLockNotAllowed(s *Subject, r *Rule) {
 
 // TargetDatabaseDoesNotExist 目标数据库必须已存在
 // RULE: SEL-L3-001
-func (v *SelectVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
+func (v *SelectVldr) selectTargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, ti := range v.Vi {
 		if v.DatabaseInfo(ti.Database) == nil {
@@ -118,7 +113,7 @@ func (v *SelectVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 
 // TargetTableDoesNotExist 目标表必须已存在
 // RULE: SEL-L3-002
-func (v *SelectVldr) TargetTableDoesNotExist(s *Subject, r *Rule) {
+func (v *SelectVldr) selectTargetTableDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, ti := range v.Vi {
 		if ti.Table == nil {
@@ -136,7 +131,7 @@ func (v *SelectVldr) TargetTableDoesNotExist(s *Subject, r *Rule) {
 
 // TargetColumnDoesNotDoesNotExist 目标列必须已存在，从抽象语法数解出来所有的关联字段信息，包括FieldList/Where/OrderBy/GroupBy
 // RULE: SEL-L3-003
-func (v *SelectVldr) TargetColumnDoesNotDoesNotExist(s *Subject, r *Rule) {
+func (v *SelectVldr) selectTargetColumnDoesNotDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, field := range v.sd.Fields.Fields {
 		if field.WildCard != nil {
@@ -150,7 +145,7 @@ func (v *SelectVldr) TargetColumnDoesNotDoesNotExist(s *Subject, r *Rule) {
 
 // ReturnBlobOrTextNotAllowed 是否允许返回BLOB/TEXT列
 // RULE: SEL-L3-004
-func (v *SelectVldr) ReturnBlobOrTextNotAllowed(s *Subject, r *Rule) {
+func (v *SelectVldr) selectReturnBlobOrTextNotAllowed(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	fields := []*ast.SelectField{}
 	for _, field := range v.sd.Fields.Fields {

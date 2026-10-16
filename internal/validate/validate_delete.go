@@ -15,11 +15,6 @@ type DeleteVldr struct {
 	dd *ast.DeleteStmt
 }
 
-// Call 利用反射方法动态调用审核函数
-func (v *DeleteVldr) Call(method string, params ...interface{}) {
-	_ = Call(v, method, params...)
-}
-
 // Enabled 当前规则组是否生效
 func (v *DeleteVldr) Enabled() bool {
 	return true
@@ -42,14 +37,14 @@ func (v *DeleteVldr) Validate(wg *sync.WaitGroup) {
 			if r.Bitwise&1 != 1 {
 				continue
 			}
-			v.Call(r.Func, s, r)
+			Call(v, uint16(r.VldrGroup), r.Func, s, r)
 		}
 	}
 }
 
 // WithoutWhereNotAllowed 不允许没有WHERE的删除
 // RULE: DEL-L2-001
-func (v *DeleteVldr) WithoutWhereNotAllowed(s *Subject, r *Rule) {
+func (v *DeleteVldr) deleteWithoutWhereNotAllowed(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	if v.dd.Where == nil {
 		c := &Clause{
@@ -62,14 +57,14 @@ func (v *DeleteVldr) WithoutWhereNotAllowed(s *Subject, r *Rule) {
 
 // MaxAllowedDeleteRows 单次删除的最大行数
 // RULE: DEL-L3-001
-func (v *DeleteVldr) MaxAllowedDeleteRows(s *Subject, r *Rule) {
+func (v *DeleteVldr) deleteMaxAllowedDeleteRows(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// TODO:
 }
 
 // TargetDatabaseDoesNotExist 目标库是否存在
 // RULE: DEL-L3-002
-func (v *DeleteVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
+func (v *DeleteVldr) deleteTargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, ti := range v.Vi {
 		if v.DatabaseInfo(ti.Database) == nil {
@@ -84,7 +79,7 @@ func (v *DeleteVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 
 // TargetTableDoesNotDoesNotExist 目标表是否存在
 // RULE: DEL-L3-003
-func (v *DeleteVldr) TargetTableDoesNotDoesNotExist(s *Subject, r *Rule) {
+func (v *DeleteVldr) deleteTargetTableDoesNotDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, ti := range v.Vi {
 		if ti.Table == nil {
@@ -102,7 +97,7 @@ func (v *DeleteVldr) TargetTableDoesNotDoesNotExist(s *Subject, r *Rule) {
 
 // TargetColumnDoesNotDoesNotExist 条件过滤列是否存在
 // RULE: DEL-L3-004
-func (v *DeleteVldr) TargetColumnDoesNotDoesNotExist(s *Subject, r *Rule) {
+func (v *DeleteVldr) deleteTargetColumnDoesNotDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// TODO:
 }

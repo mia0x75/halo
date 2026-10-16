@@ -16,11 +16,6 @@ type InsertVldr struct {
 	id *ast.InsertStmt
 }
 
-// Call 利用反射方法动态调用审核函数
-func (v *InsertVldr) Call(method string, params ...interface{}) {
-	_ = Call(v, method, params...)
-}
-
 // Enabled 当前规则组是否生效
 func (v *InsertVldr) Enabled() bool {
 	return true
@@ -43,14 +38,14 @@ func (v *InsertVldr) Validate(wg *sync.WaitGroup) {
 			if r.Bitwise&1 != 1 {
 				continue
 			}
-			v.Call(r.Func, s, r)
+			Call(v, uint16(r.VldrGroup), r.Func, s, r)
 		}
 	}
 }
 
 // ExplicitColumnRequired 是否要求显式列申明
 // RULE: INS-L2-001
-func (v *InsertVldr) ExplicitColumnRequired(s *Subject, r *Rule) {
+func (v *InsertVldr) insertExplicitColumnRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	if v.id.IsReplace {
 		return
@@ -67,7 +62,7 @@ func (v *InsertVldr) ExplicitColumnRequired(s *Subject, r *Rule) {
 
 // UsingSelectNotAllowed 是否允许INSERT...SELECT
 // RULE: INS-L2-002
-func (v *InsertVldr) UsingSelectNotAllowed(s *Subject, r *Rule) {
+func (v *InsertVldr) insertUsingSelectNotAllowed(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	if v.id.IsReplace {
 		return
@@ -84,7 +79,7 @@ func (v *InsertVldr) UsingSelectNotAllowed(s *Subject, r *Rule) {
 
 // RowsLimit 单语句允许操作的最大行数
 // RULE: INS-L2-004
-func (v *InsertVldr) RowsLimit(s *Subject, r *Rule) {
+func (v *InsertVldr) insertRowsLimit(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	thredhold, err := strconv.Atoi(r.Values)
 	if err != nil {
@@ -101,7 +96,7 @@ func (v *InsertVldr) RowsLimit(s *Subject, r *Rule) {
 
 // ColumnsValuesMustMatch 列类型、值是否匹配
 // RULE: INS-L2-005
-func (v *InsertVldr) ColumnsValuesMustMatch(s *Subject, r *Rule) {
+func (v *InsertVldr) insertColumnsValuesMustMatch(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	columnNum := len(v.id.Columns)
 	for _, list := range v.id.Lists {
@@ -117,7 +112,7 @@ func (v *InsertVldr) ColumnsValuesMustMatch(s *Subject, r *Rule) {
 
 // TargetDatabaseDoesNotExist 目标库是否存在
 // RULE: INS-L3-001
-func (v *InsertVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
+func (v *InsertVldr) insertTargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, ti := range v.Vi {
 		if v.DatabaseInfo(ti.Database) == nil {
@@ -132,7 +127,7 @@ func (v *InsertVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 
 // TargetTableDoesNotExist 目标表是否存在
 // RULE: INS-L3-002
-func (v *InsertVldr) TargetTableDoesNotExist(s *Subject, r *Rule) {
+func (v *InsertVldr) insertTargetTableDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, ti := range v.Vi {
 		if ti.Table == nil {
@@ -150,14 +145,14 @@ func (v *InsertVldr) TargetTableDoesNotExist(s *Subject, r *Rule) {
 
 // TargetColumnDoesNotExist 目标列是否存在
 // RULE: INS-L3-003
-func (v *InsertVldr) TargetColumnDoesNotExist(s *Subject, r *Rule) {
+func (v *InsertVldr) insertTargetColumnDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// TODO:
 }
 
 // ValueForNotNullColumnRequired 非空列是否有值
 // RULE: INS-L3-004
-func (v *InsertVldr) ValueForNotNullColumnRequired(s *Subject, r *Rule) {
+func (v *InsertVldr) insertValueForNotNullColumnRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// TODO:
 }
@@ -167,11 +162,6 @@ type ReplaceVldr struct {
 	vldr
 
 	id *ast.InsertStmt
-}
-
-// Call 利用反射方法动态调用审核函数
-func (v *ReplaceVldr) Call(method string, params ...interface{}) {
-	_ = Call(v, method, params...)
 }
 
 // Enabled 当前规则组是否生效
@@ -195,7 +185,7 @@ func (v *ReplaceVldr) Validate(wg *sync.WaitGroup) {
 			if r.Bitwise&1 != 1 {
 				continue
 			}
-			v.Call(r.Func, s, r)
+			Call(v, uint16(r.VldrGroup), r.Func, s, r)
 		}
 	}
 }
