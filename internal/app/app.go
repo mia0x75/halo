@@ -11,6 +11,7 @@ import (
 
 	"github.com/mia0x75/halo/internal/agent"
 	"github.com/mia0x75/halo/internal/analyzer"
+	"github.com/mia0x75/halo/internal/cache"
 	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/platform/db"
 	mysqlrepo "github.com/mia0x75/halo/internal/repository/mysql"
@@ -141,7 +142,13 @@ func New(ctx context.Context, cfg db.Config) (*App, error) {
 		User:      service.NewUserService(tx, repos.User),
 	}
 
-	return &App{DB: database, Repos: repos, Tx: tx, Agent: agent.LocalExecutor{}, Services: services}, nil
+	a := &App{DB: database, Repos: repos, Tx: tx, Agent: agent.LocalExecutor{}, Services: services}
+
+	// The caches read through the repositories, so they can only be populated
+	// once the container is fully wired.
+	cache.Init(a.Repos)
+
+	return a, nil
 }
 
 // Close releases the metadata pool.

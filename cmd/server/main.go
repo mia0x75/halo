@@ -91,7 +91,6 @@ func main() {
 	}
 	defer func() { _ = application.Close() }()
 
-	cache.Init(application.Repos)
 	cachedRules := cache.RulesMap.All()
 	rules := make([]*domain.Rule, 0, len(cachedRules))
 	for _, m := range cachedRules {

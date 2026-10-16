@@ -34,7 +34,8 @@ func TestInitSmoke(t *testing.T) {
 	}
 	defer func() { _ = application.Close() }()
 
-	cache.Init(application.Repos)
+	// app.New already ran cache.Init; LoopInit stops the refresh goroutines it
+	// started.
 	defer cache.LoopInit()
 
 	t.Logf("users=%d rules=%d clusters=%d options=%d edges=%d avatars=%d",
