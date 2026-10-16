@@ -59,17 +59,22 @@ func (p Postgres) LoadTables(ctx context.Context, db *sqlx.DB, database string) 
 	return tables, nil
 }
 
-// loadTableHeaders 读取 information_schema.tables。Engine/Charset 无 PG 对应概念，留空。
+// loadTableHeaders 读取当前库内用户 schema 的 information_schema.tables。
+// A PG connection is bound to a single database, so `database` only records
+// which key the caller expects; tables come from every non-system schema the
+// connection can see. Engine/Charset 无 PG 对应概念，留空。
 func (Postgres) loadTableHeaders(ctx context.Context, db *sqlx.DB, database string) ([]*meta.Table, error) {
 	const query = "SELECT c.table_schema, c.table_name, " +
 		"obj_description((quote_ident(c.table_schema) || '.' || quote_ident(c.table_name))::regclass) AS comment " +
 		"FROM information_schema.tables c " +
-		"WHERE c.table_schema = COALESCE(NULLIF($1, ''), current_schema()) " +
+		"WHERE c.table_catalog = current_database() " +
+		"AND c.table_schema NOT IN ('information_schema') " +
+		"AND c.table_schema NOT LIKE 'pg\\_%' " +
 		"AND c.table_type = 'BASE TABLE' " +
 		"ORDER BY c.table_name"
 
 	var rows []postgresTableRow
-	if err := db.SelectContext(ctx, &rows, query, database); err != nil {
+	if err := db.SelectContext(ctx, &rows, query); err != nil {
 		return nil, fmt.Errorf("query postgres tables: %w", err)
 	}
 
@@ -85,16 +90,19 @@ func (Postgres) loadTableHeaders(ctx context.Context, db *sqlx.DB, database stri
 	return tables, nil
 }
 
-// loadColumns 读取 information_schema.columns，类型取 udt_name 走统一分类。
+// loadColumns 读取当前库内用户 schema 的 information_schema.columns，类型取
+// udt_name 走统一分类。
 func (Postgres) loadColumns(ctx context.Context, db *sqlx.DB, database string) (map[string]map[string]*meta.Column, error) {
 	const query = "SELECT table_name, column_name, udt_name, data_type, " +
 		"is_nullable, column_default, collation_name " +
 		"FROM information_schema.columns " +
-		"WHERE table_schema = COALESCE(NULLIF($1, ''), current_schema()) " +
+		"WHERE table_catalog = current_database() " +
+		"AND table_schema NOT IN ('information_schema') " +
+		"AND table_schema NOT LIKE 'pg\\_%' " +
 		"ORDER BY table_name, ordinal_position"
 
 	var rows []postgresColumnRow
-	if err := db.SelectContext(ctx, &rows, query, database); err != nil {
+	if err := db.SelectContext(ctx, &rows, query); err != nil {
 		return nil, fmt.Errorf("query postgres columns: %w", err)
 	}
 
@@ -148,25 +156,16 @@ func (Postgres) loadIndexes(ctx context.Context, db *sqlx.DB, database string) (
 	return indexes, nil
 }
 
-// listSchemas 只覆盖当前连接的库：PG 的 schema 位于单个 database 内，
-// 跨库需另开连接，此处不跨。
-func (Postgres) listSchemas(ctx context.Context, db *sqlx.DB) ([]string, error) {
-	const query = "SELECT schema_name FROM information_schema.schemata " +
-		"WHERE schema_name <> 'information_schema' AND schema_name NOT LIKE 'pg\\_%' " +
-		"ORDER BY schema_name"
+// Databases 返回实例内的用户库名。A PG connection is bound to one database, so
+// callers must not expect every name to be reachable over this connection; the
+// list exists so ticket/query validation can confirm the target database name.
+// PG 无库级默认字符集/排序规则，留空。
+func (Postgres) Databases(ctx context.Context, db *sqlx.DB) ([]*meta.Database, error) {
+	const query = "SELECT datname FROM pg_database WHERE datistemplate = false ORDER BY datname"
 
 	var names []string
 	if err := db.SelectContext(ctx, &names, query); err != nil {
-		return nil, fmt.Errorf("query postgres schemas: %w", err)
-	}
-	return names, nil
-}
-
-// Databases 返回当前库内的用户 schema。PG 无库级默认字符集/排序规则，留空。
-func (p Postgres) Databases(ctx context.Context, db *sqlx.DB) ([]*meta.Database, error) {
-	names, err := p.listSchemas(ctx, db)
-	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("query postgres databases: %w", err)
 	}
 	dbs := make([]*meta.Database, 0, len(names))
 	for _, name := range names {
