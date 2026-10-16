@@ -330,6 +330,9 @@ func (v *vldr) WalkSubquery(node ast.SubqueryExpr, stack *Stack) {
 
 // Walk 语法树分析
 func (v *vldr) Walk(node ast.Node) {
+	// Validators are package singletons, so VisitInfo would otherwise leak from
+	// the previous statement (and the previous Run) into this one.
+	v.Vi = v.Vi[:0]
 	switch x := node.(type) {
 	case *ast.DeallocateStmt:
 		return
