@@ -6,7 +6,6 @@ import (
 
 	"github.com/mia0x75/halo/internal/agent/meta"
 	"github.com/mia0x75/halo/internal/domain"
-	"github.com/mia0x75/halo/internal/models"
 )
 
 // ErrNotImplemented marks the 2D-A adapter skeleton. The translation from the
@@ -16,14 +15,14 @@ var ErrNotImplemented = errors.New("validate: adapter not implemented")
 
 // RuleSource loads the validation rules from mm_rules.
 type RuleSource interface {
-	Load(ctx context.Context) ([]*models.Rule, error)
+	Load(ctx context.Context) ([]*domain.Rule, error)
 }
 
 // SchemaSource loads the target database metadata. It returns *meta.Table so
 // the rule engine keeps inspecting charset/collate/engine exactly as before;
 // the neutral type preserves the same fields the engine reads.
 type SchemaSource interface {
-	Load(ctx context.Context, cluster *models.Cluster) (map[string][]*meta.Table, error)
+	Load(ctx context.Context, cluster *domain.Cluster) (map[string][]*meta.Table, error)
 }
 
 // Adapter implements domain.Validator on top of the legacy rule engine.

@@ -16,13 +16,13 @@ func TestRunRegistryEmptyContext(t *testing.T) {
 
 // TestCollectViolations flattens per-statement hits.
 func TestCollectViolations(t *testing.T) {
-	s := &models.Statement{Violations: &models.Violations{}}
+	s := &Subject{Violations: &models.Violations{}}
 	s.Violations.Append(&models.Clause{Level: 1, Description: "boom"})
 
-	got := collectViolations([]*models.Statement{s})
+	got := collectViolations([]*Subject{s})
 	require.Len(t, got, 1)
 	require.Same(t, s, got[0].Statement)
 	require.Equal(t, "boom", got[0].Clause.Description)
 
-	require.Empty(t, collectViolations([]*models.Statement{{}}))
+	require.Empty(t, collectViolations([]*Subject{{}}))
 }

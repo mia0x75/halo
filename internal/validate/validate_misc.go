@@ -6,7 +6,6 @@ import (
 
 	"github.com/mia0x75/parser/ast"
 
-	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/tools"
 )
 
@@ -38,15 +37,15 @@ func (v *MiscVldr) Validate(wg *sync.WaitGroup) {
 
 // LockTableProhibited 是否允许LOCK TABLE
 // RULE: MSC-L1-001
-func (v *MiscVldr) LockTableProhibited(r *models.Rule) {
-	for _, s := range v.Ctx.Stmts {
+func (v *MiscVldr) LockTableProhibited(r *Rule) {
+	for _, s := range v.Ctx.Subjects {
 		if _, ok := s.StmtNode.(*ast.LockTableStmt); !ok {
 			continue
 		}
 
-		c := &models.Clause{
+		c := &Clause{
 			Description: r.Message,
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -54,8 +53,8 @@ func (v *MiscVldr) LockTableProhibited(r *models.Rule) {
 
 // FlushTableProhibited 是否允许FLUSH TABLE => TODO: FLUSH语法支持不全
 // RULE: MSC-L1-002
-func (v *MiscVldr) FlushTableProhibited(r *models.Rule) {
-	for _, s := range v.Ctx.Stmts {
+func (v *MiscVldr) FlushTableProhibited(r *Rule) {
+	for _, s := range v.Ctx.Subjects {
 		ct, ok := s.StmtNode.(*ast.FlushStmt)
 		if !ok {
 			continue
@@ -63,9 +62,9 @@ func (v *MiscVldr) FlushTableProhibited(r *models.Rule) {
 
 		switch ct.Tp {
 		case ast.FlushTables, ast.FlushStatus, ast.FlushPrivileges, ast.FlushNone:
-			c := &models.Clause{
+			c := &Clause{
 				Description: r.Message,
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		default:
@@ -76,15 +75,15 @@ func (v *MiscVldr) FlushTableProhibited(r *models.Rule) {
 
 // TruncateTableProhibited 是否允许TRUNCATE TABLE
 // RULE: MSC-L1-003
-func (v *MiscVldr) TruncateTableProhibited(r *models.Rule) {
-	for _, s := range v.Ctx.Stmts {
+func (v *MiscVldr) TruncateTableProhibited(r *Rule) {
+	for _, s := range v.Ctx.Subjects {
 		if _, ok := s.StmtNode.(*ast.TruncateTableStmt); !ok {
 			continue
 		}
 
-		c := &models.Clause{
+		c := &Clause{
 			Description: r.Message,
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -92,10 +91,10 @@ func (v *MiscVldr) TruncateTableProhibited(r *models.Rule) {
 
 // MergeRequired 合并同一个表的操作，这个对大表的ALTER很重要
 // RULE: MSC-L1-004
-func (v *MiscVldr) MergeRequired(r *models.Rule) {
+func (v *MiscVldr) MergeRequired(r *Rule) {
 	slice := []string{}
 	name := ""
-	for _, s := range v.Ctx.Stmts {
+	for _, s := range v.Ctx.Subjects {
 		switch s.StmtNode.(type) {
 		case *ast.CreateIndexStmt:
 			n := s.StmtNode.(*ast.CreateIndexStmt)
@@ -129,9 +128,9 @@ func (v *MiscVldr) MergeRequired(r *models.Rule) {
 			continue // 继续下一轮for循环
 		}
 		if tools.Contains(slice, name) {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, name),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		} else {
@@ -144,15 +143,15 @@ func (v *MiscVldr) MergeRequired(r *models.Rule) {
 
 // PurgeLogsProhibited 是否允许PURGE LOG
 // RULE: MSC-L1-005
-func (v *MiscVldr) PurgeLogsProhibited(r *models.Rule) {
-	for _, s := range v.Ctx.Stmts {
+func (v *MiscVldr) PurgeLogsProhibited(r *Rule) {
+	for _, s := range v.Ctx.Subjects {
 		if _, ok := s.StmtNode.(*ast.PurgeStmt); !ok {
 			continue
 		}
 
-		c := &models.Clause{
+		c := &Clause{
 			Description: r.Message,
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -160,15 +159,15 @@ func (v *MiscVldr) PurgeLogsProhibited(r *models.Rule) {
 
 // UnlockTableProhibited 是否允许UNLOCK TABLES
 // RULE: MSC-L1-006
-func (v *MiscVldr) UnlockTableProhibited(r *models.Rule) {
-	for _, s := range v.Ctx.Stmts {
+func (v *MiscVldr) UnlockTableProhibited(r *Rule) {
+	for _, s := range v.Ctx.Subjects {
 		if _, ok := s.StmtNode.(*ast.UnlockTableStmt); !ok {
 			continue
 		}
 
-		c := &models.Clause{
+		c := &Clause{
 			Description: r.Message,
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -176,15 +175,15 @@ func (v *MiscVldr) UnlockTableProhibited(r *models.Rule) {
 
 // KillProhibited 是否允许KILL线程
 // RULE: MSC-L1-007
-func (v *MiscVldr) KillProhibited(r *models.Rule) {
-	for _, s := range v.Ctx.Stmts {
+func (v *MiscVldr) KillProhibited(r *Rule) {
+	for _, s := range v.Ctx.Subjects {
 		if _, ok := s.StmtNode.(*ast.KillStmt); !ok {
 			continue
 		}
 
-		c := &models.Clause{
+		c := &Clause{
 			Description: r.Message,
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -192,15 +191,15 @@ func (v *MiscVldr) KillProhibited(r *models.Rule) {
 
 // SplitRequired 是否允许同时出现DDL、DML
 // RULE: MSC-L1-008
-func (v *MiscVldr) SplitRequired(r *models.Rule) {
+func (v *MiscVldr) SplitRequired(r *Rule) {
 	method := uint8(0)
-	for _, s := range v.Ctx.Stmts {
+	for _, s := range v.Ctx.Subjects {
 		switch s.StmtNode.(type) {
 		case *ast.AlterTableStmt, *ast.AlterDatabaseStmt, *ast.CreateDatabaseStmt, *ast.CreateIndexStmt, *ast.CreateTableStmt, *ast.CreateViewStmt, *ast.DropDatabaseStmt, *ast.DropIndexStmt, *ast.DropTableStmt, *ast.RenameTableStmt, *ast.TruncateTableStmt:
 			if method != 0 && method != 1 {
-				c := &models.Clause{
+				c := &Clause{
 					Description: r.Message,
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			} else {
@@ -208,9 +207,9 @@ func (v *MiscVldr) SplitRequired(r *models.Rule) {
 			}
 		case *ast.DeleteStmt, *ast.InsertStmt, *ast.UnionStmt, *ast.UpdateStmt, *ast.SelectStmt, *ast.ShowStmt, *ast.LoadDataStmt:
 			if method != 0 && method != 2 {
-				c := &models.Clause{
+				c := &Clause{
 					Description: r.Message,
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			} else {

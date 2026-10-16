@@ -8,8 +8,6 @@ import (
 
 	"github.com/mia0x75/parser/ast"
 	log "github.com/sirupsen/logrus"
-
-	"github.com/mia0x75/halo/internal/models"
 )
 
 // ViewCreateVldr 创建视图语句相关的审核规则
@@ -32,7 +30,7 @@ func (v *ViewCreateVldr) Enabled() bool {
 // Validate 规则组的审核入口
 func (v *ViewCreateVldr) Validate(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for _, s := range v.Ctx.Stmts {
+	for _, s := range v.Ctx.Subjects {
 		// 该方法不能放到结构体vldr是因为，反射时找不到子类的方法
 		node := s.StmtNode
 		if cv, ok := node.(*ast.CreateViewStmt); !ok {
@@ -52,12 +50,12 @@ func (v *ViewCreateVldr) Validate(wg *sync.WaitGroup) {
 
 // ViewNameQualified 视图名标识符规则
 // RULE: CVW-L2-001
-func (v *ViewCreateVldr) ViewNameQualified(s *models.Statement, r *models.Rule) {
+func (v *ViewCreateVldr) ViewNameQualified(s *Subject, r *Rule) {
 	viewName := v.cv.ViewName.Name.O
 	if err := Match(r, viewName, viewName, r.Values); err != nil {
-		c := &models.Clause{
+		c := &Clause{
 			Description: err.Error(),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -65,12 +63,12 @@ func (v *ViewCreateVldr) ViewNameQualified(s *models.Statement, r *models.Rule) 
 
 // ViewNameLowerCaseRequired 视图名大小写规则
 // RULE: CVW-L2-002
-func (v *ViewCreateVldr) ViewNameLowerCaseRequired(s *models.Statement, r *models.Rule) {
+func (v *ViewCreateVldr) ViewNameLowerCaseRequired(s *Subject, r *Rule) {
 	viewName := v.cv.ViewName.Name.O
 	if err := Match(r, viewName, viewName); err != nil {
-		c := &models.Clause{
+		c := &Clause{
 			Description: err.Error(),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -78,13 +76,13 @@ func (v *ViewCreateVldr) ViewNameLowerCaseRequired(s *models.Statement, r *model
 
 // ViewNameMaxLength 视图名长度规则
 // RULE: CVW-L2-003
-func (v *ViewCreateVldr) ViewNameMaxLength(s *models.Statement, r *models.Rule) {
+func (v *ViewCreateVldr) ViewNameMaxLength(s *Subject, r *Rule) {
 	viewName := v.cv.ViewName.Name.O
 	threshold, _ := strconv.Atoi(r.Values)
 	if len(viewName) > threshold {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, viewName, threshold),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -92,14 +90,14 @@ func (v *ViewCreateVldr) ViewNameMaxLength(s *models.Statement, r *models.Rule) 
 
 // ViewNamePrefixRequired 视图名前缀规则
 // RULE: CVW-L2-004
-func (v *ViewCreateVldr) ViewNamePrefixRequired(s *models.Statement, r *models.Rule) {
+func (v *ViewCreateVldr) ViewNamePrefixRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	viewName := strings.TrimSpace(v.cv.ViewName.Name.O)
 	if len(viewName) > 0 {
 		if err := Match(r, viewName, r.Values); err != nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, viewName, r.Values),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -109,13 +107,13 @@ func (v *ViewCreateVldr) ViewNamePrefixRequired(s *models.Statement, r *models.R
 
 // TargetDatabaseDoesNotExist 目标库是否存在
 // RULE: CVW-L3-001
-func (v *ViewCreateVldr) TargetDatabaseDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *ViewCreateVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, ti := range v.Vi {
 		if v.DatabaseInfo(ti.Database) == nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, ti.Database),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -124,7 +122,7 @@ func (v *ViewCreateVldr) TargetDatabaseDoesNotExist(s *models.Statement, r *mode
 
 // TargetViewDoesNotExist 目标视图是否存在
 // RULE: CVW-L3-002
-func (v *ViewCreateVldr) TargetViewDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *ViewCreateVldr) TargetViewDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 }
 
@@ -150,12 +148,12 @@ func (v *ViewAlterVldr) Validate(wg *sync.WaitGroup) {
 
 // TargetDatabaseDoesNotExist 目标库是否存在
 // RULE: MVW-L3-001
-func (v *ViewAlterVldr) TargetDatabaseDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *ViewAlterVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 }
 
 // TargetViewDoesNotExist 目标视图是否存在
 // RULE: MVW-L3-002
-func (v *ViewAlterVldr) TargetViewDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *ViewAlterVldr) TargetViewDoesNotExist(s *Subject, r *Rule) {
 }
 
 // ViewDropVldr 删除视图语句相关的审核规则
@@ -180,10 +178,10 @@ func (v *ViewDropVldr) Validate(wg *sync.WaitGroup) {
 
 // TargetDatabaseDoesNotExist 目标库是否存在
 // RULE: DVW-L3-001
-func (v *ViewDropVldr) TargetDatabaseDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *ViewDropVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 }
 
 // TargetViewDoesNotExist 目标视图是否存在
 // RULE: DVW-L3-002
-func (v *ViewDropVldr) TargetViewDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *ViewDropVldr) TargetViewDoesNotExist(s *Subject, r *Rule) {
 }

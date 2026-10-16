@@ -12,6 +12,7 @@ import (
 	"github.com/mia0x75/halo/internal/agent/meta"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/cache"
+	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/crypto"
@@ -52,15 +53,15 @@ var (
 
 // Context 在不同的验证组中共享内容
 type Context struct {
-	Stmts     []*models.Statement      // 全部等待审核的数据
-	Ticket    *models.Ticket           // 等待审核的工单
-	Cluster   *models.Cluster          // 目标群集
+	Subjects  []*Subject               // 全部等待审核的数据
+	Ticket    *domain.Ticket           // 等待审核的工单
+	Cluster   *domain.Cluster          // 目标群集
 	Databases []models.Database        // 目标群集所有的用户数据库
 	Tables    map[string][]*meta.Table // 目标群集上目标数据库的元数据
 	// Rules is the rule set the engine runs against. It is the future channel
 	// for RunRegistry; the legacy global wiring (SetGroup reading caches) is
 	// still in place and is removed in 2D-B.
-	Rules []*models.Rule
+	Rules []*Rule
 }
 
 // 相当于注册表
@@ -103,22 +104,26 @@ var registry = map[uint16]Validator{
 // delegates the pure rule execution to RunRegistry. Violations are written back
 // in place onto each statement, exactly as before.
 func Run(stmts []*models.Statement, cluster *models.Cluster, ticket *models.Ticket) {
-	ctx := &Context{
-		Cluster: cluster,
-		Ticket:  ticket,
-		Stmts:   stmts,
+	subjects := make([]*Subject, 0, len(stmts))
+	for _, m := range stmts {
+		subjects = append(subjects, subjectFromModels(m))
 	}
-	passwd := func(c *models.Cluster) string {
+	ctx := &Context{
+		Cluster:  bridge.ClusterToDomain(cluster),
+		Ticket:   bridge.TicketToDomain(ticket),
+		Subjects: subjects,
+	}
+	target := ctx.Cluster
+	passwd := func(c *domain.Cluster) string {
 		bs, _ := crypto.DecryptAES(c.Password, config.Config().Secret.Crypto)
 		return string(bs)
 	}
 	exec := agent.LocalExecutor{}
-	target := bridge.ClusterToDomain(cluster)
 	var err error
-	if ctx.Tables, err = exec.LoadTables(context.Background(), target, passwd(cluster)); err != nil {
+	if ctx.Tables, err = exec.LoadTables(context.Background(), target, passwd(target)); err != nil {
 		fmt.Println(err)
 	}
-	if databases, derr := exec.Databases(context.Background(), target, passwd(cluster)); derr != nil {
+	if databases, derr := exec.Databases(context.Background(), target, passwd(target)); derr != nil {
 		fmt.Println(derr)
 	} else {
 		ctx.Databases = make([]models.Database, 0, len(databases))
@@ -130,7 +135,11 @@ func Run(stmts []*models.Statement, cluster *models.Cluster, ticket *models.Tick
 			})
 		}
 	}
-	ctx.Rules = cache.RulesMap.All()
+	cachedRules := cache.RulesMap.All()
+	ctx.Rules = make([]*Rule, 0, len(cachedRules))
+	for _, m := range cachedRules {
+		ctx.Rules = append(ctx.Rules, ruleFromDomain(bridge.RuleToDomain(m)))
+	}
 
 	// Each validator group pulls its rules from the process-wide cache. This
 	// global wiring is deliberately kept here (never in RunRegistry) and is
@@ -145,8 +154,8 @@ func Run(stmts []*models.Statement, cluster *models.Cluster, ticket *models.Tick
 
 // Violation pairs a rule hit with the statement it was raised on.
 type Violation struct {
-	Statement *models.Statement
-	Clause    *models.Clause
+	Statement *Subject
+	Clause    *Clause
 }
 
 // RunRegistry is the pure rule engine: it runs every enabled validator group
@@ -162,11 +171,11 @@ func RunRegistry(c *Context) []Violation {
 		}
 	}
 	wg.Wait()
-	return collectViolations(c.Stmts)
+	return collectViolations(c.Subjects)
 }
 
 // collectViolations flattens the per-statement hits into a single slice.
-func collectViolations(stmts []*models.Statement) []Violation {
+func collectViolations(stmts []*Subject) []Violation {
 	var out []Violation
 	for _, s := range stmts {
 		if s.Violations == nil {
@@ -182,7 +191,7 @@ func collectViolations(stmts []*models.Statement) []Violation {
 // Validator 接口定义
 type Validator interface {
 	SetGroup(gid uint16) // 设定分组，获得规则列表
-	GetRules() []*models.Rule
+	GetRules() []*Rule
 	Enabled() bool
 	SetContext(ctx *Context)     // 分组规则是否启用
 	Validate(wg *sync.WaitGroup) // 验证
@@ -221,8 +230,8 @@ type IndexEntry struct {
 }
 
 type vldr struct {
-	Rules []*models.Rule // 全部适用的规则
-	Ctx   *Context       // 上下文，保存检测报告？
+	Rules []*Rule  // 全部适用的规则
+	Ctx   *Context // 上下文，保存检测报告？
 	Vi    []VisitInfo
 }
 
@@ -232,15 +241,19 @@ func (v *vldr) SetContext(ctx *Context) {
 }
 
 // GetRules 设置验证分组，并初始化验证规则
-func (v *vldr) GetRules() []*models.Rule {
+func (v *vldr) GetRules() []*Rule {
 	return v.Rules
 }
 
 // SetGroup 设置验证分组，并初始化验证规则
 func (v *vldr) SetGroup(gid uint16) {
-	rules := cache.RulesMap.Filter(func(elem *models.Rule) bool {
-		return elem.VldrGroup == gid
+	cached := cache.RulesMap.Filter(func(elem *models.Rule) bool {
+		return uint16(elem.VldrGroup) == gid
 	})
+	rules := make([]*Rule, 0, len(cached))
+	for _, m := range cached {
+		rules = append(rules, ruleFromDomain(bridge.RuleToDomain(m)))
+	}
 	v.Rules = rules
 }
 
@@ -752,7 +765,7 @@ func Call(object interface{}, method string, params ...interface{}) error {
 }
 
 // Match 正则匹配
-func Match(r *models.Rule, src string, params ...interface{}) (err error) {
+func Match(r *Rule, src string, params ...interface{}) (err error) {
 	match := false
 	match, err = regexp.MatchString(r.Values, src)
 	if err != nil {

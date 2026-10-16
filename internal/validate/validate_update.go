@@ -6,8 +6,6 @@ import (
 
 	"github.com/mia0x75/parser/ast"
 	log "github.com/sirupsen/logrus"
-
-	"github.com/mia0x75/halo/internal/models"
 )
 
 // UpdateVldr 数据更新语句相关的审核规则
@@ -30,7 +28,7 @@ func (v *UpdateVldr) Enabled() bool {
 // Validate 规则组的审核入口
 func (v *UpdateVldr) Validate(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for _, s := range v.Ctx.Stmts {
+	for _, s := range v.Ctx.Subjects {
 		// 该方法不能放到结构体vldr是因为，反射时找不到子类的方法
 		node := s.StmtNode
 		if ud, ok := node.(*ast.UpdateStmt); !ok {
@@ -51,12 +49,12 @@ func (v *UpdateVldr) Validate(wg *sync.WaitGroup) {
 
 // WithoutWhereNotAllowed 是否允许没有WHERE的更新
 // RULE: UPD-L2-001
-func (v *UpdateVldr) WithoutWhereNotAllowed(s *models.Statement, r *models.Rule) {
+func (v *UpdateVldr) WithoutWhereNotAllowed(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	if v.ud.Where == nil {
-		c := &models.Clause{
+		c := &Clause{
 			Description: r.Message,
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -64,13 +62,13 @@ func (v *UpdateVldr) WithoutWhereNotAllowed(s *models.Statement, r *models.Rule)
 
 // TargetDatabaseDoesNotExist 目标库是否存在
 // RULE: UPD-L3-001
-func (v *UpdateVldr) TargetDatabaseDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *UpdateVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, ti := range v.Vi {
 		if v.DatabaseInfo(ti.Database) == nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, ti.Database),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -79,16 +77,16 @@ func (v *UpdateVldr) TargetDatabaseDoesNotExist(s *models.Statement, r *models.R
 
 // TargetTableDoesNotExist 目标表是否存在
 // RULE: UPD-L3-002
-func (v *UpdateVldr) TargetTableDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *UpdateVldr) TargetTableDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, ti := range v.Vi {
 		if ti.Table == nil {
 			continue
 		}
 		if v.TableInfo(ti.Database, ti.Table.Name) == nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, fmt.Sprintf("`%s`.`%s`", ti.Database, ti.Table.Name)),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -97,14 +95,14 @@ func (v *UpdateVldr) TargetTableDoesNotExist(s *models.Statement, r *models.Rule
 
 // TargetColumnDoesNotExist 目标列是否存在
 // RULE: UPD-L3-003
-func (v *UpdateVldr) TargetColumnDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *UpdateVldr) TargetColumnDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// TODO:
 }
 
 // MaxAllowedUpdateRows 允许单次更新的最大行数
 // RULE: UPD-L3-004
-func (v *UpdateVldr) MaxAllowedUpdateRows(s *models.Statement, r *models.Rule) {
+func (v *UpdateVldr) MaxAllowedUpdateRows(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// TODO:
 }

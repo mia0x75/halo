@@ -16,6 +16,7 @@ import (
 	"github.com/mia0x75/halo/internal/agent"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/cache"
+	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/crypto"
@@ -74,7 +75,7 @@ func buildContext() *Context {
 		return elem.UUID == "fd577136-24ec-40bb-a792-c70078f075ab"
 	})
 
-	ticket := &models.Ticket{
+	ticket := &domain.Ticket{
 		UUID:       "9f25e9ee-3ca3-4fe6-9747-39ea90be59b1",
 		UserID:     1,
 		ReviewerID: 1,
@@ -83,9 +84,9 @@ func buildContext() *Context {
 	}
 
 	ctx := &Context{
-		Cluster: cluster,
-		Ticket:  ticket,
-		Stmts:   nil,
+		Cluster:  bridge.ClusterToDomain(cluster),
+		Ticket:   ticket,
+		Subjects: nil,
 	}
 	exec := agent.LocalExecutor{}
 	target := bridge.ClusterToDomain(cluster)
@@ -126,20 +127,21 @@ func TestGeneralRules(t *testing.T) {
 	ctx := buildContext()
 
 	for _, c := range cases {
-		r := cache.RulesMap.Any(func(elem *models.Rule) bool {
+		mr := cache.RulesMap.Any(func(elem *models.Rule) bool {
 			return elem.Name == c.RuleName
 		})
+		r := ruleFromDomain(bridge.RuleToDomain(mr))
 		stmt, err := p.ParseOneStmt(c.Text, "", "")
 		if err != nil {
 			t.Errorf("语法错误: %s, err: %s", c.Text, err.Error())
 			continue
 		}
-		s := &models.Statement{
+		s := &Subject{
 			Content:    c.Text,
 			Violations: &models.Violations{},
 			StmtNode:   stmt,
 		}
-		ctx.Stmts = []*models.Statement{s}
+		ctx.Subjects = []*Subject{s}
 		switch {
 		case strings.HasPrefix(c.RuleName, "CDB"):
 			v := &DatabaseCreateVldr{}
@@ -815,15 +817,16 @@ func TestTableCreateColumnCountLimit(t *testing.T) {
 	}
 
 	for _, c := range Cases {
-		r := cache.RulesMap.Any(func(elem *models.Rule) bool {
+		mr := cache.RulesMap.Any(func(elem *models.Rule) bool {
 			return elem.Name == c.RuleName
 		})
+		r := ruleFromDomain(bridge.RuleToDomain(mr))
 		stmt, err := p.ParseOneStmt(c.Text, "", "")
 		if err != nil {
 			t.Errorf("语法错误: %s", err.Error())
 			continue
 		}
-		s := &models.Statement{
+		s := &Subject{
 			Violations: &models.Violations{},
 			StmtNode:   stmt,
 		}
@@ -1309,24 +1312,25 @@ func TestMergeStatement(t *testing.T) {
 	// assert := assert.New(t)
 	ctx := buildContext()
 	for _, c := range cases {
-		r := cache.RulesMap.Any(func(elem *models.Rule) bool {
+		mr := cache.RulesMap.Any(func(elem *models.Rule) bool {
 			return elem.Name == c.RuleName
 		})
+		r := ruleFromDomain(bridge.RuleToDomain(mr))
 		nodes, _, err := p.Parse(c.Text, "", "")
 		if err != nil {
 			t.Errorf("语法错误: %s", err.Error())
 			continue
 		}
-		stmts := []*models.Statement{}
+		stmts := []*Subject{}
 		for _, node := range nodes {
-			s := &models.Statement{
+			s := &Subject{
 				Content:    c.Text,
 				Violations: &models.Violations{},
 				StmtNode:   node,
 			}
 			stmts = append(stmts, s)
 		}
-		ctx.Stmts = stmts
+		ctx.Subjects = stmts
 		v := &MiscVldr{}
 		v.Ctx = ctx
 		v.Call(r.Func, r)

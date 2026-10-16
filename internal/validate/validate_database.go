@@ -10,8 +10,6 @@ import (
 	"github.com/mia0x75/parser/ast"
 	"github.com/mia0x75/parser/charset"
 	log "github.com/sirupsen/logrus"
-
-	"github.com/mia0x75/halo/internal/models"
 )
 
 // DatabaseCreateVldr 创建数据库语句相关的审核规则
@@ -34,7 +32,7 @@ func (v *DatabaseCreateVldr) Enabled() bool {
 // Validate 规则组的审核入口
 func (v *DatabaseCreateVldr) Validate(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for _, s := range v.Ctx.Stmts {
+	for _, s := range v.Ctx.Subjects {
 		// 该方法不能放到结构体vldr是因为，反射时找不到子类的方法
 		node := s.StmtNode
 		if cd, ok := node.(*ast.CreateDatabaseStmt); !ok {
@@ -55,7 +53,7 @@ func (v *DatabaseCreateVldr) Validate(wg *sync.WaitGroup) {
 
 // AvailableCharsets 建库允许的字符集
 // RULE: CDB-L2-001
-func (v *DatabaseCreateVldr) AvailableCharsets(s *models.Statement, r *models.Rule) {
+func (v *DatabaseCreateVldr) AvailableCharsets(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var charsets []string
 	_ = json.Unmarshal([]byte(r.Values), &charsets)
@@ -74,9 +72,9 @@ func (v *DatabaseCreateVldr) AvailableCharsets(s *models.Statement, r *models.Ru
 		}
 	}
 	if !valid {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, useCharset, charsets),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -84,7 +82,7 @@ func (v *DatabaseCreateVldr) AvailableCharsets(s *models.Statement, r *models.Ru
 
 // AvailableCollates 建库允许的排序规则
 // RULE: CDB-L2-002
-func (v *DatabaseCreateVldr) AvailableCollates(s *models.Statement, r *models.Rule) {
+func (v *DatabaseCreateVldr) AvailableCollates(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var collates []string
 	_ = json.Unmarshal([]byte(r.Values), &collates)
@@ -104,9 +102,9 @@ func (v *DatabaseCreateVldr) AvailableCollates(s *models.Statement, r *models.Ru
 		}
 	}
 	if !valid {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, useCollate, collates),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -114,7 +112,7 @@ func (v *DatabaseCreateVldr) AvailableCollates(s *models.Statement, r *models.Ru
 
 // CharsetCollateMustMatch 建库的字符集与排序规则必须匹配
 // RULE: CDB-L2-003
-func (v *DatabaseCreateVldr) CharsetCollateMustMatch(s *models.Statement, r *models.Rule) {
+func (v *DatabaseCreateVldr) CharsetCollateMustMatch(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	useCharset := ""
 	useCollate := ""
@@ -132,9 +130,9 @@ func (v *DatabaseCreateVldr) CharsetCollateMustMatch(s *models.Statement, r *mod
 	}
 
 	if !charset.ValidCharsetAndCollation(useCharset, useCollate) {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, useCharset, useCollate),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -142,13 +140,13 @@ func (v *DatabaseCreateVldr) CharsetCollateMustMatch(s *models.Statement, r *mod
 
 // DatabaseNameQualified 库名标识符规则
 // RULE: CDB-L2-004
-func (v *DatabaseCreateVldr) DatabaseNameQualified(s *models.Statement, r *models.Rule) {
+func (v *DatabaseCreateVldr) DatabaseNameQualified(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	dbName := v.cd.Name
 	if err := Match(r, dbName, dbName, r.Values); err != nil {
-		c := &models.Clause{
+		c := &Clause{
 			Description: err.Error(),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -156,13 +154,13 @@ func (v *DatabaseCreateVldr) DatabaseNameQualified(s *models.Statement, r *model
 
 // DatabaseNameLowerCaseRequired 库名大小写规则
 // RULE: CDB-L2-005
-func (v *DatabaseCreateVldr) DatabaseNameLowerCaseRequired(s *models.Statement, r *models.Rule) {
+func (v *DatabaseCreateVldr) DatabaseNameLowerCaseRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	dbName := v.cd.Name
 	if err := Match(r, dbName, dbName); err != nil {
-		c := &models.Clause{
+		c := &Clause{
 			Description: err.Error(),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -170,14 +168,14 @@ func (v *DatabaseCreateVldr) DatabaseNameLowerCaseRequired(s *models.Statement, 
 
 // DatabaseNameMaxLength 库名长度规则
 // RULE: CDB-L2-006
-func (v *DatabaseCreateVldr) DatabaseNameMaxLength(s *models.Statement, r *models.Rule) {
+func (v *DatabaseCreateVldr) DatabaseNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	dbName := v.cd.Name
 	threshold, _ := strconv.Atoi(r.Values)
 	if len(dbName) > threshold {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, dbName, threshold),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -185,13 +183,13 @@ func (v *DatabaseCreateVldr) DatabaseNameMaxLength(s *models.Statement, r *model
 
 // TargetDatabaseDoesNotExist 目标数据库已经存在
 // RULE: CDB-L2-007
-func (v *DatabaseCreateVldr) TargetDatabaseDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *DatabaseCreateVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	database := v.cd.Name
 	if v.DatabaseInfo(database) != nil {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, database),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -217,7 +215,7 @@ func (v *DatabaseAlterVldr) Enabled() bool {
 // Validate 规则组的审核入口
 func (v *DatabaseAlterVldr) Validate(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for _, s := range v.Ctx.Stmts {
+	for _, s := range v.Ctx.Subjects {
 		// 该方法不能放到结构体vldr是因为，反射时找不到子类的方法
 		node := s.StmtNode
 		if ad, ok := node.(*ast.AlterDatabaseStmt); !ok {
@@ -238,7 +236,7 @@ func (v *DatabaseAlterVldr) Validate(wg *sync.WaitGroup) {
 
 // AvailableCharsets 改库允许的字符集
 // RULE: MDB-L2-001
-func (v *DatabaseAlterVldr) AvailableCharsets(s *models.Statement, r *models.Rule) {
+func (v *DatabaseAlterVldr) AvailableCharsets(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var charsets []string
 	_ = json.Unmarshal([]byte(r.Values), &charsets)
@@ -260,9 +258,9 @@ func (v *DatabaseAlterVldr) AvailableCharsets(s *models.Statement, r *models.Rul
 	}
 
 	if !valid {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, useCharset, charsets),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -270,7 +268,7 @@ func (v *DatabaseAlterVldr) AvailableCharsets(s *models.Statement, r *models.Rul
 
 // AvailableCollates 改库允许的排序规则
 // RULE: MDB-L2-002
-func (v *DatabaseAlterVldr) AvailableCollates(s *models.Statement, r *models.Rule) {
+func (v *DatabaseAlterVldr) AvailableCollates(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var collates []string
 	_ = json.Unmarshal([]byte(r.Values), &collates)
@@ -292,9 +290,9 @@ func (v *DatabaseAlterVldr) AvailableCollates(s *models.Statement, r *models.Rul
 	}
 
 	if !valid {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, useCollate, collates),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -302,7 +300,7 @@ func (v *DatabaseAlterVldr) AvailableCollates(s *models.Statement, r *models.Rul
 
 // CharsetCollateMustMatch 改库的字符集与排序规则必须匹配
 // RULE: MDB-L2-003
-func (v *DatabaseAlterVldr) CharsetCollateMustMatch(s *models.Statement, r *models.Rule) {
+func (v *DatabaseAlterVldr) CharsetCollateMustMatch(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	useCharset := ""
 	useCollate := ""
@@ -329,9 +327,9 @@ func (v *DatabaseAlterVldr) CharsetCollateMustMatch(s *models.Statement, r *mode
 	}
 
 	if !charset.ValidCharsetAndCollation(useCharset, useCollate) {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, useCharset, useCollate),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -339,13 +337,13 @@ func (v *DatabaseAlterVldr) CharsetCollateMustMatch(s *models.Statement, r *mode
 
 // TargetDatabaseDoesNotExist 目标库不存在
 // RULE: MDB-L2-004
-func (v *DatabaseAlterVldr) TargetDatabaseDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *DatabaseAlterVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	database := v.ad.Name
 	if v.DatabaseInfo(database) == nil {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, database),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -371,7 +369,7 @@ func (v *DatabaseDropVldr) Enabled() bool {
 // Validate 规则组的审核入口
 func (v *DatabaseDropVldr) Validate(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for _, s := range v.Ctx.Stmts {
+	for _, s := range v.Ctx.Subjects {
 		// 该方法不能放到结构体vldr是因为，反射时找不到子类的方法
 		node := s.StmtNode
 		if dd, ok := node.(*ast.DropDatabaseStmt); !ok {
@@ -392,13 +390,13 @@ func (v *DatabaseDropVldr) Validate(wg *sync.WaitGroup) {
 
 // TargetDatabaseDoesNotExist 目标库不存在
 // RULE: DDB-L2-001
-func (v *DatabaseDropVldr) TargetDatabaseDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *DatabaseDropVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	database := v.dd.Name
 	if v.DatabaseInfo(database) == nil {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, database),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}

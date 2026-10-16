@@ -12,8 +12,6 @@ import (
 	"github.com/mia0x75/parser/mysql"
 	"github.com/mia0x75/parser/types"
 	log "github.com/sirupsen/logrus"
-
-	"github.com/mia0x75/halo/internal/models"
 )
 
 // TableCreateVldr 创建表语句相关的审核规则
@@ -36,7 +34,7 @@ func (v *TableCreateVldr) Enabled() bool {
 // Validate 规则组的审核入口
 func (v *TableCreateVldr) Validate(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for _, s := range v.Ctx.Stmts {
+	for _, s := range v.Ctx.Subjects {
 		// 该方法不能放到结构体vldr是因为，反射时找不到子类的方法
 		node := s.StmtNode
 		if ct, ok := node.(*ast.CreateTableStmt); !ok {
@@ -57,7 +55,7 @@ func (v *TableCreateVldr) Validate(wg *sync.WaitGroup) {
 
 // AvailableCharsets 建表允许的字符集
 // RULE: CTB-L2-001
-func (v *TableCreateVldr) AvailableCharsets(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) AvailableCharsets(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// CREATE ... LIKE ... 或者 CREATE ... SELECT ...
 	if v.ct.ReferTable != nil || v.ct.Select != nil {
@@ -84,9 +82,9 @@ func (v *TableCreateVldr) AvailableCharsets(s *models.Statement, r *models.Rule)
 	}
 
 	if !valid {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, useCharset, charsets),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -94,7 +92,7 @@ func (v *TableCreateVldr) AvailableCharsets(s *models.Statement, r *models.Rule)
 
 // AvailableCollates 建表允许的排序规则
 // RULE: CTB-L2-002
-func (v *TableCreateVldr) AvailableCollates(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) AvailableCollates(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// CREATE ... LIKE ... 或者 CREATE ... SELECT ...
 	if v.ct.ReferTable != nil || v.ct.Select != nil {
@@ -121,9 +119,9 @@ func (v *TableCreateVldr) AvailableCollates(s *models.Statement, r *models.Rule)
 	}
 
 	if !valid {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, useCollate, collates),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -131,7 +129,7 @@ func (v *TableCreateVldr) AvailableCollates(s *models.Statement, r *models.Rule)
 
 // TableCharsetCollateMustMatch 建表是校验规则与字符集必须匹配
 // RULE: CTB-L2-003
-func (v *TableCreateVldr) TableCharsetCollateMustMatch(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) TableCharsetCollateMustMatch(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// TODO 需要判断后续字符集与排序规则的关系,考虑读字典表
 	// CREATE ... LIKE ... 或者 CREATE ... SELECT ...
@@ -155,9 +153,9 @@ func (v *TableCreateVldr) TableCharsetCollateMustMatch(s *models.Statement, r *m
 	}
 
 	if !charset.ValidCharsetAndCollation(useCharset, useCollate) {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, useCharset, useCollate),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -165,7 +163,7 @@ func (v *TableCreateVldr) TableCharsetCollateMustMatch(s *models.Statement, r *m
 
 // AvailableEngines 建表允许的存储引擎
 // RULE: CTB-L2-004
-func (v *TableCreateVldr) AvailableEngines(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) AvailableEngines(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// CREATE ... LIKE ... 或者 CREATE ... SELECT ...
 	if v.ct.ReferTable != nil || v.ct.Select != nil {
@@ -190,9 +188,9 @@ func (v *TableCreateVldr) AvailableEngines(s *models.Statement, r *models.Rule) 
 	}
 
 	if !valid {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, useEngine, engines),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -200,13 +198,13 @@ func (v *TableCreateVldr) AvailableEngines(s *models.Statement, r *models.Rule) 
 
 // TableNameQualified 表名必须符合命名规范
 // RULE: CTB-L2-005
-func (v *TableCreateVldr) TableNameQualified(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) TableNameQualified(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	tableName := v.ct.Table.Name.O
 	if err := Match(r, tableName, tableName, r.Values); err != nil {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, tableName, r.Values),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -214,13 +212,13 @@ func (v *TableCreateVldr) TableNameQualified(s *models.Statement, r *models.Rule
 
 // TableNameLowerCaseRequired 表名是否允许大写
 // RULE: CTB-L2-006
-func (v *TableCreateVldr) TableNameLowerCaseRequired(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) TableNameLowerCaseRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	tableName := strings.TrimSpace(v.ct.Table.Name.O)
 	if err := Match(r, tableName, tableName); err != nil {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, tableName),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -228,7 +226,7 @@ func (v *TableCreateVldr) TableNameLowerCaseRequired(s *models.Statement, r *mod
 
 // TableNameMaxLength 表名最大长度
 // RULE: CTB-L2-007
-func (v *TableCreateVldr) TableNameMaxLength(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) TableNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	threshold, err := strconv.Atoi(r.Values)
 	if err != nil {
@@ -236,9 +234,9 @@ func (v *TableCreateVldr) TableNameMaxLength(s *models.Statement, r *models.Rule
 	}
 	tableName := strings.TrimSpace(v.ct.Table.Name.O)
 	if len(tableName) > threshold {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, tableName, threshold),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -246,7 +244,7 @@ func (v *TableCreateVldr) TableNameMaxLength(s *models.Statement, r *models.Rule
 
 // TableCommentRequired 表必须有注释
 // RULE: CTB-L2-008
-func (v *TableCreateVldr) TableCommentRequired(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) TableCommentRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// CREATE ... LIKE ... 或者 CREATE ... SELECT ...
 	if v.ct.ReferTable != nil || v.ct.Select != nil {
@@ -265,9 +263,9 @@ func (v *TableCreateVldr) TableCommentRequired(s *models.Statement, r *models.Ru
 		}
 	}
 	if !valid {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, tableName),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -275,16 +273,16 @@ func (v *TableCreateVldr) TableCommentRequired(s *models.Statement, r *models.Ru
 
 // CreateTableFromSelectNotAllowed 是否允许查询语句建表
 // RULE: CTB-L2-009
-func (v *TableCreateVldr) CreateTableFromSelectNotAllowed(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) CreateTableFromSelectNotAllowed(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// 规则允许执行，表示禁止新建表
 	if v.ct.Select == nil {
 		return
 	}
 	if _, ok := v.ct.Select.(*ast.SelectStmt); ok {
-		c := &models.Clause{
+		c := &Clause{
 			Description: r.Message,
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -292,7 +290,7 @@ func (v *TableCreateVldr) CreateTableFromSelectNotAllowed(s *models.Statement, r
 
 // ColumnNameQualified 列名必须符合命名规范
 // RULE: CTB-L2-010
-func (v *TableCreateVldr) ColumnNameQualified(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) ColumnNameQualified(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, col := range v.ct.Cols {
 		colName := col.Name.Name.O
@@ -300,9 +298,9 @@ func (v *TableCreateVldr) ColumnNameQualified(s *models.Statement, r *models.Rul
 			colName = "<empty>"
 		}
 		if err := Match(r, colName, colName, r.Values); err != nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: err.Error(),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -311,7 +309,7 @@ func (v *TableCreateVldr) ColumnNameQualified(s *models.Statement, r *models.Rul
 
 // ColumnNameLowerCaseRequired 列名是否允许大写
 // RULE: CTB-L2-011
-func (v *TableCreateVldr) ColumnNameLowerCaseRequired(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) ColumnNameLowerCaseRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, col := range v.ct.Cols {
 		colName := strings.TrimSpace(col.Name.Name.O)
@@ -319,9 +317,9 @@ func (v *TableCreateVldr) ColumnNameLowerCaseRequired(s *models.Statement, r *mo
 			continue
 		}
 		if err := Match(r, colName, colName); err != nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: err.Error(),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -330,7 +328,7 @@ func (v *TableCreateVldr) ColumnNameLowerCaseRequired(s *models.Statement, r *mo
 
 // ColumnNameMaxLength 列名最大长度
 // RULE: CTB-L2-012
-func (v *TableCreateVldr) ColumnNameMaxLength(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) ColumnNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	threshold, err := strconv.Atoi(r.Values)
 	if err != nil {
@@ -339,9 +337,9 @@ func (v *TableCreateVldr) ColumnNameMaxLength(s *models.Statement, r *models.Rul
 	for _, col := range v.ct.Cols {
 		colName := strings.TrimSpace(col.Name.Name.O)
 		if len(colName) > threshold {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, colName, threshold),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -350,7 +348,7 @@ func (v *TableCreateVldr) ColumnNameMaxLength(s *models.Statement, r *models.Rul
 
 // ColumnNameDuplicate 列名是否重复
 // RULE: CTB-L2-013
-func (v *TableCreateVldr) ColumnNameDuplicate(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) ColumnNameDuplicate(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	tableName := v.ct.Table.Name.O
 	// 字段名
@@ -358,9 +356,9 @@ func (v *TableCreateVldr) ColumnNameDuplicate(s *models.Statement, r *models.Rul
 	for _, col := range v.ct.Cols {
 		colName := col.Name.Name.L // 不关心大小写
 		if _, ok := columnMap[colName]; ok {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, tableName, colName),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		} else {
@@ -371,7 +369,7 @@ func (v *TableCreateVldr) ColumnNameDuplicate(s *models.Statement, r *models.Rul
 
 // MaxAllowedColumnCount 表允许的最大列数
 // RULE: CTB-L2-014
-func (v *TableCreateVldr) MaxAllowedColumnCount(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) MaxAllowedColumnCount(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	tableName := v.ct.Table.Name.O
 	// 字段数量
@@ -381,9 +379,9 @@ func (v *TableCreateVldr) MaxAllowedColumnCount(s *models.Statement, r *models.R
 	}
 
 	if len(v.ct.Cols) > threshold {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, tableName, len(v.ct.Cols), threshold),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -391,7 +389,7 @@ func (v *TableCreateVldr) MaxAllowedColumnCount(s *models.Statement, r *models.R
 
 // ColumnTypesDoesNotExpect 列不允许的数据类型
 // RULE: CTB-L2-015
-func (v *TableCreateVldr) ColumnTypesDoesNotExpect(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) ColumnTypesDoesNotExpect(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var availableTypes []string
 	_ = json.Unmarshal([]byte(r.Values), &availableTypes)
@@ -404,9 +402,9 @@ func (v *TableCreateVldr) ColumnTypesDoesNotExpect(s *models.Statement, r *model
 		colType := types.TypeStr(col.Tp.Tp)
 		for _, t := range availableTypes {
 			if strings.EqualFold(colType, t) {
-				c := &models.Clause{
+				c := &Clause{
 					Description: fmt.Sprintf(r.Message, col.Name, colType, availableTypes),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -416,7 +414,7 @@ func (v *TableCreateVldr) ColumnTypesDoesNotExpect(s *models.Statement, r *model
 
 // ColumnCommentRequired 列必须有注释
 // RULE: CTB-L2-016
-func (v *TableCreateVldr) ColumnCommentRequired(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) ColumnCommentRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, col := range v.ct.Cols {
 		// 排除含有注释字段
@@ -432,9 +430,9 @@ func (v *TableCreateVldr) ColumnCommentRequired(s *models.Statement, r *models.R
 		}
 		// 格式化输出错误信息
 		if !hasComment {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, col.Name.Name.O),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -443,7 +441,7 @@ func (v *TableCreateVldr) ColumnCommentRequired(s *models.Statement, r *models.R
 
 // ColumnAvailableCharsets 列允许的字符集
 // RULE: CTB-L2-017
-func (v *TableCreateVldr) ColumnAvailableCharsets(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) ColumnAvailableCharsets(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// 字符集
 	var charsets []string
@@ -464,9 +462,9 @@ func (v *TableCreateVldr) ColumnAvailableCharsets(s *models.Statement, r *models
 			}
 		}
 		if !valid {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, col.Name, colCharset, charsets),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -475,7 +473,7 @@ func (v *TableCreateVldr) ColumnAvailableCharsets(s *models.Statement, r *models
 
 // ColumnAvailableCollates 列允许的排序规则
 // RULE: CTB-L2-018
-func (v *TableCreateVldr) ColumnAvailableCollates(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) ColumnAvailableCollates(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// 排序规则
 	var collates []string
@@ -495,9 +493,9 @@ func (v *TableCreateVldr) ColumnAvailableCollates(s *models.Statement, r *models
 			}
 		}
 		if !valid {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, col.Name, colCollate, collates),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -506,7 +504,7 @@ func (v *TableCreateVldr) ColumnAvailableCollates(s *models.Statement, r *models
 
 // ColumnCharsetCollateMustMatch 列的字符集与排序规则必须匹配
 // RULE: CTB-L2-019
-func (v *TableCreateVldr) ColumnCharsetCollateMustMatch(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) ColumnCharsetCollateMustMatch(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, col := range v.ct.Cols {
 		// TODO 需要判断后续字符集与排序规则的关系,考虑读字典表
@@ -519,9 +517,9 @@ func (v *TableCreateVldr) ColumnCharsetCollateMustMatch(s *models.Statement, r *
 
 		if len(colCollate) > 0 && len(colCharset) > 0 {
 			if !charset.ValidCharsetAndCollation(colCharset, colCollate) {
-				c := &models.Clause{
+				c := &Clause{
 					Description: fmt.Sprintf(r.Message, col.Name, colCharset, colCollate),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -531,7 +529,7 @@ func (v *TableCreateVldr) ColumnCharsetCollateMustMatch(s *models.Statement, r *
 
 // ColumnNotNullWithDefaultRequired 非空列是否有默认值
 // RULE: CTB-L2-020
-func (v *TableCreateVldr) ColumnNotNullWithDefaultRequired(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) ColumnNotNullWithDefaultRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// 非空字段 默认值字段
 	nameMap := make(map[string]int)
@@ -561,9 +559,9 @@ func (v *TableCreateVldr) ColumnNotNullWithDefaultRequired(s *models.Statement, 
 
 	for name, val := range nameMap {
 		if val == 1 {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, name),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -572,7 +570,7 @@ func (v *TableCreateVldr) ColumnNotNullWithDefaultRequired(s *models.Statement, 
 
 // ColumnAutoIncAvailableTypes 自增列允许的数据类型
 // RULE: CTB-L2-021
-func (v *TableCreateVldr) ColumnAutoIncAvailableTypes(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) ColumnAutoIncAvailableTypes(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var availableTypes []string
 	_ = json.Unmarshal([]byte(r.Values), &availableTypes)
@@ -592,9 +590,9 @@ func (v *TableCreateVldr) ColumnAutoIncAvailableTypes(s *models.Statement, r *mo
 					}
 				}
 				if !valid {
-					c := &models.Clause{
+					c := &Clause{
 						Description: fmt.Sprintf(r.Message, col.Name, colType, availableTypes),
-						Level:       r.Level,
+						Level:       uint8(r.Level),
 					}
 					s.Violations.Append(c)
 				}
@@ -609,7 +607,7 @@ func (v *TableCreateVldr) ColumnAutoIncAvailableTypes(s *models.Statement, r *mo
 
 // ColumnAutoIncUnsignedRequired 自增列必须是无符号
 // RULE: CTB-L2-022
-func (v *TableCreateVldr) ColumnAutoIncUnsignedRequired(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) ColumnAutoIncUnsignedRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, col := range v.ct.Cols {
 		hasAutoInc := false
@@ -617,9 +615,9 @@ func (v *TableCreateVldr) ColumnAutoIncUnsignedRequired(s *models.Statement, r *
 			if op.Tp == ast.ColumnOptionAutoIncrement {
 				hasAutoInc = true
 				if !mysql.HasUnsignedFlag(col.Tp.Flag) {
-					c := &models.Clause{
+					c := &Clause{
 						Description: fmt.Sprintf(r.Message, col.Name),
-						Level:       r.Level,
+						Level:       uint8(r.Level),
 					}
 					s.Violations.Append(c)
 				}
@@ -634,7 +632,7 @@ func (v *TableCreateVldr) ColumnAutoIncUnsignedRequired(s *models.Statement, r *
 
 // ColumnAutoIncMustPrimaryKey 自增列必须是主键
 // RULE: CTB-L2-023
-func (v *TableCreateVldr) ColumnAutoIncMustPrimaryKey(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) ColumnAutoIncMustPrimaryKey(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, col := range v.ct.Cols {
 		for _, op := range col.Options {
@@ -670,9 +668,9 @@ func (v *TableCreateVldr) ColumnAutoIncMustPrimaryKey(s *models.Statement, r *mo
 	}
 	for colName := range autoIncMap {
 		if pkMap[colName] != 1 {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, colName),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -681,7 +679,7 @@ func (v *TableCreateVldr) ColumnAutoIncMustPrimaryKey(s *models.Statement, r *mo
 
 // MaxAllowedTimestampCount 仅允许一个时间戳类型的列
 // RULE: CTB-L2-024
-func (v *TableCreateVldr) MaxAllowedTimestampCount(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) MaxAllowedTimestampCount(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	tableName := v.ct.Table.Name.O
 	count := 0
@@ -693,9 +691,9 @@ func (v *TableCreateVldr) MaxAllowedTimestampCount(s *models.Statement, r *model
 	}
 
 	if count > 1 {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, tableName),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -703,16 +701,16 @@ func (v *TableCreateVldr) MaxAllowedTimestampCount(s *models.Statement, r *model
 
 // MaxAllowedIndexColumnCount 单一索引最大列数
 // RULE: CTB-L2-025
-func (v *TableCreateVldr) MaxAllowedIndexColumnCount(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) MaxAllowedIndexColumnCount(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	threshold, _ := strconv.Atoi(r.Values)
 	for _, c := range v.ct.Constraints {
 		switch c.Tp {
 		case ast.ConstraintIndex, ast.ConstraintPrimaryKey, ast.ConstraintKey, ast.ConstraintUniq, ast.ConstraintUniqKey, ast.ConstraintUniqIndex:
 			if len(c.Keys) > threshold {
-				c := &models.Clause{
+				c := &Clause{
 					Description: fmt.Sprintf(r.Message, c.Name, threshold),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -722,7 +720,7 @@ func (v *TableCreateVldr) MaxAllowedIndexColumnCount(s *models.Statement, r *mod
 
 // PrimaryKeyRequired 必须有主键
 // RULE: CTB-L2-026
-func (v *TableCreateVldr) PrimaryKeyRequired(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) PrimaryKeyRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// CREATE ... LIKE ... 或者 CREATE ... SELECT ...
 	if v.ct.ReferTable != nil || v.ct.Select != nil {
@@ -742,16 +740,16 @@ func (v *TableCreateVldr) PrimaryKeyRequired(s *models.Statement, r *models.Rule
 		}
 	}
 
-	c := &models.Clause{
+	c := &Clause{
 		Description: r.Message,
-		Level:       r.Level,
+		Level:       uint8(r.Level),
 	}
 	s.Violations.Append(c)
 }
 
 // PrimaryKeyNameExplicit 主键是否显式命名
 // RULE: CTB-L2-027
-func (v *TableCreateVldr) PrimaryKeyNameExplicit(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) PrimaryKeyNameExplicit(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	tableName := v.ct.Table.Name.O
 	valid := false
@@ -767,9 +765,9 @@ func (v *TableCreateVldr) PrimaryKeyNameExplicit(s *models.Statement, r *models.
 		}
 	}
 	if !valid {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, tableName),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -777,7 +775,7 @@ func (v *TableCreateVldr) PrimaryKeyNameExplicit(s *models.Statement, r *models.
 
 // PrimaryKeyNameQualified 主键名标识符规则
 // RULE: CTB-L2-028
-func (v *TableCreateVldr) PrimaryKeyNameQualified(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) PrimaryKeyNameQualified(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	if len(v.ct.Constraints) == 0 {
 		return
@@ -789,9 +787,9 @@ func (v *TableCreateVldr) PrimaryKeyNameQualified(s *models.Statement, r *models
 				continue
 			}
 			if err := Match(r, keyName, keyName, r.Values); err != nil {
-				c := &models.Clause{
+				c := &Clause{
 					Description: err.Error(),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 				// TODO:
@@ -803,15 +801,15 @@ func (v *TableCreateVldr) PrimaryKeyNameQualified(s *models.Statement, r *models
 
 // PrimryKeyLowerCaseRequired 主键名大小写规则
 // RULE: CTB-L2-029
-func (v *TableCreateVldr) PrimryKeyLowerCaseRequired(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) PrimryKeyLowerCaseRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, c := range v.ct.Constraints {
 		if c.Tp == ast.ConstraintPrimaryKey {
 			if len(c.Name) > 0 {
 				if err := Match(r, c.Name, c.Name); err != nil {
-					c := &models.Clause{
+					c := &Clause{
 						Description: err.Error(),
-						Level:       r.Level,
+						Level:       uint8(r.Level),
 					}
 					s.Violations.Append(c)
 				}
@@ -823,7 +821,7 @@ func (v *TableCreateVldr) PrimryKeyLowerCaseRequired(s *models.Statement, r *mod
 
 // PrimryKeyMaxLength 主键名长度规则
 // RULE: CTB-L2-030
-func (v *TableCreateVldr) PrimryKeyMaxLength(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) PrimryKeyMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	threshold, err := strconv.Atoi(r.Values)
 	if err != nil {
@@ -834,9 +832,9 @@ func (v *TableCreateVldr) PrimryKeyMaxLength(s *models.Statement, r *models.Rule
 		if c.Tp == ast.ConstraintPrimaryKey {
 			keyName := strings.TrimSpace(c.Name)
 			if len(keyName) > threshold {
-				c := &models.Clause{
+				c := &Clause{
 					Description: fmt.Sprintf(r.Message, keyName, threshold),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -847,7 +845,7 @@ func (v *TableCreateVldr) PrimryKeyMaxLength(s *models.Statement, r *models.Rule
 
 // PrimryKeyPrefixRequired 主键名前缀规则
 // RULE: CTB-L2-031
-func (v *TableCreateVldr) PrimryKeyPrefixRequired(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) PrimryKeyPrefixRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	if len(v.ct.Constraints) == 0 {
 		return
@@ -856,9 +854,9 @@ func (v *TableCreateVldr) PrimryKeyPrefixRequired(s *models.Statement, r *models
 		if c.Tp == ast.ConstraintPrimaryKey {
 			if len(c.Name) > 0 {
 				if err := Match(r, c.Name, r.Values); err != nil {
-					c := &models.Clause{
+					c := &Clause{
 						Description: fmt.Sprintf(r.Message, c.Name, r.Values),
-						Level:       r.Level,
+						Level:       uint8(r.Level),
 					}
 					s.Violations.Append(c)
 				}
@@ -869,15 +867,15 @@ func (v *TableCreateVldr) PrimryKeyPrefixRequired(s *models.Statement, r *models
 
 // IndexNameExplicit 索引必须命名
 // RULE: CTB-L2-032
-func (v *TableCreateVldr) IndexNameExplicit(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) IndexNameExplicit(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, c := range v.ct.Constraints {
 		if c.Tp == ast.ConstraintIndex {
 			keyName := strings.TrimSpace(c.Name)
 			if len(keyName) == 0 {
-				c := &models.Clause{
+				c := &Clause{
 					Description: r.Message,
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 				break
@@ -888,7 +886,7 @@ func (v *TableCreateVldr) IndexNameExplicit(s *models.Statement, r *models.Rule)
 
 // IndexNameQualified 索引名标识符规则
 // RULE: CTB-L2-033
-func (v *TableCreateVldr) IndexNameQualified(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) IndexNameQualified(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, c := range v.ct.Constraints {
 		if c.Tp == ast.ConstraintIndex {
@@ -897,9 +895,9 @@ func (v *TableCreateVldr) IndexNameQualified(s *models.Statement, r *models.Rule
 				continue
 			}
 			if err := Match(r, keyName, keyName, r.Values); err != nil {
-				c := &models.Clause{
+				c := &Clause{
 					Description: err.Error(),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -909,7 +907,7 @@ func (v *TableCreateVldr) IndexNameQualified(s *models.Statement, r *models.Rule
 
 // IndexNameLowerCaseRequired 索引名大小写规则
 // RULE: CTB-L2-034
-func (v *TableCreateVldr) IndexNameLowerCaseRequired(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) IndexNameLowerCaseRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, c := range v.ct.Constraints {
 		if c.Tp == ast.ConstraintIndex {
@@ -918,9 +916,9 @@ func (v *TableCreateVldr) IndexNameLowerCaseRequired(s *models.Statement, r *mod
 				continue
 			}
 			if err := Match(r, keyName, keyName); err != nil {
-				c := &models.Clause{
+				c := &Clause{
 					Description: err.Error(),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -930,7 +928,7 @@ func (v *TableCreateVldr) IndexNameLowerCaseRequired(s *models.Statement, r *mod
 
 // IndexNameMaxLength 索引名长度规则
 // RULE: CTB-L2-035
-func (v *TableCreateVldr) IndexNameMaxLength(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) IndexNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	threshold, err := strconv.Atoi(r.Values)
 	if err != nil {
@@ -940,9 +938,9 @@ func (v *TableCreateVldr) IndexNameMaxLength(s *models.Statement, r *models.Rule
 		if c.Tp == ast.ConstraintIndex {
 			keyName := strings.TrimSpace(c.Name)
 			if len(keyName) > threshold {
-				c := &models.Clause{
+				c := &Clause{
 					Description: fmt.Sprintf(r.Message, keyName, threshold),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -952,7 +950,7 @@ func (v *TableCreateVldr) IndexNameMaxLength(s *models.Statement, r *models.Rule
 
 // IndexNamePrefixRequired 索引名前缀规则
 // RULE: CTB-L2-036
-func (v *TableCreateVldr) IndexNamePrefixRequired(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) IndexNamePrefixRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, c := range v.ct.Constraints {
 		if c.Tp == ast.ConstraintIndex {
@@ -961,9 +959,9 @@ func (v *TableCreateVldr) IndexNamePrefixRequired(s *models.Statement, r *models
 				continue
 			}
 			if err := Match(r, keyName, keyName, r.Values); err != nil {
-				c := &models.Clause{
+				c := &Clause{
 					Description: err.Error(),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -973,15 +971,15 @@ func (v *TableCreateVldr) IndexNamePrefixRequired(s *models.Statement, r *models
 
 // UniqueNameExplicit 唯一索引必须命名
 // RULE: CTB-L2-037
-func (v *TableCreateVldr) UniqueNameExplicit(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) UniqueNameExplicit(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, c := range v.ct.Constraints {
 		if c.Tp == ast.ConstraintUniq {
 			keyName := strings.TrimSpace(c.Name)
 			if len(keyName) == 0 {
-				c := &models.Clause{
+				c := &Clause{
 					Description: r.Message,
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 				break
@@ -992,7 +990,7 @@ func (v *TableCreateVldr) UniqueNameExplicit(s *models.Statement, r *models.Rule
 
 // UniqueNameQualified 唯一索引索名标识符规则
 // RULE: CTB-L2-038
-func (v *TableCreateVldr) UniqueNameQualified(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) UniqueNameQualified(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, c := range v.ct.Constraints {
 		if c.Tp == ast.ConstraintUniq {
@@ -1001,9 +999,9 @@ func (v *TableCreateVldr) UniqueNameQualified(s *models.Statement, r *models.Rul
 				continue
 			}
 			if err := Match(r, keyName, keyName, r.Values); err != nil {
-				c := &models.Clause{
+				c := &Clause{
 					Description: err.Error(),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -1013,7 +1011,7 @@ func (v *TableCreateVldr) UniqueNameQualified(s *models.Statement, r *models.Rul
 
 // UniqueNameLowerCaseRequired 唯一索引名大小写规则
 // RULE: CTB-L2-039
-func (v *TableCreateVldr) UniqueNameLowerCaseRequired(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) UniqueNameLowerCaseRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, c := range v.ct.Constraints {
 		if c.Tp == ast.ConstraintUniq {
@@ -1022,9 +1020,9 @@ func (v *TableCreateVldr) UniqueNameLowerCaseRequired(s *models.Statement, r *mo
 				continue
 			}
 			if err := Match(r, keyName, keyName); err != nil {
-				c := &models.Clause{
+				c := &Clause{
 					Description: err.Error(),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -1034,7 +1032,7 @@ func (v *TableCreateVldr) UniqueNameLowerCaseRequired(s *models.Statement, r *mo
 
 // UniqueNameMaxLength 唯一索引名长度规则
 // RULE: CTB-L2-040
-func (v *TableCreateVldr) UniqueNameMaxLength(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) UniqueNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	threshold, err := strconv.Atoi(r.Values)
 	if err != nil {
@@ -1044,9 +1042,9 @@ func (v *TableCreateVldr) UniqueNameMaxLength(s *models.Statement, r *models.Rul
 		if c.Tp == ast.ConstraintUniq {
 			keyName := strings.TrimSpace(c.Name)
 			if len(keyName) > threshold {
-				c := &models.Clause{
+				c := &Clause{
 					Description: fmt.Sprintf(r.Message, keyName, threshold),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -1056,7 +1054,7 @@ func (v *TableCreateVldr) UniqueNameMaxLength(s *models.Statement, r *models.Rul
 
 // UniqueNamePrefixRequired 唯一索引名前缀规则
 // RULE: CTB-L2-041
-func (v *TableCreateVldr) UniqueNamePrefixRequired(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) UniqueNamePrefixRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, c := range v.ct.Constraints {
 		if c.Tp == ast.ConstraintUniq {
@@ -1065,9 +1063,9 @@ func (v *TableCreateVldr) UniqueNamePrefixRequired(s *models.Statement, r *model
 				continue
 			}
 			if err := Match(r, keyName, keyName, r.Values); err != nil {
-				c := &models.Clause{
+				c := &Clause{
 					Description: err.Error(),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -1077,7 +1075,7 @@ func (v *TableCreateVldr) UniqueNamePrefixRequired(s *models.Statement, r *model
 
 // ForeignKeyNotAllowed 是否允许外键
 // RULE: CTB-L2-042
-func (v *TableCreateVldr) ForeignKeyNotAllowed(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) ForeignKeyNotAllowed(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	valid := true
 	for i := 0; i < len(v.ct.Cols) && valid; i++ {
@@ -1098,9 +1096,9 @@ func (v *TableCreateVldr) ForeignKeyNotAllowed(s *models.Statement, r *models.Ru
 	}
 
 	if !valid {
-		c := &models.Clause{
+		c := &Clause{
 			Description: r.Message,
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -1108,15 +1106,15 @@ func (v *TableCreateVldr) ForeignKeyNotAllowed(s *models.Statement, r *models.Ru
 
 // ForeignKeyNameExplicit 是否配置外键名称
 // RULE: CTB-L2-043
-func (v *TableCreateVldr) ForeignKeyNameExplicit(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) ForeignKeyNameExplicit(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, c := range v.ct.Constraints {
 		if c.Tp == ast.ConstraintForeignKey {
 			keyName := strings.TrimSpace(c.Name)
 			if len(keyName) == 0 {
-				c := &models.Clause{
+				c := &Clause{
 					Description: r.Message,
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 				break
@@ -1127,7 +1125,7 @@ func (v *TableCreateVldr) ForeignKeyNameExplicit(s *models.Statement, r *models.
 
 // ForeignKeyNameQualified 外键名标识符规则
 // RULE: CTB-L2-044
-func (v *TableCreateVldr) ForeignKeyNameQualified(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) ForeignKeyNameQualified(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, c := range v.ct.Constraints {
 		if c.Tp == ast.ConstraintForeignKey {
@@ -1136,9 +1134,9 @@ func (v *TableCreateVldr) ForeignKeyNameQualified(s *models.Statement, r *models
 				keyName = "<empty>"
 			}
 			if err := Match(r, keyName, keyName, r.Values); err != nil {
-				c := &models.Clause{
+				c := &Clause{
 					Description: err.Error(),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -1148,7 +1146,7 @@ func (v *TableCreateVldr) ForeignKeyNameQualified(s *models.Statement, r *models
 
 // ForeignKeyNameLowerCaseRequired 外键名大小写规则
 // RULE: CTB-L2-045
-func (v *TableCreateVldr) ForeignKeyNameLowerCaseRequired(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) ForeignKeyNameLowerCaseRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, c := range v.ct.Constraints {
 		if c.Tp == ast.ConstraintForeignKey {
@@ -1157,9 +1155,9 @@ func (v *TableCreateVldr) ForeignKeyNameLowerCaseRequired(s *models.Statement, r
 				continue
 			}
 			if err := Match(r, keyName, keyName); err != nil {
-				c := &models.Clause{
+				c := &Clause{
 					Description: err.Error(),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -1169,7 +1167,7 @@ func (v *TableCreateVldr) ForeignKeyNameLowerCaseRequired(s *models.Statement, r
 
 // ForeignKeyNameMaxLength 外键名长度规则
 // RULE: CTB-L2-046
-func (v *TableCreateVldr) ForeignKeyNameMaxLength(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) ForeignKeyNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	threshold, err := strconv.Atoi(r.Values)
 	if err != nil {
@@ -1179,9 +1177,9 @@ func (v *TableCreateVldr) ForeignKeyNameMaxLength(s *models.Statement, r *models
 		if c.Tp == ast.ConstraintForeignKey {
 			keyName := strings.TrimSpace(c.Name)
 			if len(keyName) > threshold {
-				c := &models.Clause{
+				c := &Clause{
 					Description: fmt.Sprintf(r.Message, keyName, threshold),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -1191,7 +1189,7 @@ func (v *TableCreateVldr) ForeignKeyNameMaxLength(s *models.Statement, r *models
 
 // ForeignKeyNamePrefixRequired 外键名前缀规则
 // RULE: CTB-L2-047
-func (v *TableCreateVldr) ForeignKeyNamePrefixRequired(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) ForeignKeyNamePrefixRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, c := range v.ct.Constraints {
 		if c.Tp == ast.ConstraintForeignKey {
@@ -1200,9 +1198,9 @@ func (v *TableCreateVldr) ForeignKeyNamePrefixRequired(s *models.Statement, r *m
 				continue
 			}
 			if err := Match(r, keyName, keyName, r.Values); err != nil {
-				c := &models.Clause{
+				c := &Clause{
 					Description: err.Error(),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -1212,7 +1210,7 @@ func (v *TableCreateVldr) ForeignKeyNamePrefixRequired(s *models.Statement, r *m
 
 // MaxAllowedIndexCount 表中最多可建多少个索引
 // RULE: CTB-L2-048
-func (v *TableCreateVldr) MaxAllowedIndexCount(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) MaxAllowedIndexCount(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	tableName := v.ct.Table.Name.O
 	count := 0
@@ -1247,9 +1245,9 @@ func (v *TableCreateVldr) MaxAllowedIndexCount(s *models.Statement, r *models.Ru
 		return
 	}
 	if count > threshold {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, tableName, count, threshold),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -1257,13 +1255,13 @@ func (v *TableCreateVldr) MaxAllowedIndexCount(s *models.Statement, r *models.Ru
 
 // CreateTableUseLikeNotAllowed 禁止允许LIKE方式建表
 // RULE: CTB-L2-049
-func (v *TableCreateVldr) CreateTableUseLikeNotAllowed(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) CreateTableUseLikeNotAllowed(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// 规则允许执行，表示禁止新建表
 	if v.ct.ReferTable != nil {
-		c := &models.Clause{
+		c := &Clause{
 			Description: r.Message,
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -1271,7 +1269,7 @@ func (v *TableCreateVldr) CreateTableUseLikeNotAllowed(s *models.Statement, r *m
 
 // AutoIncColumnDuplicate 只允许一个自增列
 // RULE: CTB-L2-050
-func (v *TableCreateVldr) AutoIncColumnDuplicate(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) AutoIncColumnDuplicate(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	count := 0
 	for _, col := range v.ct.Cols {
@@ -1283,9 +1281,9 @@ func (v *TableCreateVldr) AutoIncColumnDuplicate(s *models.Statement, r *models.
 		}
 	}
 	if count > 1 {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, v.ct.Table.Name.O),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -1293,7 +1291,7 @@ func (v *TableCreateVldr) AutoIncColumnDuplicate(s *models.Statement, r *models.
 
 // PrimaryKeyDuplicate 只允许一个主键
 // RULE: CTB-L2-051
-func (v *TableCreateVldr) PrimaryKeyDuplicate(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) PrimaryKeyDuplicate(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	count := 0
 	for _, col := range v.ct.Cols {
@@ -1310,9 +1308,9 @@ func (v *TableCreateVldr) PrimaryKeyDuplicate(s *models.Statement, r *models.Rul
 		}
 	}
 	if count > 1 {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, v.ct.Table.Name.O),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -1320,16 +1318,16 @@ func (v *TableCreateVldr) PrimaryKeyDuplicate(s *models.Statement, r *models.Rul
 
 // TargetDatabaseDoesNotExist 建表时检查目标库是否存在
 // RULE: CTB-L3-001
-func (v *TableCreateVldr) TargetDatabaseDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	database := v.ct.Table.Schema.O
 	if len(database) == 0 {
 		database = v.Ctx.Ticket.Database
 	}
 	if v.DatabaseInfo(database) == nil {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, database),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -1337,16 +1335,16 @@ func (v *TableCreateVldr) TargetDatabaseDoesNotExist(s *models.Statement, r *mod
 
 // TargetTableDoesNotExist 建表时检查表是否已经存在
 // RULE: CTB-L3-002
-func (v *TableCreateVldr) TargetTableDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *TableCreateVldr) TargetTableDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	database := v.ct.Table.Schema.O
 	if len(database) == 0 {
 		database = v.Ctx.Ticket.Database
 	}
 	if nil != v.TableInfo(database, v.ct.Table.Name.O) {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, fmt.Sprintf("`%s`.`%s`", database, v.ct.Table.Name.O)),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -1372,7 +1370,7 @@ func (v *TableAlterVldr) Enabled() bool {
 // Validate 规则组的审核入口
 func (v *TableAlterVldr) Validate(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for _, s := range v.Ctx.Stmts {
+	for _, s := range v.Ctx.Subjects {
 		// 该方法不能放到结构体vldr是因为，反射时找不到子类的方法
 		node := s.StmtNode
 		if at, ok := node.(*ast.AlterTableStmt); !ok {
@@ -1393,7 +1391,7 @@ func (v *TableAlterVldr) Validate(wg *sync.WaitGroup) {
 
 // AvailableCharsets 改表允许的字符集
 // RULE: MTB-L2-001
-func (v *TableAlterVldr) AvailableCharsets(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) AvailableCharsets(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var charsets []string
 	// 将字符串反解析为结构体
@@ -1422,9 +1420,9 @@ func (v *TableAlterVldr) AvailableCharsets(s *models.Statement, r *models.Rule) 
 	}
 
 	if !valid {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, useCharset, charsets),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -1432,7 +1430,7 @@ func (v *TableAlterVldr) AvailableCharsets(s *models.Statement, r *models.Rule) 
 
 // AvailableCollates 改表允许的校验规则
 // RULE: MTB-L2-002
-func (v *TableAlterVldr) AvailableCollates(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) AvailableCollates(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var collates []string
 	// 将字符串反解析为结构体
@@ -1462,9 +1460,9 @@ func (v *TableAlterVldr) AvailableCollates(s *models.Statement, r *models.Rule) 
 	}
 
 	if !valid {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, useCollate, collates),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -1472,7 +1470,7 @@ func (v *TableAlterVldr) AvailableCollates(s *models.Statement, r *models.Rule) 
 
 // TableCharsetCollateMustMatch 表的字符集与排序规则必须匹配
 // RULE: MTB-L2-003
-func (v *TableAlterVldr) TableCharsetCollateMustMatch(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) TableCharsetCollateMustMatch(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -1506,9 +1504,9 @@ func (v *TableAlterVldr) TableCharsetCollateMustMatch(s *models.Statement, r *mo
 		useCollate = ti.Collate
 	}
 	if !charset.ValidCharsetAndCollation(useCharset, useCollate) {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, useCharset, useCollate),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -1516,7 +1514,7 @@ func (v *TableAlterVldr) TableCharsetCollateMustMatch(s *models.Statement, r *mo
 
 // AvailableEngines 改表允许的存储引擎
 // RULE: MTB-L2-004
-func (v *TableAlterVldr) AvailableEngines(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) AvailableEngines(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -1550,9 +1548,9 @@ func (v *TableAlterVldr) AvailableEngines(s *models.Statement, r *models.Rule) {
 	}
 
 	if !valid {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, useEngine, engines),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -1560,7 +1558,7 @@ func (v *TableAlterVldr) AvailableEngines(s *models.Statement, r *models.Rule) {
 
 // CommentRequired 如果修改表的注解信息，那么不可以为空
 // RULE: MTB-L2-005
-func (v *TableAlterVldr) CommentRequired(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) CommentRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -1575,9 +1573,9 @@ func (v *TableAlterVldr) CommentRequired(s *models.Statement, r *models.Rule) {
 				continue
 			}
 			if strings.TrimSpace(opt.StrValue) == "" {
-				c := &models.Clause{
+				c := &Clause{
 					Description: r.Message,
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -1587,7 +1585,7 @@ func (v *TableAlterVldr) CommentRequired(s *models.Statement, r *models.Rule) {
 
 // ColumnNameQualified 列名必须符合命名规范
 // RULE: MTB-L2-005
-func (v *TableAlterVldr) ColumnNameQualified(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) ColumnNameQualified(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -1606,9 +1604,9 @@ func (v *TableAlterVldr) ColumnNameQualified(s *models.Statement, r *models.Rule
 				colName = "<empty>"
 			}
 			if err := Match(r, colName, colName, r.Values); err != nil {
-				c := &models.Clause{
+				c := &Clause{
 					Description: err.Error(),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -1618,7 +1616,7 @@ func (v *TableAlterVldr) ColumnNameQualified(s *models.Statement, r *models.Rule
 
 // ColumnNameLowerCaseRequired 列名必须小写
 // RULE: MTB-L2-006
-func (v *TableAlterVldr) ColumnNameLowerCaseRequired(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) ColumnNameLowerCaseRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -1637,9 +1635,9 @@ func (v *TableAlterVldr) ColumnNameLowerCaseRequired(s *models.Statement, r *mod
 				continue
 			}
 			if err := Match(r, colName, colName); err != nil {
-				c := &models.Clause{
+				c := &Clause{
 					Description: err.Error(),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -1649,7 +1647,7 @@ func (v *TableAlterVldr) ColumnNameLowerCaseRequired(s *models.Statement, r *mod
 
 // ColumnNameMaxLength 列名最大长度
 // RULE: MTB-L2-007
-func (v *TableAlterVldr) ColumnNameMaxLength(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) ColumnNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -1669,9 +1667,9 @@ func (v *TableAlterVldr) ColumnNameMaxLength(s *models.Statement, r *models.Rule
 		for _, col := range spec.NewColumns {
 			colName := strings.TrimSpace(col.Name.Name.O)
 			if len(colName) > threshold {
-				c := &models.Clause{
+				c := &Clause{
 					Description: fmt.Sprintf(r.Message, colName, threshold),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -1681,7 +1679,7 @@ func (v *TableAlterVldr) ColumnNameMaxLength(s *models.Statement, r *models.Rule
 
 // ColumnUnwantedTypes 列允许的数据类型
 // RULE: MTB-L2-008
-func (v *TableAlterVldr) ColumnUnwantedTypes(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) ColumnUnwantedTypes(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -1703,9 +1701,9 @@ func (v *TableAlterVldr) ColumnUnwantedTypes(s *models.Statement, r *models.Rule
 			colType := types.TypeStr(col.Tp.Tp)
 			for _, t := range availableTypes {
 				if strings.EqualFold(colType, t) {
-					c := &models.Clause{
+					c := &Clause{
 						Description: fmt.Sprintf(r.Message, col.Name, colType, availableTypes),
-						Level:       r.Level,
+						Level:       uint8(r.Level),
 					}
 					s.Violations.Append(c)
 				}
@@ -1716,7 +1714,7 @@ func (v *TableAlterVldr) ColumnUnwantedTypes(s *models.Statement, r *models.Rule
 
 // ColumnCommentRequired 列必须有注释
 // RULE: MTB-L2-009
-func (v *TableAlterVldr) ColumnCommentRequired(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) ColumnCommentRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -1742,9 +1740,9 @@ func (v *TableAlterVldr) ColumnCommentRequired(s *models.Statement, r *models.Ru
 			}
 			// 格式化输出错误信息
 			if !hasComment {
-				c := &models.Clause{
+				c := &Clause{
 					Description: fmt.Sprintf(r.Message, col.Name.Name.O),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -1754,7 +1752,7 @@ func (v *TableAlterVldr) ColumnCommentRequired(s *models.Statement, r *models.Ru
 
 // ColumnAvailableCharsets 列允许的字符集
 // RULE: MTB-L2-010
-func (v *TableAlterVldr) ColumnAvailableCharsets(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) ColumnAvailableCharsets(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -1784,9 +1782,9 @@ func (v *TableAlterVldr) ColumnAvailableCharsets(s *models.Statement, r *models.
 				}
 			}
 			if !valid {
-				c := &models.Clause{
+				c := &Clause{
 					Description: fmt.Sprintf(r.Message, col.Name, colCharset, charsets),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -1796,7 +1794,7 @@ func (v *TableAlterVldr) ColumnAvailableCharsets(s *models.Statement, r *models.
 
 // ColumnAvailableCollates 列允许的排序规则
 // RULE: MTB-L2-011
-func (v *TableAlterVldr) ColumnAvailableCollates(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) ColumnAvailableCollates(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -1826,9 +1824,9 @@ func (v *TableAlterVldr) ColumnAvailableCollates(s *models.Statement, r *models.
 				}
 			}
 			if !valid {
-				c := &models.Clause{
+				c := &Clause{
 					Description: fmt.Sprintf(r.Message, col.Name, colCollate, collates),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -1839,7 +1837,7 @@ func (v *TableAlterVldr) ColumnAvailableCollates(s *models.Statement, r *models.
 // ColumnCharsetCollateMustMatch 列的字符集与排序规则必须匹配
 // RULE: MTB-L2-012
 // TODO: 测试各种语法，了解字符集和排序规则的规则
-func (v *TableAlterVldr) ColumnCharsetCollateMustMatch(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) ColumnCharsetCollateMustMatch(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -1862,9 +1860,9 @@ func (v *TableAlterVldr) ColumnCharsetCollateMustMatch(s *models.Statement, r *m
 
 			if len(colCharset) != 0 && len(colCollate) != 0 {
 				if !charset.ValidCharsetAndCollation(colCharset, colCollate) {
-					c := &models.Clause{
+					c := &Clause{
 						Description: fmt.Sprintf(r.Message, col.Name, colCharset, colCollate),
-						Level:       r.Level,
+						Level:       uint8(r.Level),
 					}
 					s.Violations.Append(c)
 				}
@@ -1878,7 +1876,7 @@ func (v *TableAlterVldr) ColumnCharsetCollateMustMatch(s *models.Statement, r *m
 
 // PositionColumnDoesNotExist 位置标记列必须存在
 // RULE: MTB-L2-013
-func (v *TableAlterVldr) PositionColumnDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) PositionColumnDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -1897,9 +1895,9 @@ func (v *TableAlterVldr) PositionColumnDoesNotExist(s *models.Statement, r *mode
 		if ti.GetColumn(spec.Position.RelativeColumn.Name.O) != nil {
 			continue
 		}
-		c := &models.Clause{
+		c := &Clause{
 			Description: r.Message,
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -1907,7 +1905,7 @@ func (v *TableAlterVldr) PositionColumnDoesNotExist(s *models.Statement, r *mode
 
 // ColumnNotNullWithDefaultRequired 非空列必须有默认值，应该做为警告级别
 // RULE: MTB-L2-013
-func (v *TableAlterVldr) ColumnNotNullWithDefaultRequired(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) ColumnNotNullWithDefaultRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -1935,9 +1933,9 @@ func (v *TableAlterVldr) ColumnNotNullWithDefaultRequired(s *models.Statement, r
 				}
 			}
 			if isNotNull && !hasDefaultValue {
-				c := &models.Clause{
+				c := &Clause{
 					Description: fmt.Sprintf(r.Message, col.Name),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -1947,7 +1945,7 @@ func (v *TableAlterVldr) ColumnNotNullWithDefaultRequired(s *models.Statement, r
 
 // IndexNameExplicit 索引必须命名
 // RULE: MTB-L2-014
-func (v *TableAlterVldr) IndexNameExplicit(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) IndexNameExplicit(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -1970,9 +1968,9 @@ func (v *TableAlterVldr) IndexNameExplicit(s *models.Statement, r *models.Rule) 
 			continue
 		}
 		if len(keyName) == 0 {
-			c := &models.Clause{
+			c := &Clause{
 				Description: r.Message,
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 			// 因为提示信息不会有名称，所以只要有违反规则，就不再检测其他的
@@ -1983,7 +1981,7 @@ func (v *TableAlterVldr) IndexNameExplicit(s *models.Statement, r *models.Rule) 
 
 // IndexNameQualified 索引名标识符必须满足规则
 // RULE: MTB-L2-015
-func (v *TableAlterVldr) IndexNameQualified(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) IndexNameQualified(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -2009,9 +2007,9 @@ func (v *TableAlterVldr) IndexNameQualified(s *models.Statement, r *models.Rule)
 			continue // 如果系统允许匿名索引，则不进行正则匹配
 		}
 		if err := Match(r, keyName, keyName, r.Values); err != nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: err.Error(),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2020,7 +2018,7 @@ func (v *TableAlterVldr) IndexNameQualified(s *models.Statement, r *models.Rule)
 
 // IndexNameLowerCaseRequired 索引名必须小写
 // RULE: MTB-L2-016
-func (v *TableAlterVldr) IndexNameLowerCaseRequired(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) IndexNameLowerCaseRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -2047,9 +2045,9 @@ func (v *TableAlterVldr) IndexNameLowerCaseRequired(s *models.Statement, r *mode
 		}
 
 		if err := Match(r, keyName, keyName); err != nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: err.Error(),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2058,7 +2056,7 @@ func (v *TableAlterVldr) IndexNameLowerCaseRequired(s *models.Statement, r *mode
 
 // IndexNameMaxLength 索引名最大长度
 // RULE: MTB-L2-017
-func (v *TableAlterVldr) IndexNameMaxLength(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) IndexNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -2090,9 +2088,9 @@ func (v *TableAlterVldr) IndexNameMaxLength(s *models.Statement, r *models.Rule)
 		}
 
 		if len(keyName) > threshold {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, keyName, threshold),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2101,7 +2099,7 @@ func (v *TableAlterVldr) IndexNameMaxLength(s *models.Statement, r *models.Rule)
 
 // IndexNamePrefixRequired 索引名前缀规则
 // RULE: MTB-L2-018
-func (v *TableAlterVldr) IndexNamePrefixRequired(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) IndexNamePrefixRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -2127,9 +2125,9 @@ func (v *TableAlterVldr) IndexNamePrefixRequired(s *models.Statement, r *models.
 			continue // 如果系统允许匿名索引，则不进行正则匹配
 		}
 		if err := Match(r, keyName, keyName, r.Values); err != nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: err.Error(),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2138,7 +2136,7 @@ func (v *TableAlterVldr) IndexNamePrefixRequired(s *models.Statement, r *models.
 
 // UniqueNameExplicit 唯一索引必须命名
 // RULE: MTB-L2-019
-func (v *TableAlterVldr) UniqueNameExplicit(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) UniqueNameExplicit(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -2156,9 +2154,9 @@ func (v *TableAlterVldr) UniqueNameExplicit(s *models.Statement, r *models.Rule)
 		}
 		keyName := strings.TrimSpace(c.Name)
 		if len(keyName) == 0 {
-			c := &models.Clause{
+			c := &Clause{
 				Description: r.Message,
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 			// 因为提示信息不会有名称，所以只要有违反规则，就不再检测其他的
@@ -2169,7 +2167,7 @@ func (v *TableAlterVldr) UniqueNameExplicit(s *models.Statement, r *models.Rule)
 
 // UniqueNameQualified 唯一索引索名标识符必须符合规则
 // RULE: MTB-L2-020
-func (v *TableAlterVldr) UniqueNameQualified(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) UniqueNameQualified(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -2188,9 +2186,9 @@ func (v *TableAlterVldr) UniqueNameQualified(s *models.Statement, r *models.Rule
 			continue // 如果系统允许匿名索引，则不进行正则匹配
 		}
 		if err := Match(r, keyName, keyName, r.Values); err != nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: err.Error(),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2199,7 +2197,7 @@ func (v *TableAlterVldr) UniqueNameQualified(s *models.Statement, r *models.Rule
 
 // UniqueNameLowerCaseRequired 唯一索引名必须小写
 // RULE: MTB-L2-021
-func (v *TableAlterVldr) UniqueNameLowerCaseRequired(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) UniqueNameLowerCaseRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -2218,9 +2216,9 @@ func (v *TableAlterVldr) UniqueNameLowerCaseRequired(s *models.Statement, r *mod
 			continue // 如果系统允许匿名索引，则不进行正则匹配
 		}
 		if err := Match(r, keyName, keyName); err != nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: err.Error(),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2229,7 +2227,7 @@ func (v *TableAlterVldr) UniqueNameLowerCaseRequired(s *models.Statement, r *mod
 
 // UniqueNameMaxLength 唯一索引名不能超过最大长度
 // RULE: MTB-L2-022
-func (v *TableAlterVldr) UniqueNameMaxLength(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) UniqueNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -2250,9 +2248,9 @@ func (v *TableAlterVldr) UniqueNameMaxLength(s *models.Statement, r *models.Rule
 		}
 		keyName := strings.TrimSpace(c.Name)
 		if len(keyName) > threshold {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, keyName, threshold),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2261,7 +2259,7 @@ func (v *TableAlterVldr) UniqueNameMaxLength(s *models.Statement, r *models.Rule
 
 // UniqueNamePrefixRequired 唯一索引名前缀必须符合规则
 // RULE: MTB-L2-023
-func (v *TableAlterVldr) UniqueNamePrefixRequired(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) UniqueNamePrefixRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -2280,9 +2278,9 @@ func (v *TableAlterVldr) UniqueNamePrefixRequired(s *models.Statement, r *models
 			continue // 如果系统允许匿名索引，则不进行正则匹配
 		}
 		if err := Match(r, keyName, keyName, r.Values); err != nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: err.Error(),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2291,7 +2289,7 @@ func (v *TableAlterVldr) UniqueNamePrefixRequired(s *models.Statement, r *models
 
 // ForeignKeyNotAllowed 禁止外键
 // RULE: MTB-L2-024
-func (v *TableAlterVldr) ForeignKeyNotAllowed(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) ForeignKeyNotAllowed(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -2304,9 +2302,9 @@ func (v *TableAlterVldr) ForeignKeyNotAllowed(s *models.Statement, r *models.Rul
 		c := spec.Constraint
 
 		if c.Tp == ast.ConstraintForeignKey {
-			c := &models.Clause{
+			c := &Clause{
 				Description: r.Message,
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2315,7 +2313,7 @@ func (v *TableAlterVldr) ForeignKeyNotAllowed(s *models.Statement, r *models.Rul
 
 // ForeignKeyNameExplicit 外键是否显式命名
 // RULE: MTB-L2-025
-func (v *TableAlterVldr) ForeignKeyNameExplicit(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) ForeignKeyNameExplicit(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -2331,9 +2329,9 @@ func (v *TableAlterVldr) ForeignKeyNameExplicit(s *models.Statement, r *models.R
 		}
 		keyName := strings.TrimSpace(c.Name)
 		if len(keyName) == 0 {
-			c := &models.Clause{
+			c := &Clause{
 				Description: r.Message,
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 			break
@@ -2343,7 +2341,7 @@ func (v *TableAlterVldr) ForeignKeyNameExplicit(s *models.Statement, r *models.R
 
 // ForeignKeyNameQualified 外键名标识符规则
 // RULE: MTB-L2-026
-func (v *TableAlterVldr) ForeignKeyNameQualified(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) ForeignKeyNameQualified(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -2363,9 +2361,9 @@ func (v *TableAlterVldr) ForeignKeyNameQualified(s *models.Statement, r *models.
 			continue
 		}
 		if err := Match(r, keyName, keyName, r.Values); err != nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: err.Error(),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2374,7 +2372,7 @@ func (v *TableAlterVldr) ForeignKeyNameQualified(s *models.Statement, r *models.
 
 // ForeignKeyNameLowerCaseRequired 外键名必须小写
 // RULE: MTB-L2-027
-func (v *TableAlterVldr) ForeignKeyNameLowerCaseRequired(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) ForeignKeyNameLowerCaseRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -2393,9 +2391,9 @@ func (v *TableAlterVldr) ForeignKeyNameLowerCaseRequired(s *models.Statement, r 
 			continue
 		}
 		if err := Match(r, keyName, keyName); err != nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: err.Error(),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2404,7 +2402,7 @@ func (v *TableAlterVldr) ForeignKeyNameLowerCaseRequired(s *models.Statement, r 
 
 // ForeignKeyNameMaxLength 外键名最大长度
 // RULE: MTB-L2-028
-func (v *TableAlterVldr) ForeignKeyNameMaxLength(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) ForeignKeyNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -2425,9 +2423,9 @@ func (v *TableAlterVldr) ForeignKeyNameMaxLength(s *models.Statement, r *models.
 		}
 		keyName := strings.TrimSpace(c.Name)
 		if len(keyName) > threshold {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, keyName, threshold),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2436,7 +2434,7 @@ func (v *TableAlterVldr) ForeignKeyNameMaxLength(s *models.Statement, r *models.
 
 // ForeignKeyNamePrefixRequired 外键名前缀规则
 // RULE: MTB-L2-029
-func (v *TableAlterVldr) ForeignKeyNamePrefixRequired(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) ForeignKeyNamePrefixRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -2455,9 +2453,9 @@ func (v *TableAlterVldr) ForeignKeyNamePrefixRequired(s *models.Statement, r *mo
 			continue
 		}
 		if err := Match(r, keyName, keyName, r.Values); err != nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: err.Error(),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2466,7 +2464,7 @@ func (v *TableAlterVldr) ForeignKeyNamePrefixRequired(s *models.Statement, r *mo
 
 // NewTableNameQualified 更名新表标识符规则
 // RULE: MTB-L2-030
-func (v *TableAlterVldr) NewTableNameQualified(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) NewTableNameQualified(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, spec := range v.at.Specs {
 		if spec.Tp != ast.AlterTableRenameTable || spec.NewTable == nil {
@@ -2477,9 +2475,9 @@ func (v *TableAlterVldr) NewTableNameQualified(s *models.Statement, r *models.Ru
 			newName = "<empty>"
 		}
 		if err := Match(r, newName, newName, r.Values); err != nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: err.Error(),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2488,7 +2486,7 @@ func (v *TableAlterVldr) NewTableNameQualified(s *models.Statement, r *models.Ru
 
 // NewTableNameLowerCaseRequired 更名新表必须小写
 // RULE: MTB-L2-031
-func (v *TableAlterVldr) NewTableNameLowerCaseRequired(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) NewTableNameLowerCaseRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, spec := range v.at.Specs {
 		if spec.Tp != ast.AlterTableRenameTable {
@@ -2499,9 +2497,9 @@ func (v *TableAlterVldr) NewTableNameLowerCaseRequired(s *models.Statement, r *m
 			continue
 		}
 		if err := Match(r, newName, newName); err != nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: err.Error(),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2510,7 +2508,7 @@ func (v *TableAlterVldr) NewTableNameLowerCaseRequired(s *models.Statement, r *m
 
 // NewTableNameMaxLength 更名新表最大长度
 // RULE: MTB-L2-032
-func (v *TableAlterVldr) NewTableNameMaxLength(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) NewTableNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	threshold, err := strconv.Atoi(r.Values)
 	if err != nil {
@@ -2522,9 +2520,9 @@ func (v *TableAlterVldr) NewTableNameMaxLength(s *models.Statement, r *models.Ru
 		}
 		newName := strings.TrimSpace(spec.NewTable.Name.O)
 		if len(newName) > threshold {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, newName, threshold),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2533,7 +2531,7 @@ func (v *TableAlterVldr) NewTableNameMaxLength(s *models.Statement, r *models.Ru
 
 // FullTextIndexNotAllowed 禁用全文索引
 // RULE: MTB-L2-033
-func (v *TableAlterVldr) FullTextIndexNotAllowed(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) FullTextIndexNotAllowed(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, spec := range v.at.Specs {
 		if spec.Tp != ast.AlterTableAddConstraint {
@@ -2544,9 +2542,9 @@ func (v *TableAlterVldr) FullTextIndexNotAllowed(s *models.Statement, r *models.
 			continue
 		}
 		if err := Match(r, c.Name); err != nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: err.Error(),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2555,7 +2553,7 @@ func (v *TableAlterVldr) FullTextIndexNotAllowed(s *models.Statement, r *models.
 
 // FullTextIndexExplicit 索引必须命名
 // RULE: MTB-L2-034
-func (v *TableAlterVldr) FullTextIndexExplicit(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) FullTextIndexExplicit(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, spec := range v.at.Specs {
 		if spec.Tp != ast.AlterTableAddConstraint {
@@ -2567,9 +2565,9 @@ func (v *TableAlterVldr) FullTextIndexExplicit(s *models.Statement, r *models.Ru
 		}
 		keyName := strings.TrimSpace(c.Name)
 		if len(keyName) == 0 {
-			c := &models.Clause{
+			c := &Clause{
 				Description: r.Message,
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 			break
@@ -2579,7 +2577,7 @@ func (v *TableAlterVldr) FullTextIndexExplicit(s *models.Statement, r *models.Ru
 
 // FullTextIndexNameQualified 索引名标识符规则
 // RULE: MTB-L2-035
-func (v *TableAlterVldr) FullTextIndexNameQualified(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) FullTextIndexNameQualified(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, spec := range v.at.Specs {
 		if spec.Tp != ast.AlterTableAddConstraint {
@@ -2594,9 +2592,9 @@ func (v *TableAlterVldr) FullTextIndexNameQualified(s *models.Statement, r *mode
 			continue
 		}
 		if err := Match(r, keyName, keyName, r.Values); err != nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: err.Error(),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2605,7 +2603,7 @@ func (v *TableAlterVldr) FullTextIndexNameQualified(s *models.Statement, r *mode
 
 // FullTextIndexNameLowerCaseRequired 索引名必须小写
 // RULE: MTB-L2-036
-func (v *TableAlterVldr) FullTextIndexNameLowerCaseRequired(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) FullTextIndexNameLowerCaseRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, spec := range v.at.Specs {
 		if spec.Tp != ast.AlterTableAddConstraint {
@@ -2620,9 +2618,9 @@ func (v *TableAlterVldr) FullTextIndexNameLowerCaseRequired(s *models.Statement,
 			continue
 		}
 		if err := Match(r, keyName, keyName); err != nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: err.Error(),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2631,7 +2629,7 @@ func (v *TableAlterVldr) FullTextIndexNameLowerCaseRequired(s *models.Statement,
 
 // FullTextIndexNameMaxLength 索引名不能超过最大长度
 // RULE: MTB-L2-037
-func (v *TableAlterVldr) FullTextIndexNameMaxLength(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) FullTextIndexNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	threshold, err := strconv.Atoi(r.Values)
 	if err != nil {
@@ -2647,9 +2645,9 @@ func (v *TableAlterVldr) FullTextIndexNameMaxLength(s *models.Statement, r *mode
 		}
 		keyName := strings.TrimSpace(c.Name)
 		if len(keyName) > threshold {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, keyName, threshold),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2658,7 +2656,7 @@ func (v *TableAlterVldr) FullTextIndexNameMaxLength(s *models.Statement, r *mode
 
 // FullTextIndexNamePrefixRequired 索引名前缀必须匹配规则
 // RULE: MTB-L2-038
-func (v *TableAlterVldr) FullTextIndexNamePrefixRequired(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) FullTextIndexNamePrefixRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, spec := range v.at.Specs {
 		if spec.Tp != ast.AlterTableAddConstraint {
@@ -2673,9 +2671,9 @@ func (v *TableAlterVldr) FullTextIndexNamePrefixRequired(s *models.Statement, r 
 			continue
 		}
 		if err := Match(r, keyName, keyName, r.Values); err != nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: err.Error(),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2684,7 +2682,7 @@ func (v *TableAlterVldr) FullTextIndexNamePrefixRequired(s *models.Statement, r 
 
 // MaxAllowedIndexColumnCount 单一索引最大列数
 // RULE: MTB-L2-039
-func (v *TableAlterVldr) MaxAllowedIndexColumnCount(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) MaxAllowedIndexColumnCount(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	threshold, err := strconv.Atoi(r.Values)
 	if err != nil {
@@ -2700,9 +2698,9 @@ func (v *TableAlterVldr) MaxAllowedIndexColumnCount(s *models.Statement, r *mode
 			keyName = "anonymous"
 		}
 		if len(c.Keys) > threshold {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, keyName, threshold),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2711,13 +2709,13 @@ func (v *TableAlterVldr) MaxAllowedIndexColumnCount(s *models.Statement, r *mode
 
 // TargetDatabaseDoesNotExist 单一索引最大列数
 // RULE: MTB-L2-039
-func (v *TableAlterVldr) TargetDatabaseDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, ti := range v.Vi {
 		if v.DatabaseInfo(ti.Database) == nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, ti.Database),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2726,16 +2724,16 @@ func (v *TableAlterVldr) TargetDatabaseDoesNotExist(s *models.Statement, r *mode
 
 // TargetTableDoesNotExist 单一索引最大列数
 // RULE: MTB-L2-039
-func (v *TableAlterVldr) TargetTableDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) TargetTableDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, ti := range v.Vi {
 		if ti.Table == nil {
 			continue
 		}
 		if v.TableInfo(ti.Database, ti.Table.Name) == nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, fmt.Sprintf("`%s`.`%s`", ti.Database, ti.Table.Name)),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2744,7 +2742,7 @@ func (v *TableAlterVldr) TargetTableDoesNotExist(s *models.Statement, r *models.
 
 // ColumnNameDuplicate 添加列 - 数据库检查
 // RULE: MTB
-func (v *TableAlterVldr) ColumnNameDuplicate(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) ColumnNameDuplicate(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -2759,9 +2757,9 @@ func (v *TableAlterVldr) ColumnNameDuplicate(s *models.Statement, r *models.Rule
 		for _, col := range spec.NewColumns {
 			ci := ti.GetColumn(col.Name.Name.O)
 			if ci != nil {
-				c := &models.Clause{
+				c := &Clause{
 					Description: fmt.Sprintf(r.Message, v.at.Table.Name.O, col.Name.Name.O),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -2771,7 +2769,7 @@ func (v *TableAlterVldr) ColumnNameDuplicate(s *models.Statement, r *models.Rule
 
 // MaxAllowedColumnCount 列的数量是否超过阈值
 // RULE: MTB-L3-006
-func (v *TableAlterVldr) MaxAllowedColumnCount(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) MaxAllowedColumnCount(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// 字段数量
 	threshold, err := strconv.Atoi(r.Values)
@@ -2795,16 +2793,16 @@ func (v *TableAlterVldr) MaxAllowedColumnCount(s *models.Statement, r *models.Ru
 
 	total := len(ti.Columns) + diff
 	if total > threshold {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, v.at.Table.Name.O, total, threshold),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
 }
 
 // ColumnNameDoesNotExist 修改删除列 - 数据库检查
-func (v *TableAlterVldr) ColumnNameDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) ColumnNameDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -2822,9 +2820,9 @@ func (v *TableAlterVldr) ColumnNameDoesNotExist(s *models.Statement, r *models.R
 			spec.Tp == ast.AlterTableDropColumn {
 			ci := ti.GetColumn(spec.OldColumnName.Name.O)
 			if ci == nil {
-				c := &models.Clause{
+				c := &Clause{
 					Description: fmt.Sprintf(r.Message, spec.OldColumnName.Name.O),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -2833,9 +2831,9 @@ func (v *TableAlterVldr) ColumnNameDoesNotExist(s *models.Statement, r *models.R
 		for _, col := range spec.NewColumns {
 			ci := ti.GetColumn(col.Name.Name.O)
 			if ci == nil {
-				c := &models.Clause{
+				c := &Clause{
 					Description: fmt.Sprintf(r.Message, col.Name.Name.O),
-					Level:       r.Level,
+					Level:       uint8(r.Level),
 				}
 				s.Violations.Append(c)
 			}
@@ -2844,7 +2842,7 @@ func (v *TableAlterVldr) ColumnNameDoesNotExist(s *models.Statement, r *models.R
 }
 
 // IndexNameDuplicate 添加索引时名称不可重复
-func (v *TableAlterVldr) IndexNameDuplicate(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) IndexNameDuplicate(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -2860,16 +2858,16 @@ func (v *TableAlterVldr) IndexNameDuplicate(s *models.Statement, r *models.Rule)
 		if v.IndexInfo(v.at.Table.Schema.O, v.at.Table.Name.O, keyName) == nil {
 			continue
 		}
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, keyName, v.at.Table.Name.O),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
 }
 
 // IndexCountLimit 索引数量限制
-func (v *TableAlterVldr) IndexCountLimit(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) IndexCountLimit(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// 字段数量
 	threshold, err := strconv.Atoi(r.Values)
@@ -2893,9 +2891,9 @@ func (v *TableAlterVldr) IndexCountLimit(s *models.Statement, r *models.Rule) {
 
 	total := len(ti.Indexes) + diff
 	if total > threshold {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, v.at.Table.Name.O, total, threshold),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -2903,7 +2901,7 @@ func (v *TableAlterVldr) IndexCountLimit(s *models.Statement, r *models.Rule) {
 
 // IndexDoesNotExist 修改删除列 - 数据库检查
 // TODO:
-func (v *TableAlterVldr) IndexDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) IndexDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -2920,9 +2918,9 @@ func (v *TableAlterVldr) IndexDoesNotExist(s *models.Statement, r *models.Rule) 
 			continue
 		}
 		if v.IndexInfo(v.at.Table.Schema.O, v.at.Table.Name.O, keyName) == nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, keyName),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2930,7 +2928,7 @@ func (v *TableAlterVldr) IndexDoesNotExist(s *models.Statement, r *models.Rule) 
 }
 
 // IndexColumnDoesNotExist 索引的目标字段必须存在
-func (v *TableAlterVldr) IndexColumnDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) IndexColumnDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -2945,9 +2943,9 @@ func (v *TableAlterVldr) IndexColumnDoesNotExist(s *models.Statement, r *models.
 			if ti.GetColumn(col.Column.Name.O) != nil {
 				continue
 			}
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, col.Column.Name.O),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2955,7 +2953,7 @@ func (v *TableAlterVldr) IndexColumnDoesNotExist(s *models.Statement, r *models.
 }
 
 // TargetTableDuplicate 修改表名，如果新名称已经存在
-func (v *TableAlterVldr) TargetTableDuplicate(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) TargetTableDuplicate(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, spec := range v.at.Specs {
 		if spec.Tp != ast.AlterTableRenameTable {
@@ -2968,9 +2966,9 @@ func (v *TableAlterVldr) TargetTableDuplicate(s *models.Statement, r *models.Rul
 				database = v.Ctx.Ticket.Database
 			}
 
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, fmt.Sprintf("`%s`.`%s`", database, spec.NewTable.Name.O)),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -2978,7 +2976,7 @@ func (v *TableAlterVldr) TargetTableDuplicate(s *models.Statement, r *models.Rul
 }
 
 // PrimaryKeyDoesNotExist TODO
-func (v *TableAlterVldr) PrimaryKeyDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) PrimaryKeyDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, spec := range v.at.Specs {
 		if spec.Tp != ast.AlterTableDropPrimaryKey {
@@ -2988,7 +2986,7 @@ func (v *TableAlterVldr) PrimaryKeyDoesNotExist(s *models.Statement, r *models.R
 }
 
 // ForeignKeyDoesNotExist TODO
-func (v *TableAlterVldr) ForeignKeyDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) ForeignKeyDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, spec := range v.at.Specs {
 		if spec.Tp != ast.AlterTableDropForeignKey {
@@ -2998,7 +2996,7 @@ func (v *TableAlterVldr) ForeignKeyDoesNotExist(s *models.Statement, r *models.R
 }
 
 // IndexOnBlobColumnNotAllowed 禁止在BLOB/TEXT上索引
-func (v *TableAlterVldr) IndexOnBlobColumnNotAllowed(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) IndexOnBlobColumnNotAllowed(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
 	if ti == nil {
@@ -3021,9 +3019,9 @@ func (v *TableAlterVldr) IndexOnBlobColumnNotAllowed(s *models.Statement, r *mod
 				!ci.Type.IsBlob() {
 				continue
 			}
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, ci.Name),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -3032,13 +3030,13 @@ func (v *TableAlterVldr) IndexOnBlobColumnNotAllowed(s *models.Statement, r *mod
 
 // MaxAllowedTimestampCount 仅允许一个事件戳类型的列
 // RULE: MTB-L3-007
-func (v *TableAlterVldr) MaxAllowedTimestampCount(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) MaxAllowedTimestampCount(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 }
 
 // IndexOverlayNotAllowed 不允许索引覆盖
 // RULE: MTB-L3-007
-func (v *TableAlterVldr) IndexOverlayNotAllowed(s *models.Statement, r *models.Rule) {
+func (v *TableAlterVldr) IndexOverlayNotAllowed(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 }
 
@@ -3062,7 +3060,7 @@ func (v *TableRenameVldr) Enabled() bool {
 // Validate 规则组的审核入口
 func (v *TableRenameVldr) Validate(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for _, s := range v.Ctx.Stmts {
+	for _, s := range v.Ctx.Subjects {
 		// 该方法不能放到结构体vldr是因为，反射时找不到子类的方法
 		node := s.StmtNode
 		if rt, ok := node.(*ast.RenameTableStmt); !ok {
@@ -3083,14 +3081,14 @@ func (v *TableRenameVldr) Validate(wg *sync.WaitGroup) {
 
 // TableRenameTablesIdentical 目标表跟源表是同一个表
 // RULE: RTB-L2-001
-func (v *TableRenameVldr) TableRenameTablesIdentical(s *models.Statement, r *models.Rule) {
+func (v *TableRenameVldr) TableRenameTablesIdentical(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	tableName := v.rt.OldTable.Schema.O + v.rt.OldTable.Name.O
 	newName := v.rt.NewTable.Schema.O + v.rt.NewTable.Name.O
 	if strings.TrimSpace(tableName) == strings.TrimSpace(newName) {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, tableName, newName),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -3098,13 +3096,13 @@ func (v *TableRenameVldr) TableRenameTablesIdentical(s *models.Statement, r *mod
 
 // TableRenameTargetTableNameQualified 目标表名标识符规则
 // RULE: RTB-L2-002
-func (v *TableRenameVldr) TableRenameTargetTableNameQualified(s *models.Statement, r *models.Rule) {
+func (v *TableRenameVldr) TableRenameTargetTableNameQualified(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	newName := v.rt.NewTable.Name.O
 	if err := Match(r, newName, newName, r.Values); err != nil {
-		c := &models.Clause{
+		c := &Clause{
 			Description: err.Error(),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -3113,13 +3111,13 @@ func (v *TableRenameVldr) TableRenameTargetTableNameQualified(s *models.Statemen
 
 // TableRenameTargetTableNameLowerCaseRequired 目标表名大小写规则
 // RULE: RTB-L2-003
-func (v *TableRenameVldr) TableRenameTargetTableNameLowerCaseRequired(s *models.Statement, r *models.Rule) {
+func (v *TableRenameVldr) TableRenameTargetTableNameLowerCaseRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	newName := v.rt.NewTable.Name.O
 	if err := Match(r, newName, newName); err != nil {
-		c := &models.Clause{
+		c := &Clause{
 			Description: err.Error(),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -3127,7 +3125,7 @@ func (v *TableRenameVldr) TableRenameTargetTableNameLowerCaseRequired(s *models.
 
 // TableRenameTargetTableNameMaxLength 目标表名长度规则
 // RULE: RTB-L2-004
-func (v *TableRenameVldr) TableRenameTargetTableNameMaxLength(s *models.Statement, r *models.Rule) {
+func (v *TableRenameVldr) TableRenameTargetTableNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	threshold, err := strconv.Atoi(r.Values)
 	if err != nil {
@@ -3136,9 +3134,9 @@ func (v *TableRenameVldr) TableRenameTargetTableNameMaxLength(s *models.Statemen
 	tableName := strings.TrimSpace(v.rt.NewTable.Name.O)
 	count := len(tableName)
 	if count > threshold {
-		c := &models.Clause{
+		c := &Clause{
 			Description: fmt.Sprintf(r.Message, tableName, threshold),
-			Level:       r.Level,
+			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
 	}
@@ -3147,19 +3145,19 @@ func (v *TableRenameVldr) TableRenameTargetTableNameMaxLength(s *models.Statemen
 
 // TableRenameSourceTableDoesNotExist 源库是否存在
 // RULE: RTB-L3-001
-func (v *TableRenameVldr) TableRenameSourceTableDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *TableRenameVldr) TableRenameSourceTableDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 }
 
 // TableRenameSourceDatabaseDoesNotExist 源表是否存在
 // RULE: RTB-L3-002
-func (v *TableRenameVldr) TableRenameSourceDatabaseDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *TableRenameVldr) TableRenameSourceDatabaseDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 }
 
 // TableRenameTargetTableDoesNotExist 目标库是否存在
 // RULE: RTB-L3-003
-func (v *TableRenameVldr) TableRenameTargetTableDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *TableRenameVldr) TableRenameTargetTableDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 }
 
@@ -3183,7 +3181,7 @@ func (v *TableDropVldr) Enabled() bool {
 // Validate 规则组的审核入口
 func (v *TableDropVldr) Validate(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for _, s := range v.Ctx.Stmts {
+	for _, s := range v.Ctx.Subjects {
 		// 该方法不能放到结构体vldr是因为，反射时找不到子类的方法
 		node := s.StmtNode
 		if dt, ok := node.(*ast.DropTableStmt); !ok {
@@ -3204,13 +3202,13 @@ func (v *TableDropVldr) Validate(wg *sync.WaitGroup) {
 
 // TargetDatabaseDoesNotExist 目标库是否存在
 // RULE: DTB-L3-001
-func (v *TableDropVldr) TargetDatabaseDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *TableDropVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, ti := range v.Vi {
 		if v.DatabaseInfo(ti.Database) == nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, ti.Database),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
@@ -3219,16 +3217,16 @@ func (v *TableDropVldr) TargetDatabaseDoesNotExist(s *models.Statement, r *model
 
 // TargetTableDoesNotExist 目标表是否存在
 // RULE: DTB-L3-002
-func (v *TableDropVldr) TargetTableDoesNotExist(s *models.Statement, r *models.Rule) {
+func (v *TableDropVldr) TargetTableDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, ti := range v.Vi {
 		if ti.Table == nil {
 			continue
 		}
 		if v.TableInfo(ti.Database, ti.Table.Name) == nil {
-			c := &models.Clause{
+			c := &Clause{
 				Description: fmt.Sprintf(r.Message, fmt.Sprintf("`%s`.`%s`", ti.Database, ti.Table.Name)),
-				Level:       r.Level,
+				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)
 		}
