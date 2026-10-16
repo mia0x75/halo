@@ -113,6 +113,12 @@ func Run(stmts []*models.Statement, cluster *models.Cluster, ticket *models.Tick
 		Subjects: subjects,
 	}
 	target := ctx.Cluster
+	// PG connections are database-scoped, so bind the target to the ticket's
+	// database before reading metadata. MySQL ignores this at connect time but
+	// the field is harmless there.
+	if ctx.Ticket != nil {
+		target.Database = ctx.Ticket.Database
+	}
 	passwd := func(c *domain.Cluster) string {
 		bs, _ := crypto.DecryptAES(c.Password, config.Config().Secret.Crypto)
 		return string(bs)
