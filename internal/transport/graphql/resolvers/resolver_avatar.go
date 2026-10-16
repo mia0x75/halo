@@ -3,8 +3,8 @@ package resolvers
 import (
 	"context"
 
-	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/cache"
+	"github.com/mia0x75/halo/internal/models"
 )
 
 // Avatars 全部的头像，头像数量不多，这个不进行分页处理

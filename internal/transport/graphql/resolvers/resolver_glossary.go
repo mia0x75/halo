@@ -3,8 +3,8 @@ package resolvers
 import (
 	"context"
 
-	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/cache"
+	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/tools"
 )
 

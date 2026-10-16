@@ -9,8 +9,8 @@ import (
 	"sync"
 
 	"github.com/mia0x75/halo/internal/auth"
-	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/cache"
+	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 )

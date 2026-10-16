@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/cache"
 	"github.com/mia0x75/halo/internal/event"
 	"github.com/mia0x75/halo/internal/models"
-	"github.com/mia0x75/halo/internal/cache"
 	"github.com/mia0x75/halo/internal/platform/config"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"

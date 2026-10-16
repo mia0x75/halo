@@ -14,8 +14,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/mia0x75/halo/internal/app"
-	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/cache"
+	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/db"
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"

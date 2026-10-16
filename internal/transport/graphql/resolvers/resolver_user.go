@@ -16,9 +16,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/cache"
 	"github.com/mia0x75/halo/internal/event"
 	"github.com/mia0x75/halo/internal/models"
-	"github.com/mia0x75/halo/internal/cache"
 	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/crypto"
 	"github.com/mia0x75/halo/internal/service"

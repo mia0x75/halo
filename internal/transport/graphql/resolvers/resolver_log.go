@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/mia0x75/halo/internal/bridge"
-	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/cache"
+	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 )
 
