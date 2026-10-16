@@ -73,6 +73,20 @@ test-db-down:
 test-config:
 	@test -f bin/config.test.json || cp config.test.json.example bin/config.test.json
 
+# 元数据库连接读取的配置文件：优先 bin/config.json，回退 bin/config.mysql.json
+META_CONFIG ?= $(shell test -f bin/config.json && echo bin/config.json || echo bin/config.mysql.json)
+
+# 向元数据库灌入测试 cluster（幂等）。连接信息取自 $(META_CONFIG) 的 database.addr。
+.PHONY: test-seed-meta
+test-seed-meta:
+	@dsn=$$(grep -m1 '"addr"' $(META_CONFIG) | sed -E 's/.*"addr"[[:space:]]*:[[:space:]]*"([^"]*)".*/\1/'); \
+	if [ -z "$$dsn" ]; then echo "$(CRED)cannot parse database.addr from $(META_CONFIG)$(CEND)"; exit 1; fi; \
+	user=$${dsn%%:*}; rest=$${dsn#*:}; pass=$${rest%%@tcp(*}; \
+	hp=$${dsn#*@tcp(}; hp=$${hp%%)*}; host=$${hp%%:*}; port=$${hp##*:}; \
+	dbpart=$${dsn#*)/}; db=$${dbpart%%\?*}; \
+	echo "$(CGREEN)seeding test clusters into $$host:$$port/$$db ...$(CEND)"; \
+	mysql --protocol=tcp -h "$$host" -P "$$port" -u "$$user" -p"$$pass" "$$db" < scripts/test/seed_meta_test.sql
+
 # 起测试库 → 跑全部测试（含 DB 集成）→ 拆测试库；无库时不依赖此目标
 .PHONY: test-all
 test-all: test-db-up
