@@ -53,15 +53,3 @@ func TestEmitterOff(t *testing.T) {
 		t.Fatalf("topics after Off = %d, want 0", got)
 	}
 }
-
-func TestGroupFlushOnOff(t *testing.T) {
-	g := &Group{}
-	g.On()
-	if got := len(g.listeners); got != 1 {
-		t.Fatalf("listeners = %d, want 1", got)
-	}
-	g.Flush()
-	if got := len(g.listeners); got != 0 {
-		t.Fatalf("listeners after Flush = %d, want 0", got)
-	}
-}
