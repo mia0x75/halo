@@ -72,6 +72,8 @@ github.com/mia0x75/antlr v0.0.0-20190323140341-bf6915c3dd7b h1:Y8tlewyYL1Oqv/7dl
 github.com/mia0x75/antlr v0.0.0-20190323140341-bf6915c3dd7b/go.mod h1:A2rVDF7RAiQkmnm3SkTt2hezKI51/+ax1m8PJxNWIiE=
 github.com/mia0x75/parser v0.0.0-20190531113551-6fbc203ea218 h1:luS/8ODdoRihrzXzh0QPURg7xFdQr8hp0lOYdtXSb4E=
 github.com/mia0x75/parser v0.0.0-20190531113551-6fbc203ea218/go.mod h1:yMzR3J9VI+sWwAVTGuYj3XoZy3P6ttJgoNGmtxy2wfQ=
+github.com/mia0x75/parser v0.0.0-20261016092521-ec8dba533f31 h1:Q6kpXcXdSyyIIz/7u5Tvz/oTU1BPbXt84pI/Uf0Nmdc=
+github.com/mia0x75/parser v0.0.0-20261016092521-ec8dba533f31/go.mod h1:yMzR3J9VI+sWwAVTGuYj3XoZy3P6ttJgoNGmtxy2wfQ=
 github.com/mia0x75/yql v0.0.0-20190325023231-8a8982f46522 h1:y7n6Ohs04+5x5nWDnMeUhRXs55z6LJxcRI72Q5Gv6tk=
 github.com/mia0x75/yql v0.0.0-20190325023231-8a8982f46522/go.mod h1:akOAXHhKoR1iFFqp6Y9DfZ4ek5wJS/8JWUXuDOGp+Zc=
 github.com/pgplex/pgparser v0.2.0 h1:BB7I/Mrwetiw07PTq/AlXcKfajlCwoJfwB7KZ7V9irI=

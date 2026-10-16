@@ -12,7 +12,7 @@ require (
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/machinebox/graphql v0.2.2
-	github.com/mia0x75/parser v0.0.0-20190531113551-6fbc203ea218
+	github.com/mia0x75/parser v0.0.0-20261016092521-ec8dba533f31
 	github.com/mia0x75/yql v0.0.0-20190325023231-8a8982f46522
 	github.com/pgplex/pgparser v0.2.0
 	github.com/shirou/gopsutil/v4 v4.26.9
