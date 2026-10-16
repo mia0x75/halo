@@ -2,6 +2,7 @@ package validate_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/mia0x75/parser"
@@ -12,6 +13,7 @@ import (
 	"github.com/mia0x75/halo/internal/app"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/cache"
+	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/crypto"
@@ -20,8 +22,44 @@ import (
 )
 
 // testClusterUUID is the seeded target cluster the rule cases were authored
-// against. Without it (or without a live metadata database) the cases skip.
-const testClusterUUID = "fd577136-24ec-40bb-a792-c70078f075ab"
+// against (see scripts/test/seed_meta_test.sql). Without it (or without a live
+// metadata database) the cases skip.
+const testClusterUUID = "fd577136-0000-0000-0000-000000000001"
+
+// testClusterPassword is the target password the local test containers use
+// (mysql/target seed). The metadata seed only stores a placeholder, so the
+// tests encrypt this value at runtime with the active config key.
+const testClusterPassword = "test"
+
+// withRealPassword replaces the seeded placeholder password with an encrypted
+// copy of testClusterPassword, so the executor can authenticate to the target.
+func withRealPassword(t *testing.T, cluster *models.Cluster) {
+	t.Helper()
+	enc, err := crypto.EncryptAES([]byte(testClusterPassword), config.Config().Secret.Crypto)
+	require.NoError(t, err)
+	cluster.Password = enc
+}
+
+// ensureT1Fixture creates the schema-aware fixture the table/index cases read.
+// They assume a pre-existing starwars.t1(id INT); it is created here (not
+// seeded, per the test-data contract) and dropped on cleanup.
+func ensureT1Fixture(t *testing.T, a *app.App) {
+	t.Helper()
+	cluster, err := a.Repos.Cluster.GetByUUID(context.Background(), testClusterUUID)
+	if errors.Is(err, domain.ErrNotFound) {
+		t.Skip("test cluster not seeded; run: make test-seed-meta")
+	}
+	require.NoError(t, err)
+	cluster.Database = "starwars"
+
+	exec := agent.LocalExecutor{}
+	const create = "CREATE TABLE IF NOT EXISTS starwars.t1 (id INT) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='t1'"
+	_, err = exec.Execute(context.Background(), cluster, testClusterPassword, create)
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		_, _ = exec.Execute(context.Background(), cluster, testClusterPassword, "DROP TABLE IF EXISTS starwars.t1")
+	})
+}
 
 type RuleTestCase struct {
 	RuleName string
@@ -62,8 +100,9 @@ func buildContext(t *testing.T) *validate.Context {
 		return elem.UUID == testClusterUUID
 	})
 	if cluster == nil {
-		t.Skipf("test cluster %s not found", testClusterUUID)
+		t.Skipf("test cluster %s not found; run: make test-seed-meta", testClusterUUID)
 	}
+	withRealPassword(t, cluster)
 	ticket := &models.Ticket{
 		UUID:       "9f25e9ee-3ca3-4fe6-9747-39ea90be59b1",
 		UserID:     1,
@@ -117,15 +156,20 @@ func runCase(t *testing.T, ctx *validate.Context, p *parser.Parser, c RuleTestCa
 
 func TestRun_Integration(t *testing.T) {
 	a := buildApp(t)
-	_ = a
-	ctx := buildContext(t)
+
+	cluster, err := a.Repos.Cluster.GetByUUID(context.Background(), testClusterUUID)
+	if errors.Is(err, domain.ErrNotFound) {
+		t.Skip("test cluster not seeded; run: make test-seed-meta")
+	}
+	require.NoError(t, err)
+	enc, err := crypto.EncryptAES([]byte(testClusterPassword), config.Config().Secret.Crypto)
+	require.NoError(t, err)
+	cluster.Password = enc
 
 	stmts := []*models.Statement{
-		{Sequence: 1, UUID: "8b0e2f31-0000-4000-8000-000000000001", Content: "SELECT 1;", Type: 1, Status: 1},
+		{Sequence: 1, UUID: "8b0e2f31-0000-4000-8000-000000000001", Content: "SELECT 1;", Type: 1, Status: 1, Violations: &models.Violations{}},
 	}
-	cluster := bridge.ClusterFromDomain(ctx.Cluster)
-	ticket := bridge.TicketFromDomain(ctx.Ticket)
-	validate.Run(stmts, cluster, ticket)
+	validate.Run(stmts, bridge.ClusterFromDomain(cluster), &models.Ticket{Database: "starwars"})
 	require.NotNil(t, stmts[0].Violations)
 }
 
@@ -826,7 +870,8 @@ var miscCases = []RuleTestCase{
 }
 
 func TestGeneralRules(t *testing.T) {
-	buildApp(t)
+	a := buildApp(t)
+	ensureT1Fixture(t, a)
 	ctx := buildContext(t)
 	p := parser.New()
 	assert := assert.New(t)
