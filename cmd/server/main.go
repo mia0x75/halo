@@ -18,10 +18,13 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/mia0x75/halo/internal/app"
+	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/cache"
+	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/event"
 	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/db"
+	"github.com/mia0x75/halo/internal/validate"
 	"github.com/mia0x75/halo/internal/worker"
 
 	// "github.com/mia0x75/halo/internal/platform/log"
@@ -89,6 +92,14 @@ func main() {
 	defer func() { _ = application.Close() }()
 
 	cache.Init(application.Repos)
+	cachedRules := cache.RulesMap.All()
+	rules := make([]*domain.Rule, 0, len(cachedRules))
+	for _, m := range cachedRules {
+		rules = append(rules, bridge.RuleToDomain(m))
+	}
+	if err := validate.ValidateRules(rules); err != nil {
+		lg.Fatalf("[F] invalid validation rules: %v", err)
+	}
 	worker.Init(application.Repos)
 	event.Init(application.Repos)
 	worker.NewScheduler()
