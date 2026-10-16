@@ -158,3 +158,31 @@ CREATE TABLE `t1` (`id` INT) CHARSET = 'utf8mb4' COLLATE = 'utf8mb4_unicode_ci';
   * [ ] 数据库元数据查看
   * [ ] 规则查看
   * [ ] 系统选项
+
+## 测试
+
+单元测试无需数据库，DB 相关用例自动跳过：
+
+```
+make test
+```
+
+需要覆盖元数据库集成用例时，用 Podman/Docker 起一次性测试库：
+
+```
+make test-all          # 起库 → 跑全量测试 → 拆库
+```
+
+`make test-all` 优先使用 `podman-compose`，回退 `docker compose`。测试库端口：
+MySQL `127.0.0.1:3307`、PostgreSQL `127.0.0.1:5433`，schema+seed 取自
+`scripts/halodb_schema_*.sql` 与 `scripts/halodb_seed_*.sql`。
+
+手动控制：
+
+```
+make test-db-up        # 起库（等待 schema+seed 就绪）
+make test-db-down      # 拆库并删除数据卷
+```
+
+配置可用环境变量覆盖：`HALO_TEST_DSN`（MySQL）、`HALO_TEST_PG_DSN`（PG）、
+`HALO_TEST_CONFIG`（validate 集成测试配置）。示例见 `config.test.json.example`。

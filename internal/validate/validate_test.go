@@ -18,17 +18,28 @@ import (
 var _ = driver.ValueExpr{}
 
 // TestMain parses the config flag outside init(), so the testing package's own
-// flags are already registered when Parse runs. HALO_TEST_CONFIG takes priority
-// so the integration tests can point at a throwaway database.
+// flags are already registered when Parse runs. Paths are tried in order and
+// the first existing one wins; the search tolerates the test binary's working
+// directory being the package dir rather than the repo root.
 func TestMain(m *testing.M) {
-	cfg := flag.String("c", "/etc/halo/cfg.json", "configuration file")
+	cfg := flag.String("c", "", "configuration file")
 	flag.Parse()
-	path := *cfg
-	if env := os.Getenv("HALO_TEST_CONFIG"); env != "" {
-		path = env
+
+	candidates := []string{
+		*cfg,
+		os.Getenv("HALO_TEST_CONFIG"),
+		"bin/config.test.json",
+		"../../bin/config.test.json",
+		"/etc/halo/cfg.json",
 	}
-	if _, err := os.Stat(path); err == nil {
-		config.ParseConfig(path)
+	for _, path := range candidates {
+		if path == "" {
+			continue
+		}
+		if _, err := os.Stat(path); err == nil {
+			config.ParseConfig(path)
+			break
+		}
 	}
 	os.Exit(m.Run())
 }
