@@ -2,7 +2,7 @@ package auth
 
 import (
 	"context"
-	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"strings"
@@ -98,7 +98,7 @@ func FromContext(ctx context.Context) *Credential {
 }
 
 func sha1hex(data string) string {
-	h := sha1.New()
+	h := sha256.New()
 	h.Write([]byte(data))
 	return hex.EncodeToString(h.Sum(nil))
 }
