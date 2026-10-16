@@ -5,3 +5,4 @@ bin/
 cfg.json
 internal/app/build.go
 .Makefile.swp
+docs/review/
