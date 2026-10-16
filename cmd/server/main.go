@@ -98,6 +98,9 @@ func main() {
 	if err := validate.ValidateRules(rules); err != nil {
 		lg.Fatalf("[F] invalid validation rules: %v", err)
 	}
+	// Surface rules whose handler is missing; these were silently skipped by
+	// the former reflection dispatch.
+	validate.ValidateRegistry(rules)
 	worker.Init(application.Repos)
 	worker.NewScheduler()
 
