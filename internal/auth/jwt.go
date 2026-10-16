@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"time"
 
-	jwt "github.com/dgrijalva/jwt-go"
+	jwt "github.com/golang-jwt/jwt/v5"
 )
 
 // Claims is the JWT payload for Halo sessions.
 type Claims struct {
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 	UserUUID string `json:"uuid"`
 }
 
@@ -38,8 +38,8 @@ func NewDefault() *JWT {
 // CreateToken signs a token for the given user UUID.
 func (j *JWT) CreateToken(userUUID string) (string, error) {
 	claims := &Claims{
-		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(j.duration).Unix(),
+		jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(j.duration)),
 			Issuer:    j.issuer,
 		},
 		userUUID,

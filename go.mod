@@ -4,12 +4,12 @@ go 1.26.0
 
 require (
 	github.com/99designs/gqlgen v0.17.95
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fatih/structs v1.1.0
 	github.com/go-sql-driver/mysql v1.10.1
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
-	github.com/jackc/pgx/v5 v5.6.0
+	github.com/jackc/pgx/v5 v5.11.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/machinebox/graphql v0.2.2
 	github.com/mia0x75/parser v0.0.0-20190531113551-6fbc203ea218
