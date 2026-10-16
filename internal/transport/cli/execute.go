@@ -51,9 +51,7 @@ func execute(cmd *cobra.Command, args []string) {
 			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", appErr.Error())
 			break
 		}
-		event.Init(application.Repos)
 		worker.Init(application.Repos)
-
 		if ticketUUID, err = cmd.Flags().GetString("ticket"); err != nil {
 			break
 		}
@@ -113,13 +111,22 @@ func execute(cmd *cobra.Command, args []string) {
 			stmt.Status = gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumDone]
 			stmt.RowsAffected = uint(result.RowsAffected)
 		}
+		// Execution is audited as the system user, since the CLI acts on its
+		// own rather than on behalf of a logged-in operator.
+		actorID := uint(0)
+		if sysUser, sysErr := application.Repos.User.GetByUUID(ctx, event.SystemUserUUID); sysErr == nil {
+			actorID = sysUser.UserID
+		}
+
 		if err != nil {
-			event.FireSync(event.EventTicketFailed, &event.TicketFailedArgs{
+			event.FireSync(event.EventTicketFailed, &event.TicketFailed{
+				UserID:  actorID,
 				Ticket:  *ticket,
 				Cluster: *cluster,
 			})
 		} else {
-			event.FireSync(event.EventTicketExecuted, &event.TicketExecutedArgs{
+			event.FireSync(event.EventTicketExecuted, &event.TicketExecuted{
+				UserID:  actorID,
 				Ticket:  *ticket,
 				Cluster: *cluster,
 			})

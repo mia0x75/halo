@@ -341,7 +341,7 @@ L:
 		// 主动同步缓存
 		cache.ClustersMap.Append(cluster)
 
-		event.Fire(event.EventClusterCreated, &event.ClusterCreatedArgs{
+		event.Fire(event.EventClusterCreated, &event.ClusterCreated{
 			Manager: *credential.User,
 			Cluster: *cluster,
 		})
@@ -416,7 +416,7 @@ L:
 			break L
 		}
 
-		event.Fire(event.EventClusterUpdated, &event.ClusterUpdatedArgs{
+		event.Fire(event.EventClusterUpdated, &event.ClusterUpdated{
 			Manager: *credential.User,
 			Cluster: *cluster,
 		})
@@ -452,7 +452,7 @@ func (r *mutationRootResolver) RemoveCluster(ctx context.Context, id string) (ok
 			return elem.UUID == id
 		})
 
-		event.Fire(event.EventClusterRemoved, &event.ClusterRemovedArgs{
+		event.Fire(event.EventClusterRemoved, &event.ClusterRemoved{
 			Manager: *credential.User,
 			Cluster: *cluster,
 		})
@@ -495,7 +495,7 @@ func (r *mutationRootResolver) PatchClusterStatus(ctx context.Context, input mod
 			}
 		}
 
-		event.Fire(event.EventClusterStatusPatched, &event.ClusterStatusPatchedArgs{
+		event.Fire(event.EventClusterStatusPatched, &event.ClusterStatusPatched{
 			Manager: *credential.User,
 			Cluster: *cluster,
 		})

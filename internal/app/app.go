@@ -13,7 +13,9 @@ import (
 	"github.com/mia0x75/halo/internal/analyzer"
 	"github.com/mia0x75/halo/internal/cache"
 	"github.com/mia0x75/halo/internal/domain"
+	"github.com/mia0x75/halo/internal/event"
 	"github.com/mia0x75/halo/internal/platform/db"
+	"github.com/mia0x75/halo/internal/platform/notify"
 	mysqlrepo "github.com/mia0x75/halo/internal/repository/mysql"
 	postgresrepo "github.com/mia0x75/halo/internal/repository/postgres"
 	"github.com/mia0x75/halo/internal/service"
@@ -26,6 +28,7 @@ type App struct {
 	Repos    service.Repos
 	Tx       service.TxManager
 	Agent    agent.Executor
+	EventBus *event.Bus
 	Services Services
 }
 
@@ -143,6 +146,17 @@ func New(ctx context.Context, cfg db.Config) (*App, error) {
 	}
 
 	a := &App{DB: database, Repos: repos, Tx: tx, Agent: agent.LocalExecutor{}, Services: services}
+
+	// The event bus needs the repositories and the notifier. Wiring it here
+	// keeps internal/event free of any service/transport dependency and removes
+	// the former package-level init().
+	a.EventBus = event.NewBus(100)
+	event.Register(a.EventBus, event.Deps{
+		Log:       repos.Log,
+		Statistic: repos.Statistic,
+		User:      repos.User,
+		Notifier:  notify.NewMulti(notify.EmailNotifier{}),
+	})
 
 	// The caches read through the repositories, so they can only be populated
 	// once the container is fully wired.

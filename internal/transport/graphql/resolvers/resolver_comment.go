@@ -59,7 +59,7 @@ func (r *mutationRootResolver) CreateComment(ctx context.Context, input models.C
 		}
 		comment.CommentID = uint(newID)
 
-		event.Fire(event.EventCommentCreated, &event.CommentCreatedArgs{
+		event.Fire(event.EventCommentCreated, &event.CommentCreated{
 			User:    *credential.User,
 			Ticket:  *ticket,
 			Comment: *comment,

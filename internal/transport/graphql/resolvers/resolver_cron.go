@@ -45,7 +45,7 @@ func (r *mutationRootResolver) CancelCron(ctx context.Context, id string) (ok bo
 		}
 		ticket := bridge.TicketFromDomain(domainTicket)
 
-		event.Fire(event.EventCronCancelled, &event.CronCancelledArgs{
+		event.Fire(event.EventCronCancelled, &event.CronCancelled{
 			User:   *credential.User,
 			Cron:   *cron,
 			Ticket: *ticket,

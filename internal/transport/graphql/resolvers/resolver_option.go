@@ -58,7 +58,7 @@ func (r *mutationRootResolver) PatchOptionValues(ctx context.Context, input mode
 			break
 		}
 
-		event.Fire(event.EventOptionValuePatched, &event.OptionValuePatchedArgs{
+		event.Fire(event.EventOptionValuePatched, &event.OptionValuePatched{
 			Manager: *credential.User,
 			Option:  *option,
 		})

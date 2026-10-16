@@ -269,7 +269,7 @@ L:
 		}
 		rs = string(bs)
 
-		event.Fire(event.EventQueryCreated, &event.QueryCreatedArgs{
+		event.Fire(event.EventQueryCreated, &event.QueryCreated{
 			User:  *user,
 			Query: *query,
 		})
@@ -369,7 +369,7 @@ L:
 			break L
 		}
 
-		event.Fire(event.EventQueryAnalyzed, &event.QueryAnalyzedArgs{
+		event.Fire(event.EventQueryAnalyzed, &event.QueryAnalyzed{
 			User:  *user,
 			Query: *query,
 		})
@@ -468,7 +468,7 @@ L:
 			break L
 		}
 
-		event.Fire(event.EventQueryRewrited, &event.QueryRewritedArgs{
+		event.Fire(event.EventQueryRewrited, &event.QueryRewrited{
 			User:  *user,
 			Query: *query,
 		})

@@ -193,7 +193,7 @@ L:
 		notifyTicketStatusChange(user.UUID, ticket.UUID, fmt.Sprintf("新建工单(uuid=%s)成功，系统正在开始启动自动化审核。", ticket.UUID))
 		go r.validation(statements, cluster, ticket)
 
-		event.Fire(event.EventTicketCreated, &event.TicketCreatedArgs{
+		event.Fire(event.EventTicketCreated, &event.TicketCreated{
 			User:    *user,
 			Ticket:  *ticket,
 			Cluster: *cluster,
@@ -385,7 +385,7 @@ L:
 		notifyTicketStatusChange(user.UUID, ticket.UUID, fmt.Sprintf("更新工单(uuid=%s)成功，系统正在开始启动自动化审核。", ticket.UUID))
 		go r.validation(statements, cluster, ticket)
 
-		event.Fire(event.EventTicketUpdated, &event.TicketUpdatedArgs{
+		event.Fire(event.EventTicketUpdated, &event.TicketUpdated{
 			User:    *user,
 			Ticket:  *ticket,
 			Cluster: *cluster,
@@ -436,7 +436,7 @@ func (r *mutationRootResolver) RemoveTicket(ctx context.Context, id string) (ok 
 		cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 			return elem.ClusterID == removed.ClusterID
 		})
-		event.Fire(event.EventTicketRemoved, &event.TicketRemovedArgs{
+		event.Fire(event.EventTicketRemoved, &event.TicketRemoved{
 			User:    *user,
 			Ticket:  *bridge.TicketFromDomain(removed),
 			Cluster: *cluster,
@@ -500,7 +500,7 @@ func (r *mutationRootResolver) PatchTicketStatus(ctx context.Context, input mode
 		cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 			return elem.ClusterID == ticket.ClusterID
 		})
-		event.Fire(event.EventTicketStatusPatched, &event.TicketStatusPatchedArgs{
+		event.Fire(event.EventTicketStatusPatched, &event.TicketStatusPatched{
 			User:    *user,
 			Ticket:  *ticket,
 			Cluster: *cluster,
@@ -626,7 +626,7 @@ func (r *mutationRootResolver) ScheduleTicket(ctx context.Context, input models.
 			Valid: true,
 		}
 
-		event.Fire(event.EventTicketScheduled, &event.TicketScheduledArgs{
+		event.Fire(event.EventTicketScheduled, &event.TicketScheduled{
 			User:    *user,
 			Ticket:  *ticket,
 			Cluster: *cluster,

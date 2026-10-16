@@ -40,7 +40,7 @@ func (r *mutationRootResolver) PatchRuleValues(ctx context.Context, input models
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 		}
 
-		event.Fire(event.EventRuleValuesPatched, &event.RuleValuesPatchedArgs{
+		event.Fire(event.EventRuleValuesPatched, &event.RuleValuesPatched{
 			Manager: *credential.User,
 			Rule:    *rule,
 		})
@@ -87,7 +87,7 @@ func (r *mutationRootResolver) PatchRuleBitwise(ctx context.Context, input model
 			break
 		}
 
-		event.Fire(event.EventRuleBitwisePatched, &event.RuleBitwisePatchedArgs{
+		event.Fire(event.EventRuleBitwisePatched, &event.RuleBitwisePatched{
 			Manager: *credential.User,
 			Rule:    *rule,
 		})

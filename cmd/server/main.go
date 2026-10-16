@@ -21,7 +21,6 @@ import (
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/cache"
 	"github.com/mia0x75/halo/internal/domain"
-	"github.com/mia0x75/halo/internal/event"
 	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/db"
 	"github.com/mia0x75/halo/internal/validate"
@@ -100,7 +99,6 @@ func main() {
 		lg.Fatalf("[F] invalid validation rules: %v", err)
 	}
 	worker.Init(application.Repos)
-	event.Init(application.Repos)
 	worker.NewScheduler()
 
 	addr := config.Config().Listen

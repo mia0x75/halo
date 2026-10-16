@@ -251,7 +251,7 @@ L:
 		cache.UsersMap.Append(user)
 		cache.EdgesMap.Reload()
 
-		event.Fire(event.EventUserRegistered, &event.UserRegisteredArgs{
+		event.Fire(event.EventUserRegistered, &event.UserRegistered{
 			User: *user,
 		})
 
@@ -344,7 +344,7 @@ L:
 			break L
 		}
 
-		event.Fire(event.EventUserRegistered, &event.UserRegisteredArgs{
+		event.Fire(event.EventUserRegistered, &event.UserRegistered{
 			User: *user,
 		})
 
@@ -384,7 +384,7 @@ L:
 			break L
 		}
 
-		event.Fire(event.EventUserRegistered, &event.UserRegisteredArgs{
+		event.Fire(event.EventUserRegistered, &event.UserRegistered{
 			User: *user,
 		})
 
@@ -399,7 +399,7 @@ func (r *mutationRootResolver) ResetPasswd(ctx context.Context, input models.Res
 L:
 	for {
 		// TODO:
-		event.Fire(event.EventUserRegistered, &event.UserRegisteredArgs{
+		event.Fire(event.EventUserRegistered, &event.UserRegistered{
 			// UserUUID: user.UUID,
 		})
 
@@ -414,7 +414,7 @@ L:
 	for {
 		// 1, 参考Activate 1/2/3/4，不同是没有过期则不允许
 		// TODO:
-		event.Fire(event.EventUserRegistered, &event.UserRegisteredArgs{
+		event.Fire(event.EventUserRegistered, &event.UserRegistered{
 			// UserUUID: user.UUID,
 		})
 
@@ -475,7 +475,7 @@ L:
 			Token: token,
 		}
 
-		event.Fire(event.EventUserSignedIn, &event.UserSignedInArgs{
+		event.Fire(event.EventUserSignedIn, &event.UserSignedIn{
 			User: *user,
 			IP:   "127.0.0.1", // TODO:
 		})
@@ -498,7 +498,7 @@ func (r *mutationRootResolver) Logout(ctx context.Context) (bool, error) {
 	user := credential.User
 	transportauth.Revoke(user.UUID)
 
-	event.Fire(event.EventUserLogout, &event.UserLogoutArgs{
+	event.Fire(event.EventUserLogout, &event.UserLogout{
 		User: *user,
 	})
 
@@ -531,7 +531,7 @@ L:
 			break L
 		}
 
-		event.Fire(event.EventProfileUpdated, &event.ProfileUpdatedArgs{
+		event.Fire(event.EventProfileUpdated, &event.ProfileUpdated{
 			User: *user,
 		})
 
@@ -575,7 +575,7 @@ L:
 			break L
 		}
 
-		event.Fire(event.EventPasswordUpdated, &event.PasswordUpdatedArgs{
+		event.Fire(event.EventPasswordUpdated, &event.PasswordUpdated{
 			User: *user,
 		})
 
@@ -620,7 +620,7 @@ L:
 			break L
 		}
 
-		event.Fire(event.EventEmailUpdated, &event.EmailUpdatedArgs{
+		event.Fire(event.EventEmailUpdated, &event.EmailUpdated{
 			User:  *user,
 			Email: input.NewEmail,
 		})
@@ -683,7 +683,7 @@ L:
 		cache.EdgesMap.Reload()
 
 		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
-		event.Fire(event.EventReviewerGranted, &event.ReviewerGrantedArgs{
+		event.Fire(event.EventReviewerGranted, &event.ReviewerGranted{
 			Manager: *credential.User,
 			User:    *user,
 		})
@@ -743,7 +743,7 @@ L:
 		cache.EdgesMap.Reload()
 
 		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
-		event.Fire(event.EventReviewerRevoked, &event.ReviewerRevokedArgs{
+		event.Fire(event.EventReviewerRevoked, &event.ReviewerRevoked{
 			Manager: *credential.User,
 			User:    *user,
 		})
@@ -806,7 +806,7 @@ L:
 		cache.EdgesMap.Reload()
 
 		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
-		event.Fire(event.EventClusterGranted, &event.ClusterGrantedArgs{
+		event.Fire(event.EventClusterGranted, &event.ClusterGranted{
 			Manager: *credential.User,
 			User:    *user,
 		})
@@ -866,7 +866,7 @@ L:
 		cache.EdgesMap.Reload()
 
 		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
-		event.Fire(event.EventClusterRevoked, &event.ClusterRevokedArgs{
+		event.Fire(event.EventClusterRevoked, &event.ClusterRevoked{
 			Manager: *credential.User,
 			User:    *user,
 		})
@@ -922,7 +922,7 @@ L:
 		cache.EdgesMap.Reload()
 
 		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
-		event.Fire(event.EventRoleGranted, &event.RoleGrantedArgs{
+		event.Fire(event.EventRoleGranted, &event.RoleGranted{
 			Manager: *credential.User,
 			User:    *user,
 		})
@@ -983,7 +983,7 @@ L:
 		cache.EdgesMap.Reload()
 
 		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
-		event.Fire(event.EventRoleRevoked, &event.RoleRevokedArgs{
+		event.Fire(event.EventRoleRevoked, &event.RoleRevoked{
 			Manager: *credential.User,
 			User:    *user,
 		})
@@ -1140,7 +1140,7 @@ L:
 		cache.EdgesMap.Reload()
 
 		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
-		event.Fire(event.EventUserCreated, &event.UserCreatedArgs{
+		event.Fire(event.EventUserCreated, &event.UserCreated{
 			Manager: *credential.User,
 			User:    *user,
 		})
@@ -1219,7 +1219,7 @@ L:
 		// 后台更新用户，同步清理该用户的令牌，如果有的话
 		transportauth.Revoke(input.UserUUID)
 
-		defer event.Fire(event.EventUserUpdated, &event.UserUpdatedArgs{
+		defer event.Fire(event.EventUserUpdated, &event.UserUpdated{
 			Manager: *credential.User,
 			User:    *user,
 		})
@@ -1270,7 +1270,7 @@ L:
 		// 后台更新用户，同步清理该用户的令牌，如果有的话
 		transportauth.Revoke(input.UserUUID)
 
-		event.Fire(event.EventUserStatusPatched, &event.UserStatusPatchedArgs{
+		event.Fire(event.EventUserStatusPatched, &event.UserStatusPatched{
 			Manager: *credential.User,
 			User:    *user,
 		})
