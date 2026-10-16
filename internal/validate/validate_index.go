@@ -45,7 +45,7 @@ func (v *IndexCreateVldr) Validate(wg *sync.WaitGroup) {
 
 // MaxAllowedIndexColumnCount 组合索引允许的最大列数
 // RULE: CIX-L2-001
-func (v *IndexCreateVldr) createIndexMaxAllowedIndexColumnCount(s *Subject, r *Rule) {
+func (v *IndexCreateVldr) MaxAllowedIndexColumnCount(s *Subject, r *Rule) {
 	threshold, _ := strconv.Atoi(r.Values)
 	if threshold < len(v.ci.IndexColNames) {
 		c := &Clause{
@@ -58,7 +58,7 @@ func (v *IndexCreateVldr) createIndexMaxAllowedIndexColumnCount(s *Subject, r *R
 
 // IndexNameQualified 索引名标识符规则
 // RULE: CIX-L2-002
-func (v *IndexCreateVldr) createIndexIndexNameQualified(s *Subject, r *Rule) {
+func (v *IndexCreateVldr) IndexNameQualified(s *Subject, r *Rule) {
 	indexName := v.ci.IndexName
 
 	if err := Match(r, indexName, indexName, r.Values); err != nil {
@@ -72,7 +72,7 @@ func (v *IndexCreateVldr) createIndexIndexNameQualified(s *Subject, r *Rule) {
 
 // IndexNameLowerCaseRequired 索引名大小写规则
 // RULE: CIX-L2-003
-func (v *IndexCreateVldr) createIndexIndexNameLowerCaseRequired(s *Subject, r *Rule) {
+func (v *IndexCreateVldr) IndexNameLowerCaseRequired(s *Subject, r *Rule) {
 	indexName := v.ci.IndexName
 
 	if err := Match(r, indexName, indexName); err != nil {
@@ -86,7 +86,7 @@ func (v *IndexCreateVldr) createIndexIndexNameLowerCaseRequired(s *Subject, r *R
 
 // IndexNameMaxLength 索引名长度规则
 // RULE: CIX-L2-004
-func (v *IndexCreateVldr) createIndexIndexNameMaxLength(s *Subject, r *Rule) {
+func (v *IndexCreateVldr) IndexNameMaxLength(s *Subject, r *Rule) {
 	threshold, _ := strconv.Atoi(r.Values)
 	indexName := v.ci.IndexName
 	if len(indexName) > threshold {
@@ -101,7 +101,7 @@ func (v *IndexCreateVldr) createIndexIndexNameMaxLength(s *Subject, r *Rule) {
 
 // IndexNamePrefixRequired 索引名前缀规则
 // RULE: CIX-L2-005
-func (v *IndexCreateVldr) createIndexIndexNamePrefixRequired(s *Subject, r *Rule) {
+func (v *IndexCreateVldr) IndexNamePrefixRequired(s *Subject, r *Rule) {
 	indexName := v.ci.IndexName
 
 	if err := Match(r, indexName, indexName, r.Values); err != nil {
@@ -115,7 +115,7 @@ func (v *IndexCreateVldr) createIndexIndexNamePrefixRequired(s *Subject, r *Rule
 
 // IndexColumnDuplicate 组合索引中是否有重复列
 // RULE: CIX-L2-006
-func (v *IndexCreateVldr) createIndexIndexColumnDuplicate(s *Subject, r *Rule) {
+func (v *IndexCreateVldr) IndexColumnDuplicate(s *Subject, r *Rule) {
 	m := make(map[string]int)
 	for _, k := range v.ci.IndexColNames {
 		if _, ok := m[k.Column.Name.L]; ok {
@@ -132,7 +132,7 @@ func (v *IndexCreateVldr) createIndexIndexColumnDuplicate(s *Subject, r *Rule) {
 
 // TargetDatabaseDoesNotExist 添加索引的表所属库是否存在
 // RULE: CIX-L3-001
-func (v *IndexCreateVldr) createIndexTargetDatabaseDoesNotExist(s *Subject, r *Rule) {
+func (v *IndexCreateVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, ti := range v.Vi {
 		if v.DatabaseInfo(ti.Database) == nil {
@@ -147,7 +147,7 @@ func (v *IndexCreateVldr) createIndexTargetDatabaseDoesNotExist(s *Subject, r *R
 
 // TargetTableDoesNotExist 条件索引的表是否存在
 // RULE: CIX-L3-002
-func (v *IndexCreateVldr) createIndexTargetTableDoesNotExist(s *Subject, r *Rule) {
+func (v *IndexCreateVldr) TargetTableDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, ti := range v.Vi {
 		if ti.Table == nil {
@@ -165,7 +165,7 @@ func (v *IndexCreateVldr) createIndexTargetTableDoesNotExist(s *Subject, r *Rule
 
 // TargetColumnDoesNotExist 添加索引的列是否存在
 // RULE: CIX-L3-003
-func (v *IndexCreateVldr) createIndexTargetColumnDoesNotExist(s *Subject, r *Rule) {
+func (v *IndexCreateVldr) TargetColumnDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.ci.Table.Schema.O, v.ci.Table.Name.O)
 	if ti == nil {
@@ -184,13 +184,13 @@ func (v *IndexCreateVldr) createIndexTargetColumnDoesNotExist(s *Subject, r *Rul
 
 // IndexOverlayNotAllowed 索引内容是否重复
 // RULE: CIX-L3-004
-func (v *IndexCreateVldr) createIndexIndexOverlayNotAllowed(s *Subject, r *Rule) {
+func (v *IndexCreateVldr) IndexOverlayNotAllowed(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 }
 
 // IndexNameDuplicate 索引名是否重复
 // RULE: CIX-L3-005
-func (v *IndexCreateVldr) createIndexIndexNameDuplicate(s *Subject, r *Rule) {
+func (v *IndexCreateVldr) IndexNameDuplicate(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.ci.Table.Schema.O, v.ci.Table.Name.O)
 	if ti == nil {
@@ -207,7 +207,7 @@ func (v *IndexCreateVldr) createIndexIndexNameDuplicate(s *Subject, r *Rule) {
 
 // MaxAllowedIndexCount 最多能建多少个索引
 // RULE: CIX-L3-006
-func (v *IndexCreateVldr) createIndexMaxAllowedIndexCount(s *Subject, r *Rule) {
+func (v *IndexCreateVldr) MaxAllowedIndexCount(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.ci.Table.Schema.O, v.ci.Table.Name.O)
 	if ti == nil {
@@ -230,7 +230,7 @@ func (v *IndexCreateVldr) createIndexMaxAllowedIndexCount(s *Subject, r *Rule) {
 
 // IndexOnBlobColumnNotAllowed 是否允许在BLOB/TEXT列上建索引
 // RULE: CIX-L3-007
-func (v *IndexCreateVldr) createIndexIndexOnBlobColumnNotAllowed(s *Subject, r *Rule) {
+func (v *IndexCreateVldr) IndexOnBlobColumnNotAllowed(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.ci.Table.Schema.O, v.ci.Table.Name.O)
 	if ti == nil {
@@ -286,7 +286,7 @@ func (v *IndexDropVldr) Validate(wg *sync.WaitGroup) {
 
 // TargetDatabaseDoesNotExist 目标库是否存在
 // RULE: RIX-L3-001
-func (v *IndexDropVldr) renameIndexTargetDatabaseDoesNotExist(s *Subject, r *Rule) {
+func (v *IndexDropVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, ti := range v.Vi {
 		if v.DatabaseInfo(ti.Database) == nil {
@@ -301,7 +301,7 @@ func (v *IndexDropVldr) renameIndexTargetDatabaseDoesNotExist(s *Subject, r *Rul
 
 // TargetTableDoesNotExist 目标表是否存在
 // RULE: RIX-L3-002
-func (v *IndexDropVldr) renameIndexTargetTableDoesNotExist(s *Subject, r *Rule) {
+func (v *IndexDropVldr) TargetTableDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, ti := range v.Vi {
 		if ti.Table == nil {
@@ -319,7 +319,7 @@ func (v *IndexDropVldr) renameIndexTargetTableDoesNotExist(s *Subject, r *Rule) 
 
 // TargetIndexDoesNotExist 目标索引是否存在
 // RULE: RIX-L3-003
-func (v *IndexDropVldr) renameIndexTargetIndexDoesNotExist(s *Subject, r *Rule) {
+func (v *IndexDropVldr) TargetIndexDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	ti := v.TableInfo(v.di.Table.Schema.O, v.di.Table.Name.O)
 	if ti == nil {

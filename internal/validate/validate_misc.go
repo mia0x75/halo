@@ -32,7 +32,7 @@ func (v *MiscVldr) Validate(wg *sync.WaitGroup) {
 
 // LockTableProhibited 是否允许LOCK TABLE
 // RULE: MSC-L1-001
-func (v *MiscVldr) miscLockTableProhibited(_ *Subject, r *Rule) {
+func (v *MiscVldr) LockTableProhibited(_ *Subject, r *Rule) {
 	for _, s := range v.Ctx.Subjects {
 		if _, ok := s.StmtNode.(*ast.LockTableStmt); !ok {
 			continue
@@ -48,7 +48,7 @@ func (v *MiscVldr) miscLockTableProhibited(_ *Subject, r *Rule) {
 
 // FlushTableProhibited 是否允许FLUSH TABLE => TODO: FLUSH语法支持不全
 // RULE: MSC-L1-002
-func (v *MiscVldr) miscFlushTableProhibited(_ *Subject, r *Rule) {
+func (v *MiscVldr) FlushTableProhibited(_ *Subject, r *Rule) {
 	for _, s := range v.Ctx.Subjects {
 		ct, ok := s.StmtNode.(*ast.FlushStmt)
 		if !ok {
@@ -70,7 +70,7 @@ func (v *MiscVldr) miscFlushTableProhibited(_ *Subject, r *Rule) {
 
 // TruncateTableProhibited 是否允许TRUNCATE TABLE
 // RULE: MSC-L1-003
-func (v *MiscVldr) miscTruncateTableProhibited(_ *Subject, r *Rule) {
+func (v *MiscVldr) TruncateTableProhibited(_ *Subject, r *Rule) {
 	for _, s := range v.Ctx.Subjects {
 		if _, ok := s.StmtNode.(*ast.TruncateTableStmt); !ok {
 			continue
@@ -86,7 +86,7 @@ func (v *MiscVldr) miscTruncateTableProhibited(_ *Subject, r *Rule) {
 
 // MergeRequired 合并同一个表的操作，这个对大表的ALTER很重要
 // RULE: MSC-L1-004
-func (v *MiscVldr) miscMergeRequired(_ *Subject, r *Rule) {
+func (v *MiscVldr) MergeRequired(_ *Subject, r *Rule) {
 	slice := []string{}
 	name := ""
 	for _, s := range v.Ctx.Subjects {
@@ -138,7 +138,7 @@ func (v *MiscVldr) miscMergeRequired(_ *Subject, r *Rule) {
 
 // PurgeLogsProhibited 是否允许PURGE LOG
 // RULE: MSC-L1-005
-func (v *MiscVldr) miscPurgeLogsProhibited(_ *Subject, r *Rule) {
+func (v *MiscVldr) PurgeLogsProhibited(_ *Subject, r *Rule) {
 	for _, s := range v.Ctx.Subjects {
 		if _, ok := s.StmtNode.(*ast.PurgeStmt); !ok {
 			continue
@@ -154,7 +154,7 @@ func (v *MiscVldr) miscPurgeLogsProhibited(_ *Subject, r *Rule) {
 
 // UnlockTableProhibited 是否允许UNLOCK TABLES
 // RULE: MSC-L1-006
-func (v *MiscVldr) miscUnlockTableProhibited(_ *Subject, r *Rule) {
+func (v *MiscVldr) UnlockTableProhibited(_ *Subject, r *Rule) {
 	for _, s := range v.Ctx.Subjects {
 		if _, ok := s.StmtNode.(*ast.UnlockTableStmt); !ok {
 			continue
@@ -170,7 +170,7 @@ func (v *MiscVldr) miscUnlockTableProhibited(_ *Subject, r *Rule) {
 
 // KillProhibited 是否允许KILL线程
 // RULE: MSC-L1-007
-func (v *MiscVldr) miscKillProhibited(_ *Subject, r *Rule) {
+func (v *MiscVldr) KillProhibited(_ *Subject, r *Rule) {
 	for _, s := range v.Ctx.Subjects {
 		if _, ok := s.StmtNode.(*ast.KillStmt); !ok {
 			continue
@@ -186,7 +186,7 @@ func (v *MiscVldr) miscKillProhibited(_ *Subject, r *Rule) {
 
 // SplitRequired 是否允许同时出现DDL、DML
 // RULE: MSC-L1-008
-func (v *MiscVldr) miscSplitRequired(_ *Subject, r *Rule) {
+func (v *MiscVldr) SplitRequired(_ *Subject, r *Rule) {
 	method := uint8(0)
 	for _, s := range v.Ctx.Subjects {
 		switch s.StmtNode.(type) {

@@ -21,37 +21,37 @@ func (v *TriggerCreateVldr) Validate(wg *sync.WaitGroup) {
 
 // TriggerNameQualified 触发器名标识符规则
 // RULE: CTG-L2-001
-func (v *TriggerCreateVldr) createTriggerTriggerNameQualified(s *Subject, r *Rule) {
+func (v *TriggerCreateVldr) TriggerNameQualified(s *Subject, r *Rule) {
 }
 
 // TriggerNameLowerCaseRequired 触发器名大小写规则
 // RULE: CTG-L2-002
-func (v *TriggerCreateVldr) createTriggerTriggerNameLowerCaseRequired(s *Subject, r *Rule) {
+func (v *TriggerCreateVldr) TriggerNameLowerCaseRequired(s *Subject, r *Rule) {
 }
 
 // TriggerNameMaxLength 触发器名长度规则
 // RULE: CTG-L2-003
-func (v *TriggerCreateVldr) createTriggerTriggerNameMaxLength(s *Subject, r *Rule) {
+func (v *TriggerCreateVldr) TriggerNameMaxLength(s *Subject, r *Rule) {
 }
 
 // TriggerPrefixRequired 触发器名前缀规则
 // RULE: CTG-L2-004
-func (v *TriggerCreateVldr) createTriggerTriggerPrefixRequired(s *Subject, r *Rule) {
+func (v *TriggerCreateVldr) TriggerPrefixRequired(s *Subject, r *Rule) {
 }
 
 // TargetDatabaseDoesNotExist 目标库是否存在
 // RULE: CTG-L3-001
-func (v *TriggerCreateVldr) createTriggerTargetDatabaseDoesNotExist(s *Subject, r *Rule) {
+func (v *TriggerCreateVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 }
 
 // TargetTableDoesNotExist 目标表是否存在
 // RULE: CTG-L3-002
-func (v *TriggerCreateVldr) createTriggerTargetTableDoesNotExist(s *Subject, r *Rule) {
+func (v *TriggerCreateVldr) TargetTableDoesNotExist(s *Subject, r *Rule) {
 }
 
 // TargetTriggerDoesNotExist 目标触发器是否存在
 // RULE: CTG-L3-003
-func (v *TriggerCreateVldr) createTriggerTargetTriggerDoesNotExist(s *Subject, r *Rule) {
+func (v *TriggerCreateVldr) TargetTriggerDoesNotExist(s *Subject, r *Rule) {
 }
 
 // TriggerAlterVldr 修改触发器语句相关的审核规则
@@ -71,17 +71,17 @@ func (v *TriggerAlterVldr) Validate(wg *sync.WaitGroup) {
 
 // TargetDatabaseDoesNotExist 目标库是否存在
 // RULE:DTG-L3-001
-func (v *TriggerAlterVldr) alterTriggerTargetDatabaseDoesNotExist(s *Subject, r *Rule) {
+func (v *TriggerAlterVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 }
 
 // TargetTableDoesNotExist 目标表是否存在
 // RULE: MTG-L3-002
-func (v *TriggerAlterVldr) alterTriggerTargetTableDoesNotExist(s *Subject, r *Rule) {
+func (v *TriggerAlterVldr) TargetTableDoesNotExist(s *Subject, r *Rule) {
 }
 
 // TargetTriggerDoesNotExist 目标触发器是否存在
 // RULE: MTG-L3-003
-func (v *TriggerAlterVldr) alterTriggerTargetTriggerDoesNotExist(s *Subject, r *Rule) {
+func (v *TriggerAlterVldr) TargetTriggerDoesNotExist(s *Subject, r *Rule) {
 }
 
 // TriggerDropVldr 删除触发器语句相关的审核规则
@@ -101,15 +101,15 @@ func (v *TriggerDropVldr) Validate(wg *sync.WaitGroup) {
 
 // TargetDatabaseDoesNotExist 目标库是否存在
 // RULE:DTG-L3-001
-func (v *TriggerDropVldr) dropTriggerTargetDatabaseDoesNotExist(s *Subject, r *Rule) {
+func (v *TriggerDropVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 }
 
 // TargetTableDoesNotExist 目标表是否存在
 // RULE:DTG-L3-002
-func (v *TriggerDropVldr) dropTriggerTargetTableDoesNotExist(s *Subject, r *Rule) {
+func (v *TriggerDropVldr) TargetTableDoesNotExist(s *Subject, r *Rule) {
 }
 
 // TargetTriggerDoesNotExist 目标触发器是否存在
 // RULE:DTG-L3-003
-func (v *TriggerDropVldr) dropTriggerTargetTriggerDoesNotExist(s *Subject, r *Rule) {
+func (v *TriggerDropVldr) TargetTriggerDoesNotExist(s *Subject, r *Rule) {
 }

@@ -45,7 +45,7 @@ func (v *InsertVldr) Validate(wg *sync.WaitGroup) {
 
 // ExplicitColumnRequired 是否要求显式列申明
 // RULE: INS-L2-001
-func (v *InsertVldr) insertExplicitColumnRequired(s *Subject, r *Rule) {
+func (v *InsertVldr) ExplicitColumnRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	if v.id.IsReplace {
 		return
@@ -62,7 +62,7 @@ func (v *InsertVldr) insertExplicitColumnRequired(s *Subject, r *Rule) {
 
 // UsingSelectNotAllowed 是否允许INSERT...SELECT
 // RULE: INS-L2-002
-func (v *InsertVldr) insertUsingSelectNotAllowed(s *Subject, r *Rule) {
+func (v *InsertVldr) UsingSelectNotAllowed(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	if v.id.IsReplace {
 		return
@@ -79,7 +79,7 @@ func (v *InsertVldr) insertUsingSelectNotAllowed(s *Subject, r *Rule) {
 
 // RowsLimit 单语句允许操作的最大行数
 // RULE: INS-L2-004
-func (v *InsertVldr) insertRowsLimit(s *Subject, r *Rule) {
+func (v *InsertVldr) RowsLimit(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	thredhold, err := strconv.Atoi(r.Values)
 	if err != nil {
@@ -96,7 +96,7 @@ func (v *InsertVldr) insertRowsLimit(s *Subject, r *Rule) {
 
 // ColumnsValuesMustMatch 列类型、值是否匹配
 // RULE: INS-L2-005
-func (v *InsertVldr) insertColumnsValuesMustMatch(s *Subject, r *Rule) {
+func (v *InsertVldr) ColumnsValuesMustMatch(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	columnNum := len(v.id.Columns)
 	for _, list := range v.id.Lists {
@@ -112,7 +112,7 @@ func (v *InsertVldr) insertColumnsValuesMustMatch(s *Subject, r *Rule) {
 
 // TargetDatabaseDoesNotExist 目标库是否存在
 // RULE: INS-L3-001
-func (v *InsertVldr) insertTargetDatabaseDoesNotExist(s *Subject, r *Rule) {
+func (v *InsertVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, ti := range v.Vi {
 		if v.DatabaseInfo(ti.Database) == nil {
@@ -127,7 +127,7 @@ func (v *InsertVldr) insertTargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 
 // TargetTableDoesNotExist 目标表是否存在
 // RULE: INS-L3-002
-func (v *InsertVldr) insertTargetTableDoesNotExist(s *Subject, r *Rule) {
+func (v *InsertVldr) TargetTableDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	for _, ti := range v.Vi {
 		if ti.Table == nil {
@@ -145,14 +145,14 @@ func (v *InsertVldr) insertTargetTableDoesNotExist(s *Subject, r *Rule) {
 
 // TargetColumnDoesNotExist 目标列是否存在
 // RULE: INS-L3-003
-func (v *InsertVldr) insertTargetColumnDoesNotExist(s *Subject, r *Rule) {
+func (v *InsertVldr) TargetColumnDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// TODO:
 }
 
 // ValueForNotNullColumnRequired 非空列是否有值
 // RULE: INS-L3-004
-func (v *InsertVldr) insertValueForNotNullColumnRequired(s *Subject, r *Rule) {
+func (v *InsertVldr) ValueForNotNullColumnRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// TODO:
 }
@@ -180,6 +180,7 @@ func (v *ReplaceVldr) Validate(wg *sync.WaitGroup) {
 			continue
 		} else {
 			v.id = id
+			v.Walk(v.id)
 		}
 		for _, r := range v.Rules {
 			if r.Bitwise&1 != 1 {
