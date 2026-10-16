@@ -2670,6 +2670,62 @@ func (v *TableAlterVldr) FullTextIndexNamePrefixRequired(s *Subject, r *Rule) {
 	}
 }
 
+// FullTextIndexNameDoesNotExist 删全文索引时索引必须存在
+// RULE: MTB-L3-023
+func (v *TableAlterVldr) FullTextIndexNameDoesNotExist(s *Subject, r *Rule) {
+	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
+	if ti == nil {
+		return
+	}
+	for _, spec := range v.at.Specs {
+		if spec.Tp != ast.AlterTableDropIndex {
+			continue
+		}
+		keyName := strings.TrimSpace(spec.Name)
+		if keyName == "" {
+			continue
+		}
+		if v.IndexInfo(v.at.Table.Schema.O, v.at.Table.Name.O, keyName) == nil {
+			c := &Clause{
+				Description: fmt.Sprintf(r.Message, v.at.Table.Name.O, keyName),
+				Level:       uint8(r.Level),
+			}
+			s.Violations.Append(c)
+		}
+	}
+}
+
+// FullTextIndexNameDuplicate 全文索引必须不存在
+// RULE: MTB-L3-022
+func (v *TableAlterVldr) FullTextIndexNameDuplicate(s *Subject, r *Rule) {
+	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
+	if ti == nil {
+		return
+	}
+	for _, spec := range v.at.Specs {
+		if spec.Tp != ast.AlterTableAddConstraint {
+			continue
+		}
+		c := spec.Constraint
+		if c.Tp != ast.ConstraintFulltext {
+			continue
+		}
+		keyName := strings.TrimSpace(c.Name)
+		if keyName == "" {
+			continue
+		}
+		if v.IndexInfo(v.at.Table.Schema.O, v.at.Table.Name.O, keyName) != nil {
+			c := &Clause{
+				Description: fmt.Sprintf(r.Message, v.at.Table.Name.O, keyName),
+				Level:       uint8(r.Level),
+			}
+			s.Violations.Append(c)
+		}
+	}
+}
+
 // MaxAllowedIndexColumnCount 单一索引最大列数
 // RULE: MTB-L2-039
 func (v *TableAlterVldr) MaxAllowedIndexColumnCount(s *Subject, r *Rule) {
@@ -3143,6 +3199,12 @@ func (v *TableRenameVldr) SourceDatabaseDoesNotExist(s *Subject, r *Rule) {
 // TableRenameTargetTableDoesNotExist 目标库是否存在
 // RULE: RTB-L3-003
 func (v *TableRenameVldr) TargetTableDoesNotExist(s *Subject, r *Rule) {
+	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+}
+
+// TargetDatabaseDoesNotExist 目标表是否已存在
+// RULE: RTB-L3-004
+func (v *TableRenameVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 }
 
