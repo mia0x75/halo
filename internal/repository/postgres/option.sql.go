@@ -10,13 +10,13 @@ import (
 )
 
 const createOption = `-- name: CreateOption :exec
-INSERT INTO mm_options (name, uuid, value, description, element, writable, version) VALUES ($1, $2, $3, $4, $5, $6, $7)
+INSERT INTO mm_options (name, uuid, parameter, description, element, writable, version) VALUES ($1, $2, $3, $4, $5, $6, $7)
 `
 
 type CreateOptionParams struct {
 	Name        string
 	Uuid        string
-	Value       string
+	Parameter   string
 	Description string
 	Element     string
 	Writable    int16
@@ -27,7 +27,7 @@ func (q *Queries) CreateOption(ctx context.Context, arg CreateOptionParams) erro
 	_, err := q.db.ExecContext(ctx, createOption,
 		arg.Name,
 		arg.Uuid,
-		arg.Value,
+		arg.Parameter,
 		arg.Description,
 		arg.Element,
 		arg.Writable,
@@ -46,7 +46,7 @@ func (q *Queries) DeleteOptionByUUID(ctx context.Context, uuid string) error {
 }
 
 const getOptionByName = `-- name: GetOptionByName :one
-SELECT name, uuid, value, description, element, writable, version, update_at, create_at FROM mm_options WHERE name = $1 LIMIT 1
+SELECT name, uuid, parameter, description, element, writable, version, update_at, create_at FROM mm_options WHERE name = $1 LIMIT 1
 `
 
 func (q *Queries) GetOptionByName(ctx context.Context, name string) (MmOption, error) {
@@ -55,7 +55,7 @@ func (q *Queries) GetOptionByName(ctx context.Context, name string) (MmOption, e
 	err := row.Scan(
 		&i.Name,
 		&i.Uuid,
-		&i.Value,
+		&i.Parameter,
 		&i.Description,
 		&i.Element,
 		&i.Writable,
@@ -67,7 +67,7 @@ func (q *Queries) GetOptionByName(ctx context.Context, name string) (MmOption, e
 }
 
 const getOptionByUUID = `-- name: GetOptionByUUID :one
-SELECT name, uuid, value, description, element, writable, version, update_at, create_at FROM mm_options WHERE uuid = $1 LIMIT 1
+SELECT name, uuid, parameter, description, element, writable, version, update_at, create_at FROM mm_options WHERE uuid = $1 LIMIT 1
 `
 
 func (q *Queries) GetOptionByUUID(ctx context.Context, uuid string) (MmOption, error) {
@@ -76,7 +76,7 @@ func (q *Queries) GetOptionByUUID(ctx context.Context, uuid string) (MmOption, e
 	err := row.Scan(
 		&i.Name,
 		&i.Uuid,
-		&i.Value,
+		&i.Parameter,
 		&i.Description,
 		&i.Element,
 		&i.Writable,
@@ -88,7 +88,7 @@ func (q *Queries) GetOptionByUUID(ctx context.Context, uuid string) (MmOption, e
 }
 
 const listOptions = `-- name: ListOptions :many
-SELECT name, uuid, value, description, element, writable, version, update_at, create_at FROM mm_options WHERE uuid < $1 ORDER BY uuid DESC LIMIT $2
+SELECT name, uuid, parameter, description, element, writable, version, update_at, create_at FROM mm_options WHERE uuid < $1 ORDER BY uuid DESC LIMIT $2
 `
 
 type ListOptionsParams struct {
@@ -108,7 +108,7 @@ func (q *Queries) ListOptions(ctx context.Context, arg ListOptionsParams) ([]MmO
 		if err := rows.Scan(
 			&i.Name,
 			&i.Uuid,
-			&i.Value,
+			&i.Parameter,
 			&i.Description,
 			&i.Element,
 			&i.Writable,
@@ -130,11 +130,11 @@ func (q *Queries) ListOptions(ctx context.Context, arg ListOptionsParams) ([]MmO
 }
 
 const updateOption = `-- name: UpdateOption :exec
-UPDATE mm_options SET value = $1, description = $2, element = $3, writable = $4, version = $5, update_at = NOW() WHERE uuid = $6
+UPDATE mm_options SET parameter = $1, description = $2, element = $3, writable = $4, version = $5, update_at = NOW() WHERE uuid = $6
 `
 
 type UpdateOptionParams struct {
-	Value       string
+	Parameter   string
 	Description string
 	Element     string
 	Writable    int16
@@ -144,7 +144,7 @@ type UpdateOptionParams struct {
 
 func (q *Queries) UpdateOption(ctx context.Context, arg UpdateOptionParams) error {
 	_, err := q.db.ExecContext(ctx, updateOption,
-		arg.Value,
+		arg.Parameter,
 		arg.Description,
 		arg.Element,
 		arg.Writable,

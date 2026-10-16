@@ -21,7 +21,7 @@ func TestRuleRepo(t *testing.T) {
 		Level:       domain.RuleLevelError,
 		VldrGroup:   1,
 		Operator:    "in",
-		Values:      "a,b",
+		Parameters:  "a,b",
 		Bitwise:     1,
 		Func:        "func",
 		Message:     "not allowed",
@@ -34,7 +34,7 @@ func TestRuleRepo(t *testing.T) {
 	got, err := repo.GetByUUID(ctx, rule.UUID)
 	require.NoError(t, err)
 	require.Equal(t, domain.RuleLevelError, got.Level)
-	require.Equal(t, rule.Values, got.Values)
+	require.Equal(t, rule.Parameters, got.Parameters)
 
 	byName, err := repo.GetByName(ctx, rule.Name)
 	require.NoError(t, err)

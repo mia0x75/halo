@@ -12,7 +12,7 @@ import (
 
 // Rule is a validation rule as the engine sees it: the persisted domain entity
 // plus lazily parsed, memoised Values. It embeds domain.Rule so call sites keep
-// reading r.Name / r.Values / r.Message unchanged.
+// reading r.Name / r.Parameters / r.Message unchanged.
 //
 // The mutex guards the cache because validator groups run concurrently.
 type Rule struct {
@@ -25,7 +25,7 @@ type Rule struct {
 // empty reports whether Values carries nothing to parse. Seeded "in"/"regexp"
 // rules always have values; NULL rows (stored as the literal "nil") do not.
 func (r *Rule) empty() bool {
-	return r.Values == "" || r.Values == "nil"
+	return r.Parameters == "" || r.Parameters == "nil"
 }
 
 // Int parses Values as a base-10 integer.
@@ -36,9 +36,9 @@ func (r *Rule) Int() (int, error) {
 	if v, ok := r.cached("int"); ok {
 		return v.(int), nil
 	}
-	n, err := strconv.Atoi(r.Values)
+	n, err := strconv.Atoi(r.Parameters)
 	if err != nil {
-		return 0, fmt.Errorf("parse values %q as int: %w", r.Values, err)
+		return 0, fmt.Errorf("parse values %q as int: %w", r.Parameters, err)
 	}
 	r.setCache("int", n)
 	return n, nil
@@ -53,8 +53,8 @@ func (r *Rule) StringSlice() ([]string, error) {
 		return v.([]string), nil
 	}
 	var s []string
-	if err := json.Unmarshal([]byte(r.Values), &s); err != nil {
-		return nil, fmt.Errorf("parse values %q as string slice: %w", r.Values, err)
+	if err := json.Unmarshal([]byte(r.Parameters), &s); err != nil {
+		return nil, fmt.Errorf("parse values %q as string slice: %w", r.Parameters, err)
 	}
 	r.setCache("strings", s)
 	return s, nil
@@ -68,9 +68,9 @@ func (r *Rule) Regexp() (*regexp.Regexp, error) {
 	if v, ok := r.cached("re"); ok {
 		return v.(*regexp.Regexp), nil
 	}
-	re, err := regexp.Compile(r.Values)
+	re, err := regexp.Compile(r.Parameters)
 	if err != nil {
-		return nil, fmt.Errorf("compile values %q as regexp: %w", r.Values, err)
+		return nil, fmt.Errorf("compile values %q as regexp: %w", r.Parameters, err)
 	}
 	r.setCache("re", re)
 	return re, nil

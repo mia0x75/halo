@@ -174,7 +174,7 @@ type MmOption struct {
 	// UUID
 	Uuid string
 	// 配置值
-	Value string
+	Parameter string
 	// 描述
 	Description string
 	// 展现组件类型
@@ -250,7 +250,7 @@ type MmRule struct {
 	// 比较符
 	Operator string
 	// 有效值
-	Values string
+	Parameters string
 	// 是否可用
 	Bitwise uint8
 	// 处理函数

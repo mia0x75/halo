@@ -141,10 +141,10 @@ type PatchUserStatusInput struct {
 	Status   uint8  `valid:"required,matches(^(0|1|2)$)" gqlgen:"Status"`   //
 }
 
-// PatchRuleValuesInput GraphQL API交互所需要的结构体
-type PatchRuleValuesInput struct {
-	RuleUUID string `valid:"required,length(36|36)" gqlgen:"RuleUUID"` //
-	Values   string `valid:"required,length(1|150)" gqlgen:"Values"`   //
+// PatchRuleParametersInput GraphQL API交互所需要的结构体
+type PatchRuleParametersInput struct {
+	RuleUUID   string `valid:"required,length(36|36)" gqlgen:"RuleUUID"`   //
+	Parameters string `valid:"required,length(1|150)" gqlgen:"Parameters"` //
 }
 
 // PatchRuleBitwiseInput GraphQL API交互所需要的结构体
@@ -195,10 +195,10 @@ type ValidatePatternInput struct {
 	Pattern string `valid:"required,length(1|255)" gqlgen:"Pattern"` //
 }
 
-// PatchOptionValueInput GraphQL API交互所需要的结构体
-type PatchOptionValueInput struct {
+// PatchOptionParameterInput GraphQL API交互所需要的结构体
+type PatchOptionParameterInput struct {
 	OptionUUID string `valid:"required,length(36|36)" gqlgen:"OptionUUID"` //
-	Value      string `valid:"required,length(1|40)"  gqlgen:"Value"`      //
+	Parameter  string `valid:"required,length(1|40)"  gqlgen:"Parameter"`  //
 }
 
 // CreateQueryInput GraphQL API交互所需要的结构体

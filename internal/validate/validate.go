@@ -741,9 +741,9 @@ func Call(v Validator, group uint16, name string, s *Subject, r *Rule) {
 // Match 正则匹配
 func Match(r *Rule, src string, params ...interface{}) (err error) {
 	match := false
-	match, err = regexp.MatchString(r.Values, src)
+	match, err = regexp.MatchString(r.Parameters, src)
 	if err != nil {
-		err = fmt.Errorf("`%s`不是一个有的效正则表达式。", r.Values)
+		err = fmt.Errorf("`%s`不是一个有的效正则表达式。", r.Parameters)
 		return
 	}
 

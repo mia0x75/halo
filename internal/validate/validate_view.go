@@ -47,7 +47,7 @@ func (v *ViewCreateVldr) Validate(wg *sync.WaitGroup) {
 // RULE: CVW-L2-001
 func (v *ViewCreateVldr) ViewNameQualified(s *Subject, r *Rule) {
 	viewName := v.cv.ViewName.Name.O
-	if err := Match(r, viewName, viewName, r.Values); err != nil {
+	if err := Match(r, viewName, viewName, r.Parameters); err != nil {
 		c := &Clause{
 			Description: err.Error(),
 			Level:       uint8(r.Level),
@@ -73,7 +73,7 @@ func (v *ViewCreateVldr) ViewNameLowerCaseRequired(s *Subject, r *Rule) {
 // RULE: CVW-L2-003
 func (v *ViewCreateVldr) ViewNameMaxLength(s *Subject, r *Rule) {
 	viewName := v.cv.ViewName.Name.O
-	threshold, _ := strconv.Atoi(r.Values)
+	threshold, _ := strconv.Atoi(r.Parameters)
 	if len(viewName) > threshold {
 		c := &Clause{
 			Description: fmt.Sprintf(r.Message, viewName, threshold),
@@ -89,9 +89,9 @@ func (v *ViewCreateVldr) ViewNamePrefixRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	viewName := strings.TrimSpace(v.cv.ViewName.Name.O)
 	if len(viewName) > 0 {
-		if err := Match(r, viewName, r.Values); err != nil {
+		if err := Match(r, viewName, r.Parameters); err != nil {
 			c := &Clause{
-				Description: fmt.Sprintf(r.Message, viewName, r.Values),
+				Description: fmt.Sprintf(r.Message, viewName, r.Parameters),
 				Level:       uint8(r.Level),
 			}
 			s.Violations.Append(c)

@@ -315,18 +315,18 @@ func (e *UserStatusPatched) AuditRecord() *domain.Log {
 // Rule / Option events
 // ---------------------------------------------------------------------------
 
-// RuleValuesPatched 规则值更新成功事件
-type RuleValuesPatched struct {
+// RuleParametersPatched 规则值更新成功事件
+type RuleParametersPatched struct {
 	Manager models.User
 	Rule    models.Rule
 }
 
-// Topic routes the rule-values-patched event.
-func (e *RuleValuesPatched) Topic() string { return EventRuleValuesPatched }
+// Topic routes the rule-parameters-patched event.
+func (e *RuleParametersPatched) Topic() string { return EventRuleParametersPatched }
 
 // AuditRecord records the rule value change; the rule service writes only the
 // generic "rule.update" line.
-func (e *RuleValuesPatched) AuditRecord() *domain.Log {
+func (e *RuleParametersPatched) AuditRecord() *domain.Log {
 	return newAudit(e.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)更新规则(uuid=%s)值成功。\n", e.Manager.UUID, e.Rule.UUID))
 }
 
@@ -345,18 +345,18 @@ func (e *RuleBitwisePatched) AuditRecord() *domain.Log {
 	return newAudit(e.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)更新规则(uuid=%s)状态位成功。\n", e.Manager.UUID, e.Rule.UUID))
 }
 
-// OptionValuePatched 系统选项更新成功事件
-type OptionValuePatched struct {
+// OptionParameterPatched 系统选项更新成功事件
+type OptionParameterPatched struct {
 	Manager models.User
 	Option  models.Option
 }
 
 // Topic routes the option-value-patched event.
-func (e *OptionValuePatched) Topic() string { return EventOptionValuePatched }
+func (e *OptionParameterPatched) Topic() string { return EventOptionParameterPatched }
 
 // AuditRecord records the option change; the option service writes only the
 // generic "option.update" line.
-func (e *OptionValuePatched) AuditRecord() *domain.Log {
+func (e *OptionParameterPatched) AuditRecord() *domain.Log {
 	return newAudit(e.Manager.UserID, fmt.Sprintf("管理员(uuid=%s)更新系统选项(uuid=%s)成功。\n", e.Manager.UUID, e.Option.UUID))
 }
 

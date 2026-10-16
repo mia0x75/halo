@@ -15,7 +15,7 @@ type Rule struct {
 	Level       uint8  `db:"level"               valid:"required,matches(^(1|2|3)$)"       json:"level"       gqlgen:"Level"`                //
 	VldrGroup   uint16 `db:"vldr_group"         valid:"required,matches(^([0-9]{4})$)"    json:"vldr_group"  gqlgen:"VldrGroup"`             //
 	Operator    string `db:"operator"         valid:"required,length(1|10),alphanum"    json:"operator"    gqlgen:"Operator"`                //
-	Values      string `db:"values"            valid:"required,length(1|150)"            json:"values"      gqlgen:"Values"`                 //
+	Parameters  string `db:"parameters"            valid:"required,length(1|150)"            json:"parameters"      gqlgen:"Parameters"`     //
 	Bitwise     uint8  `db:"bitwise"                valid:"required,int,matches(^(4|5|6|7)$)" json:"bitwise"     gqlgen:"Bitwise"`           //
 	Func        string `db:"func"            valid:"required,length(1|75)"             json:"func"        gqlgen:"Func"`                     //
 	Message     string `db:"message"        valid:"required,runelength(1|150)"        json:"message"     gqlgen:"Message"`                   //
@@ -44,7 +44,7 @@ func (m *Rule) BeforeUpdate() {
 
 // String 结构体输出到字符串的默认方式
 func (m *Rule) String() string {
-	return fmt.Sprintf("uuid: %s, name: %s, group: %d, description: %s, level: %d, vldr_group: %d, operator: %s, values: %s, bitwise: %d",
+	return fmt.Sprintf("uuid: %s, name: %s, group: %d, description: %s, level: %d, vldr_group: %d, operator: %s, parameters: %s, bitwise: %d",
 		m.UUID,
 		m.Name,
 		m.Group,
@@ -52,7 +52,7 @@ func (m *Rule) String() string {
 		m.Level,
 		m.VldrGroup,
 		m.Operator,
-		m.Values,
+		m.Parameters,
 		m.Bitwise,
 	)
 }

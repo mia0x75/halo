@@ -21,7 +21,7 @@ type Rule struct {
 	Level       RuleLevel `db:"level"`
 	VldrGroup   uint8     `db:"vldr_group"`
 	Operator    string    `db:"operator"`
-	Values      string    `db:"values"`
+	Parameters  string    `db:"parameters"`
 	Bitwise     uint8     `db:"bitwise"`
 	Func        string    `db:"func"`
 	Message     string    `db:"message"`

@@ -81,7 +81,7 @@ func (v *InsertVldr) UsingSelectNotAllowed(s *Subject, r *Rule) {
 // RULE: INS-L2-004
 func (v *InsertVldr) RowsLimit(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
-	thredhold, err := strconv.Atoi(r.Values)
+	thredhold, err := strconv.Atoi(r.Parameters)
 	if err != nil {
 		return
 	}

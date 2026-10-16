@@ -51,7 +51,7 @@ func (v *DatabaseCreateVldr) Validate(wg *sync.WaitGroup) {
 func (v *DatabaseCreateVldr) AvailableCharsets(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var charsets []string
-	_ = json.Unmarshal([]byte(r.Values), &charsets)
+	_ = json.Unmarshal([]byte(r.Parameters), &charsets)
 	var useCharset = "<empty>"
 	valid := false
 	for _, db := range v.cd.Options {
@@ -80,7 +80,7 @@ func (v *DatabaseCreateVldr) AvailableCharsets(s *Subject, r *Rule) {
 func (v *DatabaseCreateVldr) AvailableCollates(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var collates []string
-	_ = json.Unmarshal([]byte(r.Values), &collates)
+	_ = json.Unmarshal([]byte(r.Parameters), &collates)
 
 	var useCollate = "<empty>"
 	valid := false
@@ -138,7 +138,7 @@ func (v *DatabaseCreateVldr) CharsetCollateMustMatch(s *Subject, r *Rule) {
 func (v *DatabaseCreateVldr) DatabaseNameQualified(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	dbName := v.cd.Name
-	if err := Match(r, dbName, dbName, r.Values); err != nil {
+	if err := Match(r, dbName, dbName, r.Parameters); err != nil {
 		c := &Clause{
 			Description: err.Error(),
 			Level:       uint8(r.Level),
@@ -166,7 +166,7 @@ func (v *DatabaseCreateVldr) DatabaseNameLowerCaseRequired(s *Subject, r *Rule) 
 func (v *DatabaseCreateVldr) DatabaseNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	dbName := v.cd.Name
-	threshold, _ := strconv.Atoi(r.Values)
+	threshold, _ := strconv.Atoi(r.Parameters)
 	if len(dbName) > threshold {
 		c := &Clause{
 			Description: fmt.Sprintf(r.Message, dbName, threshold),
@@ -229,7 +229,7 @@ func (v *DatabaseAlterVldr) Validate(wg *sync.WaitGroup) {
 func (v *DatabaseAlterVldr) AvailableCharsets(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var charsets []string
-	_ = json.Unmarshal([]byte(r.Values), &charsets)
+	_ = json.Unmarshal([]byte(r.Parameters), &charsets)
 
 	var useCharset string
 	valid := true
@@ -261,7 +261,7 @@ func (v *DatabaseAlterVldr) AvailableCharsets(s *Subject, r *Rule) {
 func (v *DatabaseAlterVldr) AvailableCollates(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var collates []string
-	_ = json.Unmarshal([]byte(r.Values), &collates)
+	_ = json.Unmarshal([]byte(r.Parameters), &collates)
 
 	var useCollate string
 	valid := true

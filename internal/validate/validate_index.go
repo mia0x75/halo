@@ -46,7 +46,7 @@ func (v *IndexCreateVldr) Validate(wg *sync.WaitGroup) {
 // MaxAllowedIndexColumnCount 组合索引允许的最大列数
 // RULE: CIX-L2-001
 func (v *IndexCreateVldr) MaxAllowedIndexColumnCount(s *Subject, r *Rule) {
-	threshold, _ := strconv.Atoi(r.Values)
+	threshold, _ := strconv.Atoi(r.Parameters)
 	if threshold < len(v.ci.IndexColNames) {
 		c := &Clause{
 			Description: fmt.Sprintf(r.Message, v.ci.IndexName, threshold),
@@ -61,7 +61,7 @@ func (v *IndexCreateVldr) MaxAllowedIndexColumnCount(s *Subject, r *Rule) {
 func (v *IndexCreateVldr) IndexNameQualified(s *Subject, r *Rule) {
 	indexName := v.ci.IndexName
 
-	if err := Match(r, indexName, indexName, r.Values); err != nil {
+	if err := Match(r, indexName, indexName, r.Parameters); err != nil {
 		c := &Clause{
 			Description: err.Error(),
 			Level:       uint8(r.Level),
@@ -87,7 +87,7 @@ func (v *IndexCreateVldr) IndexNameLowerCaseRequired(s *Subject, r *Rule) {
 // IndexNameMaxLength 索引名长度规则
 // RULE: CIX-L2-004
 func (v *IndexCreateVldr) IndexNameMaxLength(s *Subject, r *Rule) {
-	threshold, _ := strconv.Atoi(r.Values)
+	threshold, _ := strconv.Atoi(r.Parameters)
 	indexName := v.ci.IndexName
 	if len(indexName) > threshold {
 		c := &Clause{
@@ -104,7 +104,7 @@ func (v *IndexCreateVldr) IndexNameMaxLength(s *Subject, r *Rule) {
 func (v *IndexCreateVldr) IndexNamePrefixRequired(s *Subject, r *Rule) {
 	indexName := v.ci.IndexName
 
-	if err := Match(r, indexName, indexName, r.Values); err != nil {
+	if err := Match(r, indexName, indexName, r.Parameters); err != nil {
 		c := &Clause{
 			Description: err.Error(),
 			Level:       uint8(r.Level),
@@ -214,7 +214,7 @@ func (v *IndexCreateVldr) MaxAllowedIndexCount(s *Subject, r *Rule) {
 		return
 	}
 	// 索引数量
-	threshold, err := strconv.Atoi(r.Values)
+	threshold, err := strconv.Atoi(r.Parameters)
 	if err != nil {
 		return
 	}

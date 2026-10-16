@@ -738,7 +738,7 @@ type Option implements Node {
 	"""
 	系统选项的当前取值
 	"""
-	Value:       String! @length(max: 75)
+	Parameter:   String! @length(max: 75)
 
 	"""
 	分别是：0 - 只读 和 1 - 读写。
@@ -932,7 +932,7 @@ type Rule implements Node {
 	"""
 	规则当前的设定值，部分规则需要，比如允许的存储引擎
 	"""
-	Values:      String!  @length(max: 75)
+	Parameters:  String!  @length(max: 75)
 
 	"""
 	用低三位表达规则的状态，分别是：读/写/执行，默认高位永远是1。
@@ -2244,16 +2244,16 @@ input PatchUserStatusInput {
 """
 更改审核规则的值
 """
-input PatchRuleValuesInput {
+input PatchRuleParametersInput {
 	"""
 	规则UUID
 	"""
-	RuleUUID: ID!
+	RuleUUID:   ID!
 
 	"""
 	规则的值
 	"""
-	Values:   String! @length(max: 150)
+	Parameters: String! @length(max: 150)
 }
 
 """
@@ -2529,7 +2529,7 @@ input ValidatePatternInput {
 """
 修改系统选项
 """
-input PatchOptionValueInput {
+input PatchOptionParameterInput {
 	"""
 	系统选项UUID
 	"""
@@ -2538,7 +2538,7 @@ input PatchOptionValueInput {
 	"""
 	选项值
 	"""
-	Value:      String! @length(max: 40)
+	Parameter:  String! @length(max: 40)
 }
 
 """
@@ -2941,21 +2941,21 @@ type MutationRoot {
 	"""
 	管理员修改规则的值
 	"""
-	patchOptionValues(
+	patchOptionParameters(
 		"""
 		修改后的规则值
 		"""
-		input: PatchOptionValueInput!
+		input: PatchOptionParameterInput!
 	): Boolean! @auth(requires: [ADMIN])
 
 	"""
 	管理员修改规则的值
 	"""
-	patchRuleValues(
+	patchRuleParameters(
 		"""
 		修改后的规则值
 		"""
-		input: PatchRuleValuesInput!
+		input: PatchRuleParametersInput!
 	): Boolean! @auth(requires: [ADMIN])
 
 	"""

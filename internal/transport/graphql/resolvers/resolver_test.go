@@ -1549,9 +1549,9 @@ func TestPatchClusterStatus(t *testing.T) {
 
 //rule
 
-func TestPatchRuleValues(t *testing.T) {
+func TestPatchRuleParameters(t *testing.T) {
 	req := graphql.NewRequest(`
-    mutation patchRuleValues($id:ID!,$values:String!){
+    mutation patchRuleParameters($id:ID!,$values:String!){
 		patchRuleValues(
 		  input:{
 			RuleUUID:$id,

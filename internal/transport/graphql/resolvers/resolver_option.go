@@ -32,8 +32,8 @@ func (r *queryRootResolver) Options(ctx context.Context) (L []*models.Option, er
 	return
 }
 
-// PatchOptionValues 修改系统选项
-func (r *mutationRootResolver) PatchOptionValues(ctx context.Context, input models.PatchOptionValueInput) (ok bool, err error) {
+// PatchOptionParameters 修改系统选项
+func (r *mutationRootResolver) PatchOptionParameters(ctx context.Context, input models.PatchOptionParameterInput) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
 		option := cache.OptionsMap.Any(func(elem *models.Option) bool {
@@ -49,7 +49,8 @@ func (r *mutationRootResolver) PatchOptionValues(ctx context.Context, input mode
 			err = fmt.Errorf("错误代码: %s, 错误信息: 系统选项(uuid=%s)不允许更新。", rc, input.OptionUUID)
 			break
 		}
-		option.Value = input.Value
+
+		option.Parameter = input.Parameter
 		option.BeforeUpdate()
 		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		if err = r.app.Services.Option.Update(ctx, bridge.OptionToDomain(option), credential.User.UserID); err != nil {
@@ -58,7 +59,7 @@ func (r *mutationRootResolver) PatchOptionValues(ctx context.Context, input mode
 			break
 		}
 
-		event.Fire(event.EventOptionValuePatched, &event.OptionValuePatched{
+		event.Fire(event.EventOptionParameterPatched, &event.OptionParameterPatched{
 			Manager: *credential.User,
 			Option:  *option,
 		})

@@ -106,7 +106,7 @@ type MmLog struct {
 type MmOption struct {
 	Name        string
 	Uuid        string
-	Value       string
+	Parameter   string
 	Description string
 	Element     string
 	Writable    int16
@@ -150,7 +150,7 @@ type MmRule struct {
 	Level       int16
 	VldrGroup   int16
 	Operator    string
-	Values      string
+	Parameters  string
 	Bitwise     int16
 	Func        string
 	Message     string

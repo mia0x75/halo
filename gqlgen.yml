@@ -177,14 +177,14 @@ models:
   ValidatePatternInput:
     model: github.com/mia0x75/halo/internal/models.ValidatePatternInput
 
-  PatchOptionValueInput:
-    model: github.com/mia0x75/halo/internal/models.PatchOptionValueInput
+  PatchOptionParameterInput:
+    model: github.com/mia0x75/halo/internal/models.PatchOptionParameterInput
 
   CreateQueryInput:
     model: github.com/mia0x75/halo/internal/models.CreateQueryInput
 
-  PatchRuleValuesInput:
-    model: github.com/mia0x75/halo/internal/models.PatchRuleValuesInput
+  PatchRuleParametersInput:
+    model: github.com/mia0x75/halo/internal/models.PatchRuleParametersInput
 
   PatchRuleBitwiseInput:
     model: github.com/mia0x75/halo/internal/models.PatchRuleBitwiseInput

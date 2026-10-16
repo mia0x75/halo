@@ -30,6 +30,8 @@ github.com/go-sql-driver/mysql v1.10.1 h1:arlSnNLq6a5yxGxV7qg9lF4j0C+KwD6NbQyKr9
 github.com/go-sql-driver/mysql v1.10.1/go.mod h1:M+cqaI7+xxXGG9swrdeUIoPG3Y3KCkF0pZej+SK+nWk=
 github.com/go-viper/mapstructure/v2 v2.5.0 h1:vM5IJoUAy3d7zRSVtIwQgBj7BiWtMPfmPEgAXnvj1Ro=
 github.com/go-viper/mapstructure/v2 v2.5.0/go.mod h1:oJDH3BJKyqBA2TXFhDsKDGDTlndYOZ6rGS0BRZIxGhM=
+github.com/goccy/go-yaml v1.19.2 h1:PmFC1S6h8ljIz6gMRBopkjP1TVT7xuwrButHID66PoM=
+github.com/goccy/go-yaml v1.19.2/go.mod h1:XBurs7gK8ATbW4ZPGKgcbrY1Br56PdM69F7LkFRi1kA=
 github.com/golang-jwt/jwt/v5 v5.3.1 h1:kYf81DTWFe7t+1VvL7eS+jKFVWaUnK9cB1qbwn63YCY=
 github.com/golang-jwt/jwt/v5 v5.3.1/go.mod h1:fxCRLWMO43lRc8nhHWY6LGqRcf+1gQWArsqaEUEa5bE=
 github.com/google/go-cmp v0.5.6/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
@@ -70,8 +72,6 @@ github.com/mattn/go-sqlite3 v1.14.22 h1:2gZY6PC6kBnID23Tichd1K+Z0oS6nE/XwU+Vz/5o
 github.com/mattn/go-sqlite3 v1.14.22/go.mod h1:Uh1q+B4BYcTPb+yiD3kU8Ct7aC0hY9fxUwlHK0RXw+Y=
 github.com/mia0x75/antlr v0.0.0-20190323140341-bf6915c3dd7b h1:Y8tlewyYL1Oqv/7dlXtF1tyIkR2EC4WQaFdlhGIO9us=
 github.com/mia0x75/antlr v0.0.0-20190323140341-bf6915c3dd7b/go.mod h1:A2rVDF7RAiQkmnm3SkTt2hezKI51/+ax1m8PJxNWIiE=
-github.com/mia0x75/parser v0.0.0-20190531113551-6fbc203ea218 h1:luS/8ODdoRihrzXzh0QPURg7xFdQr8hp0lOYdtXSb4E=
-github.com/mia0x75/parser v0.0.0-20190531113551-6fbc203ea218/go.mod h1:yMzR3J9VI+sWwAVTGuYj3XoZy3P6ttJgoNGmtxy2wfQ=
 github.com/mia0x75/parser v0.0.0-20261016092521-ec8dba533f31 h1:Q6kpXcXdSyyIIz/7u5Tvz/oTU1BPbXt84pI/Uf0Nmdc=
 github.com/mia0x75/parser v0.0.0-20261016092521-ec8dba533f31/go.mod h1:yMzR3J9VI+sWwAVTGuYj3XoZy3P6ttJgoNGmtxy2wfQ=
 github.com/mia0x75/yql v0.0.0-20190325023231-8a8982f46522 h1:y7n6Ohs04+5x5nWDnMeUhRXs55z6LJxcRI72Q5Gv6tk=
@@ -121,6 +121,8 @@ github.com/tklauser/numcpus v0.12.0 h1:NR85qdvHA9pFse3x3weVZ0r0ST8R6l5RHbZrlRaqo
 github.com/tklauser/numcpus v0.12.0/go.mod h1:ABHeXzJnr/qqwguhClkZKT1/8VABcYrsyUiUGobwWJg=
 github.com/toolkits/file v0.0.0-20160325033739-a5b3c5147e07 h1:d/VUIMNTk65Xz69htmRPNfjypq2uNRqVsymcXQu6kKk=
 github.com/toolkits/file v0.0.0-20160325033739-a5b3c5147e07/go.mod h1:FbXpUxsx5in7z/OrWFDdhYetOy3/VGIJsVHN9G7RUPA=
+github.com/urfave/cli/v3 v3.11.0 h1:P/euJp99kb9p0tlVY+iYTLYYTAQlfl0hR2gUO1Img1Q=
+github.com/urfave/cli/v3 v3.11.0/go.mod h1:ysVLtOEmg2tOy6PknnYVhDoouyC/6N42TMeoMzskhso=
 github.com/vektah/gqlparser/v2 v2.5.62 h1:GJP/emj1wIWKs0U3SHcAgzknWgylTqQ1qH2gNL+wSWc=
 github.com/vektah/gqlparser/v2 v2.5.62/go.mod h1:JNK+plRwKdXLsF/qPFPe5tE0z4s1WeroD9S5LR8um/Q=
 github.com/yusufpapurcu/wmi v1.2.4 h1:zFUKzehAFReQwLys1b/iSMl+JQGSCSjtVqQn9bBrPo0=

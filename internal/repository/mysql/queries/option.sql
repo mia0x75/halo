@@ -1,17 +1,17 @@
 -- name: CreateOption :exec
-INSERT INTO mm_options (name, uuid, value, description, element, writable, version) VALUES (?, ?, ?, ?, ?, ?, ?);
+INSERT INTO mm_options (name, uuid, parameter, description, element, writable, version) VALUES (?, ?, ?, ?, ?, ?, ?);
 
 -- name: GetOptionByUUID :one
-SELECT name, uuid, value, description, element, writable, version, update_at, create_at FROM mm_options WHERE uuid = ? LIMIT 1;
+SELECT name, uuid, parameter, description, element, writable, version, update_at, create_at FROM mm_options WHERE uuid = ? LIMIT 1;
 
 -- name: GetOptionByName :one
-SELECT name, uuid, value, description, element, writable, version, update_at, create_at FROM mm_options WHERE name = ? LIMIT 1;
+SELECT name, uuid, parameter, description, element, writable, version, update_at, create_at FROM mm_options WHERE name = ? LIMIT 1;
 
 -- name: UpdateOption :exec
-UPDATE mm_options SET value = ?, description = ?, element = ?, writable = ?, version = ? WHERE uuid = ?;
+UPDATE mm_options SET parameter = ?, description = ?, element = ?, writable = ?, version = ? WHERE uuid = ?;
 
 -- name: DeleteOptionByUUID :exec
 DELETE FROM mm_options WHERE uuid = ?;
 
 -- name: ListOptions :many
-SELECT name, uuid, value, description, element, writable, version, update_at, create_at FROM mm_options WHERE uuid < ? ORDER BY uuid DESC LIMIT ?;
+SELECT name, uuid, parameter, description, element, writable, version, update_at, create_at FROM mm_options WHERE uuid < ? ORDER BY uuid DESC LIMIT ?;

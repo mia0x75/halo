@@ -10,7 +10,7 @@ import (
 )
 
 const createRule = `-- name: CreateRule :exec
-INSERT INTO mm_rules (name, uuid, ` + "`" + `group` + "`" + `, description, level, vldr_group, operator, ` + "`" + `values` + "`" + `, bitwise, func, message, element, version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO mm_rules (name, uuid, ` + "`" + `group` + "`" + `, description, level, vldr_group, operator, parameters, bitwise, func, message, element, version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
 type CreateRuleParams struct {
@@ -21,7 +21,7 @@ type CreateRuleParams struct {
 	Level       uint8
 	VldrGroup   uint8
 	Operator    string
-	Values      string
+	Parameters  string
 	Bitwise     uint8
 	Func        string
 	Message     string
@@ -38,7 +38,7 @@ func (q *Queries) CreateRule(ctx context.Context, arg CreateRuleParams) error {
 		arg.Level,
 		arg.VldrGroup,
 		arg.Operator,
-		arg.Values,
+		arg.Parameters,
 		arg.Bitwise,
 		arg.Func,
 		arg.Message,
@@ -58,7 +58,7 @@ func (q *Queries) DeleteRuleByUUID(ctx context.Context, uuid string) error {
 }
 
 const getRuleByName = `-- name: GetRuleByName :one
-SELECT name, uuid, ` + "`" + `group` + "`" + `, description, level, vldr_group, operator, ` + "`" + `values` + "`" + `, bitwise, func, message, element, version, update_at, create_at FROM mm_rules WHERE name = ? LIMIT 1
+SELECT name, uuid, ` + "`" + `group` + "`" + `, description, level, vldr_group, operator, parameters, bitwise, func, message, element, version, update_at, create_at FROM mm_rules WHERE name = ? LIMIT 1
 `
 
 func (q *Queries) GetRuleByName(ctx context.Context, name string) (MmRule, error) {
@@ -72,7 +72,7 @@ func (q *Queries) GetRuleByName(ctx context.Context, name string) (MmRule, error
 		&i.Level,
 		&i.VldrGroup,
 		&i.Operator,
-		&i.Values,
+		&i.Parameters,
 		&i.Bitwise,
 		&i.Func,
 		&i.Message,
@@ -85,7 +85,7 @@ func (q *Queries) GetRuleByName(ctx context.Context, name string) (MmRule, error
 }
 
 const getRuleByUUID = `-- name: GetRuleByUUID :one
-SELECT name, uuid, ` + "`" + `group` + "`" + `, description, level, vldr_group, operator, ` + "`" + `values` + "`" + `, bitwise, func, message, element, version, update_at, create_at FROM mm_rules WHERE uuid = ? LIMIT 1
+SELECT name, uuid, ` + "`" + `group` + "`" + `, description, level, vldr_group, operator, parameters, bitwise, func, message, element, version, update_at, create_at FROM mm_rules WHERE uuid = ? LIMIT 1
 `
 
 func (q *Queries) GetRuleByUUID(ctx context.Context, uuid string) (MmRule, error) {
@@ -99,7 +99,7 @@ func (q *Queries) GetRuleByUUID(ctx context.Context, uuid string) (MmRule, error
 		&i.Level,
 		&i.VldrGroup,
 		&i.Operator,
-		&i.Values,
+		&i.Parameters,
 		&i.Bitwise,
 		&i.Func,
 		&i.Message,
@@ -112,7 +112,7 @@ func (q *Queries) GetRuleByUUID(ctx context.Context, uuid string) (MmRule, error
 }
 
 const listRules = `-- name: ListRules :many
-SELECT name, uuid, ` + "`" + `group` + "`" + `, description, level, vldr_group, operator, ` + "`" + `values` + "`" + `, bitwise, func, message, element, version, update_at, create_at FROM mm_rules WHERE uuid < ? ORDER BY uuid DESC LIMIT ?
+SELECT name, uuid, ` + "`" + `group` + "`" + `, description, level, vldr_group, operator, parameters, bitwise, func, message, element, version, update_at, create_at FROM mm_rules WHERE uuid < ? ORDER BY uuid DESC LIMIT ?
 `
 
 type ListRulesParams struct {
@@ -137,7 +137,7 @@ func (q *Queries) ListRules(ctx context.Context, arg ListRulesParams) ([]MmRule,
 			&i.Level,
 			&i.VldrGroup,
 			&i.Operator,
-			&i.Values,
+			&i.Parameters,
 			&i.Bitwise,
 			&i.Func,
 			&i.Message,
@@ -160,7 +160,7 @@ func (q *Queries) ListRules(ctx context.Context, arg ListRulesParams) ([]MmRule,
 }
 
 const updateRule = `-- name: UpdateRule :exec
-UPDATE mm_rules SET ` + "`" + `group` + "`" + ` = ?, description = ?, level = ?, vldr_group = ?, operator = ?, ` + "`" + `values` + "`" + ` = ?, bitwise = ?, func = ?, message = ?, element = ?, version = ? WHERE uuid = ?
+UPDATE mm_rules SET ` + "`" + `group` + "`" + ` = ?, description = ?, level = ?, vldr_group = ?, operator = ?, parameters = ?, bitwise = ?, func = ?, message = ?, element = ?, version = ? WHERE uuid = ?
 `
 
 type UpdateRuleParams struct {
@@ -169,7 +169,7 @@ type UpdateRuleParams struct {
 	Level       uint8
 	VldrGroup   uint8
 	Operator    string
-	Values      string
+	Parameters  string
 	Bitwise     uint8
 	Func        string
 	Message     string
@@ -185,7 +185,7 @@ func (q *Queries) UpdateRule(ctx context.Context, arg UpdateRuleParams) error {
 		arg.Level,
 		arg.VldrGroup,
 		arg.Operator,
-		arg.Values,
+		arg.Parameters,
 		arg.Bitwise,
 		arg.Func,
 		arg.Message,

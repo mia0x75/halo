@@ -15,8 +15,8 @@ import (
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 )
 
-// PatchRuleValues 修改规则值
-func (r *mutationRootResolver) PatchRuleValues(ctx context.Context, input models.PatchRuleValuesInput) (ok bool, err error) {
+// PatchRuleParameters 修改规则值
+func (r *mutationRootResolver) PatchRuleParameters(ctx context.Context, input models.PatchRuleParametersInput) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
 		rule := cache.RulesMap.Any(func(elem *models.Rule) bool {
@@ -32,7 +32,7 @@ func (r *mutationRootResolver) PatchRuleValues(ctx context.Context, input models
 			err = fmt.Errorf("错误代码: %s, 错误信息: 规则(uuid=%s)不允许更新。", rc, input.RuleUUID)
 			break
 		}
-		rule.Values = input.Values
+		rule.Parameters = input.Parameters
 		rule.BeforeUpdate()
 		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		if err = r.app.Services.Rule.Update(ctx, bridge.RuleToDomain(rule), credential.User.UserID); err != nil {
@@ -40,7 +40,7 @@ func (r *mutationRootResolver) PatchRuleValues(ctx context.Context, input models
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 		}
 
-		event.Fire(event.EventRuleValuesPatched, &event.RuleValuesPatched{
+		event.Fire(event.EventRuleParametersPatched, &event.RuleParametersPatched{
 			Manager: *credential.User,
 			Rule:    *rule,
 		})

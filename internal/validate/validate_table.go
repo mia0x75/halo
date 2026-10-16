@@ -59,7 +59,7 @@ func (v *TableCreateVldr) AvailableCharsets(s *Subject, r *Rule) {
 
 	var charsets []string
 	// 将字符串反解析为结构体
-	_ = json.Unmarshal([]byte(r.Values), &charsets)
+	_ = json.Unmarshal([]byte(r.Parameters), &charsets)
 
 	useCharset := "<empty>"
 	valid := false
@@ -96,7 +96,7 @@ func (v *TableCreateVldr) AvailableCollates(s *Subject, r *Rule) {
 
 	var collates []string
 	// 将字符串反解析为结构体
-	_ = json.Unmarshal([]byte(r.Values), &collates)
+	_ = json.Unmarshal([]byte(r.Parameters), &collates)
 
 	useCollate := "<empty>"
 	valid := false
@@ -166,7 +166,7 @@ func (v *TableCreateVldr) AvailableEngines(s *Subject, r *Rule) {
 	}
 
 	var engines []string
-	_ = json.Unmarshal([]byte(r.Values), &engines)
+	_ = json.Unmarshal([]byte(r.Parameters), &engines)
 
 	useEngine := "<empty>"
 	valid := false
@@ -196,9 +196,9 @@ func (v *TableCreateVldr) AvailableEngines(s *Subject, r *Rule) {
 func (v *TableCreateVldr) TableNameQualified(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	tableName := v.ct.Table.Name.O
-	if err := Match(r, tableName, tableName, r.Values); err != nil {
+	if err := Match(r, tableName, tableName, r.Parameters); err != nil {
 		c := &Clause{
-			Description: fmt.Sprintf(r.Message, tableName, r.Values),
+			Description: fmt.Sprintf(r.Message, tableName, r.Parameters),
 			Level:       uint8(r.Level),
 		}
 		s.Violations.Append(c)
@@ -223,7 +223,7 @@ func (v *TableCreateVldr) TableNameLowerCaseRequired(s *Subject, r *Rule) {
 // RULE: CTB-L2-007
 func (v *TableCreateVldr) TableNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
-	threshold, err := strconv.Atoi(r.Values)
+	threshold, err := strconv.Atoi(r.Parameters)
 	if err != nil {
 		return
 	}
@@ -292,7 +292,7 @@ func (v *TableCreateVldr) ColumnNameQualified(s *Subject, r *Rule) {
 		if len(strings.TrimSpace(colName)) == 0 {
 			colName = "<empty>"
 		}
-		if err := Match(r, colName, colName, r.Values); err != nil {
+		if err := Match(r, colName, colName, r.Parameters); err != nil {
 			c := &Clause{
 				Description: err.Error(),
 				Level:       uint8(r.Level),
@@ -325,7 +325,7 @@ func (v *TableCreateVldr) ColumnNameLowerCaseRequired(s *Subject, r *Rule) {
 // RULE: CTB-L2-012
 func (v *TableCreateVldr) ColumnNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
-	threshold, err := strconv.Atoi(r.Values)
+	threshold, err := strconv.Atoi(r.Parameters)
 	if err != nil {
 		return
 	}
@@ -368,7 +368,7 @@ func (v *TableCreateVldr) MaxAllowedColumnCount(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	tableName := v.ct.Table.Name.O
 	// 字段数量
-	threshold, err := strconv.Atoi(r.Values)
+	threshold, err := strconv.Atoi(r.Parameters)
 	if err != nil {
 		return
 	}
@@ -387,7 +387,7 @@ func (v *TableCreateVldr) MaxAllowedColumnCount(s *Subject, r *Rule) {
 func (v *TableCreateVldr) ColumnTypesDoesNotExpect(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var availableTypes []string
-	_ = json.Unmarshal([]byte(r.Values), &availableTypes)
+	_ = json.Unmarshal([]byte(r.Parameters), &availableTypes)
 
 	if len(availableTypes) == 0 {
 		return
@@ -440,7 +440,7 @@ func (v *TableCreateVldr) ColumnAvailableCharsets(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// 字符集
 	var charsets []string
-	_ = json.Unmarshal([]byte(r.Values), &charsets)
+	_ = json.Unmarshal([]byte(r.Parameters), &charsets)
 
 	for _, col := range v.ct.Cols {
 		colCharset := col.Tp.Charset
@@ -472,7 +472,7 @@ func (v *TableCreateVldr) ColumnAvailableCollates(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// 排序规则
 	var collates []string
-	_ = json.Unmarshal([]byte(r.Values), &collates)
+	_ = json.Unmarshal([]byte(r.Parameters), &collates)
 
 	for _, col := range v.ct.Cols {
 		colCollate := col.Tp.Collate
@@ -568,7 +568,7 @@ func (v *TableCreateVldr) ColumnNotNullWithDefaultRequired(s *Subject, r *Rule) 
 func (v *TableCreateVldr) ColumnAutoIncAvailableTypes(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var availableTypes []string
-	_ = json.Unmarshal([]byte(r.Values), &availableTypes)
+	_ = json.Unmarshal([]byte(r.Parameters), &availableTypes)
 
 	for _, col := range v.ct.Cols {
 		hasAutoInc := false
@@ -698,7 +698,7 @@ func (v *TableCreateVldr) MaxAllowedTimestampCount(s *Subject, r *Rule) {
 // RULE: CTB-L2-025
 func (v *TableCreateVldr) MaxAllowedIndexColumnCount(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
-	threshold, _ := strconv.Atoi(r.Values)
+	threshold, _ := strconv.Atoi(r.Parameters)
 	for _, c := range v.ct.Constraints {
 		switch c.Tp {
 		case ast.ConstraintIndex, ast.ConstraintPrimaryKey, ast.ConstraintKey, ast.ConstraintUniq, ast.ConstraintUniqKey, ast.ConstraintUniqIndex:
@@ -781,7 +781,7 @@ func (v *TableCreateVldr) PrimaryKeyNameQualified(s *Subject, r *Rule) {
 			if len(keyName) == 0 {
 				continue
 			}
-			if err := Match(r, keyName, keyName, r.Values); err != nil {
+			if err := Match(r, keyName, keyName, r.Parameters); err != nil {
 				c := &Clause{
 					Description: err.Error(),
 					Level:       uint8(r.Level),
@@ -818,7 +818,7 @@ func (v *TableCreateVldr) PrimryKeyLowerCaseRequired(s *Subject, r *Rule) {
 // RULE: CTB-L2-030
 func (v *TableCreateVldr) PrimryKeyMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
-	threshold, err := strconv.Atoi(r.Values)
+	threshold, err := strconv.Atoi(r.Parameters)
 	if err != nil {
 		return
 	}
@@ -848,9 +848,9 @@ func (v *TableCreateVldr) PrimryKeyPrefixRequired(s *Subject, r *Rule) {
 	for _, c := range v.ct.Constraints {
 		if c.Tp == ast.ConstraintPrimaryKey {
 			if len(c.Name) > 0 {
-				if err := Match(r, c.Name, r.Values); err != nil {
+				if err := Match(r, c.Name, r.Parameters); err != nil {
 					c := &Clause{
-						Description: fmt.Sprintf(r.Message, c.Name, r.Values),
+						Description: fmt.Sprintf(r.Message, c.Name, r.Parameters),
 						Level:       uint8(r.Level),
 					}
 					s.Violations.Append(c)
@@ -889,7 +889,7 @@ func (v *TableCreateVldr) IndexNameQualified(s *Subject, r *Rule) {
 			if len(keyName) == 0 {
 				continue
 			}
-			if err := Match(r, keyName, keyName, r.Values); err != nil {
+			if err := Match(r, keyName, keyName, r.Parameters); err != nil {
 				c := &Clause{
 					Description: err.Error(),
 					Level:       uint8(r.Level),
@@ -925,7 +925,7 @@ func (v *TableCreateVldr) IndexNameLowerCaseRequired(s *Subject, r *Rule) {
 // RULE: CTB-L2-035
 func (v *TableCreateVldr) IndexNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
-	threshold, err := strconv.Atoi(r.Values)
+	threshold, err := strconv.Atoi(r.Parameters)
 	if err != nil {
 		return
 	}
@@ -953,7 +953,7 @@ func (v *TableCreateVldr) IndexNamePrefixRequired(s *Subject, r *Rule) {
 			if len(keyName) == 0 {
 				continue
 			}
-			if err := Match(r, keyName, keyName, r.Values); err != nil {
+			if err := Match(r, keyName, keyName, r.Parameters); err != nil {
 				c := &Clause{
 					Description: err.Error(),
 					Level:       uint8(r.Level),
@@ -993,7 +993,7 @@ func (v *TableCreateVldr) UniqueNameQualified(s *Subject, r *Rule) {
 			if len(keyName) == 0 {
 				continue
 			}
-			if err := Match(r, keyName, keyName, r.Values); err != nil {
+			if err := Match(r, keyName, keyName, r.Parameters); err != nil {
 				c := &Clause{
 					Description: err.Error(),
 					Level:       uint8(r.Level),
@@ -1029,7 +1029,7 @@ func (v *TableCreateVldr) UniqueNameLowerCaseRequired(s *Subject, r *Rule) {
 // RULE: CTB-L2-040
 func (v *TableCreateVldr) UniqueNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
-	threshold, err := strconv.Atoi(r.Values)
+	threshold, err := strconv.Atoi(r.Parameters)
 	if err != nil {
 		return
 	}
@@ -1057,7 +1057,7 @@ func (v *TableCreateVldr) UniqueNamePrefixRequired(s *Subject, r *Rule) {
 			if len(keyName) == 0 {
 				continue
 			}
-			if err := Match(r, keyName, keyName, r.Values); err != nil {
+			if err := Match(r, keyName, keyName, r.Parameters); err != nil {
 				c := &Clause{
 					Description: err.Error(),
 					Level:       uint8(r.Level),
@@ -1128,7 +1128,7 @@ func (v *TableCreateVldr) ForeignKeyNameQualified(s *Subject, r *Rule) {
 			if len(keyName) == 0 {
 				keyName = "<empty>"
 			}
-			if err := Match(r, keyName, keyName, r.Values); err != nil {
+			if err := Match(r, keyName, keyName, r.Parameters); err != nil {
 				c := &Clause{
 					Description: err.Error(),
 					Level:       uint8(r.Level),
@@ -1164,7 +1164,7 @@ func (v *TableCreateVldr) ForeignKeyNameLowerCaseRequired(s *Subject, r *Rule) {
 // RULE: CTB-L2-046
 func (v *TableCreateVldr) ForeignKeyNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
-	threshold, err := strconv.Atoi(r.Values)
+	threshold, err := strconv.Atoi(r.Parameters)
 	if err != nil {
 		return
 	}
@@ -1192,7 +1192,7 @@ func (v *TableCreateVldr) ForeignKeyNamePrefixRequired(s *Subject, r *Rule) {
 			if len(keyName) == 0 {
 				continue
 			}
-			if err := Match(r, keyName, keyName, r.Values); err != nil {
+			if err := Match(r, keyName, keyName, r.Parameters); err != nil {
 				c := &Clause{
 					Description: err.Error(),
 					Level:       uint8(r.Level),
@@ -1235,7 +1235,7 @@ func (v *TableCreateVldr) MaxAllowedIndexCount(s *Subject, r *Rule) {
 			}
 		}
 	}
-	threshold, err := strconv.Atoi(r.Values)
+	threshold, err := strconv.Atoi(r.Parameters)
 	if err != nil {
 		return
 	}
@@ -1385,7 +1385,7 @@ func (v *TableAlterVldr) AvailableCharsets(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var charsets []string
 	// 将字符串反解析为结构体
-	_ = json.Unmarshal([]byte(r.Values), &charsets)
+	_ = json.Unmarshal([]byte(r.Parameters), &charsets)
 
 	useCharset := "<empty>"
 	valid := true
@@ -1424,7 +1424,7 @@ func (v *TableAlterVldr) AvailableCollates(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	var collates []string
 	// 将字符串反解析为结构体
-	_ = json.Unmarshal([]byte(r.Values), &collates)
+	_ = json.Unmarshal([]byte(r.Parameters), &collates)
 
 	useCollate := "<empty>"
 	valid := true
@@ -1512,7 +1512,7 @@ func (v *TableAlterVldr) AvailableEngines(s *Subject, r *Rule) {
 	}
 	var engines []string
 	// 将字符串反解析为结构体
-	_ = json.Unmarshal([]byte(r.Values), &engines)
+	_ = json.Unmarshal([]byte(r.Parameters), &engines)
 
 	useEngine := "<empty>"
 	valid := true
@@ -1593,7 +1593,7 @@ func (v *TableAlterVldr) ColumnNameQualified(s *Subject, r *Rule) {
 			if len(strings.TrimSpace(colName)) == 0 {
 				colName = "<empty>"
 			}
-			if err := Match(r, colName, colName, r.Values); err != nil {
+			if err := Match(r, colName, colName, r.Parameters); err != nil {
 				c := &Clause{
 					Description: err.Error(),
 					Level:       uint8(r.Level),
@@ -1643,7 +1643,7 @@ func (v *TableAlterVldr) ColumnNameMaxLength(s *Subject, r *Rule) {
 	if ti == nil {
 		return
 	}
-	threshold, err := strconv.Atoi(r.Values)
+	threshold, err := strconv.Atoi(r.Parameters)
 	if err != nil {
 		return
 	}
@@ -1676,7 +1676,7 @@ func (v *TableAlterVldr) ColumnUnwantedTypes(s *Subject, r *Rule) {
 		return
 	}
 	var availableTypes []string
-	_ = json.Unmarshal([]byte(r.Values), &availableTypes)
+	_ = json.Unmarshal([]byte(r.Parameters), &availableTypes)
 
 	if len(availableTypes) == 0 {
 		return
@@ -1750,7 +1750,7 @@ func (v *TableAlterVldr) ColumnAvailableCharsets(s *Subject, r *Rule) {
 	}
 	// 字符集
 	var charsets []string
-	_ = json.Unmarshal([]byte(r.Values), &charsets)
+	_ = json.Unmarshal([]byte(r.Parameters), &charsets)
 
 	for _, spec := range v.at.Specs {
 		if spec.Tp != ast.AlterTableAddColumns &&
@@ -1792,7 +1792,7 @@ func (v *TableAlterVldr) ColumnAvailableCollates(s *Subject, r *Rule) {
 	}
 	// 排序规则
 	var collates []string
-	_ = json.Unmarshal([]byte(r.Values), &collates)
+	_ = json.Unmarshal([]byte(r.Parameters), &collates)
 	for _, spec := range v.at.Specs {
 		if spec.Tp != ast.AlterTableAddColumns &&
 			spec.Tp != ast.AlterTableChangeColumn &&
@@ -1996,7 +1996,7 @@ func (v *TableAlterVldr) IndexNameQualified(s *Subject, r *Rule) {
 		if len(keyName) == 0 {
 			continue // 如果系统允许匿名索引，则不进行正则匹配
 		}
-		if err := Match(r, keyName, keyName, r.Values); err != nil {
+		if err := Match(r, keyName, keyName, r.Parameters); err != nil {
 			c := &Clause{
 				Description: err.Error(),
 				Level:       uint8(r.Level),
@@ -2052,7 +2052,7 @@ func (v *TableAlterVldr) IndexNameMaxLength(s *Subject, r *Rule) {
 	if ti == nil {
 		return
 	}
-	threshold, err := strconv.Atoi(r.Values)
+	threshold, err := strconv.Atoi(r.Parameters)
 	if err != nil {
 		return
 	}
@@ -2114,7 +2114,7 @@ func (v *TableAlterVldr) IndexNamePrefixRequired(s *Subject, r *Rule) {
 		if len(keyName) == 0 {
 			continue // 如果系统允许匿名索引，则不进行正则匹配
 		}
-		if err := Match(r, keyName, keyName, r.Values); err != nil {
+		if err := Match(r, keyName, keyName, r.Parameters); err != nil {
 			c := &Clause{
 				Description: err.Error(),
 				Level:       uint8(r.Level),
@@ -2175,7 +2175,7 @@ func (v *TableAlterVldr) UniqueNameQualified(s *Subject, r *Rule) {
 		if len(keyName) == 0 {
 			continue // 如果系统允许匿名索引，则不进行正则匹配
 		}
-		if err := Match(r, keyName, keyName, r.Values); err != nil {
+		if err := Match(r, keyName, keyName, r.Parameters); err != nil {
 			c := &Clause{
 				Description: err.Error(),
 				Level:       uint8(r.Level),
@@ -2223,7 +2223,7 @@ func (v *TableAlterVldr) UniqueNameMaxLength(s *Subject, r *Rule) {
 	if ti == nil {
 		return
 	}
-	threshold, err := strconv.Atoi(r.Values)
+	threshold, err := strconv.Atoi(r.Parameters)
 	if err != nil {
 		return
 	}
@@ -2267,7 +2267,7 @@ func (v *TableAlterVldr) UniqueNamePrefixRequired(s *Subject, r *Rule) {
 		if len(keyName) == 0 {
 			continue // 如果系统允许匿名索引，则不进行正则匹配
 		}
-		if err := Match(r, keyName, keyName, r.Values); err != nil {
+		if err := Match(r, keyName, keyName, r.Parameters); err != nil {
 			c := &Clause{
 				Description: err.Error(),
 				Level:       uint8(r.Level),
@@ -2350,7 +2350,7 @@ func (v *TableAlterVldr) ForeignKeyNameQualified(s *Subject, r *Rule) {
 		if len(keyName) == 0 {
 			continue
 		}
-		if err := Match(r, keyName, keyName, r.Values); err != nil {
+		if err := Match(r, keyName, keyName, r.Parameters); err != nil {
 			c := &Clause{
 				Description: err.Error(),
 				Level:       uint8(r.Level),
@@ -2398,7 +2398,7 @@ func (v *TableAlterVldr) ForeignKeyNameMaxLength(s *Subject, r *Rule) {
 	if ti == nil {
 		return
 	}
-	threshold, err := strconv.Atoi(r.Values)
+	threshold, err := strconv.Atoi(r.Parameters)
 	if err != nil {
 		return
 	}
@@ -2442,7 +2442,7 @@ func (v *TableAlterVldr) ForeignKeyNamePrefixRequired(s *Subject, r *Rule) {
 		if len(keyName) == 0 {
 			continue
 		}
-		if err := Match(r, keyName, keyName, r.Values); err != nil {
+		if err := Match(r, keyName, keyName, r.Parameters); err != nil {
 			c := &Clause{
 				Description: err.Error(),
 				Level:       uint8(r.Level),
@@ -2464,7 +2464,7 @@ func (v *TableAlterVldr) NewTableNameQualified(s *Subject, r *Rule) {
 		if len(strings.TrimSpace(newName)) == 0 {
 			newName = "<empty>"
 		}
-		if err := Match(r, newName, newName, r.Values); err != nil {
+		if err := Match(r, newName, newName, r.Parameters); err != nil {
 			c := &Clause{
 				Description: err.Error(),
 				Level:       uint8(r.Level),
@@ -2500,7 +2500,7 @@ func (v *TableAlterVldr) NewTableNameLowerCaseRequired(s *Subject, r *Rule) {
 // RULE: MTB-L2-032
 func (v *TableAlterVldr) NewTableNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
-	threshold, err := strconv.Atoi(r.Values)
+	threshold, err := strconv.Atoi(r.Parameters)
 	if err != nil {
 		return
 	}
@@ -2581,7 +2581,7 @@ func (v *TableAlterVldr) FullTextIndexNameQualified(s *Subject, r *Rule) {
 		if len(keyName) == 0 {
 			continue
 		}
-		if err := Match(r, keyName, keyName, r.Values); err != nil {
+		if err := Match(r, keyName, keyName, r.Parameters); err != nil {
 			c := &Clause{
 				Description: err.Error(),
 				Level:       uint8(r.Level),
@@ -2621,7 +2621,7 @@ func (v *TableAlterVldr) FullTextIndexNameLowerCaseRequired(s *Subject, r *Rule)
 // RULE: MTB-L2-037
 func (v *TableAlterVldr) FullTextIndexNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
-	threshold, err := strconv.Atoi(r.Values)
+	threshold, err := strconv.Atoi(r.Parameters)
 	if err != nil {
 		return
 	}
@@ -2660,7 +2660,7 @@ func (v *TableAlterVldr) FullTextIndexNamePrefixRequired(s *Subject, r *Rule) {
 		if len(keyName) == 0 {
 			continue
 		}
-		if err := Match(r, keyName, keyName, r.Values); err != nil {
+		if err := Match(r, keyName, keyName, r.Parameters); err != nil {
 			c := &Clause{
 				Description: err.Error(),
 				Level:       uint8(r.Level),
@@ -2730,7 +2730,7 @@ func (v *TableAlterVldr) FullTextIndexNameDuplicate(s *Subject, r *Rule) {
 // RULE: MTB-L2-039
 func (v *TableAlterVldr) MaxAllowedIndexColumnCount(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
-	threshold, err := strconv.Atoi(r.Values)
+	threshold, err := strconv.Atoi(r.Parameters)
 	if err != nil {
 		return
 	}
@@ -2818,7 +2818,7 @@ func (v *TableAlterVldr) ColumnNameDuplicate(s *Subject, r *Rule) {
 func (v *TableAlterVldr) MaxAllowedColumnCount(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// 字段数量
-	threshold, err := strconv.Atoi(r.Values)
+	threshold, err := strconv.Atoi(r.Parameters)
 	if err != nil {
 		return
 	}
@@ -2916,7 +2916,7 @@ func (v *TableAlterVldr) IndexNameDuplicate(s *Subject, r *Rule) {
 func (v *TableAlterVldr) IndexCountLimit(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	// 字段数量
-	threshold, err := strconv.Atoi(r.Values)
+	threshold, err := strconv.Atoi(r.Parameters)
 	if err != nil {
 		return
 	}
@@ -3140,7 +3140,7 @@ func (v *TableRenameVldr) TablesIdentical(s *Subject, r *Rule) {
 func (v *TableRenameVldr) TargetTableNameQualified(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	newName := v.rt.NewTable.Name.O
-	if err := Match(r, newName, newName, r.Values); err != nil {
+	if err := Match(r, newName, newName, r.Parameters); err != nil {
 		c := &Clause{
 			Description: err.Error(),
 			Level:       uint8(r.Level),
@@ -3168,7 +3168,7 @@ func (v *TableRenameVldr) TargetTableNameLowerCaseRequired(s *Subject, r *Rule) 
 // RULE: RTB-L2-004
 func (v *TableRenameVldr) TargetTableNameMaxLength(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
-	threshold, err := strconv.Atoi(r.Values)
+	threshold, err := strconv.Atoi(r.Parameters)
 	if err != nil {
 		return
 	}

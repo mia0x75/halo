@@ -458,7 +458,7 @@ CREATE TABLE `mm_options` (
   `uuid`        CHAR(36)
                 NOT NULL
                 COMMENT 'UUID',
-  `value`       TINYTEXT
+  `parameter`   TINYTEXT
                 NOT NULL
                 COMMENT '配置值',
   `description` VARCHAR(75)
@@ -665,7 +665,7 @@ CREATE TABLE `mm_rules` (
   `operator`    VARCHAR(10)
                 NOT NULL
                 COMMENT '比较符',
-  `values`      VARCHAR(150)
+  `parameters`  VARCHAR(150)
                 NOT NULL
                 COMMENT '有效值',
   `bitwise`     TINYINT UNSIGNED

@@ -16,7 +16,7 @@ func TestOptionRepo(t *testing.T) {
 	o := &domain.Option{
 		Name:        "option-" + newSuffix(),
 		UUID:        newUUID(),
-		Value:       "true",
+		Parameter:   "true",
 		Description: "an option",
 		Element:     "switch",
 		Writable:    1,
@@ -27,21 +27,21 @@ func TestOptionRepo(t *testing.T) {
 
 	got, err := repo.GetByUUID(ctx, o.UUID)
 	require.NoError(t, err)
-	require.Equal(t, o.Value, got.Value)
+	require.Equal(t, o.Parameter, got.Parameter)
 
 	byName, err := repo.GetByName(ctx, o.Name)
 	require.NoError(t, err)
 	require.Equal(t, o.UUID, byName.UUID)
 
 	updated := nowUnix()
-	o.Value = "false"
+	o.Parameter = "false"
 	o.Version = 2
 	o.UpdateAt = &updated
 	require.NoError(t, repo.Update(ctx, o))
 
 	got, err = repo.GetByUUID(ctx, o.UUID)
 	require.NoError(t, err)
-	require.Equal(t, "false", got.Value)
+	require.Equal(t, "false", got.Parameter)
 
 	list, err := repo.List(ctx, o.UUID+"~", 100)
 	require.NoError(t, err)

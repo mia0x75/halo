@@ -20,7 +20,7 @@ func optionFromRow(r MmOption) *domain.Option {
 	return &domain.Option{
 		Name:        r.Name,
 		UUID:        r.Uuid,
-		Value:       r.Value,
+		Parameter:   r.Parameter,
 		Description: r.Description,
 		Element:     r.Element,
 		Writable:    uint8(r.Writable),
@@ -34,7 +34,7 @@ func (r *OptionRepo) Create(ctx context.Context, o *domain.Option) error {
 	return wrap("option.Create", r.q.CreateOption(ctx, CreateOptionParams{
 		Name:        o.Name,
 		Uuid:        o.UUID,
-		Value:       o.Value,
+		Parameter:   o.Parameter,
 		Description: o.Description,
 		Element:     o.Element,
 		Writable:    int16(o.Writable),
@@ -61,7 +61,7 @@ func (r *OptionRepo) GetByName(ctx context.Context, name string) (*domain.Option
 
 func (r *OptionRepo) Update(ctx context.Context, o *domain.Option) error {
 	return wrap("option.Update", r.q.UpdateOption(ctx, UpdateOptionParams{
-		Value:       o.Value,
+		Parameter:   o.Parameter,
 		Description: o.Description,
 		Element:     o.Element,
 		Writable:    int16(o.Writable),

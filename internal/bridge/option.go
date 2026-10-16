@@ -13,7 +13,7 @@ func OptionFromDomain(o *domain.Option) *models.Option {
 	return &models.Option{
 		Name:        o.Name,
 		UUID:        o.UUID,
-		Value:       o.Value,
+		Parameter:   o.Parameter,
 		Description: o.Description,
 		Element:     o.Element,
 		Writable:    o.Writable,
@@ -31,7 +31,7 @@ func OptionToDomain(o *models.Option) *domain.Option {
 	return &domain.Option{
 		Name:        o.Name,
 		UUID:        o.UUID,
-		Value:       o.Value,
+		Parameter:   o.Parameter,
 		Description: o.Description,
 		Element:     o.Element,
 		Writable:    o.Writable,

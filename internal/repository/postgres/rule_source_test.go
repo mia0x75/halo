@@ -21,7 +21,7 @@ func TestRuleSourceLoad(t *testing.T) {
 		Level:       domain.RuleLevelError,
 		VldrGroup:   110,
 		Operator:    "in",
-		Values:      "a,b",
+		Parameters:  "a,b",
 		Bitwise:     1,
 		Func:        "func",
 		Message:     "not allowed",

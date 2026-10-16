@@ -11,7 +11,7 @@ import (
 type Option struct {
 	Name        string `db:"name"         valid:"required,length(1|50),alphanum"  json:"group"       gqlgen:"Group"`                       //
 	UUID        string `db:"uuid" valid:"-"                               json:"uuid"        gqlgen:"UUID"`                                //
-	Value       string `db:"value"                 valid:"required,length(1|255),alphanum" json:"value"       gqlgen:"Value"`              //
+	Parameter   string `db:"parameter"                 valid:"required,length(1|255),alphanum" json:"parameter"       gqlgen:"Parameter"`  //
 	Writable    uint8  `db:"writable"            valid:"required,range(0|1)"             json:"writable"    gqlgen:"Writable"`             //
 	Description string `db:"description"     valid:"required,runelength(1|75)"       json:"description" gqlgen:"Description"`              //
 	Element     string `db:"element"         valid:"required,runelength(1|15)"       json:"element"     gqlgen:"Element"`                  //
@@ -38,10 +38,10 @@ func (m *Option) BeforeUpdate() {
 
 // String 结构体输出到字符串的默认方式
 func (m *Option) String() string {
-	return fmt.Sprintf("uuid: %s, name: %s, value: %s, description: %s, writable: %d, element: %s",
+	return fmt.Sprintf("uuid: %s, name: %s, parameter: %s, description: %s, writable: %d, element: %s",
 		m.UUID,
 		m.Name,
-		m.Value,
+		m.Parameter,
 		m.Description,
 		m.Writable,
 		m.Element,

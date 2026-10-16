@@ -5,7 +5,7 @@ package domain
 type Option struct {
 	Name        string `db:"name"`
 	UUID        string `db:"uuid"`
-	Value       string `db:"value"`
+	Parameter   string `db:"parameter"`
 	Description string `db:"description"`
 	Element     string `db:"element"`
 	Writable    uint8  `db:"writable"`

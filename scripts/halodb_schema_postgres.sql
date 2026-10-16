@@ -123,7 +123,7 @@ DROP TABLE IF EXISTS mm_options;
 CREATE TABLE mm_options (
     name        VARCHAR(50) PRIMARY KEY,
     uuid        CHAR(36) NOT NULL,
-    value       TEXT NOT NULL,
+    parameter   TEXT NOT NULL,
     description VARCHAR(75) NOT NULL,
     element     VARCHAR(15) NOT NULL DEFAULT '-',
     writable    SMALLINT NOT NULL,
@@ -191,7 +191,7 @@ CREATE TABLE mm_rules (
     level       SMALLINT NOT NULL,
     vldr_group  SMALLINT NOT NULL,
     operator    VARCHAR(10) NOT NULL,
-    "values"    VARCHAR(150) NOT NULL,
+    parameters  VARCHAR(150) NOT NULL,
     bitwise     SMALLINT NOT NULL,
     func        VARCHAR(75) NOT NULL DEFAULT 'nil',
     message     VARCHAR(150) NOT NULL,

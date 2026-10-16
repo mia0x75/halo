@@ -218,44 +218,44 @@ type ComplexityRoot struct {
 	}
 
 	MutationRoot struct {
-		Activate             func(childComplexity int, input models.ActivateInput) int
-		AnalyzeQuery         func(childComplexity int, input models.SoarQueryInput) int
-		CancelCron           func(childComplexity int, id string) int
-		CreateCluster        func(childComplexity int, input models.CreateClusterInput) int
-		CreateComment        func(childComplexity int, input models.CreateCommentInput) int
-		CreateQuery          func(childComplexity int, input models.CreateQueryInput) int
-		CreateTicket         func(childComplexity int, input models.CreateTicketInput) int
-		CreateUser           func(childComplexity int, input models.CreateUserInput) int
-		ExecuteTicket        func(childComplexity int, id string) int
-		GrantClusters        func(childComplexity int, input models.GrantClustersInput) int
-		GrantReviewers       func(childComplexity int, input models.GrantReviewersInput) int
-		GrantRoles           func(childComplexity int, input models.GrantRolesInput) int
-		Login                func(childComplexity int, input models.UserLoginInput) int
-		Logout               func(childComplexity int) int
-		LostPasswd           func(childComplexity int, input models.LostPasswdInput) int
-		PatchClusterStatus   func(childComplexity int, input models.PatchClusterStatusInput) int
-		PatchOptionValues    func(childComplexity int, input models.PatchOptionValueInput) int
-		PatchRuleBitwise     func(childComplexity int, input models.PatchRuleBitwiseInput) int
-		PatchRuleValues      func(childComplexity int, input models.PatchRuleValuesInput) int
-		PatchTicketStatus    func(childComplexity int, input models.PatchTicketStatusInput) int
-		PatchUserStatus      func(childComplexity int, input models.PatchUserStatusInput) int
-		Register             func(childComplexity int, input models.UserRegisterInput) int
-		RemoveCluster        func(childComplexity int, id string) int
-		RemoveTicket         func(childComplexity int, id string) int
-		ResendActivationMail func(childComplexity int, input models.ActivateInput) int
-		ResetPasswd          func(childComplexity int, input models.ResetPasswdInput) int
-		RevokeClusters       func(childComplexity int, input models.RevokeClustersInput) int
-		RevokeReviewers      func(childComplexity int, input models.RevokeReviewersInput) int
-		RevokeRoles          func(childComplexity int, input models.RevokeRolesInput) int
-		RewriteQuery         func(childComplexity int, input models.SoarQueryInput) int
-		ScheduleTicket       func(childComplexity int, input models.ScheduleTicketInput) int
-		UpdateCluster        func(childComplexity int, input models.UpdateClusterInput) int
-		UpdateEmail          func(childComplexity int, input models.PatchEmailInput) int
-		UpdatePassword       func(childComplexity int, input models.PatchPasswordInput) int
-		UpdateProfile        func(childComplexity int, input models.UpdateProfileInput) int
-		UpdateTemplate       func(childComplexity int, input *models.UpdateTemplateInput) int
-		UpdateTicket         func(childComplexity int, input models.UpdateTicketInput) int
-		UpdateUser           func(childComplexity int, input models.UpdateUserInput) int
+		Activate              func(childComplexity int, input models.ActivateInput) int
+		AnalyzeQuery          func(childComplexity int, input models.SoarQueryInput) int
+		CancelCron            func(childComplexity int, id string) int
+		CreateCluster         func(childComplexity int, input models.CreateClusterInput) int
+		CreateComment         func(childComplexity int, input models.CreateCommentInput) int
+		CreateQuery           func(childComplexity int, input models.CreateQueryInput) int
+		CreateTicket          func(childComplexity int, input models.CreateTicketInput) int
+		CreateUser            func(childComplexity int, input models.CreateUserInput) int
+		ExecuteTicket         func(childComplexity int, id string) int
+		GrantClusters         func(childComplexity int, input models.GrantClustersInput) int
+		GrantReviewers        func(childComplexity int, input models.GrantReviewersInput) int
+		GrantRoles            func(childComplexity int, input models.GrantRolesInput) int
+		Login                 func(childComplexity int, input models.UserLoginInput) int
+		Logout                func(childComplexity int) int
+		LostPasswd            func(childComplexity int, input models.LostPasswdInput) int
+		PatchClusterStatus    func(childComplexity int, input models.PatchClusterStatusInput) int
+		PatchOptionParameters func(childComplexity int, input models.PatchOptionParameterInput) int
+		PatchRuleBitwise      func(childComplexity int, input models.PatchRuleBitwiseInput) int
+		PatchRuleParameters   func(childComplexity int, input models.PatchRuleParametersInput) int
+		PatchTicketStatus     func(childComplexity int, input models.PatchTicketStatusInput) int
+		PatchUserStatus       func(childComplexity int, input models.PatchUserStatusInput) int
+		Register              func(childComplexity int, input models.UserRegisterInput) int
+		RemoveCluster         func(childComplexity int, id string) int
+		RemoveTicket          func(childComplexity int, id string) int
+		ResendActivationMail  func(childComplexity int, input models.ActivateInput) int
+		ResetPasswd           func(childComplexity int, input models.ResetPasswdInput) int
+		RevokeClusters        func(childComplexity int, input models.RevokeClustersInput) int
+		RevokeReviewers       func(childComplexity int, input models.RevokeReviewersInput) int
+		RevokeRoles           func(childComplexity int, input models.RevokeRolesInput) int
+		RewriteQuery          func(childComplexity int, input models.SoarQueryInput) int
+		ScheduleTicket        func(childComplexity int, input models.ScheduleTicketInput) int
+		UpdateCluster         func(childComplexity int, input models.UpdateClusterInput) int
+		UpdateEmail           func(childComplexity int, input models.PatchEmailInput) int
+		UpdatePassword        func(childComplexity int, input models.PatchPasswordInput) int
+		UpdateProfile         func(childComplexity int, input models.UpdateProfileInput) int
+		UpdateTemplate        func(childComplexity int, input *models.UpdateTemplateInput) int
+		UpdateTicket          func(childComplexity int, input models.UpdateTicketInput) int
+		UpdateUser            func(childComplexity int, input models.UpdateUserInput) int
 	}
 
 	Option struct {
@@ -263,9 +263,9 @@ type ComplexityRoot struct {
 		Description func(childComplexity int) int
 		Element     func(childComplexity int) int
 		Name        func(childComplexity int) int
+		Parameter   func(childComplexity int) int
 		UUID        func(childComplexity int) int
 		UpdateAt    func(childComplexity int) int
-		Value       func(childComplexity int) int
 		Writable    func(childComplexity int) int
 	}
 
@@ -360,9 +360,9 @@ type ComplexityRoot struct {
 		Group       func(childComplexity int) int
 		Message     func(childComplexity int) int
 		Name        func(childComplexity int) int
+		Parameters  func(childComplexity int) int
 		UUID        func(childComplexity int) int
 		UpdateAt    func(childComplexity int) int
-		Values      func(childComplexity int) int
 		VldrGroup   func(childComplexity int) int
 	}
 
@@ -514,8 +514,8 @@ type MutationRootResolver interface {
 	ScheduleTicket(ctx context.Context, input models.ScheduleTicketInput) (*models.Cron, error)
 	CancelCron(ctx context.Context, id string) (bool, error)
 	CreateComment(ctx context.Context, input models.CreateCommentInput) (*models.Comment, error)
-	PatchOptionValues(ctx context.Context, input models.PatchOptionValueInput) (bool, error)
-	PatchRuleValues(ctx context.Context, input models.PatchRuleValuesInput) (bool, error)
+	PatchOptionParameters(ctx context.Context, input models.PatchOptionParameterInput) (bool, error)
+	PatchRuleParameters(ctx context.Context, input models.PatchRuleParametersInput) (bool, error)
 	PatchRuleBitwise(ctx context.Context, input models.PatchRuleBitwiseInput) (bool, error)
 	CreateQuery(ctx context.Context, input models.CreateQueryInput) (string, error)
 	AnalyzeQuery(ctx context.Context, input models.SoarQueryInput) (string, error)
@@ -1386,17 +1386,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MutationRoot.PatchClusterStatus(childComplexity, args["input"].(models.PatchClusterStatusInput)), true
-	case "MutationRoot.patchOptionValues":
-		if e.ComplexityRoot.MutationRoot.PatchOptionValues == nil {
+	case "MutationRoot.patchOptionParameters":
+		if e.ComplexityRoot.MutationRoot.PatchOptionParameters == nil {
 			break
 		}
 
-		args, err := ec.field_MutationRoot_patchOptionValues_args(ctx, rawArgs)
+		args, err := ec.field_MutationRoot_patchOptionParameters_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.ComplexityRoot.MutationRoot.PatchOptionValues(childComplexity, args["input"].(models.PatchOptionValueInput)), true
+		return e.ComplexityRoot.MutationRoot.PatchOptionParameters(childComplexity, args["input"].(models.PatchOptionParameterInput)), true
 	case "MutationRoot.patchRuleBitwise":
 		if e.ComplexityRoot.MutationRoot.PatchRuleBitwise == nil {
 			break
@@ -1408,17 +1408,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MutationRoot.PatchRuleBitwise(childComplexity, args["input"].(models.PatchRuleBitwiseInput)), true
-	case "MutationRoot.patchRuleValues":
-		if e.ComplexityRoot.MutationRoot.PatchRuleValues == nil {
+	case "MutationRoot.patchRuleParameters":
+		if e.ComplexityRoot.MutationRoot.PatchRuleParameters == nil {
 			break
 		}
 
-		args, err := ec.field_MutationRoot_patchRuleValues_args(ctx, rawArgs)
+		args, err := ec.field_MutationRoot_patchRuleParameters_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.ComplexityRoot.MutationRoot.PatchRuleValues(childComplexity, args["input"].(models.PatchRuleValuesInput)), true
+		return e.ComplexityRoot.MutationRoot.PatchRuleParameters(childComplexity, args["input"].(models.PatchRuleParametersInput)), true
 	case "MutationRoot.patchTicketStatus":
 		if e.ComplexityRoot.MutationRoot.PatchTicketStatus == nil {
 			break
@@ -1653,6 +1653,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Option.Name(childComplexity), true
+	case "Option.Parameter":
+		if e.ComplexityRoot.Option.Parameter == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Option.Parameter(childComplexity), true
 	case "Option.UUID":
 		if e.ComplexityRoot.Option.UUID == nil {
 			break
@@ -1665,12 +1671,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Option.UpdateAt(childComplexity), true
-	case "Option.Value":
-		if e.ComplexityRoot.Option.Value == nil {
-			break
-		}
-
-		return e.ComplexityRoot.Option.Value(childComplexity), true
 	case "Option.Writable":
 		if e.ComplexityRoot.Option.Writable == nil {
 			break
@@ -2225,6 +2225,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Rule.Name(childComplexity), true
+	case "Rule.Parameters":
+		if e.ComplexityRoot.Rule.Parameters == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Rule.Parameters(childComplexity), true
 	case "Rule.UUID":
 		if e.ComplexityRoot.Rule.UUID == nil {
 			break
@@ -2237,12 +2243,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Rule.UpdateAt(childComplexity), true
-	case "Rule.Values":
-		if e.ComplexityRoot.Rule.Values == nil {
-			break
-		}
-
-		return e.ComplexityRoot.Rule.Values(childComplexity), true
 	case "Rule.VldrGroup":
 		if e.ComplexityRoot.Rule.VldrGroup == nil {
 			break
@@ -2716,10 +2716,10 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputLostPasswdInput,
 		ec.unmarshalInputPatchClusterStatusInput,
 		ec.unmarshalInputPatchEmailInput,
-		ec.unmarshalInputPatchOptionValueInput,
+		ec.unmarshalInputPatchOptionParameterInput,
 		ec.unmarshalInputPatchPasswordInput,
 		ec.unmarshalInputPatchRuleBitwiseInput,
-		ec.unmarshalInputPatchRuleValuesInput,
+		ec.unmarshalInputPatchRuleParametersInput,
 		ec.unmarshalInputPatchTicketStatusInput,
 		ec.unmarshalInputPatchUserStatusInput,
 		ec.unmarshalInputResendActivationMailInput,
@@ -3181,8 +3181,8 @@ func (ec *executionContext) childFields_Option(ctx context.Context, field graphq
 		return ec.fieldContext_Option_UUID(ctx, field)
 	case "Name":
 		return ec.fieldContext_Option_Name(ctx, field)
-	case "Value":
-		return ec.fieldContext_Option_Value(ctx, field)
+	case "Parameter":
+		return ec.fieldContext_Option_Parameter(ctx, field)
 	case "Writable":
 		return ec.fieldContext_Option_Writable(ctx, field)
 	case "Description":
@@ -3303,8 +3303,8 @@ func (ec *executionContext) childFields_Rule(ctx context.Context, field graphql.
 		return ec.fieldContext_Rule_Description(ctx, field)
 	case "VldrGroup":
 		return ec.fieldContext_Rule_VldrGroup(ctx, field)
-	case "Values":
-		return ec.fieldContext_Rule_Values(ctx, field)
+	case "Parameters":
+		return ec.fieldContext_Rule_Parameters(ctx, field)
 	case "Bitwise":
 		return ec.fieldContext_Rule_Bitwise(ctx, field)
 	case "Func":
@@ -4092,12 +4092,12 @@ func (ec *executionContext) field_MutationRoot_patchClusterStatus_args(ctx conte
 	return args, nil
 }
 
-func (ec *executionContext) field_MutationRoot_patchOptionValues_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_MutationRoot_patchOptionParameters_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
-		func(ctx context.Context, v any) (models.PatchOptionValueInput, error) {
-			return ec.unmarshalNPatchOptionValueInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchOptionValueInput(ctx, v)
+		func(ctx context.Context, v any) (models.PatchOptionParameterInput, error) {
+			return ec.unmarshalNPatchOptionParameterInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchOptionParameterInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -4120,12 +4120,12 @@ func (ec *executionContext) field_MutationRoot_patchRuleBitwise_args(ctx context
 	return args, nil
 }
 
-func (ec *executionContext) field_MutationRoot_patchRuleValues_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_MutationRoot_patchRuleParameters_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
-		func(ctx context.Context, v any) (models.PatchRuleValuesInput, error) {
-			return ec.unmarshalNPatchRuleValuesInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchRuleValuesInput(ctx, v)
+		func(ctx context.Context, v any) (models.PatchRuleParametersInput, error) {
+			return ec.unmarshalNPatchRuleParametersInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchRuleParametersInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -9669,17 +9669,17 @@ func (ec *executionContext) fieldContext_MutationRoot_createComment(ctx context.
 	return fc, nil
 }
 
-func (ec *executionContext) _MutationRoot_patchOptionValues(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _MutationRoot_patchOptionParameters(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_MutationRoot_patchOptionValues(ctx, field)
+			return ec.fieldContext_MutationRoot_patchOptionParameters(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.MutationRoot().PatchOptionValues(ctx, fc.Args["input"].(models.PatchOptionValueInput))
+			return ec.Resolvers.MutationRoot().PatchOptionParameters(ctx, fc.Args["input"].(models.PatchOptionParameterInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -9707,7 +9707,7 @@ func (ec *executionContext) _MutationRoot_patchOptionValues(ctx context.Context,
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_MutationRoot_patchOptionValues(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_MutationRoot_patchOptionParameters(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "MutationRoot",
 		Field:      field,
@@ -9724,24 +9724,24 @@ func (ec *executionContext) fieldContext_MutationRoot_patchOptionValues(ctx cont
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_MutationRoot_patchOptionValues_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_MutationRoot_patchOptionParameters_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _MutationRoot_patchRuleValues(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _MutationRoot_patchRuleParameters(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_MutationRoot_patchRuleValues(ctx, field)
+			return ec.fieldContext_MutationRoot_patchRuleParameters(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.MutationRoot().PatchRuleValues(ctx, fc.Args["input"].(models.PatchRuleValuesInput))
+			return ec.Resolvers.MutationRoot().PatchRuleParameters(ctx, fc.Args["input"].(models.PatchRuleParametersInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -9769,7 +9769,7 @@ func (ec *executionContext) _MutationRoot_patchRuleValues(ctx context.Context, f
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_MutationRoot_patchRuleValues(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_MutationRoot_patchRuleParameters(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "MutationRoot",
 		Field:      field,
@@ -9786,7 +9786,7 @@ func (ec *executionContext) fieldContext_MutationRoot_patchRuleValues(ctx contex
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_MutationRoot_patchRuleValues_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_MutationRoot_patchRuleParameters_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -10281,16 +10281,16 @@ func (ec *executionContext) fieldContext_Option_Name(_ context.Context, field gr
 	return graphql.NewScalarFieldContext("Option", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
-func (ec *executionContext) _Option_Value(ctx context.Context, field graphql.CollectedField, obj *models.Option) (ret graphql.Marshaler) {
+func (ec *executionContext) _Option_Parameter(ctx context.Context, field graphql.CollectedField, obj *models.Option) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Option_Value(ctx, field)
+			return ec.fieldContext_Option_Parameter(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
-			return obj.Value, nil
+			return obj.Parameter, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -10318,7 +10318,7 @@ func (ec *executionContext) _Option_Value(ctx context.Context, field graphql.Col
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Option_Value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Option_Parameter(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("Option", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
@@ -13450,16 +13450,16 @@ func (ec *executionContext) fieldContext_Rule_VldrGroup(_ context.Context, field
 	return graphql.NewScalarFieldContext("Rule", field, false, false, errors.New("field of type UInt16 does not have child fields"))
 }
 
-func (ec *executionContext) _Rule_Values(ctx context.Context, field graphql.CollectedField, obj *models.Rule) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rule_Parameters(ctx context.Context, field graphql.CollectedField, obj *models.Rule) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Rule_Values(ctx, field)
+			return ec.fieldContext_Rule_Parameters(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
-			return obj.Values, nil
+			return obj.Parameters, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -13487,7 +13487,7 @@ func (ec *executionContext) _Rule_Values(ctx context.Context, field graphql.Coll
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Rule_Values(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Rule_Parameters(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("Rule", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
@@ -17782,8 +17782,8 @@ func (ec *executionContext) unmarshalInputPatchEmailInput(ctx context.Context, o
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputPatchOptionValueInput(ctx context.Context, obj any) (models.PatchOptionValueInput, error) {
-	var it models.PatchOptionValueInput
+func (ec *executionContext) unmarshalInputPatchOptionParameterInput(ctx context.Context, obj any) (models.PatchOptionParameterInput, error) {
+	var it models.PatchOptionParameterInput
 	if obj == nil {
 		return it, nil
 	}
@@ -17793,7 +17793,7 @@ func (ec *executionContext) unmarshalInputPatchOptionValueInput(ctx context.Cont
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"OptionUUID", "Value"}
+	fieldsInOrder := [...]string{"OptionUUID", "Parameter"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -17807,8 +17807,8 @@ func (ec *executionContext) unmarshalInputPatchOptionValueInput(ctx context.Cont
 				return it, err
 			}
 			it.OptionUUID = data
-		case "Value":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Value"))
+		case "Parameter":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Parameter"))
 			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalNString2string(ctx, v) }
 
 			directive1 := func(ctx context.Context) (any, error) {
@@ -17829,7 +17829,7 @@ func (ec *executionContext) unmarshalInputPatchOptionValueInput(ctx context.Cont
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
 			if data, ok := tmp.(string); ok {
-				it.Value = data
+				it.Parameter = data
 			} else {
 				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
 				return it, graphql.ErrorOnPath(ctx, err)
@@ -17973,8 +17973,8 @@ func (ec *executionContext) unmarshalInputPatchRuleBitwiseInput(ctx context.Cont
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputPatchRuleValuesInput(ctx context.Context, obj any) (models.PatchRuleValuesInput, error) {
-	var it models.PatchRuleValuesInput
+func (ec *executionContext) unmarshalInputPatchRuleParametersInput(ctx context.Context, obj any) (models.PatchRuleParametersInput, error) {
+	var it models.PatchRuleParametersInput
 	if obj == nil {
 		return it, nil
 	}
@@ -17984,7 +17984,7 @@ func (ec *executionContext) unmarshalInputPatchRuleValuesInput(ctx context.Conte
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"RuleUUID", "Values"}
+	fieldsInOrder := [...]string{"RuleUUID", "Parameters"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -17998,8 +17998,8 @@ func (ec *executionContext) unmarshalInputPatchRuleValuesInput(ctx context.Conte
 				return it, err
 			}
 			it.RuleUUID = data
-		case "Values":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Values"))
+		case "Parameters":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Parameters"))
 			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalNString2string(ctx, v) }
 
 			directive1 := func(ctx context.Context) (any, error) {
@@ -18020,7 +18020,7 @@ func (ec *executionContext) unmarshalInputPatchRuleValuesInput(ctx context.Conte
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
 			if data, ok := tmp.(string); ok {
-				it.Values = data
+				it.Parameters = data
 			} else {
 				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
 				return it, graphql.ErrorOnPath(ctx, err)
@@ -20991,16 +20991,16 @@ func (ec *executionContext) _MutationRoot(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.RequiredNull {
 				out.Invalids++
 			}
-		case "patchOptionValues":
+		case "patchOptionParameters":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._MutationRoot_patchOptionValues(ctx, field)
+				return ec._MutationRoot_patchOptionParameters(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "patchRuleValues":
+		case "patchRuleParameters":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._MutationRoot_patchRuleValues(ctx, field)
+				return ec._MutationRoot_patchRuleParameters(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -21104,8 +21104,8 @@ func (ec *executionContext) _Option(ctx context.Context, sel ast.SelectionSet, o
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "Value":
-			out.Values[i] = ec._Option_Value(ctx, field, obj)
+		case "Parameter":
+			out.Values[i] = ec._Option_Parameter(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -22393,8 +22393,8 @@ func (ec *executionContext) _Rule(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "Values":
-			out.Values[i] = ec._Rule_Values(ctx, field, obj)
+		case "Parameters":
+			out.Values[i] = ec._Rule_Parameters(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -24321,8 +24321,8 @@ func (ec *executionContext) unmarshalNPatchEmailInput2githubᚗcomᚋmia0x75ᚋh
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNPatchOptionValueInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchOptionValueInput(ctx context.Context, v any) (models.PatchOptionValueInput, error) {
-	res, err := ec.unmarshalInputPatchOptionValueInput(ctx, v)
+func (ec *executionContext) unmarshalNPatchOptionParameterInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchOptionParameterInput(ctx context.Context, v any) (models.PatchOptionParameterInput, error) {
+	res, err := ec.unmarshalInputPatchOptionParameterInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -24336,8 +24336,8 @@ func (ec *executionContext) unmarshalNPatchRuleBitwiseInput2githubᚗcomᚋmia0x
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNPatchRuleValuesInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchRuleValuesInput(ctx context.Context, v any) (models.PatchRuleValuesInput, error) {
-	res, err := ec.unmarshalInputPatchRuleValuesInput(ctx, v)
+func (ec *executionContext) unmarshalNPatchRuleParametersInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchRuleParametersInput(ctx context.Context, v any) (models.PatchRuleParametersInput, error) {
+	res, err := ec.unmarshalInputPatchRuleParametersInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
