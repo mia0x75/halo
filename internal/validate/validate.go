@@ -58,9 +58,8 @@ type Context struct {
 	Cluster   *domain.Cluster          // 目标群集
 	Databases []models.Database        // 目标群集所有的用户数据库
 	Tables    map[string][]*meta.Table // 目标群集上目标数据库的元数据
-	// Rules is the rule set the engine runs against. It is the future channel
-	// for RunRegistry; the legacy global wiring (SetGroup reading caches) is
-	// still in place and is removed in 2D-B.
+	// Rules is the rule set the engine runs against. Run fills it once from
+	// the cache; RunRegistry distributes it to each group.
 	Rules []*Rule
 }
 
@@ -100,7 +99,7 @@ var registry = map[uint16]Validator{
 
 // Run 调用入口。签名保持不变以兼容 resolvers。
 //
-// It performs the IO (target DB metadata) and the legacy global wiring, then
+// It performs the IO (target DB metadata) and reads the rule set once, then
 // delegates the pure rule execution to RunRegistry. Violations are written back
 // in place onto each statement, exactly as before.
 func Run(stmts []*models.Statement, cluster *models.Cluster, ticket *models.Ticket) {
@@ -141,14 +140,6 @@ func Run(stmts []*models.Statement, cluster *models.Cluster, ticket *models.Tick
 		ctx.Rules = append(ctx.Rules, ruleFromDomain(bridge.RuleToDomain(m)))
 	}
 
-	// Each validator group pulls its rules from the process-wide cache. This
-	// global wiring is deliberately kept here (never in RunRegistry) and is
-	// removed in 2D-B once rules flow through Context.Rules.
-	for g, v := range registry {
-		if v.Enabled() {
-			v.SetGroup(g)
-		}
-	}
 	RunRegistry(ctx)
 }
 
@@ -159,19 +150,31 @@ type Violation struct {
 }
 
 // RunRegistry is the pure rule engine: it runs every enabled validator group
-// over c and returns the aggregated hits. It performs no IO and never reads
-// cache.RulesMap; callers must wire each group's rules (SetGroup) beforehand.
+// over c and returns the aggregated hits. It performs no IO and reads no
+// caches; each group only sees the rules carried by c.
 func RunRegistry(c *Context) []Violation {
 	wg := &sync.WaitGroup{}
-	for _, v := range registry {
+	for g, v := range registry {
 		if v.Enabled() {
 			wg.Add(1)
 			v.SetContext(c)
+			v.SetRules(rulesByGroup(c.Rules, g))
 			go v.Validate(wg)
 		}
 	}
 	wg.Wait()
 	return collectViolations(c.Subjects)
+}
+
+// rulesByGroup picks the rules addressed to a single validator group.
+func rulesByGroup(rules []*Rule, gid uint16) []*Rule {
+	out := make([]*Rule, 0, len(rules))
+	for _, r := range rules {
+		if uint16(r.VldrGroup) == gid {
+			out = append(out, r)
+		}
+	}
+	return out
 }
 
 // collectViolations flattens the per-statement hits into a single slice.
@@ -190,10 +193,10 @@ func collectViolations(stmts []*Subject) []Violation {
 
 // Validator 接口定义
 type Validator interface {
-	SetGroup(gid uint16) // 设定分组，获得规则列表
+	SetRules(rules []*Rule) // 设定分组，获得规则列表
 	GetRules() []*Rule
-	Enabled() bool
-	SetContext(ctx *Context)     // 分组规则是否启用
+	Enabled() bool               // 分组规则是否启用
+	SetContext(ctx *Context)     // 设定上下文
 	Validate(wg *sync.WaitGroup) // 验证
 }
 
@@ -245,15 +248,8 @@ func (v *vldr) GetRules() []*Rule {
 	return v.Rules
 }
 
-// SetGroup 设置验证分组，并初始化验证规则
-func (v *vldr) SetGroup(gid uint16) {
-	cached := cache.RulesMap.Filter(func(elem *models.Rule) bool {
-		return uint16(elem.VldrGroup) == gid
-	})
-	rules := make([]*Rule, 0, len(cached))
-	for _, m := range cached {
-		rules = append(rules, ruleFromDomain(bridge.RuleToDomain(m)))
-	}
+// SetRules 设置验证分组适用的规则列表
+func (v *vldr) SetRules(rules []*Rule) {
 	v.Rules = rules
 }
 
