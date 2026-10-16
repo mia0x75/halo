@@ -489,13 +489,15 @@ UNLOCK TABLES;
 
 
 LOCK TABLES `mm_users` WRITE;
+
+# Admin123#! default password, will remove before release
 INSERT INTO `mm_users` VALUES
-(0,'00000000-0000-0000-0000-000000000000','系统用户','$2a$10$QJT45HdMQIaEHPCNvqkKeeLZpggFEKKU5SdNl.c3hRSGVGbCcMogS',1,'系统用户',0,1,3, NULL, UTC_TIMESTAMP());
+(0,'00000000-0000-0000-0000-000000000000','系统用户','$2a$10$z6w5ZlrjNrWBus2HckZeTOOj1Kj0/rGMyHROSF.q5Py.YpxzAAQ4W',1,'系统用户',0,1,3, NULL, UTC_TIMESTAMP());
 
 UPDATE `mm_users` SET `user_id` = 0;
 
 INSERT INTO `mm_users` VALUES
-(1,'e70e78bb-9d08-405d-a0ed-266ec703de19','root@163.com','$2a$10$QJT45HdMQIaEHPCNvqkKeeLZpggFEKKU5SdNl.c3hRSGVGbCcMogS',1,'root',0,1,3, NULL, UTC_TIMESTAMP());
+(1,'e70e78bb-9d08-405d-a0ed-266ec703de19','root@163.com','$2a$10$z6w5ZlrjNrWBus2HckZeTOOj1Kj0/rGMyHROSF.q5Py.YpxzAAQ4W',1,'root',0,1,3, NULL, UTC_TIMESTAMP());
 UNLOCK TABLES;
 
 

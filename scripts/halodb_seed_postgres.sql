@@ -475,14 +475,14 @@ INSERT INTO mm_rules VALUES
 ('UPD-L3-003','bdf11d37-9534-4553-826d-15d3b08f1059',16,'目标列必须已存在',1,162,'none','nil',4,'TargetColumnDoesNotExist','UPDATE语句中更新的列"%s"不存在。','none',1, NULL, NOW()),
 ('UPD-L3-005','a72f3d07-7512-46bb-a442-8a505610a72e',16,'允许单次更新的最大行数',1,162,'lte','1000',6,'MaxAllowedUpdateRows','单条UPDATE语句不得操作超过%d条记录。','number',1, NULL, NOW());
 
-
+-- Admin123#! default password, will remove before release
 INSERT INTO mm_users VALUES
-(DEFAULT,'00000000-0000-0000-0000-000000000000','系统用户','$2a$10$QJT45HdMQIaEHPCNvqkKeeLZpggFEKKU5SdNl.c3hRSGVGbCcMogS',1,'系统用户',0,1,3, NULL, NOW());
+(DEFAULT,'00000000-0000-0000-0000-000000000000','系统用户','$2a$10$z6w5ZlrjNrWBus2HckZeTOOj1Kj0/rGMyHROSF.q5Py.YpxzAAQ4W',1,'系统用户',0,1,3, NULL, NOW());
 
 UPDATE mm_users SET user_id = 0;
 
 INSERT INTO mm_users VALUES
-(1,'e70e78bb-9d08-405d-a0ed-266ec703de19','root@163.com','$2a$10$QJT45HdMQIaEHPCNvqkKeeLZpggFEKKU5SdNl.c3hRSGVGbCcMogS',1,'root',0,1,3, NULL, NOW());
+(1,'e70e78bb-9d08-405d-a0ed-266ec703de19','root@163.com','$2a$10$z6w5ZlrjNrWBus2HckZeTOOj1Kj0/rGMyHROSF.q5Py.YpxzAAQ4W',1,'root',0,1,3, NULL, NOW());
 
 
 -- 工单创建成功
