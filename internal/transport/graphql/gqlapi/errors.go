@@ -21,6 +21,7 @@ var (
 	ReturnCodeTimeout                ReturnCode = 1408 //       ├─ 系统响应超时
 	ReturnCodeUnknowError            ReturnCode = 1500 //       └─ 未知错误,一般是系统异常
 	ReturnCodeUserStatusPending      ReturnCode = 2005 // 专用 ─┬─
+	ReturnCodeInvalidEmail           ReturnCode = 2006
 	ReturnCodeUserEmailTaken         ReturnCode = 2009 //       ├─
 	ReturnCodeWrongPassword          ReturnCode = 2010 //       ├─
 	ReturnCodeUserStatusBlocked      ReturnCode = 2016 //       ├─

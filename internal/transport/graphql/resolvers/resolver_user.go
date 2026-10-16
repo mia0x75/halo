@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"net/mail"
 	"strconv"
 	"strings"
 	"time"
@@ -194,6 +195,15 @@ func (r *mutationRootResolver) Register(ctx context.Context, input models.UserRe
 L:
 	for {
 		rc := gqlapi.ReturnCodeOK
+
+		// Prevent email content injection by treating email content as untrusted input
+		var addr *mail.Address
+		if addr, err = mail.ParseAddress(input.Email); err != nil {
+			rc = gqlapi.ReturnCodeInvalidEmail
+			break
+		}
+		input.Email = strings.ToLower(addr.Address)
+
 		user = cache.UsersMap.Any(func(elem *models.User) bool {
 			return elem.Email == input.Email
 		})

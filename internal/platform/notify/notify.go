@@ -13,6 +13,7 @@ import (
 	"net/smtp"
 	"net/textproto"
 	"strings"
+	"unicode"
 
 	log "github.com/sirupsen/logrus"
 
@@ -80,7 +81,10 @@ func (EmailNotifier) Send(_ context.Context, msg Message) error {
 	// Header values are attacker-influenced (ticket subject, user name/email),
 	// so strip CR/LF to prevent SMTP header injection, and reject a recipient
 	// that is not a valid address.
-	from := mail.Address{Name: sanitizeHeader("系统用户"), Address: cfg.User}
+	from := mail.Address{Address: cfg.Addr}
+	if cfg.User != "" {
+		from.Name = sanitizeHeader(cfg.User)
+	}
 	to, err := mail.ParseAddress(msg.ToEmail)
 	if err != nil {
 		return fmt.Errorf("invalid recipient %q: %w", msg.ToEmail, err)
@@ -96,9 +100,9 @@ func (EmailNotifier) Send(_ context.Context, msg Message) error {
 
 	var buffer bytes.Buffer
 	for key, value := range header {
-		fmt.Fprintf(&buffer, "%s: %s\r\n", key, value[0])
+		fmt.Fprintf(&buffer, "%s: %s\r\n", key, sanitizeHeader(value[0]))
 	}
-	fmt.Fprintf(&buffer, "\r\n%s", msg.Body)
+	fmt.Fprintf(&buffer, "\r\n%s", sanitizeBody(msg.Body))
 
 	servername := cfg.Addr
 	host, _, _ := net.SplitHostPort(servername)
@@ -146,6 +150,23 @@ func sanitizeHeader(s string) string {
 		return s
 	}
 	return strings.NewReplacer("\r", "", "\n", "").Replace(s)
+}
+
+// sanitizeBody removes bare CR characters and other control characters from the email body,
+// while preserving \n as a regular line break.
+// This prevents untrusted content from forging header lines such as "X-Foo: bar\r\n" (CRLF injection).
+func sanitizeBody(s string) string {
+	b := make([]rune, 0, len(s))
+	for _, r := range s {
+		if r == '\r' {
+			continue /// Remove bare CR; use \n for line breaks
+		}
+		if r != '\n' && unicode.IsControl(r) {
+			continue // Discard all other control characters (NUL, BEL, ESC, etc.
+		}
+		b = append(b, r)
+	}
+	return string(b)
 }
 
 // DingTalkNotifier is a placeholder for the DingTalk webhook channel.
