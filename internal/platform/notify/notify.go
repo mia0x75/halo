@@ -78,10 +78,10 @@ func (EmailNotifier) Send(_ context.Context, msg Message) error {
 		return nil
 	}
 
-	// Header values are attacker-influenced (ticket subject, user name/email),
-	// so strip CR/LF to prevent SMTP header injection, and reject a recipient
-	// that is not a valid address.
-	from := mail.Address{Address: cfg.Addr}
+	// Header/body values may be attacker-influenced (ticket fields, user profile
+	// data), so sanitize before constructing MIME content and reject an invalid
+	// recipient address.
+	from := mail.Address{Address: sanitizeHeader(cfg.Addr)}
 	if cfg.User != "" {
 		from.Name = sanitizeHeader(cfg.User)
 	}
@@ -89,20 +89,23 @@ func (EmailNotifier) Send(_ context.Context, msg Message) error {
 	if err != nil {
 		return fmt.Errorf("invalid recipient %q: %w", msg.ToEmail, err)
 	}
+	to.Address = sanitizeHeader(to.Address)
 	to.Name = sanitizeHeader(msg.ToName)
+	subject := sanitizeHeader(msg.Subject)
+	body := sanitizeBody(msg.Body)
 
 	header := textproto.MIMEHeader{}
-	header.Set(textproto.CanonicalMIMEHeaderKey("from"), fmt.Sprintf("%s <%s>", from.Name, from.Address))
-	header.Set(textproto.CanonicalMIMEHeaderKey("to"), fmt.Sprintf("%s <%s>", to.Name, to.Address))
+	header.Set(textproto.CanonicalMIMEHeaderKey("from"), from.String())
+	header.Set(textproto.CanonicalMIMEHeaderKey("to"), to.String())
 	header.Set(textproto.CanonicalMIMEHeaderKey("content-type"), "text/plain; charset=UTF-8")
 	header.Set(textproto.CanonicalMIMEHeaderKey("mime-version"), "1.0")
-	header.Set(textproto.CanonicalMIMEHeaderKey("subject"), sanitizeHeader(msg.Subject))
+	header.Set(textproto.CanonicalMIMEHeaderKey("subject"), subject)
 
 	var buffer bytes.Buffer
 	for key, value := range header {
 		fmt.Fprintf(&buffer, "%s: %s\r\n", key, sanitizeHeader(value[0]))
 	}
-	fmt.Fprintf(&buffer, "\r\n%s", sanitizeBody(msg.Body))
+	fmt.Fprintf(&buffer, "\r\n%s", body)
 
 	servername := cfg.Addr
 	host, _, _ := net.SplitHostPort(servername)
