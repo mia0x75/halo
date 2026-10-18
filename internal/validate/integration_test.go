@@ -3,6 +3,7 @@ package validate_test
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/mia0x75/parser"
@@ -40,10 +41,11 @@ func withRealPassword(t *testing.T, cluster *models.Cluster) {
 	cluster.Password = enc
 }
 
-// ensureT1Fixture creates the schema-aware fixture the table/index cases read.
-// They assume a pre-existing starwars.t1(id INT); it is created here (not
-// seeded, per the test-data contract) and dropped on cleanup.
-func ensureT1Fixture(t *testing.T, a *app.App) {
+// ensureFixture creates the schema-aware fixtures the table/index cases read.
+// The cases assume a pre-existing starwars users/orders pair (target seed); the
+// extra tables are created here (not seeded, per the test-data contract) and
+// dropped on cleanup.
+func ensureFixture(t *testing.T, a *app.App) {
 	t.Helper()
 	cluster, err := a.Repos.Cluster.GetByUUID(context.Background(), testClusterUUID)
 	if errors.Is(err, domain.ErrNotFound) {
@@ -52,13 +54,47 @@ func ensureT1Fixture(t *testing.T, a *app.App) {
 	require.NoError(t, err)
 	cluster.Database = "starwars"
 
+	fixtures := []struct{ create, drop string }{
+		{
+			create: "CREATE TABLE IF NOT EXISTS starwars.t1 (id INT) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='t1'",
+			drop:   "DROP TABLE IF EXISTS starwars.t1",
+		},
+		{
+			// TEXT payload exercises the blob/text index guard (CIX-L3-007).
+			create: "CREATE TABLE IF NOT EXISTS starwars.large_t (id INT, payload TEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='large_t'",
+			drop:   "DROP TABLE IF EXISTS starwars.large_t",
+		},
+		{
+			// Five indexes trip the per-table index cap (CIX-L3-006, limit 5).
+			create: "CREATE TABLE IF NOT EXISTS starwars.idx_many (id INT, KEY index_1(id), KEY index_2(id), KEY index_3(id), KEY index_4(id), KEY index_5(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='idx_many'",
+			drop:   "DROP TABLE IF EXISTS starwars.idx_many",
+		},
+	}
+
 	exec := agent.LocalExecutor{}
-	const create = "CREATE TABLE IF NOT EXISTS starwars.t1 (id INT) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='t1'"
-	_, err = exec.Execute(context.Background(), cluster, testClusterPassword, create)
-	require.NoError(t, err)
+	for _, f := range fixtures {
+		_, err = exec.Execute(context.Background(), cluster, testClusterPassword, f.create)
+		require.NoError(t, err)
+	}
 	t.Cleanup(func() {
-		_, _ = exec.Execute(context.Background(), cluster, testClusterPassword, "DROP TABLE IF EXISTS starwars.t1")
+		for _, f := range fixtures {
+			_, _ = exec.Execute(context.Background(), cluster, testClusterPassword, f.drop)
+		}
 	})
+}
+
+// replaceManyValues mirrors insertManyValues for the REPLACE row-count rule.
+func replaceManyValues(n int) string {
+	var b strings.Builder
+	b.WriteString("replace into t1(id) values")
+	for i := 0; i < n; i++ {
+		if i > 0 {
+			b.WriteString(",")
+		}
+		b.WriteString("(1)")
+	}
+	b.WriteString(";")
+	return b.String()
 }
 
 type RuleTestCase struct {
@@ -149,9 +185,62 @@ func runCase(t *testing.T, ctx *validate.Context, p *parser.Parser, c RuleTestCa
 	}
 	s := &validate.Subject{Content: c.Text, Violations: &models.Violations{}, StmtNode: stmt}
 	ctx.Subjects = []*validate.Subject{s}
-	ctx.Rules = []*validate.Rule{{Rule: *bridge.RuleToDomain(mr)}}
+	rule := bridge.RuleToDomain(mr)
+	// The seed ships some implemented rules disabled (even Bitwise); force the
+	// rule on so a case can exercise its handler regardless of seed state.
+	rule.Bitwise |= 1
+	ctx.Rules = []*validate.Rule{{Rule: *rule}}
 	validate.RunRegistry(ctx)
 	return s.Violations.Marshal() == "", true
+}
+
+// ruleCaseTables gathers every authored case table so a rule can be tested by
+// name without duplicating its cases.
+var ruleCaseTables = [][]RuleTestCase{
+	tableCases,
+	viewCases,
+	updateCasess,
+	replaceCases,
+	insertCases,
+	indexCases,
+	deleteCases,
+	databaseCases,
+	miscCases,
+}
+
+// casesForRule returns every case authored for a single rule.
+func casesForRule(name string) []RuleTestCase {
+	var out []RuleTestCase
+	for _, table := range ruleCaseTables {
+		for _, c := range table {
+			if c.RuleName == name {
+				out = append(out, c)
+			}
+		}
+	}
+	return out
+}
+
+// runRuleCases boots the live fixture and drives every case authored for name.
+func runRuleCases(t *testing.T, name string) {
+	t.Helper()
+	cases := casesForRule(name)
+	if len(cases) == 0 {
+		t.Skipf("no test cases authored for %s", name)
+	}
+	a := buildApp(t)
+	ensureFixture(t, a)
+	ctx := buildContext(t)
+	p := parser.New()
+	for _, c := range cases {
+		valid, ok := runCase(t, ctx, p, c)
+		if !ok {
+			continue
+		}
+		if c.Valid != valid {
+			t.Errorf("%s: %s: want valid=%v, got %v", name, c.Text, c.Valid, valid)
+		}
+	}
 }
 
 func TestRun_Integration(t *testing.T) {
@@ -694,6 +783,14 @@ var updateCasess = []RuleTestCase{
 	{"UPD-L2-001", "update t1 ,c set c.id =t.id where c.id >1;", true},                     // UpdateWithoutWhereEnabled
 	{"UPD-L2-001", "update t1 c set c.id=15 limit 10;", false},                             // UpdateWithoutWhereEnabled
 	{"UPD-L2-001", "update t1 ,c set c.id =t.id where c.id in (select id from t2);", true}, // UpdateWithoutWhereEnabled
+	{"UPD-L3-001", "update starwars.users set name='x' where id=1;", true},                 // 目标库存在
+	{"UPD-L3-001", "update nodb.users set name='x' where id=1;", false},                    // 目标库不存在
+	{"UPD-L3-002", "update users set name='x' where id=1;", true},                          // 目标表存在
+	{"UPD-L3-002", "update starwars.nouser set name='x' where id=1;", false},               // 目标表不存在
+	{"UPD-L3-003", "update users set name='x' where id=1;", true},                          // 目标列存在
+	{"UPD-L3-003", "update users set bogus='x' where id=1;", false},                        // 目标列不存在
+	{"UPD-L3-005", "update users set name='x' limit 100;", true},                           // 未超过最大更新行数
+	{"UPD-L3-005", "update users set name='x';", false},                                    // 无 LIMIT，视为不满足
 }
 
 // TestUpdateTargetDatabaseExists 目标库是否存在
@@ -707,6 +804,10 @@ var viewCases = []RuleTestCase{
 	{"CVW-L2-003", "create view tzzzzzzzzzzzzzzzzzzzzzzzz1 as select * from t;", false}, // ViewCreateViewNameMaxLength
 	{"CVW-L2-004", "create view vw_concrete_view as select * from t;", true},            // ViewCreateViewNamePrefixRequired
 	{"CVW-L2-004", "create view v_concrete_view as select * from t;", false},            // ViewCreateViewNamePrefixRequired
+	{"CVW-L3-001", "create view starwars.v_ok as select 1;", true},                      // 目标库存在
+	{"CVW-L3-001", "create view nodb.v_bad as select 1;", false},                        // 目标库不存在
+	{"DVW-L3-001", "drop view starwars.v_ok;", true},                                    // 目标库存在
+	{"DVW-L3-001", "drop view nodb.v_bad;", false},                                      // 目标库不存在
 }
 
 // TestViewCreateTargetDatabaseExists 目标库是否存在
@@ -717,6 +818,18 @@ var insertCases = []RuleTestCase{
 	{"INS-L2-002", "insert into t1 select * from c;", false},                                             // InsertUsingSelectEnabled
 	{"INS-L2-002", "insert into t1(a,b,c,d) values(1,1,1,1);", true},                                     // InsertUsingSelectEnabled
 	{"INS-L2-002", "insert into t1(a,b,c,d) select a,b,c,d from t2 limit 10", false},                     // InsertUsingSelectEnabled
+	{"INS-L2-005", "insert into users (name,email) values ('a','b');", true},                             // 列与值数量一致
+	{"INS-L2-005", "insert into users (name,email) values ('a');", false},                                // 列与值数量不一致
+	{"INS-L3-001", "insert into starwars.users (name,email) values ('a','b');", true},                    // 目标库存在
+	{"INS-L3-001", "insert into nodb.users (name,email) values ('a','b');", false},                       // 目标库不存在
+	{"INS-L3-002", "insert into users (name,email) values ('a','b');", true},                             // 目标表存在
+	{"INS-L3-002", "insert into starwars.notable (id) values (1);", false},                               // 目标表不存在
+	{"INS-L3-003", "insert into users (name,email) values ('a','b');", true},                             // 目标列存在
+	{"INS-L3-003", "insert into users (name,bogus) values ('a','b');", false},                            // 目标列不存在
+	{"INS-L3-004", "insert into users (name,email) values ('a','b');", true},                             // 非空列均有值
+	{"INS-L3-004", "insert into users (name) values ('a');", false},                                      // 缺少非空 email 列
+	{"INS-L3-006", "insert into t1(id) values(1),(2);", true},                                            // 未超过行数上限
+	{"INS-L3-006", insertManyValues(1001), false},                                                        // 超过行数上限
 }
 
 // TestInsertExplicitColumnRequired 是否要求显式列申明
@@ -765,6 +878,20 @@ var indexCases = []RuleTestCase{
 	{"CIX-L3-003", "CREATE INDEX index_2 ON t1(name);", false},             //
 	{"CIX-L3-003", "CREATE INDEX index_2 ON starwars.t1(name);", false},    //
 	{"CIX-L3-003", "CREATE INDEX index_2 ON mock.t1(name);", true},         // 表不存在，不处理
+	{"CIX-L3-004", "CREATE INDEX index_1 ON users(status);", true},         // 与已有索引不重叠
+	{"CIX-L3-004", "CREATE INDEX index_1 ON users(email);", false},         // 与 unique_1(email) 重叠
+	{"CIX-L3-005", "CREATE INDEX index_1 ON users(email);", true},          // 索引名不重复
+	{"CIX-L3-005", "CREATE INDEX unique_1 ON users(status);", false},       // 索引名重复
+	{"CIX-L3-006", "CREATE INDEX index_6 ON users(status);", true},         // 未超过索引数量上限
+	{"CIX-L3-006", "CREATE INDEX index_6 ON idx_many(id);", false},         // 超过索引数量上限
+	{"CIX-L3-007", "CREATE INDEX index_1 ON users(status);", true},         // 非文本/二进制列
+	{"CIX-L3-007", "CREATE INDEX index_1 ON large_t(payload);", false},     // TEXT 列不允许建索引
+	{"RIX-L3-001", "drop index index_1 on idx_many;", true},                // 目标库存在
+	{"RIX-L3-001", "drop index index_1 on mock.idx_many;", false},          // 目标库不存在
+	{"RIX-L3-002", "drop index index_1 on idx_many;", true},                // 目标表存在
+	{"RIX-L3-002", "drop index index_1 on notable;", false},                // 目标表不存在
+	{"RIX-L3-003", "drop index index_1 on idx_many;", true},                // 目标索引存在
+	{"RIX-L3-003", "drop index index_missing on idx_many;", false},         // 目标索引不存在
 }
 
 // TestIndexCreateTargetDatabaseExists 添加索引的表所属库是否存在
@@ -776,11 +903,16 @@ var deleteCases = []RuleTestCase{
 	{"DEL-L2-001", "delete from t1 ;", false},                     //  DeleteWithoutWhereEnabled
 	{"DEL-L3-002", "delete from t1;", true},                       //
 	{"DEL-L3-002", "delete from starwars.t1;", true},              //
-	// {"DEL-L3-002", "delete from mock.t1 ;", false},                // Walk方法不完善，致使VisitInfo内容不全
-	{"DEL-L3-003", "delete from t1;", true},          //
-	{"DEL-L3-003", "delete from starwars.t1;", true}, //
-	{"DEL-L3-003", "delete from t2;", true},          //
-	{"DEL-L3-003", "delete from starwars.t2;", true}, //
+	{"DEL-L3-002", "delete from mock.t1;", false},                 // 目标库不存在
+	{"DEL-L3-003", "delete from t1;", true},                       //
+	{"DEL-L3-003", "delete from starwars.t1;", true},              //
+	{"DEL-L3-003", "delete from t2;", false},                      // 目标表不存在
+	{"DEL-L3-003", "delete from starwars.t2;", false},             // 目标表不存在
+	{"DEL-L3-003", "delete from mock.t1;", false},                 // 目标表不存在
+	{"DEL-L3-001", "delete from users limit 10;", true},           // 未超过最大删除行数
+	{"DEL-L3-001", "delete from users;", false},                   // 无 LIMIT，视为不满足
+	{"DEL-L3-004", "delete from users where id=1;", true},         // 过滤列存在
+	{"DEL-L3-004", "delete from users where bogus=1;", false},     // 过滤列不存在
 }
 
 // TestDeleteRowsLimit 单次删除的最大行数
@@ -835,12 +967,20 @@ var databaseCases = []RuleTestCase{
 }
 
 var replaceCases = []RuleTestCase{
-	// {"RPL-L2-001", "replace into t values(1,2,3,'c');", false},                                           // ReplaceExplicitColumnRequired
-	// {"RPL-L2-001", "replace into t select 1,a,b,z from t2 ;", false},                                     // ReplaceExplicitColumnRequired
-	// {"RPL-L2-002", "replace into t(a,b,c,d) select a,b,c,d from t2  where t2.id > 100  limit 10", false}, // ReplaceUsingSelectEnabled
-	// {"RPL-L2-002", "replace into t select * from c;", false},                                             // ReplaceUsingSelectEnabled
-	// {"RPL-L2-002", "replace into t(a,b,c,d) values(1,1,1,1);", true},                                     // ReplaceUsingSelectEnabled
-	// {"RPL-L2-002", "replace into t(a,b,c,d) select a,b,c,d from t2 limit 10", false},                     // ReplaceUsingSelectEnabled
+	{"RPL-L2-002", "replace into users (name,email) values ('a','b');", true},              // 未使用 SELECT
+	{"RPL-L2-002", "replace into users (name,email) select name,email from users;", false}, // 不允许 REPLACE...SELECT
+	{"RPL-L2-004", "replace into t1(id) values(1);", true},                                 // RPL-L2-004 行数上限
+	{"RPL-L2-004", replaceManyValues(1001), false},                                         // 超过行数上限
+	{"RPL-L2-005", "replace into users (name,email) values ('a','b');", true},              // 列与值数量一致
+	{"RPL-L2-005", "replace into users (name,email) values ('a');", false},                 // 列与值数量不一致
+	{"RPL-L3-001", "replace into starwars.users (name,email) values ('a','b');", true},     // 目标库存在
+	{"RPL-L3-001", "replace into nodb.users (name,email) values ('a','b');", false},        // 目标库不存在
+	{"RPL-L3-002", "replace into users (name,email) values ('a','b');", true},              // 目标表存在
+	{"RPL-L3-002", "replace into starwars.nouser (name,email) values ('a','b');", false},   // 目标表不存在
+	{"RPL-L3-003", "replace into users (name,email) values ('a','b');", true},              // 目标列存在
+	{"RPL-L3-003", "replace into users (name,bogus) values ('a','b');", false},             // 目标列不存在
+	{"RPL-L3-004", "replace into users (name,email) values ('a','b');", true},              // 非空列均有值
+	{"RPL-L3-004", "replace into users (name) values ('a');", false},                       // 非空列缺失
 }
 
 // TestReplaceUsingSelectEnabled 是否允许REPLACE...SELECT
@@ -871,7 +1011,7 @@ var miscCases = []RuleTestCase{
 
 func TestGeneralRules(t *testing.T) {
 	a := buildApp(t)
-	ensureT1Fixture(t, a)
+	ensureFixture(t, a)
 	ctx := buildContext(t)
 	p := parser.New()
 	assert := assert.New(t)
@@ -975,24 +1115,31 @@ func TestTableCreateColumnCountLimit(t *testing.T) {
 	}
 }
 
-func TestMergeStatement(t *testing.T) {
-	buildApp(t)
+// mergeCases are the multi-statement cases. They need the multi-statement
+// parser, so they cannot go through the single-statement runCase.
+var mergeCases = []RuleTestCase{
+	{"MSC-L1-004", "CREATE TABLE t1 (c1 INT); CREATE INDEX index_1 ON t1(c1);", false},
+	{"MSC-L1-004", "CREATE TABLE t1 (c1 INT); ALTER TABLE t1 ADD c2 INT;", false},
+	{"MSC-L1-004", "ALTER TABLE t1 ADD c1 INT; ALTER TABLE t1 ADD c2 INT;", false},
+	{"MSC-L1-004", "ALTER TABLE t1 ADD c1 INT; ALTER TABLE t1 DROP INDEX index_2;", false},
+	{"MSC-L1-004", "CREATE INDEX index_1 ON t1(c1); ALTER TABLE t1 DROP INDEX index_2;", false},
+	{"MSC-L1-008", "SELECT 1;", true},
+	{"MSC-L1-008", "SELECT * FROM t1; ALTER TABLE t1 ADD c1 INT;", false},
+	{"MSC-L1-008", "ALTER TABLE t1 ADD c1 INT; SELECT * FROM t1;", false},
+	{"MSC-L1-004", "SELECT 1;", true},
+}
+
+// runMergeCases drives the multi-statement cases for one rule ("" = all).
+func runMergeCases(t *testing.T, name string) {
+	t.Helper()
+	ensureFixture(t, buildApp(t))
 	ctx := buildContext(t)
 	p := parser.New()
 
-	cases := []RuleTestCase{
-		{"MSC-L1-004", "CREATE TABLE t1 (c1 INT); CREATE INDEX index_1 ON t1(c1);", false},
-		{"MSC-L1-004", "CREATE TABLE t1 (c1 INT); ALTER TABLE t1 ADD c2 INT;", false},
-		{"MSC-L1-004", "ALTER TABLE t1 ADD c1 INT; ALTER TABLE t1 ADD c2 INT;", false},
-		{"MSC-L1-004", "ALTER TABLE t1 ADD c1 INT; ALTER TABLE t1 DROP INDEX index_2;", false},
-		{"MSC-L1-004", "CREATE INDEX index_1 ON t1(c1); ALTER TABLE t1 DROP INDEX index_2;", false},
-		{"MSC-L1-008", "SELECT 1;", true},
-		{"MSC-L1-008", "SELECT * FROM t1; ALTER TABLE t1 ADD c1 INT;", false},
-		{"MSC-L1-008", "ALTER TABLE t1 ADD c1 INT; SELECT * FROM t1;", false},
-		{"MSC-L1-004", "SELECT 1;", true},
-	}
-
-	for _, c := range cases {
+	for _, c := range mergeCases {
+		if name != "" && c.RuleName != name {
+			continue
+		}
 		mr := cache.RulesMap.Any(func(elem *models.Rule) bool {
 			return elem.Name == c.RuleName
 		})
@@ -1014,7 +1161,15 @@ func TestMergeStatement(t *testing.T) {
 			})
 		}
 		ctx.Subjects = subjects
-		ctx.Rules = []*validate.Rule{{Rule: *bridge.RuleToDomain(mr)}}
+		// The seed ships some implemented rules disabled (even Bitwise); force
+		// the rule on so a case can exercise its handler regardless of seed state.
+		rule := bridge.RuleToDomain(mr)
+		rule.Bitwise |= 1
+		ctx.Rules = []*validate.Rule{{Rule: *rule}}
 		validate.RunRegistry(ctx)
 	}
+}
+
+func TestMergeStatement(t *testing.T) {
+	runMergeCases(t, "")
 }
