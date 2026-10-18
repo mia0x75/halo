@@ -477,7 +477,7 @@ INSERT INTO mm_rules VALUES
 ('UPD-L3-001','022dbea9-af6f-44cb-b0ae-3f4712a014c8',16,'目标库必须已存在',1,162,'none','nil',5,'TargetDatabaseDoesNotExist','UPDATE语句中指定的库"%s"不存在。','none',1, NULL, NOW()),
 ('UPD-L3-002','749e0a05-843b-4c8e-8d5c-6ef252b261ad',16,'目标表必须已存在',1,162,'none','nil',5,'TargetTableDoesNotExist','UPDATE语句中指定的表"%s"不存在。','none',1, NULL, NOW()),
 ('UPD-L3-003','bdf11d37-9534-4553-826d-15d3b08f1059',16,'目标列必须已存在',1,162,'none','nil',4,'TargetColumnDoesNotExist','UPDATE语句中更新的列"%s"不存在。','none',1, NULL, NOW()),
-('UPD-L3-004','d4039173-8482-48be-b8ec-c494fd6359a5',16,'条件限定列必须已存在',3,162,'none','nil',4,'FilterColumnExists','UPDATE语句中条件限定列"%s"不存在。','none',1, NULL, NOW()),
+('UPD-L3-004','d4039173-8482-48be-b8ec-c494fd6359a5',16,'条件限定列必须已存在',1,162,'none','nil',4,'FilterColumnExists','UPDATE语句中条件限定列"%s"不存在。','none',1, NULL, NOW()),
 ('UPD-L3-005','a72f3d07-7512-46bb-a442-8a505610a72e',16,'允许单次更新的最大行数',1,162,'lte','1000',6,'MaxAllowedUpdateRows','单条UPDATE语句不得操作超过%d条记录。','number',1, NULL, NOW()),
 ('INS-L3-006','601842ae-1fc3-4dd0-934c-44c039aca7b7',16,'单语句允许操作的最大行数',1,160,'lte','1000',5,'RowsLimit','单语句不得操作超过%d条记录。','number',1, NULL, NOW()),
 ('MTB-L3-024','6fbf9776-124a-4611-be8b-3d8acbd2130c',12,'修改表注解信息时不可为空',1,120,'none','nil',5,'CommentRequired','修改表注解信息时不可为空。','none',1, NULL, NOW()),
