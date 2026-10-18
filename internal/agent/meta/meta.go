@@ -12,6 +12,18 @@ func (t ColumnType) IsText() bool { return sqlKinds[t] == kindText }
 // IsBlob reports whether the type belongs to the binary family.
 func (t ColumnType) IsBlob() bool { return sqlKinds[t] == kindBlob }
 
+// IsLargeObject reports whether the type stores arbitrary-length payloads (the
+// TEXT/BLOB families). Unlike IsText it excludes CHAR/VARCHAR, so rules that
+// forbid returning large payloads do not reject ordinary string columns.
+func (t ColumnType) IsLargeObject() bool {
+	switch t {
+	case "TINYTEXT", "TEXT", "MEDIUMTEXT", "LONGTEXT",
+		"TINYBLOB", "BLOB", "MEDIUMBLOB", "LONGBLOB":
+		return true
+	}
+	return false
+}
+
 type sqlKind int
 
 const (
@@ -52,6 +64,9 @@ type Column struct {
 	Nullable bool
 	Default  string
 	Comment  string
+	// AutoIncrement marks identity/auto_increment columns so column-level rules
+	// do not require an explicit value for them.
+	AutoIncrement bool
 }
 
 // Index is index-level metadata.

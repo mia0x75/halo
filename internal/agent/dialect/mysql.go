@@ -32,6 +32,7 @@ type mysqlColumnRow struct {
 	Type     string  `db:"COLUMN_TYPE"`
 	Nullable string  `db:"IS_NULLABLE"`
 	Default  *string `db:"COLUMN_DEFAULT"`
+	Extra    *string `db:"EXTRA"`
 	Comment  *string `db:"COLUMN_COMMENT"`
 }
 
@@ -92,7 +93,7 @@ func (MySQL) loadTableHeaders(ctx context.Context, db *sqlx.DB, database string)
 // loadColumns 读取 information_schema.COLUMNS。database 为空时用 DATABASE()。
 func (MySQL) loadColumns(ctx context.Context, db *sqlx.DB, database string) (map[string]map[string]*meta.Column, error) {
 	const query = "SELECT TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, " +
-		"COLUMN_DEFAULT, COLUMN_COMMENT " +
+		"COLUMN_DEFAULT, EXTRA, COLUMN_COMMENT " +
 		"FROM information_schema.COLUMNS " +
 		"WHERE TABLE_SCHEMA = COALESCE(NULLIF(?, ''), DATABASE()) " +
 		"ORDER BY TABLE_NAME, ORDINAL_POSITION"
@@ -105,11 +106,12 @@ func (MySQL) loadColumns(ctx context.Context, db *sqlx.DB, database string) (map
 	columns := make(map[string]map[string]*meta.Column, len(rows))
 	for _, row := range rows {
 		col := &meta.Column{
-			Name:     row.Column,
-			Type:     meta.ColumnType(normalizeMySQLType(row.Type)),
-			Nullable: row.Nullable == "YES",
-			Default:  deref(row.Default),
-			Comment:  deref(row.Comment),
+			Name:          row.Column,
+			Type:          meta.ColumnType(normalizeMySQLType(row.Type)),
+			Nullable:      row.Nullable == "YES",
+			Default:       deref(row.Default),
+			Comment:       deref(row.Comment),
+			AutoIncrement: strings.Contains(deref(row.Extra), "auto_increment"),
 		}
 		if columns[row.Table] == nil {
 			columns[row.Table] = make(map[string]*meta.Column)

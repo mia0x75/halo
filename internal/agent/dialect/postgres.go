@@ -31,6 +31,7 @@ type postgresColumnRow struct {
 	Schema    string  `db:"data_type"`
 	Nullable  string  `db:"is_nullable"`
 	Default   *string `db:"column_default"`
+	Identity  string  `db:"is_identity"`
 	Collation *string `db:"collation_name"`
 }
 
@@ -94,7 +95,7 @@ func (Postgres) loadTableHeaders(ctx context.Context, db *sqlx.DB, database stri
 // udt_name 走统一分类。
 func (Postgres) loadColumns(ctx context.Context, db *sqlx.DB, database string) (map[string]map[string]*meta.Column, error) {
 	const query = "SELECT table_name, column_name, udt_name, data_type, " +
-		"is_nullable, column_default, collation_name " +
+		"is_nullable, column_default, is_identity, collation_name " +
 		"FROM information_schema.columns " +
 		"WHERE table_catalog = current_database() " +
 		"AND table_schema NOT IN ('information_schema') " +
@@ -109,10 +110,11 @@ func (Postgres) loadColumns(ctx context.Context, db *sqlx.DB, database string) (
 	columns := make(map[string]map[string]*meta.Column, len(rows))
 	for _, row := range rows {
 		col := &meta.Column{
-			Name:     row.Column,
-			Type:     meta.ColumnType(normalizePostgresType(row.Schema, row.Type)),
-			Nullable: row.Nullable == "YES",
-			Default:  deref(row.Default),
+			Name:          row.Column,
+			Type:          meta.ColumnType(normalizePostgresType(row.Schema, row.Type)),
+			Nullable:      row.Nullable == "YES",
+			Default:       deref(row.Default),
+			AutoIncrement: row.Identity == "YES" || strings.HasPrefix(deref(row.Default), "nextval("),
 		}
 		if columns[row.Table] == nil {
 			columns[row.Table] = make(map[string]*meta.Column)
