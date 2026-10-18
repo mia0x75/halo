@@ -33,6 +33,7 @@ func (v *ViewCreateVldr) Validate(wg *sync.WaitGroup) {
 			continue
 		} else {
 			v.cv = cv
+			v.Walk(cv)
 		}
 		for _, r := range v.Rules {
 			if r.Bitwise&1 != 1 {
@@ -119,6 +120,7 @@ func (v *ViewCreateVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 // RULE: CVW-L3-002
 func (v *ViewCreateVldr) TargetViewDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+	// Meta has no view metadata support; cannot check view existence.
 }
 
 // ViewAlterVldr 修改视图语句相关的审核规则
@@ -134,16 +136,21 @@ func (v *ViewAlterVldr) Enabled() bool {
 // Validate 规则组的审核入口
 func (v *ViewAlterVldr) Validate(wg *sync.WaitGroup) {
 	defer wg.Done()
+	// The parser has no ALTER VIEW AST, so no subject ever reaches this group.
 }
 
 // TargetDatabaseDoesNotExist 目标库是否存在
 // RULE: MVW-L3-001
 func (v *ViewAlterVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
+	// Cannot implement reliably: parser has no ALTER VIEW AST; skip.
+	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 }
 
 // TargetViewDoesNotExist 目标视图是否存在
 // RULE: MVW-L3-002
 func (v *ViewAlterVldr) TargetViewDoesNotExist(s *Subject, r *Rule) {
+	// Cannot implement reliably: parser has no ALTER VIEW AST; skip.
+	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 }
 
 // ViewDropVldr 删除视图语句相关的审核规则
@@ -159,14 +166,37 @@ func (v *ViewDropVldr) Enabled() bool {
 // Validate 规则组的审核入口
 func (v *ViewDropVldr) Validate(wg *sync.WaitGroup) {
 	defer wg.Done()
+	for _, s := range v.Ctx.Subjects {
+		node := s.StmtNode
+		dt, ok := node.(*ast.DropTableStmt)
+		if !ok || !dt.IsView {
+			continue
+		}
+		v.Walk(dt)
+		for _, r := range v.Rules {
+			if r.Bitwise&1 != 1 {
+				continue
+			}
+			Call(v, uint16(r.VldrGroup), r.Func, s, r)
+		}
+	}
 }
 
 // TargetDatabaseDoesNotExist 目标库是否存在
 // RULE: DVW-L3-001
 func (v *ViewDropVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
+	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+	for _, ti := range v.Vi {
+		if v.DatabaseInfo(ti.Database) == nil {
+			c := &Clause{Description: fmt.Sprintf(r.Message, ti.Database), Level: uint8(r.Level)}
+			s.Violations.Append(c)
+		}
+	}
 }
 
 // TargetViewDoesNotExist 目标视图是否存在
 // RULE: DVW-L3-002
 func (v *ViewDropVldr) TargetViewDoesNotExist(s *Subject, r *Rule) {
+	// Meta has no view metadata support; cannot check view existence.
+	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 }

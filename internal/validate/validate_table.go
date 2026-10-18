@@ -3074,16 +3074,63 @@ func (v *TableAlterVldr) IndexOnBlobColumnNotAllowed(s *Subject, r *Rule) {
 	}
 }
 
-// MaxAllowedTimestampCount 仅允许一个事件戳类型的列
+// MaxAllowedTimestampCount 仅允许一个时间戳类型的列
 // RULE: MTB-L3-007
 func (v *TableAlterVldr) MaxAllowedTimestampCount(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
+	if ti == nil {
+		return
+	}
+	dropped := map[string]bool{}
+	count := 0
+	for _, spec := range v.at.Specs {
+		switch spec.Tp {
+		case ast.AlterTableDropColumn:
+			if spec.OldColumnName != nil {
+				dropped[spec.OldColumnName.Name.O] = true
+			}
+		case ast.AlterTableAddColumns:
+			for _, col := range spec.NewColumns {
+				if strings.EqualFold(types.TypeStr(col.Tp.Tp), "timestamp") {
+					count++
+				}
+			}
+		}
+	}
+	for name, col := range ti.Columns {
+		if dropped[name] {
+			continue
+		}
+		if strings.EqualFold(string(col.Type), "timestamp") {
+			count++
+		}
+	}
+	if count > 1 {
+		appendViolation(s, r, v.at.Table.Name.O)
+	}
 }
 
 // IndexOverlayNotAllowed 不允许索引覆盖
-// RULE: MTB-L3-007
+// RULE: MTB-L3-014
 func (v *TableAlterVldr) IndexOverlayNotAllowed(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+	ti := v.TableInfo(v.at.Table.Schema.O, v.at.Table.Name.O)
+	if ti == nil {
+		return
+	}
+	for _, spec := range v.at.Specs {
+		if spec.Tp != ast.AlterTableAddConstraint || spec.Constraint == nil {
+			continue
+		}
+		cols := indexColNames(spec.Constraint.Keys)
+		for _, name := range sortedIndexNames(ti) {
+			if indexOverlay(cols, ti.Indexes[name].Cols) {
+				appendViolation(s, r, v.at.Table.Name.O, name)
+				break
+			}
+		}
+	}
 }
 
 // TableRenameVldr 改名表语句相关的审核规则
@@ -3184,28 +3231,55 @@ func (v *TableRenameVldr) TargetTableNameMaxLength(s *Subject, r *Rule) {
 
 }
 
-// TableRenameSourceTableDoesNotExist 源库是否存在
-// RULE: RTB-L3-001
-func (v *TableRenameVldr) SourceTableDoesNotExist(s *Subject, r *Rule) {
-	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+// renameDatabase resolves the schema of t, falling back to the ticket database.
+func (v *TableRenameVldr) renameDatabase(t *ast.TableName) string {
+	if db := strings.TrimSpace(t.Schema.O); db != "" {
+		return db
+	}
+	return v.Ctx.Ticket.Database
 }
 
-// TableRenameSourceDatabaseDoesNotExist 源表是否存在
+// SourceTableDoesNotExist 源库必须已存在
+// RULE: RTB-L3-001
+//
+// The seed pairs this handler name with a source-database message, so the
+// implementation follows the message ("源库") rather than the name.
+func (v *TableRenameVldr) SourceTableDoesNotExist(s *Subject, r *Rule) {
+	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+	db := v.renameDatabase(v.rt.OldTable)
+	if v.DatabaseInfo(db) == nil {
+		appendViolation(s, r, db)
+	}
+}
+
+// SourceDatabaseDoesNotExist 源表必须已存在
 // RULE: RTB-L3-002
 func (v *TableRenameVldr) SourceDatabaseDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+	db := v.renameDatabase(v.rt.OldTable)
+	if v.TableInfo(db, v.rt.OldTable.Name.O) == nil {
+		appendViolation(s, r, v.rt.OldTable.Name.O)
+	}
 }
 
-// TableRenameTargetTableDoesNotExist 目标库是否存在
+// TargetTableDoesNotExist 目标库必须已存在
 // RULE: RTB-L3-003
 func (v *TableRenameVldr) TargetTableDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+	db := v.renameDatabase(v.rt.NewTable)
+	if v.DatabaseInfo(db) == nil {
+		appendViolation(s, r, db)
+	}
 }
 
-// TargetDatabaseDoesNotExist 目标表是否已存在
+// TargetDatabaseDoesNotExist 目标表必须不存在
 // RULE: RTB-L3-004
 func (v *TableRenameVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+	db := v.renameDatabase(v.rt.NewTable)
+	if v.TableInfo(db, v.rt.NewTable.Name.O) != nil {
+		appendViolation(s, r, v.rt.NewTable.Name.O)
+	}
 }
 
 // TableDropVldr 删除表语句相关的审核规则

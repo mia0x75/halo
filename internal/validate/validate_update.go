@@ -92,12 +92,47 @@ func (v *UpdateVldr) TargetTableDoesNotExist(s *Subject, r *Rule) {
 // RULE: UPD-L3-003
 func (v *UpdateVldr) TargetColumnDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
-	// TODO:
+	refs := v.tableRefs(v.ud.TableRefs)
+	reported := map[string]bool{}
+	check := func(c *ast.ColumnName) {
+		name, bad := missingColumn(refs, c)
+		if !bad || reported[name] {
+			return
+		}
+		reported[name] = true
+		appendViolation(s, r, name)
+	}
+	for _, a := range v.ud.List {
+		check(a.Column)
+		for _, c := range collectedColumns(a.Expr) {
+			check(c)
+		}
+	}
+	for _, c := range collectedColumns(v.ud.Where) {
+		check(c)
+	}
 }
 
 // MaxAllowedUpdateRows 允许单次更新的最大行数
-// RULE: UPD-L3-004
+// RULE: UPD-L3-005
 func (v *UpdateVldr) MaxAllowedUpdateRows(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
-	// TODO:
+	threshold, err := r.Int()
+	if err != nil {
+		return
+	}
+	rows, ok := limitRows(v.ud.Limit)
+	if !ok || rows > int64(threshold) {
+		appendViolation(s, r, threshold)
+	}
+}
+
+// FilterColumnExists would report an UPDATE whose WHERE clause references a
+// column that does not exist. Kept as a documented no-op: TargetColumnDoesNotExist
+// (UPD-L3-003) already validates both assignment and filter columns, so a second
+// pass here would emit the same violation twice. The rule row is retained so the
+// upstream code stays resolvable.
+// RULE: UPD-L3-004
+func (v *UpdateVldr) FilterColumnExists(_ *Subject, r *Rule) {
+	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 }

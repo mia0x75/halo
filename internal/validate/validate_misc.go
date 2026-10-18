@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/mia0x75/parser/ast"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/mia0x75/halo/internal/tools"
 )
@@ -212,4 +213,14 @@ func (v *MiscVldr) SplitRequired(_ *Subject, r *Rule) {
 			}
 		}
 	}
+}
+
+// SplitTicket would require a ticket to hold a single statement, forcing the
+// submitter to open a separate ticket per statement. The upstream rule set
+// shipped it without a handler, and mixing DDL with DML is already covered by
+// SplitRequired (MSC-L1-008). Kept as a documented no-op so the seeded rule
+// resolves to a handler instead of being reported as missing.
+// RULE: MSC-L0-001
+func (v *MiscVldr) SplitTicket(_ *Subject, r *Rule) {
+	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 }

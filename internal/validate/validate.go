@@ -463,6 +463,17 @@ func (v *vldr) Walk(node ast.Node) {
 			v.appendVisitInfo(vi)
 		}
 	case *ast.CreateViewStmt:
+		// The target of a view rule is the view itself, not the tables its
+		// SELECT reads from.
+		database := x.ViewName.Schema.O
+		if database == "" {
+			database = v.Ctx.Ticket.Database
+		}
+		vi := VisitInfo{
+			Database: database,
+			Table:    &TableEntry{Name: x.ViewName.Name.O},
+		}
+		v.appendVisitInfo(vi)
 	case *ast.DropDatabaseStmt:
 		vi := VisitInfo{
 			Database: x.Name,
@@ -528,8 +539,9 @@ func (v *vldr) Walk(node ast.Node) {
 	}
 }
 
-// Walk TODO
-func Walk(ctx *Context, node ast.Node) []VisitInfo { //may have duplicate db name
+// Walk flattens a table-ref AST node into the VisitInfo list the schema-aware
+// rules resolve against. Results may repeat when a table is referenced twice.
+func Walk(ctx *Context, node ast.Node) []VisitInfo {
 	var vi []VisitInfo
 
 	if node == nil {
@@ -538,56 +550,16 @@ func Walk(ctx *Context, node ast.Node) []VisitInfo { //may have duplicate db nam
 
 	switch x := node.(type) {
 	case *ast.TableSource:
-		Walk(ctx, x.Source)
+		vi = append(vi, Walk(ctx, x.Source)...)
 	case *ast.UnionStmt:
 		if x.SelectList != nil {
 			for _, sel := range x.SelectList.Selects {
-				Walk(ctx, sel)
+				vi = append(vi, Walk(ctx, sel)...)
 			}
 		}
 	case *ast.SelectStmt:
 		if x.From != nil {
-			Walk(ctx, x.From.TableRefs)
-		}
-		if x.GroupBy != nil {
-			for _, item := range x.OrderBy.Items {
-				fmt.Printf("x.GroupBy.Items: %T, %+v\n", item, item)
-			}
-		}
-		if x.OrderBy != nil {
-			for _, item := range x.OrderBy.Items {
-				fmt.Printf("x.OrderBy.Items: %T, %+v\n", item, item)
-			}
-		}
-		if x.Where != nil {
-			fmt.Printf("x.Where: %T, %+v", x.Where, x.Where)
-			switch expr := x.Where.(type) {
-			case *ast.AggregateFuncExpr:
-			case *ast.WindowFuncExpr:
-			case *ast.BetweenExpr:
-			case *ast.BinaryOperationExpr:
-				fmt.Printf("ast.BinaryOperationExpr, L:%T, %+v\n", expr.L, expr.L)
-				fmt.Printf("ast.BinaryOperationExpr, R:%T, %+v\n", expr.R, expr.R)
-			case *ast.CaseExpr:
-			case *ast.ColumnNameExpr:
-			case *ast.CompareSubqueryExpr:
-			case *ast.DefaultExpr:
-			case *ast.ExistsSubqueryExpr:
-			case *ast.FuncCallExpr:
-			case *ast.FuncCastExpr:
-			case *ast.IsNullExpr:
-			case *ast.IsTruthExpr:
-			case *ast.ParenthesesExpr:
-			case *ast.PatternInExpr:
-			case *ast.PatternLikeExpr:
-			case *ast.PatternRegexpExpr:
-			case *ast.PositionExpr:
-			case *ast.RowExpr:
-			case *ast.SubqueryExpr:
-			case *ast.UnaryOperationExpr:
-			case *ast.ValuesExpr:
-			case *ast.VariableExpr:
-			}
+			vi = append(vi, Walk(ctx, x.From.TableRefs)...)
 		}
 	case *ast.TableName:
 		table := &TableEntry{
@@ -603,8 +575,10 @@ func Walk(ctx *Context, node ast.Node) []VisitInfo { //may have duplicate db nam
 		}
 		vi = append(vi, elem)
 	case *ast.Join:
-		Walk(ctx, x.Left)
-		Walk(ctx, x.Right)
+		vi = append(vi, Walk(ctx, x.Left)...)
+		if x.Right != nil {
+			vi = append(vi, Walk(ctx, x.Right)...)
+		}
 	}
 
 	return vi

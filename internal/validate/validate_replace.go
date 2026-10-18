@@ -2,6 +2,7 @@ package validate
 
 import (
 	"fmt"
+	"strconv"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -90,12 +91,39 @@ func (v *ReplaceVldr) TargetTableDoesNotExist(s *Subject, r *Rule) {
 // RULE: RPL-L3-003
 func (v *ReplaceVldr) TargetColumnDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
-	// TODO:
+	checkTargetInsertColumns(&v.vldr, v.id, s, r)
 }
 
 // ValueForNotNullColumnRequired 非空列是否有值
 // RULE: RPL-L3-004
 func (v *ReplaceVldr) ValueForNotNullColumnRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
-	// TODO:
+	checkNotNullInsertColumns(&v.vldr, v.id, s, r)
+}
+
+// MergeRequired would force multiple REPLACE statements against the same table
+// within one ticket to be merged into a single statement. The upstream rule set
+// shipped this rule without a handler, and cross-statement merge is currently
+// enforced by MiscVldr.MergeRequired (MSC-L1-004). Kept as a documented no-op so
+// the seeded rule resolves to a handler instead of being reported as missing.
+// RULE: RPL-L2-003
+func (v *ReplaceVldr) MergeRequired(_ *Subject, r *Rule) {
+	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+}
+
+// RowsLimit 单语句允许操作的最大行数
+// RULE: RPL-L2-004
+func (v *ReplaceVldr) RowsLimit(s *Subject, r *Rule) {
+	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+	threshold, err := strconv.Atoi(r.Parameters)
+	if err != nil {
+		return
+	}
+	if len(v.id.Lists) > threshold {
+		c := &Clause{
+			Description: fmt.Sprintf(r.Message, threshold),
+			Level:       uint8(r.Level),
+		}
+		s.Violations.Append(c)
+	}
 }

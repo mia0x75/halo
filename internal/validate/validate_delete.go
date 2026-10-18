@@ -59,7 +59,14 @@ func (v *DeleteVldr) WithoutWhereNotAllowed(s *Subject, r *Rule) {
 // RULE: DEL-L3-001
 func (v *DeleteVldr) MaxAllowedDeleteRows(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
-	// TODO:
+	threshold, err := r.Int()
+	if err != nil {
+		return
+	}
+	rows, ok := limitRows(v.dd.Limit)
+	if !ok || rows > int64(threshold) {
+		appendViolation(s, r, threshold)
+	}
 }
 
 // TargetDatabaseDoesNotExist 目标库是否存在
@@ -99,5 +106,14 @@ func (v *DeleteVldr) TargetTableDoesNotDoesNotExist(s *Subject, r *Rule) {
 // RULE: DEL-L3-004
 func (v *DeleteVldr) TargetColumnDoesNotDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
-	// TODO:
+	refs := v.tableRefs(v.dd.TableRefs)
+	reported := map[string]bool{}
+	for _, c := range collectedColumns(v.dd.Where) {
+		name, bad := missingColumn(refs, c)
+		if !bad || reported[name] {
+			continue
+		}
+		reported[name] = true
+		appendViolation(s, r, name)
+	}
 }

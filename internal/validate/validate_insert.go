@@ -147,14 +147,24 @@ func (v *InsertVldr) TargetTableDoesNotExist(s *Subject, r *Rule) {
 // RULE: INS-L3-003
 func (v *InsertVldr) TargetColumnDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
-	// TODO:
+	checkTargetInsertColumns(&v.vldr, v.id, s, r)
 }
 
 // ValueForNotNullColumnRequired 非空列是否有值
 // RULE: INS-L3-004
 func (v *InsertVldr) ValueForNotNullColumnRequired(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
-	// TODO:
+	checkNotNullInsertColumns(&v.vldr, v.id, s, r)
+}
+
+// MergeRequired would force multiple INSERT statements against the same table
+// within one ticket to be merged into a single statement. The upstream rule set
+// shipped this rule without a handler, and cross-statement merge is currently
+// enforced by MiscVldr.MergeRequired (MSC-L1-004). Kept as a documented no-op so
+// the seeded rule resolves to a handler instead of being reported as missing.
+// RULE: INS-L2-003
+func (v *InsertVldr) MergeRequired(_ *Subject, r *Rule) {
+	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 }
 
 // ReplaceVldr 插入数据语句相关的审核规则

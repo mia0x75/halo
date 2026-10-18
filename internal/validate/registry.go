@@ -193,6 +193,7 @@ var ruleRegistry = map[uint16]map[string]RuleFunc{
 	160: { // InsertVldr
 		"ColumnsValuesMustMatch":        wrap((*InsertVldr).ColumnsValuesMustMatch),
 		"ExplicitColumnRequired":        wrap((*InsertVldr).ExplicitColumnRequired),
+		"MergeRequired":                 wrap((*InsertVldr).MergeRequired),
 		"RowsLimit":                     wrap((*InsertVldr).RowsLimit),
 		"TargetColumnDoesNotExist":      wrap((*InsertVldr).TargetColumnDoesNotExist),
 		"TargetDatabaseDoesNotExist":    wrap((*InsertVldr).TargetDatabaseDoesNotExist),
@@ -203,6 +204,8 @@ var ruleRegistry = map[uint16]map[string]RuleFunc{
 	161: { // ReplaceVldr
 		"ColumnsValuesMustMatch":        wrap((*ReplaceVldr).ColumnsValuesMustMatch),
 		"ExplicitColumnRequired":        wrap((*ReplaceVldr).ExplicitColumnRequired),
+		"MergeRequired":                 wrap((*ReplaceVldr).MergeRequired),
+		"ReplaceRowsLimit":              wrap((*ReplaceVldr).RowsLimit),
 		"TargetColumnDoesNotExist":      wrap((*ReplaceVldr).TargetColumnDoesNotExist),
 		"TargetDatabaseDoesNotExist":    wrap((*ReplaceVldr).TargetDatabaseDoesNotExist),
 		"TargetTableDoesNotExist":       wrap((*ReplaceVldr).TargetTableDoesNotExist),
@@ -210,6 +213,7 @@ var ruleRegistry = map[uint16]map[string]RuleFunc{
 		"ValueForNotNullColumnRequired": wrap((*ReplaceVldr).ValueForNotNullColumnRequired),
 	},
 	162: { // UpdateVldr
+		"FilterColumnExists":         wrap((*UpdateVldr).FilterColumnExists),
 		"MaxAllowedUpdateRows":       wrap((*UpdateVldr).MaxAllowedUpdateRows),
 		"TargetColumnDoesNotExist":   wrap((*UpdateVldr).TargetColumnDoesNotExist),
 		"TargetDatabaseDoesNotExist": wrap((*UpdateVldr).TargetDatabaseDoesNotExist),
@@ -323,6 +327,7 @@ var ruleRegistry = map[uint16]map[string]RuleFunc{
 		"MergeRequired":           wrap((*MiscVldr).MergeRequired),
 		"PurgeLogsProhibited":     wrap((*MiscVldr).PurgeLogsProhibited),
 		"SplitRequired":           wrap((*MiscVldr).SplitRequired),
+		"SplitTicket":             wrap((*MiscVldr).SplitTicket),
 		"TruncateTableProhibited": wrap((*MiscVldr).TruncateTableProhibited),
 		"UnlockTableProhibited":   wrap((*MiscVldr).UnlockTableProhibited),
 	},

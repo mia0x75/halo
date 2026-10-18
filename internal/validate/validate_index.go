@@ -186,6 +186,23 @@ func (v *IndexCreateVldr) TargetColumnDoesNotExist(s *Subject, r *Rule) {
 // RULE: CIX-L3-004
 func (v *IndexCreateVldr) IndexOverlayNotAllowed(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+	ti := v.TableInfo(v.ci.Table.Schema.O, v.ci.Table.Name.O)
+	if ti == nil {
+		return
+	}
+	cols := indexColNames(v.ci.IndexColNames)
+	for _, name := range sortedIndexNames(ti) {
+		if name == v.ci.IndexName {
+			continue
+		}
+		if indexOverlay(cols, ti.Indexes[name].Cols) {
+			c := &Clause{
+				Description: fmt.Sprintf(r.Message, v.ci.IndexName, name),
+				Level:       uint8(r.Level),
+			}
+			s.Violations.Append(c)
+		}
+	}
 }
 
 // IndexNameDuplicate 索引名是否重复

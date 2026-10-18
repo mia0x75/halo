@@ -133,13 +133,17 @@ func (v *SelectVldr) TargetTableDoesNotExist(s *Subject, r *Rule) {
 // RULE: SEL-L3-003
 func (v *SelectVldr) TargetColumnDoesNotDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+	refs := v.tableRefs(v.sd.From)
+	reported := map[string]bool{}
 	for _, field := range v.sd.Fields.Fields {
-		if field.WildCard != nil {
-			// 如果是SELECT *或者SELECT alias.*则不处理
-			continue
+		for _, c := range collectedColumns(field.Expr) {
+			name, bad := missingColumn(refs, c)
+			if !bad || reported[name] {
+				continue
+			}
+			reported[name] = true
+			appendViolation(s, r, name)
 		}
-		// TODO:
-		fmt.Printf("Expr: %T, %+v\n", field.Expr, field.Expr)
 	}
 }
 
@@ -147,17 +151,27 @@ func (v *SelectVldr) TargetColumnDoesNotDoesNotExist(s *Subject, r *Rule) {
 // RULE: SEL-L3-004
 func (v *SelectVldr) ReturnBlobOrTextNotAllowed(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
-	fields := []*ast.SelectField{}
+	refs := v.tableRefs(v.sd.From)
+	reported := map[string]bool{}
 	for _, field := range v.sd.Fields.Fields {
-		//nolint:staticcheck // placeholder: expand wildcard columns into concrete fields
-		if field.WildCard != nil {
-			// 如果是SELECT *或者SELECT alias.*则需要展开对应表的所有字段
-			// TODO:
+		// Wildcard columns are not expanded; SEL-L2-003 already forbids them.
+		ref, ok := field.Expr.(*ast.ColumnNameExpr)
+		if !ok || ref.Name == nil {
+			continue
 		}
-		fields = append(fields, field)
-	}
-	for _, field := range fields {
-		// TODO:
-		fmt.Printf("Expr: %T, %+v\n", field.Expr, field.Expr)
+		table, ok := lookupColumn(refs, ref.Name)
+		if !ok {
+			continue
+		}
+		col := table.GetColumn(ref.Name.Name.O)
+		if col == nil || !col.Type.IsLargeObject() {
+			continue
+		}
+		name := ref.Name.Name.O
+		if reported[name] {
+			continue
+		}
+		reported[name] = true
+		appendViolation(s, r, name)
 	}
 }
