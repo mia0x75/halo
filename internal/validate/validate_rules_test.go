@@ -62,17 +62,17 @@ func TestViewCreateTargetDatabaseExists(t *testing.T) {
 
 // RULE: CVW-L3-002
 func TestViewCreateTargetViewExists(t *testing.T) {
-	t.Skip("CVW-L3-002: meta layer has no view metadata; handler is a documented no-op")
+	runRuleCases(t, "CVW-L3-002")
 }
 
 // RULE: MVW-L3-001
 func TestViewAlterTargetDatabaseExists(t *testing.T) {
-	t.Skip("MVW-L3-001: parser has no ALTER VIEW AST; handler is a documented no-op")
+	runRuleCases(t, "MVW-L3-001")
 }
 
 // RULE: MVW-L3-002
 func TestViewAlterTargetViewExists(t *testing.T) {
-	t.Skip("MVW-L3-002: parser has no ALTER VIEW AST; handler is a documented no-op")
+	runRuleCases(t, "MVW-L3-002")
 }
 
 // RULE: DVW-L3-001
@@ -82,7 +82,7 @@ func TestViewDropTargetDatabaseExists(t *testing.T) {
 
 // RULE: DVW-L3-002
 func TestViewDropTargetViewExists(t *testing.T) {
-	t.Skip("DVW-L3-002: meta layer has no view metadata; handler is a documented no-op")
+	runRuleCases(t, "DVW-L3-002")
 }
 
 // RULE: INS-L2-001

@@ -8,6 +8,8 @@ import (
 
 	"github.com/mia0x75/parser/ast"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/mia0x75/halo/internal/agent/meta"
 )
 
 // ViewCreateVldr 创建视图语句相关的审核规则
@@ -116,16 +118,19 @@ func (v *ViewCreateVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 	}
 }
 
-// TargetViewDoesNotExist 目标视图是否存在
+// TargetViewDoesNotExist 目标视图是否存在（创建时要求不存在）
 // RULE: CVW-L3-002
 func (v *ViewCreateVldr) TargetViewDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
-	// Meta has no view metadata support; cannot check view existence.
+	ref := refOf(v.cv.ViewName)
+	v.requireObjectAbsent(s, r, ref.Schema, meta.ObjectView, ref.Name)
 }
 
 // ViewAlterVldr 修改视图语句相关的审核规则
 type ViewAlterVldr struct {
 	vldr
+
+	av *ast.AlterViewStmt
 }
 
 // Enabled 当前规则组是否生效
@@ -136,21 +141,40 @@ func (v *ViewAlterVldr) Enabled() bool {
 // Validate 规则组的审核入口
 func (v *ViewAlterVldr) Validate(wg *sync.WaitGroup) {
 	defer wg.Done()
-	// The parser has no ALTER VIEW AST, so no subject ever reaches this group.
+	for _, s := range v.Ctx.Subjects {
+		av, ok := s.StmtNode.(*ast.AlterViewStmt)
+		if !ok {
+			continue
+		}
+		v.av = av
+		v.Walk(av)
+		for _, r := range v.Rules {
+			if r.Bitwise&1 != 1 {
+				continue
+			}
+			Call(v, uint16(r.VldrGroup), r.Func, s, r)
+		}
+	}
 }
 
 // TargetDatabaseDoesNotExist 目标库是否存在
 // RULE: MVW-L3-001
 func (v *ViewAlterVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
-	// Cannot implement reliably: parser has no ALTER VIEW AST; skip.
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+	for _, ti := range v.Vi {
+		if v.DatabaseInfo(ti.Database) == nil {
+			c := &Clause{Description: fmt.Sprintf(r.Message, ti.Database), Level: uint8(r.Level)}
+			s.Violations.Append(c)
+		}
+	}
 }
 
-// TargetViewDoesNotExist 目标视图是否存在
+// TargetViewDoesNotExist 目标视图是否存在（修改时要求已存在）
 // RULE: MVW-L3-002
 func (v *ViewAlterVldr) TargetViewDoesNotExist(s *Subject, r *Rule) {
-	// Cannot implement reliably: parser has no ALTER VIEW AST; skip.
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+	ref := refOf(v.av.ViewName)
+	v.requireObjectPresent(s, r, ref.Schema, meta.ObjectView, ref.Name)
 }
 
 // ViewDropVldr 删除视图语句相关的审核规则
@@ -194,9 +218,14 @@ func (v *ViewDropVldr) TargetDatabaseDoesNotExist(s *Subject, r *Rule) {
 	}
 }
 
-// TargetViewDoesNotExist 目标视图是否存在
+// TargetViewDoesNotExist 目标视图是否存在（删除时要求已存在）
 // RULE: DVW-L3-002
 func (v *ViewDropVldr) TargetViewDoesNotExist(s *Subject, r *Rule) {
-	// Meta has no view metadata support; cannot check view existence.
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
+	for _, ti := range v.Vi {
+		if ti.Table == nil {
+			continue
+		}
+		v.requireObjectPresent(s, r, ti.Database, meta.ObjectView, ti.Table.Name)
+	}
 }

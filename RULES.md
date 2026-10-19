@@ -4,7 +4,7 @@
 >
 > 数据来源：`scripts/halodb_seed_mysql.sql`（权威）、`scripts/halodb_seed_postgres.sql`、`internal/validate/registry.go`、`internal/validate/validate_*.go`。
 >
-> 规则总数 **248**，已实现 **197**，未实现 **51**（原因见「未实现规则与原因」）。
+> 规则总数 **248**，已实现 **240**，未实现 **8**（原因见「未实现规则与原因」）。
 
 ## 一、规则模型与分类维度
 
@@ -52,7 +52,7 @@
 ### 1.5 统计总览
 
 - 规则总数：248（MySQL / PG 种子一致）
-- 已实现：197；未实现：51
+- 已实现：240；未实现：8
 - 默认启用：186；默认禁用：62
 - 严重程度分布：错误 99、警告 149、提示 0
 
@@ -344,7 +344,7 @@
 
 ### CREATE VIEW（`CVW` · vldr_group 180）
 
-共 6 条，已实现 5 条。
+共 6 条，已实现 6 条。
 
 | 规则 | 严重 | 默认 | 处理器 | 目的 |
 |------|------|------|--------|------|
@@ -353,70 +353,70 @@
 | `CVW-L2-003` | 警告 | 启用 | `ViewNameMaxLength` ✅ | 新建视图时视图名最大长度 |
 | `CVW-L2-004` | 警告 | 启用 | `ViewNamePrefixRequired` ✅ | 新建视图时视图名前缀规则 |
 | `CVW-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ✅ | 新建视图时目标库必须已存在 |
-| `CVW-L3-002` | 错误 | 禁用 | `TargetViewDoesNotExist` ⚪ | 新建视图时目标视图必须不存在（未实现） |
+| `CVW-L3-002` | 错误 | 禁用 | `TargetViewDoesNotExist` ✅ | 新建视图时目标视图必须不存在 |
 
 ### ALTER VIEW（`MVW` · vldr_group 181）
 
-共 2 条，已实现 0 条。
+共 2 条，已实现 2 条。
 
 | 规则 | 严重 | 默认 | 处理器 | 目的 |
 |------|------|------|--------|------|
-| `MVW-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ⚪ | 修改视图时目标库必须已存在（未实现） |
-| `MVW-L3-002` | 错误 | 禁用 | `TargetViewDoesNotExist` ⚪ | 修改视图时目标视图必须已存在（未实现） |
+| `MVW-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ✅ | 修改视图时目标库必须已存在 |
+| `MVW-L3-002` | 错误 | 禁用 | `TargetViewDoesNotExist` ✅ | 修改视图时目标视图必须已存在 |
 
 ### DROP VIEW（`DVW` · vldr_group 182）
 
-共 2 条，已实现 1 条。
+共 2 条，已实现 2 条。
 
 | 规则 | 严重 | 默认 | 处理器 | 目的 |
 |------|------|------|--------|------|
 | `DVW-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ✅ | 删除视图时目标库必须已存在 |
-| `DVW-L3-002` | 错误 | 禁用 | `TargetViewDoesNotExist` ⚪ | 删除视图时目标视图必须已存在（未实现） |
+| `DVW-L3-002` | 错误 | 禁用 | `TargetViewDoesNotExist` ✅ | 删除视图时目标视图必须已存在 |
 
 ### CREATE FUNCTION（`CFU` · vldr_group 190）
 
-共 6 条，已实现 0 条。
+共 6 条，已实现 6 条。
 
 | 规则 | 严重 | 默认 | 处理器 | 目的 |
 |------|------|------|--------|------|
-| `CFU-L2-001` | 警告 | 启用 | `FuncNameQuilified` ⚪ | 新建函数时函数名规则（未实现） |
-| `CFU-L2-002` | 警告 | 启用 | `FuncNameLowerCaseRequired` ⚪ | 新建函数时函数名必须小写（未实现） |
-| `CFU-L2-003` | 警告 | 启用 | `FuncNameMaxLength` ⚪ | 新建函数时函数名最大长度（未实现） |
-| `CFU-L2-004` | 警告 | 启用 | `FuncNamePrefixRequired` ⚪ | 新建函数时函数名前缀规则（未实现） |
-| `CFU-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ⚪ | 新建函数时目标库必须已存在（未实现） |
-| `CFU-L3-002` | 错误 | 禁用 | `TargetFuncDoesNotExist` ⚪ | 新建函数时目标函数必须不存在（未实现） |
+| `CFU-L2-001` | 警告 | 启用 | `FuncNameQuilified` ✅ | 新建函数时函数名规则 |
+| `CFU-L2-002` | 警告 | 启用 | `FuncNameLowerCaseRequired` ✅ | 新建函数时函数名必须小写 |
+| `CFU-L2-003` | 警告 | 启用 | `FuncNameMaxLength` ✅ | 新建函数时函数名最大长度 |
+| `CFU-L2-004` | 警告 | 启用 | `FuncNamePrefixRequired` ✅ | 新建函数时函数名前缀规则 |
+| `CFU-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ✅ | 新建函数时目标库必须已存在 |
+| `CFU-L3-002` | 错误 | 禁用 | `TargetFuncDoesNotExist` ✅ | 新建函数时目标函数必须不存在 |
 
 ### ALTER FUNCTION（`MFU` · vldr_group 191）
 
-共 2 条，已实现 0 条。
+共 2 条，已实现 2 条。
 
 | 规则 | 严重 | 默认 | 处理器 | 目的 |
 |------|------|------|--------|------|
-| `MFU-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ⚪ | 修改函数时目标库必须已存在（未实现） |
-| `MFU-L3-002` | 错误 | 禁用 | `TargetFuncDoesNotExist` ⚪ | 修改函数时目标函数必须已存在（未实现） |
+| `MFU-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ✅ | 修改函数时目标库必须已存在 |
+| `MFU-L3-002` | 错误 | 禁用 | `TargetFuncDoesNotExist` ✅ | 修改函数时目标函数必须已存在 |
 
 ### DROP FUNCTION（`DFU` · vldr_group 192）
 
-共 2 条，已实现 0 条。
+共 2 条，已实现 2 条。
 
 | 规则 | 严重 | 默认 | 处理器 | 目的 |
 |------|------|------|--------|------|
-| `DFU-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ⚪ | 删除函数时目标库必须已存在（未实现） |
-| `DFU-L3-002` | 错误 | 禁用 | `TargetFuncDoesNotExist` ⚪ | 删除函数时目标函数必须已存在（未实现） |
+| `DFU-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ✅ | 删除函数时目标库必须已存在 |
+| `DFU-L3-002` | 错误 | 禁用 | `TargetFuncDoesNotExist` ✅ | 删除函数时目标函数必须已存在 |
 
 ### CREATE TRIGGER（`CTG` · vldr_group 200）
 
-共 7 条，已实现 0 条。
+共 7 条，已实现 7 条。
 
 | 规则 | 严重 | 默认 | 处理器 | 目的 |
 |------|------|------|--------|------|
-| `CTG-L2-001` | 警告 | 启用 | `TriggerNameQualified` ⚪ | 新建触发器时触发器名规则（未实现） |
-| `CTG-L2-002` | 警告 | 启用 | `TriggerNameLowerCaseRequired` ⚪ | 新建触发器时触发器名必须小写（未实现） |
-| `CTG-L2-003` | 警告 | 启用 | `TriggerNameMaxLength` ⚪ | 新建触发器时触发器名最大长度（未实现） |
-| `CTG-L2-004` | 警告 | 启用 | `TriggerPrefixRequired` ⚪ | 新建触发器时触发器名前缀规则（未实现） |
-| `CTG-L3-001` | 警告 | 禁用 | `TargetDatabaseDoesNotExist` ⚪ | 新建触发器时目标库必须已存在（未实现） |
-| `CTG-L3-002` | 警告 | 禁用 | `TargetTableDoesNotExist` ⚪ | 新建触发器时目标表必须已存在（未实现） |
-| `CTG-L3-003` | 警告 | 禁用 | `TargetTriggerDoesNotExist` ⚪ | 新建触发器时目标触发器必须不存在（未实现） |
+| `CTG-L2-001` | 警告 | 启用 | `TriggerNameQualified` ✅ | 新建触发器时触发器名规则 |
+| `CTG-L2-002` | 警告 | 启用 | `TriggerNameLowerCaseRequired` ✅ | 新建触发器时触发器名必须小写 |
+| `CTG-L2-003` | 警告 | 启用 | `TriggerNameMaxLength` ✅ | 新建触发器时触发器名最大长度 |
+| `CTG-L2-004` | 警告 | 启用 | `TriggerPrefixRequired` ✅ | 新建触发器时触发器名前缀规则 |
+| `CTG-L3-001` | 警告 | 禁用 | `TargetDatabaseDoesNotExist` ✅ | 新建触发器时目标库必须已存在 |
+| `CTG-L3-002` | 警告 | 禁用 | `TargetTableDoesNotExist` ✅ | 新建触发器时目标表必须已存在 |
+| `CTG-L3-003` | 警告 | 禁用 | `TargetTriggerDoesNotExist` ✅ | 新建触发器时目标触发器必须不存在 |
 
 ### ALTER TRIGGER（`MTG` · vldr_group 201）
 
@@ -430,75 +430,75 @@
 
 ### DROP TRIGGER（`DTG` · vldr_group 202）
 
-共 3 条，已实现 0 条。
+共 3 条，已实现 2 条。
 
 | 规则 | 严重 | 默认 | 处理器 | 目的 |
 |------|------|------|--------|------|
-| `DTG-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ⚪ | 删除触发器时目标库必须已存在（未实现） |
+| `DTG-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ✅ | 删除触发器时目标库必须已存在 |
 | `DTG-L3-002` | 错误 | 禁用 | `TargetTableDoesNotExist` ⚪ | 删除触发器时目标表必须已存在（未实现） |
-| `DTG-L3-003` | 错误 | 禁用 | `TargetTriggerDoesNotExist` ⚪ | 删除触发器时目标触发器必须已存在（未实现） |
+| `DTG-L3-003` | 错误 | 禁用 | `TargetTriggerDoesNotExist` ✅ | 删除触发器时目标触发器必须已存在 |
 
 ### CREATE EVENT（`CEV` · vldr_group 210）
 
-共 6 条，已实现 0 条。
+共 6 条，已实现 6 条。
 
 | 规则 | 严重 | 默认 | 处理器 | 目的 |
 |------|------|------|--------|------|
-| `CEV-L2-001` | 警告 | 启用 | `EventNameQualified` ⚪ | 创建事件时事件名规则（未实现） |
-| `CEV-L2-002` | 警告 | 启用 | `EventNameLowerCaseRequired` ⚪ | 创建事件时事件名必须小写（未实现） |
-| `CEV-L2-003` | 警告 | 启用 | `EventNameMaxLength` ⚪ | 创建事件时事件名最大长度（未实现） |
-| `CEV-L2-004` | 警告 | 启用 | `EventNamePrefixRequired` ⚪ | 创建事件时事件名前缀规则（未实现） |
-| `CEV-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ⚪ | 创建事件时目标库必须已存在（未实现） |
-| `CEV-L3-002` | 错误 | 禁用 | `TargetEventDoesNotExist` ⚪ | 创建事件时目标事件必须已存在（未实现） |
+| `CEV-L2-001` | 警告 | 启用 | `EventNameQualified` ✅ | 创建事件时事件名规则 |
+| `CEV-L2-002` | 警告 | 启用 | `EventNameLowerCaseRequired` ✅ | 创建事件时事件名必须小写 |
+| `CEV-L2-003` | 警告 | 启用 | `EventNameMaxLength` ✅ | 创建事件时事件名最大长度 |
+| `CEV-L2-004` | 警告 | 启用 | `EventNamePrefixRequired` ✅ | 创建事件时事件名前缀规则 |
+| `CEV-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ✅ | 创建事件时目标库必须已存在 |
+| `CEV-L3-002` | 错误 | 禁用 | `TargetEventDoesNotExist` ✅ | 创建事件时目标事件必须已存在 |
 
 ### ALTER EVENT（`MEV` · vldr_group 211）
 
-共 2 条，已实现 0 条。
+共 2 条，已实现 2 条。
 
 | 规则 | 严重 | 默认 | 处理器 | 目的 |
 |------|------|------|--------|------|
-| `MEV-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ⚪ | 修改事件时目标库必须已存在（未实现） |
-| `MEV-L3-002` | 错误 | 禁用 | `TargetEventDoesNotExist` ⚪ | 修改事件时目标事件必须已存在（未实现） |
+| `MEV-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ✅ | 修改事件时目标库必须已存在 |
+| `MEV-L3-002` | 错误 | 禁用 | `TargetEventDoesNotExist` ✅ | 修改事件时目标事件必须已存在 |
 
 ### DROP EVENT（`DEV` · vldr_group 212）
 
-共 2 条，已实现 0 条。
+共 2 条，已实现 2 条。
 
 | 规则 | 严重 | 默认 | 处理器 | 目的 |
 |------|------|------|--------|------|
-| `DEV-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ⚪ | 删除事件时目标库必须已存在（未实现） |
-| `DEV-L3-002` | 错误 | 禁用 | `TargetEventDoesNotExist` ⚪ | 删除事件时目标事件必须已存在（未实现） |
+| `DEV-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ✅ | 删除事件时目标库必须已存在 |
+| `DEV-L3-002` | 错误 | 禁用 | `TargetEventDoesNotExist` ✅ | 删除事件时目标事件必须已存在 |
 
 ### CREATE PROCEDURE（`CSP` · vldr_group 220）
 
-共 6 条，已实现 0 条。
+共 6 条，已实现 6 条。
 
 | 规则 | 严重 | 默认 | 处理器 | 目的 |
 |------|------|------|--------|------|
-| `CSP-L2-001` | 警告 | 启用 | `ProcNameQualified` ⚪ | 新建存储过程时存储过程名规则（未实现） |
-| `CSP-L2-002` | 警告 | 启用 | `ProcNameLowerCaseRequired` ⚪ | 新建存储过程时存储过程名必须小写（未实现） |
-| `CSP-L2-003` | 警告 | 启用 | `ProcNameMaxLength` ⚪ | 新建存储过程时存储过程名最大长度（未实现） |
-| `CSP-L2-004` | 警告 | 启用 | `ProcNamePrefixRequired` ⚪ | 新建存储过程时存储过程名前缀规则（未实现） |
-| `CSP-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ⚪ | 新建存储过程时目标库必须已存在（未实现） |
-| `CSP-L3-002` | 错误 | 禁用 | `TargetProcDoesNotExist` ⚪ | 新建存储过程时目标存储过程必须不存在（未实现） |
+| `CSP-L2-001` | 警告 | 启用 | `ProcNameQualified` ✅ | 新建存储过程时存储过程名规则 |
+| `CSP-L2-002` | 警告 | 启用 | `ProcNameLowerCaseRequired` ✅ | 新建存储过程时存储过程名必须小写 |
+| `CSP-L2-003` | 警告 | 启用 | `ProcNameMaxLength` ✅ | 新建存储过程时存储过程名最大长度 |
+| `CSP-L2-004` | 警告 | 启用 | `ProcNamePrefixRequired` ✅ | 新建存储过程时存储过程名前缀规则 |
+| `CSP-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ✅ | 新建存储过程时目标库必须已存在 |
+| `CSP-L3-002` | 错误 | 禁用 | `TargetProcDoesNotExist` ✅ | 新建存储过程时目标存储过程必须不存在 |
 
 ### ALTER PROCEDURE（`MSP` · vldr_group 221）
 
-共 2 条，已实现 0 条。
+共 2 条，已实现 2 条。
 
 | 规则 | 严重 | 默认 | 处理器 | 目的 |
 |------|------|------|--------|------|
-| `MSP-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ⚪ | 修改存储过程时目标库必须已存在（未实现） |
-| `MSP-L3-002` | 错误 | 禁用 | `TargetProcDoesNotExist` ⚪ | 修改存储过程时目标存储过程必须已存在（未实现） |
+| `MSP-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ✅ | 修改存储过程时目标库必须已存在 |
+| `MSP-L3-002` | 错误 | 禁用 | `TargetProcDoesNotExist` ✅ | 修改存储过程时目标存储过程必须已存在 |
 
 ### DROP PROCEDURE（`DSP` · vldr_group 222）
 
-共 2 条，已实现 0 条。
+共 2 条，已实现 2 条。
 
 | 规则 | 严重 | 默认 | 处理器 | 目的 |
 |------|------|------|--------|------|
-| `DSP-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ⚪ | 删除存储过程时目标库必须已存在（未实现） |
-| `DSP-L3-002` | 错误 | 禁用 | `TargetProcDoesNotExist` ⚪ | 删除存储过程时目标存储过程必须已存在（未实现） |
+| `DSP-L3-001` | 错误 | 禁用 | `TargetDatabaseDoesNotExist` ✅ | 删除存储过程时目标库必须已存在 |
+| `DSP-L3-002` | 错误 | 禁用 | `TargetProcDoesNotExist` ✅ | 删除存储过程时目标存储过程必须已存在 |
 
 ### 跨语句 / 工单（`MSC` · vldr_group 230）
 
@@ -518,38 +518,29 @@
 
 ## 三、未实现规则与原因
 
-共 **51** 条未实现，分四类：
+共 **8** 条未实现，分三类：
 
-### 3.1 解析器不支持该语句（45 条）
+### 3.1 MySQL 无该语句：ALTER TRIGGER（3 条）
 
-`mia0x75/parser` 当前 **没有** 存储程序（函数 / 触发器 / 事件 / 存储过程）与 `ALTER VIEW` 的 AST 节点，因此对应校验器收不到任何语句，处理器永远不会被调用。
+MySQL **没有** `ALTER TRIGGER` 语法，`mia0x75/parser` 也没有对应 AST，因此 `MTG` 组收不到任何语句。处理器保留为文档化的空实现。
 
 | 语句类型 | 未实现规则 | 条数 |
 |----------|------------|------|
-| CREATE FUNCTION `CFU` | `CFU-L2-001..004`、`CFU-L3-001/002` | 6 |
-| ALTER FUNCTION `MFU` | `MFU-L3-001/002` | 2 |
-| DROP FUNCTION `DFU` | `DFU-L3-001/002` | 2 |
-| CREATE TRIGGER `CTG` | `CTG-L2-001..004`、`CTG-L3-001..003` | 7 |
 | ALTER TRIGGER `MTG` | `MTG-L3-001..003` | 3 |
-| DROP TRIGGER `DTG` | `DTG-L3-001..003` | 3 |
-| CREATE EVENT `CEV` | `CEV-L2-001..004`、`CEV-L3-001/002` | 6 |
-| ALTER EVENT `MEV` | `MEV-L3-001/002` | 2 |
-| DROP EVENT `DEV` | `DEV-L3-001/002` | 2 |
-| CREATE PROCEDURE `CSP` | `CSP-L2-001..004`、`CSP-L3-001/002` | 6 |
-| ALTER PROCEDURE `MSP` | `MSP-L3-001/002` | 2 |
-| DROP PROCEDURE `DSP` | `DSP-L3-001/002` | 2 |
-| ALTER VIEW `MVW` | `MVW-L3-001/002` | 2 |
 
-**实现条件**：需扩展 `mia0x75/parser` 的语法与 AST 并升级 `go.mod` 依赖（涉及外部仓库改动），完成后再在 `internal/validate` 补处理器与 `Walk` 分支。
+**实现条件**：当目标方言（如 PG）引入 `ALTER TRIGGER` 且有对应 AST 时再补处理器。
 
-### 3.2 元数据缺失：视图存在性（2 条）
+**状态：待日后处理**（本轮无法实现，保留空实现，不删除种子行）。
+
+### 3.2 AST 不携带目标表：DROP TRIGGER（1 条）
 
 | 规则 | 说明 |
 |------|------|
-| `CVW-L3-002` 新建视图时目标视图必须不存在 | 目标库元数据只加载表 / 列 / 索引，没有视图清单，无法判断视图是否存在。 |
-| `DVW-L3-002` 删除视图时目标视图必须已存在 | 同上。 |
+| `DTG-L3-002` 删除触发器时目标表必须已存在 | MySQL `DROP TRIGGER` 只写触发器名（`*ast.DropTriggerStmt` 仅含 `Name`），不带表引用，无法判定目标表。 |
 
-**实现条件**：`internal/agent/dialect` 增加读取 `information_schema.VIEWS`（MySQL）/ `pg_views`（PG）的元数据加载。
+**实现条件**：需在元数据中维护「触发器 → 所属表」映射，或目标方言的 `DROP TRIGGER` 携带表名。
+
+**状态：待日后处理**（本轮无法实现，保留空实现，不删除种子行）。
 
 ### 3.3 语义已由其它规则覆盖（4 条）
 
@@ -561,6 +552,15 @@
 | `RPL-L2-003` `MergeRequired` | REPLACE 是否需要合并 | `MSC-L1-004` |
 | `UPD-L3-004` `FilterColumnExists` | 条件限定列必须已存在 | `UPD-L3-003` 已同时校验 SET 与 WHERE 列 |
 | `MSC-L0-001` `SplitTicket` | 是否拆分工单 | `MSC-L1-008` 禁止同时出现 DDL、DML |
+
+### 3.4 已补齐（本轮）
+
+自 `mia0x75/parser` 升级到 `v0.2.0` 后，以下 43 条已实现：
+
+- 存储程序命名 + 存在性：`CFU`/`MFU`/`DFU`（函数）、`CSP`/`MSP`/`DSP`（存储过程）、`CTG`/`DTG`（触发器）、`CEV`/`MEV`/`DEV`（事件）。
+- `ALTER VIEW`：`MVW-L3-001/002`。
+- 视图存在性：`CVW-L3-002`、`DVW-L3-002`（`internal/agent` 新增 `LoadObjects`，经 `information_schema` / `pg_proc` / `pg_trigger` 读取对象清单）。
+- SELECT 过滤列：`SEL-L3-003` 由仅校验选择列表扩展为同时校验 `WHERE` / `JOIN ON` / `GROUP BY` / `ORDER BY` / `HAVING`（承接上游被移除的 `SEL-L3-005`）。
 
 ## 四、缺失规则分析
 
@@ -582,31 +582,21 @@
 | `MTB-L3-011` 仅允许一个时间戳列 | → `MTB-L3-007` MaxAllowedTimestampCount |
 | `MTB-L3-012` 列名是否重复 | → `MTB-L3-005` ColumnNameDuplicate |
 | `MTB-L3-019` 删索引时索引必须存在 | 合并进 `MTB-L3-017` IndexDoesNotExist |
-| `SEL-L3-005` SelectFilterColumnExists | **未见等价实现**（见 4.2 第 1 项） |
+| `SEL-L3-005` SelectFilterColumnExists | → 能力并入 `SEL-L3-003`（本轮扩展过滤列校验） |
 
 **新增的 8 条：** `CDB-L2-007`、`MDB-L2-004`、`DDB-L2-001`、`INS-L2-003`、`INS-L3-006`、`RPL-L2-003`、`MSC-L0-001`、`MTB-L3-025`。
 
-> 结论：除 `SEL-L3-005` 外，其余删除项都有等价承接，不构成能力缺失。
+> 结论：删除项都有等价承接，不构成能力缺失。
 
 ### 4.2 真实缺口（建议补齐）
 
-1. **SELECT 的过滤列未校验（高优先级）**
-   `SEL-L3-003` 只遍历选择列表（`Fields`），不检查 `WHERE` / `JOIN ON` / `GROUP BY` / `ORDER BY` / `HAVING` 中的列是否存在；上游 `SEL-L3-005` 被移除后无人接管。
-   参照：`DEL-L3-004`、`UPD-L3-003` 都已覆盖各自的过滤列，SELECT 是唯一缺口。
-   *建议*：恢复 `SEL-L3-005`，或在 `SEL-L3-003` 内扩展过滤列校验。
-
-2. **PostgreSQL 语句完全未纳入规则引擎（高优先级）**
+1. **PostgreSQL 语句完全未纳入规则引擎（高优先级）**
    需求前提是 MySQL + PostgreSQL 双目标库，但 `internal/validate` 仅处理 MySQL AST（`mia0x75/parser`）；PG 语句（经 `pgplex/pgparser` 解析）不经过任何规则。当前只有语法分析层（`internal/analyzer`）支持 PG。
    *建议*：明确 PG 审核范围，或补充 PG 版校验器。
 
-3. **存储程序族整体未实现（43 条，见 3.1）**
-   函数、触发器、事件、存储过程的新建/修改/删除共 43 条规则全部为空实现。
+2. **ALTER TRIGGER（`MTG`，3 条）与 `DTG-L3-002` 不可达**（见 3.1 / 3.2）
 
-4. **ALTER VIEW 未实现（2 条，见 3.1）**
-
-5. **视图存在性缺失（2 条，见 3.2）**
-
-6. **管理/会话类语句无规则**
+3. **管理/会话类语句无规则**
    以下语句有 AST 但无对应规则：`CREATE/ALTER/DROP USER`、`GRANT/REVOKE`、`SET`、`PREPARE/EXECUTE/DEALLOCATE`、`LOAD DATA`、`ANALYZE TABLE`、`BEGIN/COMMIT/ROLLBACK`。其中高风险项已由 `MSC-L1-*` 禁止（`LOCK/FLUSH/TRUNCATE/PURGE/UNLOCK/KILL`）。
 
 ### 4.3 对象级覆盖核对
@@ -618,9 +608,9 @@
 | 列 | `CTB-L2-010..012`/`MTB-L2-005..007` | `INS/UPD/RPL-L3-003`、`MTB-L3-008` | 完整 |
 | 索引 | `CIX-L2-002..005`/`CTB-L2-032..036` | `CIX-L3-005`、`MTB-L3-013`、`RIX-L3-003` | 完整 |
 | 唯一索引 / 外键 / 全文索引 / 主键 | `CTB/MTB-L2-02x..03x` | `MTB-L3-018/020/022/023` | 完整 |
-| 视图 | `CVW-L2-001..004` | 无（见 3.2） | **不完整** |
-| 存储程序 | `CFU/CTG/CEV/CSP-L2-*` | `*-L3-*` | **不完整（未实现）** |
-| SELECT 过滤列 | — | 无（见 4.2.1） | **不完整** |
+| 视图 | `CVW-L2-001..004` | `CVW-L3-002`/`MVW-L3-002`/`DVW-L3-002` | 完整 |
+| 存储程序 | `CFU/CTG/CEV/CSP-L2-*` | `CFU/CTG/CEV/CSP-L3-*` 等 | 完整（MTG/DTG-L3-002 除外，见 3.1/3.2） |
+| SELECT 过滤列 | — | `SEL-L3-003`（含 WHERE/JOIN/GROUP/ORDER/HAVING） | 完整 |
 
 ## 五、已知数据问题
 

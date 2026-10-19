@@ -135,14 +135,51 @@ func (v *SelectVldr) TargetColumnDoesNotDoesNotExist(s *Subject, r *Rule) {
 	log.Debugf("[D] RULE: %s, %s", r.Name, r.Func)
 	refs := v.tableRefs(v.sd.From)
 	reported := map[string]bool{}
+
+	// Output aliases may be referenced by HAVING/ORDER BY/GROUP BY; an unqualified
+	// name matching an alias is an output reference, not a base column.
+	aliases := map[string]bool{}
 	for _, field := range v.sd.Fields.Fields {
-		for _, c := range collectedColumns(field.Expr) {
+		if field.AsName.O != "" {
+			aliases[field.AsName.O] = true
+		}
+	}
+
+	check := func(node ast.Node, filterAlias bool) {
+		for _, c := range collectedColumns(node) {
+			if filterAlias && c.Table.O == "" && aliases[c.Name.O] {
+				continue
+			}
 			name, bad := missingColumn(refs, c)
 			if !bad || reported[name] {
 				continue
 			}
 			reported[name] = true
 			appendViolation(s, r, name)
+		}
+	}
+
+	for _, field := range v.sd.Fields.Fields {
+		check(field.Expr, false)
+	}
+	// FROM also carries the JOIN ... ON conditions.
+	if v.sd.From != nil {
+		check(v.sd.From, false)
+	}
+	if v.sd.Where != nil {
+		check(v.sd.Where, false)
+	}
+	if v.sd.Having != nil {
+		check(v.sd.Having, true)
+	}
+	if v.sd.GroupBy != nil {
+		for _, item := range v.sd.GroupBy.Items {
+			check(item.Expr, true)
+		}
+	}
+	if v.sd.OrderBy != nil {
+		for _, item := range v.sd.OrderBy.Items {
+			check(item.Expr, true)
 		}
 	}
 }

@@ -58,6 +58,9 @@ type Context struct {
 	Cluster   *domain.Cluster          // 目标群集
 	Databases []models.Database        // 目标群集所有的用户数据库
 	Tables    map[string][]*meta.Table // 目标群集上目标数据库的元数据
+	// Objects 是各库的用户对象清单（视图/函数/存储过程/触发器/事件），供存在性规则
+	// 使用。目标库未返回元数据时对应库为 nil，表示「未知」而非「不存在」。
+	Objects map[string]*meta.Objects
 	// Rules is the rule set the engine runs against. Run fills it once from
 	// the cache; RunRegistry distributes it to each group.
 	Rules []*Rule
@@ -126,6 +129,9 @@ func Run(stmts []*models.Statement, cluster *models.Cluster, ticket *models.Tick
 	exec := agent.LocalExecutor{}
 	var err error
 	if ctx.Tables, err = exec.LoadTables(context.Background(), target, passwd(target)); err != nil {
+		fmt.Println(err)
+	}
+	if ctx.Objects, err = exec.LoadObjects(context.Background(), target, passwd(target)); err != nil {
 		fmt.Println(err)
 	}
 	if databases, derr := exec.Databases(context.Background(), target, passwd(target)); derr != nil {
@@ -474,6 +480,17 @@ func (v *vldr) Walk(node ast.Node) {
 			Table:    &TableEntry{Name: x.ViewName.Name.O},
 		}
 		v.appendVisitInfo(vi)
+	case *ast.AlterViewStmt:
+		// Same rationale as CREATE VIEW: the target is the view itself.
+		database := x.ViewName.Schema.O
+		if database == "" {
+			database = v.Ctx.Ticket.Database
+		}
+		vi := VisitInfo{
+			Database: database,
+			Table:    &TableEntry{Name: x.ViewName.Name.O},
+		}
+		v.appendVisitInfo(vi)
 	case *ast.DropDatabaseStmt:
 		vi := VisitInfo{
 			Database: x.Name,
@@ -702,6 +719,45 @@ func (v *vldr) DatabaseInfo(name string) *models.Database {
 		}
 	}
 	return nil
+}
+
+// objectDB resolves the database a DDL object belongs to, falling back to the
+// ticket database when the statement omits the schema qualifier.
+func (v *vldr) objectDB(schema string) string {
+	if schema != "" {
+		return schema
+	}
+	if v.Ctx.Ticket != nil {
+		return v.Ctx.Ticket.Database
+	}
+	return ""
+}
+
+// lookupObject reports whether name exists as kind in the already-resolved
+// database. known is false when the target object metadata was not loaded,
+// letting callers skip the check instead of treating an unknown object as absent.
+func (v *vldr) lookupObject(database string, kind meta.ObjectKind, name string) (exists, known bool) {
+	objects, ok := v.Ctx.Objects[database]
+	if !ok || objects == nil {
+		return false, false
+	}
+	return objects.Has(kind, name), true
+}
+
+// objectRef is the common shape of the routine/view DDL nodes: a possibly
+// schema-qualified name.
+type objectRef struct {
+	Schema string
+	Name   string
+}
+
+// refOf extracts the schema and bare name from a parser TableName, tolerating
+// a nil node.
+func refOf(name *ast.TableName) objectRef {
+	if name == nil {
+		return objectRef{}
+	}
+	return objectRef{Schema: name.Schema.O, Name: name.Name.O}
 }
 
 // Call runs the rule handler registered for (group, name) against validator v.

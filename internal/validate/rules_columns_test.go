@@ -98,9 +98,14 @@ func TestRulesColumns_Unit(t *testing.T) {
 		{"DEL-L3-004", "delete from users where id=1;", true},
 		{"DEL-L3-004", "delete from users where c9=1;", false},
 
-		// SEL-L3-003 返回列必须存在
+		// SEL-L3-003 返回列与过滤列必须存在 (WHERE / JOIN ON / GROUP BY / ORDER BY / HAVING)
 		{"SEL-L3-003", "select id from users where id=1;", true},
 		{"SEL-L3-003", "select c9 from users where id=1;", false},
+		{"SEL-L3-003", "select id from users where c9=1;", false},
+		{"SEL-L3-003", "select id from users where id=1 order by c9;", false},
+		{"SEL-L3-003", "select id from users where id=1 group by c9;", false},
+		{"SEL-L3-003", "select id from users where id=1 having c9 > 1;", false},
+		{"SEL-L3-003", "select id as x from users where id=1 order by x;", true},
 
 		// SEL-L3-004 禁止返回 BLOB/TEXT (bio, note 为 TEXT)
 		{"SEL-L3-004", "select id, name from users where id=1;", true},

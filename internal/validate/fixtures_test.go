@@ -187,5 +187,16 @@ func unitContext() *validate.Context {
 				},
 			},
 		},
+		// Pre-existing user objects match the integration fixture's halo_* set,
+		// so the existence rules have both an "exists" and a "missing" branch.
+		Objects: map[string]*meta.Objects{
+			"starwars": {
+				Views:      map[string]struct{}{"halo_v": {}},
+				Functions:  map[string]struct{}{"halo_fn": {}},
+				Procedures: map[string]struct{}{"halo_proc": {}},
+				Triggers:   map[string]struct{}{"halo_trg": {}},
+				Events:     map[string]struct{}{"halo_ev": {}},
+			},
+		},
 	}
 }

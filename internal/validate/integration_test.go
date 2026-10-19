@@ -69,6 +69,29 @@ func ensureFixture(t *testing.T, a *app.App) {
 			create: "CREATE TABLE IF NOT EXISTS starwars.idx_many (id INT, KEY index_1(id), KEY index_2(id), KEY index_3(id), KEY index_4(id), KEY index_5(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='idx_many'",
 			drop:   "DROP TABLE IF EXISTS starwars.idx_many",
 		},
+		// User objects exercise the existence rules (CVW/DVW/CFU/MFU/DFU/CTG/
+		// DTG/CEV/MEV/DEV/CSP/MSP/DSP). Routines use a single-statement body so
+		// the executor's statement splitter does not need a client delimiter.
+		{
+			create: "CREATE OR REPLACE VIEW starwars.halo_v AS SELECT id FROM starwars.t1",
+			drop:   "DROP VIEW IF EXISTS starwars.halo_v",
+		},
+		{
+			create: "CREATE FUNCTION starwars.halo_fn() RETURNS INT DETERMINISTIC RETURN 1",
+			drop:   "DROP FUNCTION IF EXISTS starwars.halo_fn",
+		},
+		{
+			create: "CREATE PROCEDURE starwars.halo_proc() SELECT 1",
+			drop:   "DROP PROCEDURE IF EXISTS starwars.halo_proc",
+		},
+		{
+			create: "CREATE TRIGGER starwars.halo_trg BEFORE INSERT ON starwars.t1 FOR EACH ROW SET NEW.id = NEW.id",
+			drop:   "DROP TRIGGER IF EXISTS starwars.halo_trg",
+		},
+		{
+			create: "CREATE EVENT starwars.halo_ev ON SCHEDULE EVERY 1 DAY DO SELECT 1",
+			drop:   "DROP EVENT IF EXISTS starwars.halo_ev",
+		},
 	}
 
 	exec := agent.LocalExecutor{}
@@ -163,6 +186,9 @@ func buildContext(t *testing.T) *validate.Context {
 		for _, d := range databases {
 			ctx.Databases = append(ctx.Databases, models.Database{Name: d.Name, Charset: d.Charset, Collate: d.Collate})
 		}
+	}
+	if objects, err := exec.LoadObjects(context.Background(), target, passwd(cluster)); err == nil {
+		ctx.Objects = objects
 	}
 	return ctx
 }
@@ -806,8 +832,16 @@ var viewCases = []RuleTestCase{
 	{"CVW-L2-004", "create view v_concrete_view as select * from t;", false},            // ViewCreateViewNamePrefixRequired
 	{"CVW-L3-001", "create view starwars.v_ok as select 1;", true},                      // 目标库存在
 	{"CVW-L3-001", "create view nodb.v_bad as select 1;", false},                        // 目标库不存在
+	{"CVW-L3-002", "create view starwars.v_new as select 1;", true},                     // 视图不存在
+	{"CVW-L3-002", "create view starwars.halo_v as select 1;", false},                   // 视图已存在
+	{"MVW-L3-001", "alter view starwars.halo_v as select 1;", true},                     // 目标库存在
+	{"MVW-L3-001", "alter view nodb.v_bad as select 1;", false},                         // 目标库不存在
+	{"MVW-L3-002", "alter view starwars.halo_v as select 1;", true},                     // 视图存在
+	{"MVW-L3-002", "alter view starwars.no_v as select 1;", false},                      // 视图不存在
 	{"DVW-L3-001", "drop view starwars.v_ok;", true},                                    // 目标库存在
 	{"DVW-L3-001", "drop view nodb.v_bad;", false},                                      // 目标库不存在
+	{"DVW-L3-002", "drop view starwars.halo_v;", true},                                  // 视图存在
+	{"DVW-L3-002", "drop view starwars.no_v;", false},                                   // 视图不存在
 }
 
 // TestViewCreateTargetDatabaseExists 目标库是否存在
