@@ -116,13 +116,27 @@ cover: test
 # 项目构建
 build: fmt
 	@echo "$(CGREEN)Building ...$(CEND)"
-	@bash ./genver.sh $(GO_VERSION_MIN)
-	@ret=0 && for pkg in $$(go list -f '{{if (eq .Name "main")}}{{.ImportPath}}{{end}}' ./...); do \
+	@P=github.com/mia0x75/halo/internal/app; \
+	git="$$(git log --date=iso --pretty=format:'%cd' -1 2>/dev/null) $$(git describe --tags --always 2>/dev/null)"; \
+	[ -n "$$git" ] || git="not a git repo"; \
+	version="$$(cat VERSION 2>/dev/null || echo 0.0.0)"; \
+	build="$$(cat BUILD 2>/dev/null || echo 0)"; \
+	echo $$((build + 1)) > BUILD; \
+	branch="$$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"; \
+	kernel="$$(uname -r 2>/dev/null || echo unknown)"; \
+	[ -r /etc/os-release ] && . /etc/os-release; \
+	distro="$${PRETTY_NAME:-Unknown}"; \
+	compile="$$(date '+%F %T %z') by $$(go version 2>/dev/null || echo 'go not found')"; \
+	ldflags="-X \"$$P.Version=$$version.$$build\""; \
+	for kv in "Git:$$git" "Compile:$$compile" "Branch:$$branch" "Distro:$$distro" "Kernel:$$kernel"; do \
+		ldflags="$$ldflags -X \"$$P.$${kv%%:*}=$${kv#*:}\""; \
+	done; \
+	ret=0; \
+	for pkg in $$(go list -f '{{if (eq .Name "main")}}{{.ImportPath}}{{end}}' ./...); do \
 		bin=$$(basename $$pkg); \
-		echo "building $$pkg -> bin/$$bin"; \
-		GOOS=linux GOARCH=amd64 go build -trimpath -mod=readonly -ldflags="-s -w" -race -o bin/$$bin $$pkg || ret=$$? ; \
-	done ; exit $$ret
-	@echo "build Success!"
+		GOOS=linux GOARCH=amd64 go build -trimpath -mod=readonly -ldflags "$$ldflags -s -w" -race -o bin/$$bin $$pkg || ret=$$? ; \
+	done; exit $$ret
+	@echo "$(CGREEN)build Success!$(CEND)"
 
 # 安装
 install: build
