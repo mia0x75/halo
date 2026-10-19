@@ -17,6 +17,9 @@ type Executor interface {
 	// LoadTables 拉取表级元数据，外层键为库名。不传库名时拉取实例全部用户库，
 	// validate/ 的 "*" 语义由它承接。
 	LoadTables(ctx context.Context, c *domain.Cluster, password string, databases ...string) (map[string][]*meta.Table, error)
+	// LoadObjects 拉取用户对象清单（视图/函数/存储过程/触发器/事件），外层键为库名，
+	// 供存在性规则使用。
+	LoadObjects(ctx context.Context, c *domain.Cluster, password string, databases ...string) (map[string]*meta.Objects, error)
 	// Databases 列举目标实例的用户库及其默认字符集/排序规则。
 	Databases(ctx context.Context, c *domain.Cluster, password string) ([]*meta.Database, error)
 }

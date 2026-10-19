@@ -32,6 +32,17 @@ func (LocalExecutor) LoadTables(ctx context.Context, c *domain.Cluster, password
 	return target.LoadTables(ctx, databases...)
 }
 
+// LoadObjects 直连目标库拉取用户对象清单。
+func (LocalExecutor) LoadObjects(ctx context.Context, c *domain.Cluster, password string, databases ...string) (map[string]*meta.Objects, error) {
+	target, err := openTarget(ctx, c, password)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = target.Close() }()
+
+	return target.LoadObjects(ctx, databases...)
+}
+
 // Query 直连目标库执行只读查询。
 func (LocalExecutor) Query(ctx context.Context, c *domain.Cluster, password, query string) ([]map[string]string, error) {
 	target, err := openTarget(ctx, c, password)

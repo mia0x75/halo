@@ -12,6 +12,9 @@ import (
 type Dialect interface {
 	// LoadTables 返回单库完整的表级元数据，database 为空时取当前库。
 	LoadTables(ctx context.Context, db *sqlx.DB, database string) ([]*meta.Table, error)
+	// LoadObjects 返回单库用户对象（视图/函数/存储过程/触发器/事件）的名字集合，
+	// 供存在性规则使用。database 为空时取当前库。
+	LoadObjects(ctx context.Context, db *sqlx.DB, database string) (*meta.Objects, error)
 	// Databases 返回实例内的用户库/模式及其默认字符集与排序规则。
 	Databases(ctx context.Context, db *sqlx.DB) ([]*meta.Database, error)
 	// QuoteIdent 按方言加标识符引用，规避保留字冲突。

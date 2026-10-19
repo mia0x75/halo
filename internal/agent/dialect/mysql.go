@@ -151,6 +151,37 @@ func (MySQL) loadIndexes(ctx context.Context, db *sqlx.DB, database string) (map
 	return indexes, nil
 }
 
+// LoadObjects 读取 information_schema 的对象清单。任一子查询失败即整体失败，
+// 让上层把元数据视为「不可用」而非「对象不存在」，避免误报。
+func (MySQL) LoadObjects(ctx context.Context, db *sqlx.DB, database string) (*meta.Objects, error) {
+	objects := meta.NewObjects()
+	queries := []struct {
+		kind  meta.ObjectKind
+		query string
+	}{
+		{meta.ObjectView, "SELECT TABLE_NAME AS name FROM information_schema.VIEWS " +
+			"WHERE TABLE_SCHEMA = COALESCE(NULLIF(?, ''), DATABASE())"},
+		{meta.ObjectFunction, "SELECT ROUTINE_NAME AS name FROM information_schema.ROUTINES " +
+			"WHERE ROUTINE_TYPE = 'FUNCTION' AND ROUTINE_SCHEMA = COALESCE(NULLIF(?, ''), DATABASE())"},
+		{meta.ObjectProcedure, "SELECT ROUTINE_NAME AS name FROM information_schema.ROUTINES " +
+			"WHERE ROUTINE_TYPE = 'PROCEDURE' AND ROUTINE_SCHEMA = COALESCE(NULLIF(?, ''), DATABASE())"},
+		{meta.ObjectTrigger, "SELECT TRIGGER_NAME AS name FROM information_schema.TRIGGERS " +
+			"WHERE TRIGGER_SCHEMA = COALESCE(NULLIF(?, ''), DATABASE())"},
+		{meta.ObjectEvent, "SELECT EVENT_NAME AS name FROM information_schema.EVENTS " +
+			"WHERE EVENT_SCHEMA = COALESCE(NULLIF(?, ''), DATABASE())"},
+	}
+	for _, q := range queries {
+		var names []string
+		if err := db.SelectContext(ctx, &names, q.query, database); err != nil {
+			return nil, fmt.Errorf("query mysql %s objects: %w", q.kind, err)
+		}
+		for _, name := range names {
+			objects.Add(q.kind, name)
+		}
+	}
+	return objects, nil
+}
+
 type mysqlDatabaseRow struct {
 	Name    string `db:"SCHEMA_NAME"`
 	Charset string `db:"DEFAULT_CHARACTER_SET_NAME"`

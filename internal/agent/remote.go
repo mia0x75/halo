@@ -28,6 +28,11 @@ func (RemoteExecutor) LoadTables(ctx context.Context, c *domain.Cluster, passwor
 	return nil, ErrNotImplemented
 }
 
+// LoadObjects 暂未实现。
+func (RemoteExecutor) LoadObjects(ctx context.Context, c *domain.Cluster, password string, databases ...string) (map[string]*meta.Objects, error) {
+	return nil, ErrNotImplemented
+}
+
 // Databases 暂未实现。
 func (RemoteExecutor) Databases(ctx context.Context, c *domain.Cluster, password string) ([]*meta.Database, error) {
 	return nil, ErrNotImplemented

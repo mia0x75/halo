@@ -158,6 +158,41 @@ func (Postgres) loadIndexes(ctx context.Context, db *sqlx.DB, database string) (
 	return indexes, nil
 }
 
+// LoadObjects 读取当前库用户 schema 的视图/函数/存储过程/触发器名。PG 无事件
+// 概念，Events 保持为空。A PG connection is bound to one database, so `database`
+// only selects the schema (empty means current_schema()).
+func (Postgres) LoadObjects(ctx context.Context, db *sqlx.DB, database string) (*meta.Objects, error) {
+	objects := meta.NewObjects()
+	queries := []struct {
+		kind  meta.ObjectKind
+		query string
+	}{
+		{meta.ObjectView, "SELECT table_name AS name FROM information_schema.views " +
+			"WHERE table_catalog = current_database() " +
+			"AND table_schema = COALESCE(NULLIF($1, ''), current_schema())"},
+		{meta.ObjectFunction, "SELECT p.proname AS name FROM pg_proc p " +
+			"JOIN pg_namespace n ON n.oid = p.pronamespace " +
+			"WHERE p.prokind = 'f' AND n.nspname = COALESCE(NULLIF($1, ''), current_schema())"},
+		{meta.ObjectProcedure, "SELECT p.proname AS name FROM pg_proc p " +
+			"JOIN pg_namespace n ON n.oid = p.pronamespace " +
+			"WHERE p.prokind = 'p' AND n.nspname = COALESCE(NULLIF($1, ''), current_schema())"},
+		{meta.ObjectTrigger, "SELECT t.tgname AS name FROM pg_trigger t " +
+			"JOIN pg_class c ON c.oid = t.tgrelid " +
+			"JOIN pg_namespace n ON n.oid = c.relnamespace " +
+			"WHERE NOT t.tgisinternal AND n.nspname = COALESCE(NULLIF($1, ''), current_schema())"},
+	}
+	for _, q := range queries {
+		var names []string
+		if err := db.SelectContext(ctx, &names, q.query, database); err != nil {
+			return nil, fmt.Errorf("query postgres %s objects: %w", q.kind, err)
+		}
+		for _, name := range names {
+			objects.Add(q.kind, name)
+		}
+	}
+	return objects, nil
+}
+
 // Databases 返回实例内的用户库名。A PG connection is bound to one database, so
 // callers must not expect every name to be reachable over this connection; the
 // list exists so ticket/query validation can confirm the target database name.

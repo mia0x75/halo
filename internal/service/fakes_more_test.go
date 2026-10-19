@@ -174,6 +174,10 @@ func (f *fakeExecutor) LoadTables(_ context.Context, _ *domain.Cluster, _ string
 	return nil, nil
 }
 
+func (f *fakeExecutor) LoadObjects(_ context.Context, _ *domain.Cluster, _ string, _ ...string) (map[string]*meta.Objects, error) {
+	return nil, nil
+}
+
 func (f *fakeExecutor) Query(_ context.Context, _ *domain.Cluster, _, _ string) ([]map[string]string, error) {
 	return nil, nil
 }
