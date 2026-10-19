@@ -14,6 +14,24 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// columnCollate returns a column's effective collation. Parser v0.2.0 keeps a
+// column-level COLLATE in a ColumnOptionCollate option instead of mirroring it
+// into FieldType.Collate, so both locations must be checked.
+func columnCollate(col *ast.ColumnDef) string {
+	if col == nil {
+		return ""
+	}
+	for _, opt := range col.Options {
+		if opt.Tp == ast.ColumnOptionCollate {
+			return opt.StrValue
+		}
+	}
+	if col.Tp != nil {
+		return col.Tp.Collate
+	}
+	return ""
+}
+
 // TableCreateVldr 创建表语句相关的审核规则
 type TableCreateVldr struct {
 	vldr
@@ -475,7 +493,7 @@ func (v *TableCreateVldr) ColumnAvailableCollates(s *Subject, r *Rule) {
 	_ = json.Unmarshal([]byte(r.Parameters), &collates)
 
 	for _, col := range v.ct.Cols {
-		colCollate := col.Tp.Collate
+		colCollate := columnCollate(col)
 		// 排序规则允许隐式声明
 		if len(colCollate) == 0 {
 			continue
@@ -504,7 +522,7 @@ func (v *TableCreateVldr) ColumnCharsetCollateMustMatch(s *Subject, r *Rule) {
 	for _, col := range v.ct.Cols {
 		// TODO 需要判断后续字符集与排序规则的关系,考虑读字典表
 		colCharset := col.Tp.Charset
-		colCollate := col.Tp.Collate
+		colCollate := columnCollate(col)
 
 		if len(colCollate) == 0 || len(colCharset) == 0 {
 			continue
@@ -1800,7 +1818,7 @@ func (v *TableAlterVldr) ColumnAvailableCollates(s *Subject, r *Rule) {
 			continue
 		}
 		for _, col := range spec.NewColumns {
-			colCollate := col.Tp.Collate
+			colCollate := columnCollate(col)
 
 			// 排序规则允许隐式声明
 			if len(colCollate) == 0 {
@@ -1841,7 +1859,7 @@ func (v *TableAlterVldr) ColumnCharsetCollateMustMatch(s *Subject, r *Rule) {
 		}
 		for _, col := range spec.NewColumns {
 			colCharset := col.Tp.Charset
-			colCollate := col.Tp.Collate
+			colCollate := columnCollate(col)
 
 			// 排序规则允许隐式声明
 			if len(colCharset) == 0 && len(colCollate) == 0 {

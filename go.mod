@@ -12,7 +12,7 @@ require (
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/machinebox/graphql v0.2.2
-	github.com/mia0x75/parser v0.0.0-20261016165704-ef5aed3b47de
+	github.com/mia0x75/parser v0.2.0
 	github.com/mia0x75/yql v0.0.0-20190325023231-8a8982f46522
 	github.com/pgplex/pgparser v0.2.0
 	github.com/shirou/gopsutil/v4 v4.26.9
@@ -28,7 +28,6 @@ require (
 	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/agnivade/levenshtein v1.2.1 // indirect
 	github.com/coder/websocket v1.8.15 // indirect
-	github.com/cznic/mathutil v0.0.0-20181122101859-297441e03548 // indirect
 	github.com/ebitengine/purego v0.11.1 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
@@ -41,7 +40,6 @@ require (
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/matryer/is v1.4.1 // indirect
 	github.com/mia0x75/antlr v0.0.0-20190323140341-bf6915c3dd7b // indirect
-	github.com/pingcap/errors v0.11.5-0.20260523003111-3697ad564b43 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20260805114148-88456608a4f6 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
@@ -51,13 +49,13 @@ require (
 	github.com/tklauser/numcpus v0.12.0 // indirect
 	github.com/urfave/cli/v3 v3.11.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
-	go.uber.org/atomic v1.11.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/mod v0.42.0 // indirect
 	golang.org/x/sync v0.24.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
 	golang.org/x/text v0.43.0 // indirect
 	golang.org/x/tools v0.52.0 // indirect
+	modernc.org/mathutil v1.7.1 // indirect
 )
 
 tool github.com/99designs/gqlgen

@@ -201,7 +201,7 @@ func (v *MiscVldr) SplitRequired(_ *Subject, r *Rule) {
 			} else {
 				method = 1
 			}
-		case *ast.DeleteStmt, *ast.InsertStmt, *ast.UnionStmt, *ast.UpdateStmt, *ast.SelectStmt, *ast.ShowStmt, *ast.LoadDataStmt:
+		case *ast.DeleteStmt, *ast.InsertStmt, *ast.SetOprStmt, *ast.UpdateStmt, *ast.SelectStmt, *ast.ShowStmt, *ast.LoadDataStmt:
 			if method != 0 && method != 2 {
 				c := &Clause{
 					Description: r.Message,

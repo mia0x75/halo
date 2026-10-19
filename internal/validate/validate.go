@@ -369,7 +369,7 @@ func (v *vldr) Walk(node ast.Node) {
 		for _, elem := range Walk(v.Ctx, x) {
 			v.appendVisitInfo(elem)
 		}
-	case *ast.UnionStmt:
+	case *ast.SetOprStmt:
 		for _, ss := range x.SelectList.Selects {
 			for _, elem := range Walk(v.Ctx, ss) {
 				v.appendVisitInfo(elem)
@@ -551,11 +551,15 @@ func Walk(ctx *Context, node ast.Node) []VisitInfo {
 	switch x := node.(type) {
 	case *ast.TableSource:
 		vi = append(vi, Walk(ctx, x.Source)...)
-	case *ast.UnionStmt:
+	case *ast.SetOprStmt:
 		if x.SelectList != nil {
 			for _, sel := range x.SelectList.Selects {
 				vi = append(vi, Walk(ctx, sel)...)
 			}
+		}
+	case *ast.SetOprSelectList:
+		for _, sel := range x.Selects {
+			vi = append(vi, Walk(ctx, sel)...)
 		}
 	case *ast.SelectStmt:
 		if x.From != nil {
