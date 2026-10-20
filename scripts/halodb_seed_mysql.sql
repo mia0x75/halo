@@ -1,4 +1,6 @@
 SET time_zone = '+00:00';
+-- 容器里的 mysql 客户端可能按 latin1 连接，中文会变成乱码，这里显式指定。
+SET NAMES utf8mb4;
 
 LOCK TABLES `mm_avatars` WRITE;
 INSERT INTO `mm_avatars` VALUES

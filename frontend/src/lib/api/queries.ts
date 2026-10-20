@@ -281,3 +281,83 @@ export const CLUSTERS_QUERY = `
     }
   }
 `
+
+export interface StatementNode {
+  UUID: string
+  Sequence: number
+  Content: string
+  TypeDesc: string
+  Status: number
+  Report: string
+}
+
+export interface CommentNode {
+  UUID: string
+  Content: string
+  CreateAt: number
+  User: { UUID: string; Name: string | null }
+}
+
+export const CREATE_TICKET_MUTATION = `
+  mutation CreateTicket($input: CreateTicketInput!) {
+    createTicket(input: $input) {
+      UUID
+      Subject
+      Status
+    }
+  }
+`
+
+export const TICKET_DETAIL_QUERY = `
+  query Ticket($id: ID!) {
+    ticket(id: $id) {
+      UUID
+      Subject
+      Content
+      Database
+      Status
+      CreateAt
+      UpdateAt
+      Cluster { UUID Alias Host IP Port }
+      User { UUID Name Email }
+      Reviewer { UUID Name }
+      Statements(first: 20) {
+        edges { node { UUID Sequence Content TypeDesc Status Report } }
+      }
+      Comments(first: 20) {
+        edges { node { UUID Content CreateAt User { UUID Name } } }
+      }
+    }
+  }
+`
+
+export const ME_CLUSTERS_QUERY = `
+  query MeClusters($first: Int) {
+    me {
+      Clusters(first: $first) {
+        edges {
+          node {
+            UUID
+            Alias
+            Host
+            IP
+            Port
+            Type
+          }
+        }
+      }
+    }
+  }
+`
+
+export const ME_REVIEWERS_QUERY = `
+  query MeReviewers {
+    me {
+      Reviewers {
+        UUID
+        Name
+        Email
+      }
+    }
+  }
+`

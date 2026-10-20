@@ -867,8 +867,13 @@ func (r *ticketResolver) Statements(ctx context.Context, obj *models.Ticket, aft
 			Cursor: EncodeCursor(fmt.Sprintf("%d", stmt.Sequence)),
 		})
 	}
+	// Statements 是非空字段，空列表要返回空连接而不是 nil
 	if len(edges) == 0 {
-		return nil, nil
+		return &gqlapi.StatementConnection{
+			PageInfo:   &gqlapi.PageInfo{},
+			Edges:      edges,
+			TotalCount: 0,
+		}, nil
 	}
 	// 获取pageInfo
 	startCursor := EncodeCursor(fmt.Sprintf("%d", stmts[0].Sequence))

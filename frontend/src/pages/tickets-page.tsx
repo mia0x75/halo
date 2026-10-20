@@ -1,10 +1,9 @@
 import { useMemo, useState } from "react"
-import { IconPlus, IconSearch } from "@tabler/icons-react"
+import { IconSearch } from "@tabler/icons-react"
 
 import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
 import { StatusBadge } from "@/components/shared/status-badge"
-import { Button } from "@/components/ui/button"
 import { CursorPagination } from "@/components/ui/cursor-pagination"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -18,6 +17,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useGraphQL } from "@/hooks/use-graphql"
+import { TicketCreateDialog } from "@/features/tickets/ticket-create-dialog"
+import { TicketDetailDialog } from "@/features/tickets/ticket-detail-dialog"
 import { mapTicket } from "@/lib/api/mappers"
 import { TICKETS_QUERY, type TicketConnectionNode } from "@/lib/api/queries"
 import {
@@ -31,6 +32,7 @@ const pageSize = 8
 
 export function TicketsPage() {
   const [keyword, setKeyword] = useState("")
+  const [detailUUID, setDetailUUID] = useState<string | null>(null)
   const [status, setStatus] = useState<TicketStatus | "all">("all")
   const [after, setAfter] = useState<string | null>(null)
   const [stack, setStack] = useState<(string | null)[]>([])
@@ -86,10 +88,11 @@ export function TicketsPage() {
         title="工单"
         description="变更工单的提交与审核状态"
         action={
-          <Button>
-            <IconPlus size={16} stroke={1.5} />
-            新建工单
-          </Button>
+          <TicketCreateDialog
+            onCreated={() => {
+              remote.refetch()
+            }}
+          />
         }
       />
 
@@ -148,7 +151,11 @@ export function TicketsPage() {
           </TableHeader>
           <TableBody>
             {rows.map((ticket) => (
-              <TableRow key={ticket.uuid}>
+              <TableRow
+                key={ticket.uuid}
+                className="cursor-pointer"
+                onClick={() => setDetailUUID(ticket.uuid)}
+              >
                 <TableCell className="font-medium">{ticket.subject}</TableCell>
                 <TableCell className="text-muted-foreground">{ticket.database}</TableCell>
                 <TableCell className="text-muted-foreground">{ticket.cluster}</TableCell>
@@ -179,6 +186,8 @@ export function TicketsPage() {
           }}
         />
       </SectionCard>
+
+      <TicketDetailDialog uuid={detailUUID} onClose={() => setDetailUUID(null)} />
     </>
   )
 }

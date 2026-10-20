@@ -17,6 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useGraphQL } from "@/hooks/use-graphql"
+import { TicketDetailDialog } from "@/features/tickets/ticket-detail-dialog"
 import { mapTicket } from "@/lib/api/mappers"
 import {
   MY_TICKETS_QUERY,
@@ -35,6 +36,7 @@ export interface TicketQueuePageProps {
 /** 工单队列页：我的工单与待我审核共用一套表格与游标分页。 */
 export function TicketQueuePage({ mode }: TicketQueuePageProps) {
   const [keyword, setKeyword] = useState("")
+  const [detailUUID, setDetailUUID] = useState<string | null>(null)
   const [after, setAfter] = useState<string | null>(null)
   const [stack, setStack] = useState<(string | null)[]>([])
 
@@ -124,7 +126,11 @@ export function TicketQueuePage({ mode }: TicketQueuePageProps) {
           </TableHeader>
           <TableBody>
             {rows.map((ticket) => (
-              <TableRow key={ticket.uuid}>
+              <TableRow
+                key={ticket.uuid}
+                className="cursor-pointer"
+                onClick={() => setDetailUUID(ticket.uuid)}
+              >
                 <TableCell className="font-medium">{ticket.subject}</TableCell>
                 <TableCell className="text-muted-foreground">{ticket.database}</TableCell>
                 <TableCell className="text-muted-foreground">{ticket.cluster}</TableCell>
@@ -155,6 +161,8 @@ export function TicketQueuePage({ mode }: TicketQueuePageProps) {
           }}
         />
       </SectionCard>
+
+      <TicketDetailDialog uuid={detailUUID} onClose={() => setDetailUUID(null)} />
     </>
   )
 }
