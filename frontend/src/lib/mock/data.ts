@@ -273,3 +273,135 @@ export function trendFor(period: Period): TrendPoint[] {
 
 /** 接入群集数量的历史，用于第四张指标卡的趋势。 */
 export const clusterTrend = [4, 5, 5, 6, 7, 7, 8]
+
+export interface MockStatement {
+  uuid: string
+  sequence: number
+  content: string
+  typeDesc: string
+  status: number
+  /** 命中报告，结构与后端一致：{Level, Description, Rule} */
+  report: string
+}
+
+export interface MockComment {
+  uuid: string
+  content: string
+  createAt: string
+  user: string
+}
+
+const statementSeeds: Record<string, { sql: string; type: string; report?: string }> = {
+  "t-1024": {
+    sql: "ALTER TABLE `orders` ADD COLUMN `archived_at` DATETIME NULL",
+    type: "ALTER_TABLE",
+    report: JSON.stringify([
+      { Level: 1, Description: "目标表`app_order`.`orders`不存在。", Rule: "MTB-L3-002" },
+    ]),
+  },
+  "t-1023": {
+    sql: "CREATE INDEX `idx_phone` ON `users` (`phone`)",
+    type: "CREATE_INDEX",
+  },
+  "t-1022": {
+    sql: "CREATE OR REPLACE VIEW `v_daily_report` AS SELECT `day`, SUM(`amount`) FROM `payment` GROUP BY `day`",
+    type: "CREATE_VIEW",
+    report: JSON.stringify([
+      { Level: 2, Description: "查询语句没有 WHERE 条件。", Rule: "SEL-L2-001" },
+    ]),
+  },
+  "t-1021": {
+    sql: "DELETE FROM `orders` WHERE `created_at` < '2024-01-01'",
+    type: "DELETE",
+    report: JSON.stringify([
+      { Level: 2, Description: "删除语句没有 WHERE 条件。", Rule: "DEL-L2-001" },
+    ]),
+  },
+  "t-1020": {
+    sql: "ALTER TABLE `payments` ADD COLUMN `channel` VARCHAR(32) NULL",
+    type: "ALTER_TABLE",
+  },
+  "t-1019": {
+    sql: "ALTER TABLE `accounts` ADD COLUMN `status` TINYINT NULL",
+    type: "ALTER_TABLE",
+    report: JSON.stringify([
+      { Level: 2, Description: "列 status 允许为空，建议设置 NOT NULL。", Rule: "CTL-L2-003" },
+    ]),
+  },
+  "t-1018": {
+    sql: "CREATE USER 'reporter'@'%' IDENTIFIED BY '***'",
+    type: "CREATE_USER",
+  },
+  "t-1017": {
+    sql: "ALTER TABLE `orders` ADD COLUMN `memo` TEXT NULL",
+    type: "ALTER_TABLE",
+  },
+  "t-1016": {
+    sql: "ALTER TABLE `archives` PARTITION BY RANGE (`id`)",
+    type: "ALTER_TABLE",
+    report: JSON.stringify([
+      { Level: 1, Description: "建表语句没有指定存储引擎。", Rule: "MTB-L3-015" },
+    ]),
+  },
+  "t-1015": {
+    sql: "ALTER TABLE `users` ADD COLUMN `label` VARCHAR(64) NULL",
+    type: "ALTER_TABLE",
+  },
+  "t-1014": {
+    sql: "ALTER TABLE `orders` COMMENT = '订单表'",
+    type: "ALTER_TABLE",
+  },
+  "t-1013": {
+    sql: "DROP INDEX `idx_old` ON `orders`",
+    type: "DROP_INDEX",
+  },
+}
+
+/** 假数据里的工单语句，详情对话框在没有接口数据时使用。 */
+export const ticketStatements: Record<string, MockStatement[]> = Object.fromEntries(
+  Object.entries(statementSeeds).map(([uuid, seed], index) => [
+    uuid,
+    [
+      {
+        uuid: `${uuid}-s1`,
+        sequence: 1,
+        content: seed.sql,
+        typeDesc: seed.type,
+        status: 1,
+        report: seed.report ?? "",
+      },
+      ...(index % 3 === 0
+        ? [
+            {
+              uuid: `${uuid}-s2`,
+              sequence: 2,
+              content: "COMMENT = '由工单流程自动生成'",
+              typeDesc: "ALTER_TABLE",
+              status: 1,
+              report: "",
+            },
+          ]
+        : []),
+    ],
+  ]),
+)
+
+/** 假数据里的审核意见。 */
+export const ticketComments: Record<string, MockComment[]> = {
+  "t-1024": [
+    {
+      uuid: "t-1024-c1",
+      content: "归档字段建议允许为空，历史订单没有该值。",
+      createAt: "2026-10-20 09:40",
+      user: "王五",
+    },
+  ],
+  "t-1022": [
+    {
+      uuid: "t-1022-c1",
+      content: "视图依赖的 payment 表没有 day 字段，请先补上。",
+      createAt: "2026-10-19 10:35",
+      user: "王五",
+    },
+  ],
+}

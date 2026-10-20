@@ -11,11 +11,35 @@ import { StatusBadge } from "@/components/shared/status-badge"
 import { useGraphQL } from "@/hooks/use-graphql"
 import { TICKET_DETAIL_QUERY, type CommentNode, type StatementNode } from "@/lib/api/queries"
 import { formatUnix } from "@/lib/api/mappers"
-import type { TicketStatus } from "@/lib/mock/data"
+import { parseReport, reportLevelLabel } from "@/features/tickets/ticket-report"
+import {
+  ticketComments,
+  ticketStatements,
+  tickets,
+  type MockComment,
+  type MockStatement,
+  type TicketStatus,
+} from "@/lib/mock/data"
 
 export interface TicketDetailDialogProps {
   uuid: string | null
   onClose: () => void
+}
+
+interface StatementView {
+  uuid: string
+  sequence: number
+  content: string
+  typeDesc: string
+  status: number
+  report: string
+}
+
+interface CommentView {
+  uuid: string
+  content: string
+  createAt: string
+  user: string
 }
 
 interface TicketDetail {
@@ -56,23 +80,32 @@ export function TicketDetailDialog({ uuid, onClose }: TicketDetailDialogProps) {
   )
 
   const ticket = detail.data?.ticket ?? null
-  const statements = ticket?.Statements.edges.map((edge) => edge.node) ?? []
-  const comments = ticket?.Comments?.edges.map((edge) => edge.node) ?? []
+  // 接口没有数据时（未登录或接口不可用）回落到假数据，详情仍然可看。
+  const mock = ticket ? null : mockTicket(uuid)
+  const statements: StatementView[] = ticket
+    ? (ticket.Statements?.edges?.map((edge) => toStatementView(edge.node)) ?? [])
+    : (mock?.statements ?? [])
+  const comments: CommentView[] = ticket
+    ? (ticket.Comments?.edges?.map((edge) => toCommentView(edge.node)) ?? [])
+    : (mock?.comments ?? [])
 
   return (
     <Dialog open={uuid !== null} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-3xl">
-        {ticket ? (
+        {ticket || mock ? (
           <>
-            <DialogTitle className="text-base font-medium text-strong">{ticket.Subject}</DialogTitle>
+            <DialogTitle className="text-base font-medium text-strong">
+              {ticket?.Subject ?? mock?.subject}
+            </DialogTitle>
             <DialogDescription className="mt-1 text-sm text-muted-foreground">
-              {ticket.Database} · {ticket.Cluster.Alias} · 提交人 {ticket.User.Name ?? ticket.User.Email} ·
-              审核人 {ticket.Reviewer.Name ?? "-"} · {formatUnix(ticket.CreateAt)}
+              {ticket
+                ? `${ticket.Database} · ${ticket.Cluster.Alias} · 提交人 ${ticket.User.Name ?? ticket.User.Email} · 审核人 ${ticket.Reviewer.Name ?? "-"} · ${formatUnix(ticket.CreateAt)}`
+                : `${mock?.database} · ${mock?.cluster} · 提交人 ${mock?.submitter} · 审核人 ${mock?.reviewer} · ${mock?.createdAt}`}
             </DialogDescription>
 
             <div className="mt-3 flex items-center gap-2">
-              <StatusBadge status={statusByCode[ticket.Status] ?? "waiting-vld"} />
-              <Badge variant="muted">工单 {ticket.UUID.slice(0, 8)}</Badge>
+              <StatusBadge status={statusByCode[ticket?.Status ?? 0] ?? "waiting-vld"} />
+              <Badge variant="muted">工单 {(ticket?.UUID ?? mock?.uuid ?? "").slice(0, 8)}</Badge>
             </div>
 
             <div className="mt-4 flex gap-4 border-b border-border">
@@ -106,21 +139,28 @@ export function TicketDetailDialog({ uuid, onClose }: TicketDetailDialogProps) {
                   <p className="py-6 text-center text-sm text-muted-foreground">暂无语句</p>
                 ) : null}
                 {statements.map((statement) => (
-                  <div key={statement.UUID} className="rounded-md border border-border">
+                  <div key={statement.uuid} className="rounded-md border border-border">
                     <div className="flex items-center gap-2 border-b border-border px-3 py-2">
                       <span className="font-mono text-xs text-muted-foreground">
-                        #{statement.Sequence}
+                        #{statement.sequence}
                       </span>
-                      <Badge variant="muted">{statement.TypeDesc}</Badge>
+                      <Badge variant="muted">{statement.typeDesc}</Badge>
                     </div>
                     <pre className="overflow-x-auto px-3 py-2 font-mono text-xs whitespace-pre-wrap">
-                      {statement.Content}
+                      {statement.content}
                     </pre>
-                    {statement.Report ? (
-                      <p className="border-t border-border px-3 py-2 text-xs text-warning">
-                        {statement.Report}
+                    {parseReport(statement.report).map((hit, index) => (
+                      <p
+                        key={`${statement.uuid}-hit-${index}`}
+                        className="border-t border-border px-3 py-2 text-xs text-warning"
+                      >
+                        <span className="mr-1 font-medium">[{reportLevelLabel(hit.level)}]</span>
+                        {hit.description}
+                        {hit.rule ? (
+                          <span className="ml-1 font-mono text-muted-foreground">（{hit.rule}）</span>
+                        ) : null}
                       </p>
-                    ) : null}
+                    ))}
                   </div>
                 ))}
               </div>
@@ -130,10 +170,10 @@ export function TicketDetailDialog({ uuid, onClose }: TicketDetailDialogProps) {
                   <li className="py-6 text-center text-sm text-muted-foreground">暂无审核意见</li>
                 ) : null}
                 {comments.map((comment) => (
-                  <li key={comment.UUID} className="rounded-md border border-border px-3 py-2">
-                    <p className="text-sm">{comment.Content}</p>
+                  <li key={comment.uuid} className="rounded-md border border-border px-3 py-2">
+                    <p className="text-sm">{comment.content}</p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {comment.User.Name ?? "-"} · {formatUnix(comment.CreateAt)}
+                      {comment.user} · {comment.createAt}
                     </p>
                   </li>
                 ))}
@@ -151,4 +191,56 @@ export function TicketDetailDialog({ uuid, onClose }: TicketDetailDialogProps) {
       </DialogContent>
     </Dialog>
   )
+}
+
+interface MockTicketView {
+  uuid: string
+  subject: string
+  database: string
+  cluster: string
+  submitter: string
+  reviewer: string
+  createdAt: string
+  statements: MockStatement[]
+  comments: MockComment[]
+}
+
+/** 假数据里的工单详情。 */
+function mockTicket(uuid: string | null): MockTicketView | null {
+  if (!uuid) return null
+  const ticket = tickets.find((item) => item.uuid === uuid)
+  if (!ticket) return null
+  return {
+    uuid: ticket.uuid,
+    subject: ticket.subject,
+    database: ticket.database,
+    cluster: ticket.cluster,
+    submitter: ticket.submitter,
+    reviewer: ticket.reviewer,
+    createdAt: ticket.createdAt,
+    statements: ticketStatements[ticket.uuid] ?? [],
+    comments: ticketComments[ticket.uuid] ?? [],
+  }
+}
+
+/** 接口的语句节点转成页面视图。 */
+function toStatementView(node: StatementNode): StatementView {
+  return {
+    uuid: node.UUID,
+    sequence: node.Sequence,
+    content: node.Content,
+    typeDesc: node.TypeDesc,
+    status: node.Status,
+    report: node.Report ?? "",
+  }
+}
+
+/** 接口的意见节点转成页面视图。 */
+function toCommentView(node: CommentNode): CommentView {
+  return {
+    uuid: node.UUID,
+    content: node.Content,
+    createAt: formatUnix(node.CreateAt),
+    user: node.User?.Name ?? "-",
+  }
 }

@@ -871,7 +871,7 @@ func (r *ticketResolver) Statements(ctx context.Context, obj *models.Ticket, aft
 	if len(edges) == 0 {
 		return &gqlapi.StatementConnection{
 			PageInfo:   &gqlapi.PageInfo{},
-			Edges:      edges,
+			Edges:      []*gqlapi.StatementEdge{},
 			TotalCount: 0,
 		}, nil
 	}
@@ -920,8 +920,12 @@ func (r *ticketResolver) Comments(ctx context.Context, obj *models.Ticket, after
 			Cursor: EncodeCursor(fmt.Sprintf("%d", comment.CommentID)),
 		})
 	}
+	// 空列表返回空数组，避免调用方拿到 null
 	if len(edges) == 0 {
-		return &gqlapi.CommentConnection{}, nil
+		return &gqlapi.CommentConnection{
+			PageInfo: &gqlapi.PageInfo{},
+			Edges:    []*gqlapi.CommentEdge{},
+		}, nil
 	}
 	// 获取pageInfo
 	startCursor := EncodeCursor(fmt.Sprintf("%d", comments[0].CommentID))

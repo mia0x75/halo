@@ -342,7 +342,6 @@ export const ME_CLUSTERS_QUERY = `
             Host
             IP
             Port
-            Type
           }
         }
       }
