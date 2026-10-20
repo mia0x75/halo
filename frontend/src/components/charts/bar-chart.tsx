@@ -24,7 +24,7 @@ export function BarChart({
 }: BarChartProps) {
   const options = useMemo<ApexOptions>(
     () => ({
-      chart: { toolbar: { show: false }, fontFamily: "Inter, sans-serif" },
+      chart: { toolbar: { show: false } },
       colors: colors ?? [chartPalette.primary],
       dataLabels: { enabled: false },
       legend: { position: "bottom", fontSize: "12px" },

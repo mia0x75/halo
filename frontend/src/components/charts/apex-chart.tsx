@@ -30,7 +30,15 @@ export function ApexChart({ type, series, options, height = 240, className }: Ap
     const chart = new ApexCharts(container, {
       ...options,
       series,
-      chart: { ...options?.chart, type, height },
+      // 图表文字由 SVG 渲染，不继承 CSS 的 font-family，需要单独指定；
+      // 放在这里统一设置，各图表无需重复声明。
+      chart: {
+        fontFamily:
+          '"Chill Reunion Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+        ...options?.chart,
+        type,
+        height,
+      },
     })
 
     void chart.render()

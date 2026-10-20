@@ -3,7 +3,7 @@ module github.com/mia0x75/halo
 go 1.26.8
 
 require (
-	github.com/99designs/gqlgen v0.17.95
+	github.com/99designs/gqlgen v0.17.96
 	github.com/fatih/structs v1.1.0
 	github.com/go-sql-driver/mysql v1.10.1
 	github.com/golang-jwt/jwt/v5 v5.3.1

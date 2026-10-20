@@ -15,7 +15,7 @@ export interface TrendChartProps {
 export function TrendChart({ categories, series, height = 280, className }: TrendChartProps) {
   const options = useMemo<ApexOptions>(
     () => ({
-      chart: { toolbar: { show: false }, zoom: { enabled: false }, fontFamily: "Inter, sans-serif" },
+      chart: { toolbar: { show: false }, zoom: { enabled: false } },
       colors: [chartPalette.primary, chartPalette.success, chartPalette.danger],
       dataLabels: { enabled: false },
       stroke: { width: 1.5, curve: "smooth" },
