@@ -136,6 +136,17 @@
     background: var(--halo-surface);
     border-color: var(--halo-border);
   }
+
+  /* 刷选滑块：半透明填充 + 可见边框，选区一眼可辨 */
+  .svg_select_shape {
+    fill: color-mix(in oklab, var(--halo-primary) 12%, transparent);
+    stroke: var(--halo-primary);
+    stroke-opacity: 0.45;
+  }
+  .svg_select_handle {
+    stroke: var(--halo-primary);
+    stroke-opacity: 0.8;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

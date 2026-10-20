@@ -13,6 +13,8 @@ export interface TrendChartProps {
   id?: string
   /** 打开选择工具，配合下方的刷选图缩放 */
   selectable?: boolean
+  /** 初始显示区间：末尾 N 个点，不传则显示全部 */
+  range?: number
 }
 
 /** 趋势图：面积折线，多系列。 */
@@ -23,6 +25,7 @@ export function TrendChart({
   className,
   id,
   selectable = false,
+  range,
 }: TrendChartProps) {
   const options = useMemo<ApexOptions>(
     () => ({
@@ -51,10 +54,15 @@ export function TrendChart({
       // 紧凑提示框：单行展示，缩小行距
       tooltip: { compact: true, intersect: false, shared: true },
       grid: { borderColor: "transparent", padding: { left: 4, right: 4 } },
-      xaxis: { categories, labels: { style: { colors: chartPalette.textMuted, fontSize: "11px" } } },
+      xaxis: {
+        categories,
+        // range 表示从末尾算起的点数，初始只显示最近的一段
+        ...(range ? { range } : {}),
+        labels: { style: { colors: chartPalette.textMuted, fontSize: "11px" } },
+      },
       yaxis: { labels: { style: { colors: chartPalette.textMuted, fontSize: "11px" } } },
     }),
-    [categories, selectable],
+    [categories, selectable, range],
   )
 
   return (

@@ -49,10 +49,11 @@ export function DashboardPage() {
     return found ? found.Value : fallback
   }
 
-  // 趋势优先用接口的日桶：按天取回后补齐缺失的日子，曲线不断点。
-  const points = useMemo(() => {
+  // 刷选图固定展示较长区间（最多一年），主图跟随选中的窗口。
+  // 数据优先取接口的日桶；接口不可用时用假数据补齐。
+  const fullPoints = useMemo(() => {
     const buckets = metrics.data?.metrics ?? []
-    if (buckets.length === 0) return mockPoints
+    if (buckets.length === 0) return trendFor(365)
 
     const byDay = new Map<string, { created: number; executed: number; failed: number }>()
     for (const item of buckets) {
@@ -64,18 +65,24 @@ export function DashboardPage() {
     }
 
     const days = Array.from(byDay.keys()).sort()
-    if (days.length === 0) return mockPoints
+    if (days.length === 0) return trendFor(365)
 
-    // 只保留所选时段内的日子
-    const limit = period
-    const used = days.slice(-limit)
-    return used.map((day) => ({
+    const points = days.map((day) => ({
       date: day.slice(5),
       submitted: byDay.get(day)?.created ?? 0,
       executed: byDay.get(day)?.executed ?? 0,
       failed: byDay.get(day)?.failed ?? 0,
     }))
-  }, [metrics.data, mockPoints, period])
+
+    // 点太多时按步长采样，曲线才有意义
+    const max = 365
+    if (points.length <= max) return points
+    const step = Math.ceil(points.length / max)
+    return points.filter((_, index) => index % step === 0)
+  }, [metrics.data])
+
+  // 主图默认显示最近 period 天，拖动刷选滑块可切换到别的窗口
+  const visiblePoints = useMemo(() => fullPoints.slice(-period), [fullPoints, period])
 
   const levels = useGraphQL<{ ruleHitLevels: RuleHitCountNode[] }, { from: number; to: number }>(
     RULE_HIT_LEVELS_QUERY,
@@ -109,8 +116,8 @@ export function DashboardPage() {
   const pending = tickets.filter((ticket) =>
     ["waiting-vld", "waiting-mrv"].includes(ticket.status),
   ).length
-  const executed = points[points.length - 1]!.executed
-  const failed = points[points.length - 1]!.failed
+  const executed = mockPoints[mockPoints.length - 1]!.executed
+  const failed = mockPoints[mockPoints.length - 1]!.failed
 
   return (
     <>
@@ -131,21 +138,21 @@ export function DashboardPage() {
           value={String(pending)}
           delta={12}
           hint="较昨日"
-          trend={points.map((point) => point.submitted)}
+          trend={visiblePoints.map((point) => point.submitted)}
         />
         <StatCard
           label="今日已执行"
           value={String(metricValue("tickets-executed", executed))}
           delta={8}
           hint="较昨日"
-          trend={points.map((point) => point.executed)}
+          trend={visiblePoints.map((point) => point.executed)}
         />
         <StatCard
           label="失败工单"
           value={String(metricValue("tickets-failed", failed))}
           delta={-4}
           hint="较昨日"
-          trend={points.map((point) => point.failed)}
+          trend={visiblePoints.map((point) => point.failed)}
         />
         <StatCard
           label="接入群集"
@@ -166,17 +173,18 @@ export function DashboardPage() {
           <TrendChart
             id={TREND_CHART_ID}
             selectable
-            categories={points.map((point) => point.date)}
+            range={period}
+            categories={fullPoints.map((point) => point.date)}
             series={[
-              { name: "提交", data: points.map((point) => point.submitted) },
-              { name: "执行", data: points.map((point) => point.executed) },
-              { name: "失败", data: points.map((point) => point.failed) },
+              { name: "提交", data: fullPoints.map((point) => point.submitted) },
+              { name: "执行", data: fullPoints.map((point) => point.executed) },
+              { name: "失败", data: fullPoints.map((point) => point.failed) },
             ]}
           />
           <BrushChart
             target={TREND_CHART_ID}
-            categories={points.map((point) => point.date)}
-            series={[{ name: "提交", data: points.map((point) => point.submitted) }]}
+            categories={fullPoints.map((point) => point.date)}
+            series={[{ name: "提交", data: fullPoints.map((point) => point.submitted) }]}
           />
         </SectionCard>
 
