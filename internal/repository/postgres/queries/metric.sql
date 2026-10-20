@@ -32,3 +32,6 @@ INSERT INTO mm_metrics (uuid, name, scope, scope_id, type, bucket, value, versio
 ON CONFLICT (name, scope, scope_id, bucket) DO UPDATE SET
     value = EXCLUDED.value,
     update_at = NOW();
+
+-- name: DeleteMetricBucketsBefore :execrows
+DELETE FROM mm_metrics WHERE scope = 1 AND bucket < $1;

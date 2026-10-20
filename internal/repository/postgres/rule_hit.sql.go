@@ -110,6 +110,18 @@ func (q *Queries) CreateRuleHit(ctx context.Context, arg CreateRuleHitParams) er
 	return err
 }
 
+const deleteRuleHitsBefore = `-- name: DeleteRuleHitsBefore :execrows
+DELETE FROM mm_violations WHERE create_at < $1
+`
+
+func (q *Queries) DeleteRuleHitsBefore(ctx context.Context, createAt time.Time) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteRuleHitsBefore, createAt)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 const listRuleHits = `-- name: ListRuleHits :many
 SELECT violation_id, uuid, ticket_id, sequence, rule_name, level, message, create_at FROM mm_violations ORDER BY create_at DESC, violation_id DESC LIMIT $1
 `

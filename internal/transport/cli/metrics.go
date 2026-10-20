@@ -21,6 +21,13 @@ var metricsCmd = &cobra.Command{
 	Run:   metrics,
 }
 
+var metricsCleanupCmd = &cobra.Command{
+	Use:   "cleanup",
+	Short: "清理过期的日指标桶与规则命中明细",
+	Long:  `Remove the daily metric buckets and rule hit details older than the retention window`,
+	Run:   metricsCleanup,
+}
+
 var metricsRollupCmd = &cobra.Command{
 	Use:   "rollup",
 	Short: "把某一天的工单与规则命中汇总进日指标桶",
@@ -31,7 +38,9 @@ var metricsRollupCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(metricsCmd)
 	metricsCmd.AddCommand(metricsRollupCmd)
+	metricsCmd.AddCommand(metricsCleanupCmd)
 	metricsRollupCmd.Flags().String("date", "", "汇总日期（2006-01-02），缺省为昨天")
+	metricsCleanupCmd.Flags().Int("days", 90, "保留天数")
 }
 
 func metrics(cmd *cobra.Command, args []string) {
@@ -124,4 +133,33 @@ func metricsRollup(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Printf("已汇总 %s，共写入 %d 个指标桶\n", result.Date, result.Metrics)
+}
+
+// metricsCleanup removes the data older than the retention window.
+func metricsCleanup(cmd *cobra.Command, args []string) {
+	days, err := cmd.Flags().GetInt("days")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	if cfg, ok := os.LookupEnv("HALO_CFG"); ok {
+		config.ParseConfig(cfg)
+	} else {
+		config.ParseConfig("")
+	}
+
+	application, appErr := newApp()
+	if appErr != nil {
+		fmt.Println(appErr)
+		os.Exit(1)
+	}
+
+	result, err := application.Services.Metric.Cleanup(context.Background(), days)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("已清理 %d 个日指标桶、%d 条规则命中明细（保留 %d 天）\n", result.Metrics, result.Violations, days)
 }

@@ -47,6 +47,9 @@ func (f *fakeMetricRepo) Increment(_ context.Context, key domain.MetricKey, delt
 	f.counter[key.Name] += delta
 	return nil
 }
+func (f *fakeMetricRepo) DeleteBucketsBefore(context.Context, string) (int64, error) {
+	return 0, nil
+}
 func (f *fakeMetricRepo) SetGauge(_ context.Context, key domain.MetricKey, value float64) error {
 	f.gauges = append(f.gauges, key.Name)
 	if f.counter == nil {

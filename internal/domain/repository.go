@@ -139,6 +139,9 @@ type MetricRepository interface {
 	Increment(ctx context.Context, key MetricKey, delta float64) error
 	// SetGauge overwrites the value of a gauge metric.
 	SetGauge(ctx context.Context, key MetricKey, value float64) error
+	// DeleteBucketsBefore removes the daily buckets older than the given date.
+	// The bucket is a YYYY-MM-DD string, so it compares lexicographically.
+	DeleteBucketsBefore(ctx context.Context, bucket string) (int64, error)
 }
 
 type RuleHitRepository interface {
@@ -151,6 +154,8 @@ type RuleHitRepository interface {
 	CountByLevel(ctx context.Context, from, to uint) ([]RuleHitCount, error)
 	// CountByRule counts the hits per rule inside a time window.
 	CountByRule(ctx context.Context, from, to uint, limit int) ([]RuleHitCount, error)
+	// DeleteBefore removes the hits created before the given time.
+	DeleteBefore(ctx context.Context, before uint) (int64, error)
 }
 
 type StatementRepository interface {

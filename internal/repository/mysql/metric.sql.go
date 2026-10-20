@@ -38,6 +38,18 @@ func (q *Queries) CreateMetric(ctx context.Context, arg CreateMetricParams) erro
 	return err
 }
 
+const deleteMetricBucketsBefore = `-- name: DeleteMetricBucketsBefore :execrows
+DELETE FROM mm_metrics WHERE scope = 1 AND bucket < ?
+`
+
+func (q *Queries) DeleteMetricBucketsBefore(ctx context.Context, bucket string) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteMetricBucketsBefore, bucket)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 const deleteMetricByUUID = `-- name: DeleteMetricByUUID :exec
 DELETE FROM mm_metrics WHERE uuid = ?
 `

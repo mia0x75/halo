@@ -32,3 +32,6 @@ INSERT INTO mm_metrics (uuid, name, scope, scope_id, type, bucket, value, versio
 ON DUPLICATE KEY UPDATE
     value = VALUES(value),
     update_at = CURRENT_TIMESTAMP;
+
+-- name: DeleteMetricBucketsBefore :execrows
+DELETE FROM mm_metrics WHERE scope = 1 AND bucket < ?;

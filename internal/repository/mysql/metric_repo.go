@@ -133,3 +133,8 @@ func (r *MetricRepo) SetGauge(ctx context.Context, key domain.MetricKey, value f
 		Value:   strconv.FormatFloat(value, 'f', -1, 64),
 	}))
 }
+
+// DeleteBucketsBefore removes the daily buckets older than the given date.
+func (r *MetricRepo) DeleteBucketsBefore(ctx context.Context, bucket string) (int64, error) {
+	return r.q.DeleteMetricBucketsBefore(ctx, bucket)
+}

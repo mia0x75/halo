@@ -7,6 +7,7 @@ package postgresrepo
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 type Querier interface {
@@ -51,6 +52,7 @@ type Querier interface {
 	DeleteGroupByUUID(ctx context.Context, uuid string) error
 	DeleteLogByID(ctx context.Context, logID int64) error
 	DeleteLogByUUID(ctx context.Context, uuid string) error
+	DeleteMetricBucketsBefore(ctx context.Context, bucket string) (int64, error)
 	DeleteMetricByUUID(ctx context.Context, uuid string) error
 	DeleteOptionByUUID(ctx context.Context, uuid string) error
 	DeleteQueryByID(ctx context.Context, queryID int64) error
@@ -58,6 +60,7 @@ type Querier interface {
 	DeleteRoleByID(ctx context.Context, roleID int64) error
 	DeleteRoleByUUID(ctx context.Context, uuid string) error
 	DeleteRuleByUUID(ctx context.Context, uuid string) error
+	DeleteRuleHitsBefore(ctx context.Context, createAt time.Time) (int64, error)
 	DeleteStatementByTicketSequence(ctx context.Context, arg DeleteStatementByTicketSequenceParams) error
 	DeleteStatementByUUID(ctx context.Context, uuid string) error
 	DeleteStatementsByTicket(ctx context.Context, ticketID int64) error

@@ -12,3 +12,6 @@ SELECT rule_name, COUNT(*) AS count FROM mm_violations WHERE create_at >= $1 AND
 
 -- name: ListRuleHits :many
 SELECT violation_id, uuid, ticket_id, sequence, rule_name, level, message, create_at FROM mm_violations ORDER BY create_at DESC, violation_id DESC LIMIT $1;
+
+-- name: DeleteRuleHitsBefore :execrows
+DELETE FROM mm_violations WHERE create_at < $1;

@@ -110,3 +110,8 @@ func (r *RuleHitRepo) CountByRule(ctx context.Context, from, to uint, limit int)
 	}
 	return out, nil
 }
+
+// DeleteBefore removes the hits created before the given time.
+func (r *RuleHitRepo) DeleteBefore(ctx context.Context, before uint) (int64, error) {
+	return r.q.DeleteRuleHitsBefore(ctx, time.Unix(int64(before), 0).UTC())
+}
