@@ -2447,8 +2447,8 @@ type QueryRoot {
 		"""
 		连接信息
 		"""
-		input: ValidateConnectionInput
-	): Boolean! @auth(requires: [ADMIN])
+		input: ValidateConnectionInput!
+	): ClusterTestResult! @auth(requires: [ADMIN])
 
 	"""
 	测试正则表达式的有效性
@@ -2879,9 +2879,9 @@ input UpdateClusterInput {
 	Status:       UInt8!  @matches(pattern: "^(1|2)$")
 
 	"""
-	连接群集的密码
+	连接群集的密码，不填表示保持原密码
 	"""
-	Password:     String! @length(max: 40)
+	Password:     String @length(max: 40)
 
 	"""
 	所属分组UUID，不填表示未分组
@@ -3052,6 +3052,46 @@ input ValidateConnectionInput {
 	连接密码
 	"""
 	Password: String! @length(max: 40)
+
+	"""
+	目标库类型（mysql|postgres），不填按 mysql 处理
+	"""
+	Type:     String @matches(pattern: "^(mysql|postgres)$")
+
+	"""
+	连接的数据库名，不填连默认库
+	"""
+	Database: String
+}
+
+"""
+试连目标库的结果
+"""
+type ClusterTestResult {
+	"""
+	是否连通
+	"""
+	Success: Boolean!
+
+	"""
+	结果描述，连不上时是失败原因
+	"""
+	Message: String!
+
+	"""
+	目标库服务端版本
+	"""
+	Version: String!
+
+	"""
+	连接耗时（毫秒）
+	"""
+	LatencyMs: Int!
+
+	"""
+	账号可见的用户库
+	"""
+	Databases: [String!]!
 }
 
 """

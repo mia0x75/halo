@@ -106,6 +106,14 @@ type ComplexityRoot struct {
 		Node   func(childComplexity int) int
 	}
 
+	ClusterTestResult struct {
+		Databases func(childComplexity int) int
+		LatencyMs func(childComplexity int) int
+		Message   func(childComplexity int) int
+		Success   func(childComplexity int) int
+		Version   func(childComplexity int) int
+	}
+
 	Comment struct {
 		Content  func(childComplexity int) int
 		CreateAt func(childComplexity int) int
@@ -380,7 +388,7 @@ type ComplexityRoot struct {
 		TaskExecutions       func(childComplexity int, status *uint8, first *int) int
 		Tasks                func(childComplexity int) int
 		Templates            func(childComplexity int) int
-		TestCluster          func(childComplexity int, input *models.ValidateConnectionInput) int
+		TestCluster          func(childComplexity int, input models.ValidateConnectionInput) int
 		TestRegexp           func(childComplexity int, input *models.ValidatePatternInput) int
 		Ticket               func(childComplexity int, id string) int
 		TicketSearch         func(childComplexity int, search string, after *string, before *string, first *int, last *int) int
@@ -660,7 +668,7 @@ type QueryRootResolver interface {
 	Metrics(ctx context.Context, scope *uint8, names []string) ([]*models.Metric, error)
 	Environments(ctx context.Context) (*Environments, error)
 	Metadata(ctx context.Context, clusterUUID string, database string) (string, error)
-	TestCluster(ctx context.Context, input *models.ValidateConnectionInput) (bool, error)
+	TestCluster(ctx context.Context, input models.ValidateConnectionInput) (*ClusterTestResult, error)
 	TestRegexp(ctx context.Context, input *models.ValidatePatternInput) (bool, error)
 }
 type RoleResolver interface {
@@ -899,6 +907,37 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.ClusterEdge.Node(childComplexity), true
+
+	case "ClusterTestResult.Databases":
+		if e.ComplexityRoot.ClusterTestResult.Databases == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ClusterTestResult.Databases(childComplexity), true
+	case "ClusterTestResult.LatencyMs":
+		if e.ComplexityRoot.ClusterTestResult.LatencyMs == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ClusterTestResult.LatencyMs(childComplexity), true
+	case "ClusterTestResult.Message":
+		if e.ComplexityRoot.ClusterTestResult.Message == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ClusterTestResult.Message(childComplexity), true
+	case "ClusterTestResult.Success":
+		if e.ComplexityRoot.ClusterTestResult.Success == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ClusterTestResult.Success(childComplexity), true
+	case "ClusterTestResult.Version":
+		if e.ComplexityRoot.ClusterTestResult.Version == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ClusterTestResult.Version(childComplexity), true
 
 	case "Comment.Content":
 		if e.ComplexityRoot.Comment.Content == nil {
@@ -2454,7 +2493,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.QueryRoot.TestCluster(childComplexity, args["input"].(*models.ValidateConnectionInput)), true
+		return e.ComplexityRoot.QueryRoot.TestCluster(childComplexity, args["input"].(models.ValidateConnectionInput)), true
 	case "QueryRoot.testRegexp":
 		if e.ComplexityRoot.QueryRoot.TestRegexp == nil {
 			break
@@ -3504,6 +3543,22 @@ func (ec *executionContext) childFields_ClusterEdge(ctx context.Context, field g
 		return ec.fieldContext_ClusterEdge_cursor(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type ClusterEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_ClusterTestResult(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "Success":
+		return ec.fieldContext_ClusterTestResult_Success(ctx, field)
+	case "Message":
+		return ec.fieldContext_ClusterTestResult_Message(ctx, field)
+	case "Version":
+		return ec.fieldContext_ClusterTestResult_Version(ctx, field)
+	case "LatencyMs":
+		return ec.fieldContext_ClusterTestResult_LatencyMs(ctx, field)
+	case "Databases":
+		return ec.fieldContext_ClusterTestResult_Databases(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type ClusterTestResult", field.Name)
 }
 
 func (ec *executionContext) childFields_Comment(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
@@ -5745,8 +5800,8 @@ func (ec *executionContext) field_QueryRoot_testCluster_args(ctx context.Context
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
-		func(ctx context.Context, v any) (*models.ValidateConnectionInput, error) {
-			return ec.unmarshalOValidateConnectionInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐValidateConnectionInput(ctx, v)
+		func(ctx context.Context, v any) (models.ValidateConnectionInput, error) {
+			return ec.unmarshalNValidateConnectionInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐValidateConnectionInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -7226,6 +7281,121 @@ func (ec *executionContext) _ClusterEdge_cursor(ctx context.Context, field graph
 }
 func (ec *executionContext) fieldContext_ClusterEdge_cursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("ClusterEdge", field, false, false, "ID")
+}
+
+func (ec *executionContext) _ClusterTestResult_Success(ctx context.Context, field graphql.CollectedField, obj *ClusterTestResult) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ClusterTestResult_Success(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Success, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_ClusterTestResult_Success(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("ClusterTestResult", field, false, false, "Boolean")
+}
+
+func (ec *executionContext) _ClusterTestResult_Message(ctx context.Context, field graphql.CollectedField, obj *ClusterTestResult) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ClusterTestResult_Message(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Message, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_ClusterTestResult_Message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("ClusterTestResult", field, false, false, "String")
+}
+
+func (ec *executionContext) _ClusterTestResult_Version(ctx context.Context, field graphql.CollectedField, obj *ClusterTestResult) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ClusterTestResult_Version(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Version, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_ClusterTestResult_Version(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("ClusterTestResult", field, false, false, "String")
+}
+
+func (ec *executionContext) _ClusterTestResult_LatencyMs(ctx context.Context, field graphql.CollectedField, obj *ClusterTestResult) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ClusterTestResult_LatencyMs(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.LatencyMs, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_ClusterTestResult_LatencyMs(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("ClusterTestResult", field, false, false, "Int")
+}
+
+func (ec *executionContext) _ClusterTestResult_Databases(ctx context.Context, field graphql.CollectedField, obj *ClusterTestResult) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ClusterTestResult_Databases(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Databases, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNString2ᚕstringᚄ(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_ClusterTestResult_Databases(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("ClusterTestResult", field, false, false, "String")
 }
 
 func (ec *executionContext) _Comment_UUID(ctx context.Context, field graphql.CollectedField, obj *models.Comment) (ret graphql.Marshaler) {
@@ -15467,7 +15637,7 @@ func (ec *executionContext) _QueryRoot_testCluster(ctx context.Context, field gr
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.QueryRoot().TestCluster(ctx, fc.Args["input"].(*models.ValidateConnectionInput))
+			return ec.Resolvers.QueryRoot().TestCluster(ctx, fc.Args["input"].(models.ValidateConnectionInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -15475,11 +15645,11 @@ func (ec *executionContext) _QueryRoot_testCluster(ctx context.Context, field gr
 			directive1 := func(ctx context.Context) (any, error) {
 				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
 				if err != nil {
-					var zeroVal bool
+					var zeroVal *ClusterTestResult
 					return zeroVal, err
 				}
 				if ec.Directives.Auth == nil {
-					var zeroVal bool
+					var zeroVal *ClusterTestResult
 					return zeroVal, errors.New("directive auth is not implemented")
 				}
 				return ec.Directives.Auth(ctx, nil, directive0, requires)
@@ -15488,8 +15658,8 @@ func (ec *executionContext) _QueryRoot_testCluster(ctx context.Context, field gr
 			next = directive1
 			return next
 		},
-		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
-			return ec.marshalNBoolean2bool(ctx, selections, v)
+		func(ctx context.Context, selections ast.SelectionSet, v *ClusterTestResult) graphql.Marshaler {
+			return ec.marshalNClusterTestResult2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐClusterTestResult(ctx, selections, v)
 		},
 		true,
 		true,
@@ -15502,7 +15672,7 @@ func (ec *executionContext) fieldContext_QueryRoot_testCluster(ctx context.Conte
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
+			return ec.childFields_ClusterTestResult(ctx, field)
 		},
 	}
 	defer func() {
@@ -22462,7 +22632,7 @@ func (ec *executionContext) unmarshalInputUpdateClusterInput(ctx context.Context
 			}
 		case "Password":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Password"))
-			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalNString2string(ctx, v) }
+			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalOString2string(ctx, v) }
 
 			directive1 := func(ctx context.Context) (any, error) {
 				max, err := ec.unmarshalNInt2int(ctx, 40)
@@ -23271,7 +23441,7 @@ func (ec *executionContext) unmarshalInputValidateConnectionInput(ctx context.Co
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"IP", "Port", "User", "Password"}
+	fieldsInOrder := [...]string{"IP", "Port", "User", "Password", "Type", "Database"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -23391,6 +23561,40 @@ func (ec *executionContext) unmarshalInputValidateConnectionInput(ctx context.Co
 				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
+		case "Type":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Type"))
+			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalOString2string(ctx, v) }
+
+			directive1 := func(ctx context.Context) (any, error) {
+				pattern, err := ec.unmarshalNString2string(ctx, "^(mysql|postgres)$")
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.Matches == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive matches is not implemented")
+				}
+				return ec.Directives.Matches(ctx, obj, directive0, pattern)
+			}
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(string); ok {
+				it.Type = data
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+		case "Database":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Database"))
+			data, err := ec.unmarshalOString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Database = data
 		}
 	}
 	return it, nil
@@ -23899,6 +24103,59 @@ func (ec *executionContext) _ClusterEdge(ctx context.Context, sel ast.SelectionS
 			}
 		case "cursor":
 			out.Values[i] = ec._ClusterEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
+var clusterTestResultImplementors = []string{"ClusterTestResult"}
+
+func (ec *executionContext) _ClusterTestResult(ctx context.Context, sel ast.SelectionSet, obj *ClusterTestResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, clusterTestResultImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ClusterTestResult")
+		case "Success":
+			out.Values[i] = ec._ClusterTestResult_Success(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Message":
+			out.Values[i] = ec._ClusterTestResult_Message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Version":
+			out.Values[i] = ec._ClusterTestResult_Version(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "LatencyMs":
+			out.Values[i] = ec._ClusterTestResult_LatencyMs(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Databases":
+			out.Values[i] = ec._ClusterTestResult_Databases(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -27311,6 +27568,14 @@ func (ec *executionContext) marshalNClusterEdge2ᚖgithubᚗcomᚋmia0x75ᚋhalo
 	return ec._ClusterEdge(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNClusterTestResult2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐClusterTestResult(ctx context.Context, sel ast.SelectionSet, v *ClusterTestResult) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "ClusterTestResult!")
+		return graphql.Null
+	}
+	return ec._ClusterTestResult(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNCommentEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐCommentEdge(ctx context.Context, sel ast.SelectionSet, v *CommentEdge) graphql.Marshaler {
 	if v == nil {
 		graphql.AddInvalidNullError(ctx, "CommentEdge!")
@@ -27786,6 +28051,11 @@ func (ec *executionContext) unmarshalNUserLoginInput2githubᚗcomᚋmia0x75ᚋha
 
 func (ec *executionContext) unmarshalNUserRegisterInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUserRegisterInput(ctx context.Context, v any) (models.UserRegisterInput, error) {
 	res, err := ec.unmarshalInputUserRegisterInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNValidateConnectionInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐValidateConnectionInput(ctx context.Context, v any) (models.ValidateConnectionInput, error) {
+	res, err := ec.unmarshalInputValidateConnectionInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -28738,14 +29008,6 @@ func (ec *executionContext) marshalOUserEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhalo
 	}
 
 	return ret
-}
-
-func (ec *executionContext) unmarshalOValidateConnectionInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐValidateConnectionInput(ctx context.Context, v any) (*models.ValidateConnectionInput, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputValidateConnectionInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOValidatePatternInput2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐValidatePatternInput(ctx context.Context, v any) (*models.ValidatePatternInput, error) {

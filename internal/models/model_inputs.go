@@ -177,7 +177,7 @@ type UpdateClusterInput struct {
 	Alias       string `valid:"required,length(4|75)"         gqlgen:"Alias"`       //
 	User        string `valid:"required,length(4|40)"         gqlgen:"User"`        //
 	Status      uint8  `valid:"required,int,matches(^(1|2)$)" gqlgen:"Status"`      //
-	Password    string `valid:"required,length(4|40)"         gqlgen:"Password"`    //
+	Password    string `valid:"omitempty,length(4|40)"        gqlgen:"Password"`    // 不填表示保持原密码
 	// GroupUUID 所属分组，不填表示未分组
 	GroupUUID string `valid:"omitempty,length(36|36)"       gqlgen:"GroupUUID"` //
 	// Type 目标库类型，不填表示不修改
@@ -192,10 +192,12 @@ type PatchClusterStatusInput struct {
 
 // ValidateConnectionInput GraphQL API交互所需要的结构体
 type ValidateConnectionInput struct {
-	IP       string `valid:"required,ipv4"         gqlgen:"IP"`       //
-	Port     uint16 `valid:"required,port"         gqlgen:"Port"`     //
-	User     string `valid:"required,length(4|40)" gqlgen:"User"`     //
-	Password string `valid:"required,length(4|40)" gqlgen:"Password"` // 注意：密码最大长度40位，超过40位会导致数据库截断
+	IP       string `valid:"required,ipv4"         gqlgen:"IP"`                  //
+	Port     uint16 `valid:"required,port"         gqlgen:"Port"`                //
+	User     string `valid:"required,length(4|40)" gqlgen:"User"`                //
+	Password string `valid:"required,length(4|40)" gqlgen:"Password"`            // 注意：密码最大长度40位，超过40位会导致数据库截断
+	Type     string `valid:"omitempty,oneof=mysql postgres" gqlgen:"Type"`       //
+	Database string `valid:"omitempty,length(1|64)"           gqlgen:"Database"` //
 }
 
 // ValidatePatternInput GraphQL API交互所需要的结构体

@@ -2,7 +2,6 @@ package resolvers
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -22,32 +21,27 @@ import (
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 )
 
-// TestCluster 测试群集的连接性
-func (r *queryRootResolver) TestCluster(ctx context.Context, input *models.ValidateConnectionInput) (ok bool, err error) {
-	for {
-		rc := gqlapi.ReturnCodeOK
-		const pattern = "%s:%s@tcp(%s:%d)/mysql?loc=Local&parseTime=true"
-		db := &sql.DB{}
-		addr := fmt.Sprintf(pattern, input.User, input.Password, input.IP, input.Port)
-
-		if db, err = sql.Open("mysql", addr); err != nil {
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: 连接参数不正确: %s", rc, err.Error())
-			break
-		}
-		if err = db.Ping(); err != nil {
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: 无法连接到目标群集: %s", rc, err.Error())
-			break
-		}
-		_ = db.Close()
-
-		// 退出for循环
-		ok = true
-		break
+// TestCluster 测试群集的连接性，返回版本、耗时与可见用户库。
+func (r *queryRootResolver) TestCluster(ctx context.Context, input models.ValidateConnectionInput) (*gqlapi.ClusterTestResult, error) {
+	target := &domain.Cluster{
+		IP:       input.IP,
+		Port:     uint(input.Port),
+		User:     input.User,
+		Type:     domain.ClusterType(clusterType(input.Type)),
+		Database: input.Database,
 	}
-
-	return
+	result, err := r.app.Services.Cluster.TestConnection(ctx, target, input.Password)
+	if err != nil {
+		rc := gqlapi.ReturnCodeUnknowError
+		return nil, fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
+	}
+	return &gqlapi.ClusterTestResult{
+		Success:   result.Success,
+		Message:   result.Message,
+		Version:   result.Version,
+		LatencyMs: int(result.Latency.Milliseconds()),
+		Databases: result.Databases,
+	}, nil
 }
 
 // Databases 获取某一个群集的所有用户数据库
@@ -402,20 +396,24 @@ L:
 			}
 		}
 
-		var passwd []byte
-
-		passwd, err = crypto.EncryptAES([]byte(input.Password), config.Config().Secret.Crypto)
-		if err != nil {
-			break L
-		}
-
 		cluster.Host = input.Host
-		cluster.Password = passwd
+		// 密码不填表示保持原密码，服务端不返回明文，前端无从回填。
+		if input.Password != "" {
+			var passwd []byte
+			passwd, err = crypto.EncryptAES([]byte(input.Password), config.Config().Secret.Crypto)
+			if err != nil {
+				break L
+			}
+			cluster.Password = passwd
+		}
 		cluster.IP = input.IP
 		cluster.Port = input.Port
 		cluster.User = input.User
 		cluster.Alias = input.Alias
 		cluster.Status = input.Status
+		if input.Type != "" {
+			cluster.Type = clusterType(input.Type)
+		}
 		cluster.GroupID, err = resolveGroupID(input.GroupUUID)
 		if err != nil {
 			rc = gqlapi.ReturnCodeNotFound

@@ -44,6 +44,20 @@ type ClusterEdge struct {
 	Cursor string `json:"cursor"`
 }
 
+// 试连目标库的结果
+type ClusterTestResult struct {
+	// 是否连通
+	Success bool `json:"Success"`
+	// 结果描述，连不上时是失败原因
+	Message string `json:"Message"`
+	// 目标库服务端版本
+	Version string `json:"Version"`
+	// 连接耗时（毫秒）
+	LatencyMs int `json:"LatencyMs"`
+	// 账号可见的用户库
+	Databases []string `json:"Databases"`
+}
+
 type CommentConnection struct {
 	// 分页信息
 	PageInfo *PageInfo `json:"pageInfo"`
