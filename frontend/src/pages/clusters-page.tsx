@@ -49,8 +49,8 @@ export function ClustersPage() {
   const [type, setType] = useState("all")
   const [group, setGroup] = useState("all")
   const [form, setForm] = useState<
-    { mode: "create" } | { mode: "edit"; cluster: ClusterFormValues & { uuid: string } }
-  >({ mode: "create" })
+    { mode: "create" } | { mode: "edit"; cluster: ClusterFormValues & { uuid: string } } | null
+  >(null)
   const [error, setError] = useState<string | null>(null)
 
   const page = useClusters(8)
@@ -112,10 +112,8 @@ export function ClustersPage() {
               </Button>
             </div>
             <ClusterFormDialog
-              open={form.mode === "create"}
-              onOpenChange={(open) => {
-                if (!open) setForm({ mode: "create" })
-              }}
+              open={form?.mode === "create"}
+              onOpenChange={(open) => setForm(open ? { mode: "create" } : null)}
               onSaved={() => {
                 page.refetch()
               }}
@@ -241,7 +239,9 @@ export function ClustersPage() {
                     tone={cluster.status === "normal" ? "success" : "danger"}
                     label={cluster.status === "normal" ? "正常" : "已停用"}
                   />
-                  <span className="text-xs text-muted-foreground">{cluster.group}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {cluster.ip.includes("127.0.0.1") ? "本机" : "远端"}
+                  </span>
                 </div>
               </div>
             ))}
@@ -319,15 +319,15 @@ export function ClustersPage() {
         />
       </SectionCard>
 
-      {form.mode === "edit" ? (
+      {form?.mode === "edit" ? (
         <ClusterFormDialog
           open
           onOpenChange={(open) => {
-            if (!open) setForm({ mode: "create" })
+            if (!open) setForm(null)
           }}
           cluster={form.cluster}
           onSaved={() => {
-            setForm({ mode: "create" })
+            setForm(null)
             page.refetch()
           }}
         />
