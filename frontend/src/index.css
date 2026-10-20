@@ -1,0 +1,167 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource/inter/latin-400.css";
+@import "@fontsource/inter/latin-500.css";
+@import "@fontsource/inter/latin-600.css";
+@import "@fontsource/inter/latin-700.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-heading: var(--font-sans);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-success: var(--halo-success);
+  --color-warning: var(--halo-warning);
+  --color-danger: var(--halo-danger);
+  --color-danger-foreground: var(--halo-danger-foreground);
+  --color-strong: var(--halo-text-strong);
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 24px;
+  --radius-4xl: 32px;
+}
+
+:root {
+  /* surfaces & text */
+  --halo-canvas: #fafafa;
+  --halo-surface: #ffffff;
+  --halo-text: oklch(37.15% 0 0);          /* ~#404040 */
+  --halo-text-strong: #171717;
+  --halo-text-muted: oklch(55.55% 0 0);    /* ~#737373 */
+  --halo-border: color-mix(in oklab, oklch(26.86% 0 0) 11.9%, transparent);
+
+  /* brand & status */
+  --halo-primary: #066fd1;
+  --halo-success: #2fb344;
+  --halo-warning: #f59f00;
+  --halo-danger: #d63939;
+  --halo-danger-foreground: #ffffff;
+
+  /* geometry */
+  --halo-radius-card: 8px;
+  --halo-radius-control: 6px;
+
+  /* shadcn semantic mapping */
+  --background: var(--halo-canvas);
+  --foreground: var(--halo-text);
+  --card: var(--halo-surface);
+  --card-foreground: var(--halo-text);
+  --popover: var(--halo-surface);
+  --popover-foreground: var(--halo-text);
+  --primary: var(--halo-primary);
+  --primary-foreground: #ffffff;
+  --secondary: oklch(96.7% 0 0);
+  --secondary-foreground: var(--halo-text);
+  --muted: oklch(96.7% 0 0);
+  --muted-foreground: var(--halo-text-muted);
+  --accent: oklch(96.7% 0 0);
+  --accent-foreground: var(--halo-text);
+  --destructive: var(--halo-danger);
+  --border: var(--halo-border);
+  --input: var(--halo-border);
+  --ring: var(--halo-primary);
+  --radius: var(--halo-radius-control);
+
+  color-scheme: light;
+}
+
+.dark {
+  --halo-canvas: oklch(20.46% 0 0);        /* ~neutral-900 */
+  --halo-surface: oklch(26.86% 0 0);       /* ~neutral-800 */
+  --halo-text: oklch(92.19% 0 0);
+  --halo-text-strong: #ffffff;
+  --halo-text-muted: oklch(71.55% 0 0);
+  --halo-border: rgba(128, 150, 172, 0.2);
+  --halo-danger-foreground: #ffffff;
+
+  --background: var(--halo-canvas);
+  --foreground: var(--halo-text);
+  --card: var(--halo-surface);
+  --card-foreground: var(--halo-text);
+  --popover: var(--halo-surface);
+  --popover-foreground: var(--halo-text);
+  --primary: var(--halo-primary);
+  --primary-foreground: #ffffff;
+  --secondary: oklch(32% 0 0);
+  --secondary-foreground: var(--halo-text);
+  --muted: oklch(32% 0 0);
+  --muted-foreground: var(--halo-text-muted);
+  --accent: oklch(32% 0 0);
+  --accent-foreground: var(--halo-text);
+  --destructive: var(--halo-danger);
+  --border: var(--halo-border);
+  --input: var(--halo-border);
+  --ring: var(--halo-primary);
+  --radius: var(--halo-radius-control);
+
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* Apex renders SVG and needs concrete colors, so the theme is applied
+     through CSS overrides instead of theme re-renders. */
+  .apexcharts-gridline,
+  .apexcharts-xaxis line,
+  .apexcharts-yaxis line {
+    stroke: var(--halo-border);
+  }
+  .apexcharts-text {
+    fill: var(--halo-text-muted);
+  }
+  .apexcharts-tooltip {
+    background: var(--halo-surface);
+    border-color: var(--halo-border);
+    color: var(--halo-text);
+  }
+  .apexcharts-tooltip-title {
+    background: var(--halo-surface);
+    border-color: var(--halo-border);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

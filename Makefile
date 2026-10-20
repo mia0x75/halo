@@ -155,6 +155,32 @@ lint: build
 	retool do golangci-lint --tests=false run
 	@echo "gometalinter check your code is pretty good"
 
+# 前端依赖安装
+.PHONY: frontend-install
+frontend-install:
+	@echo "$(CGREEN)Installing frontend dependencies ...$(CEND)"
+	cd frontend && bun install
+
+# 前端构建（类型检查 + 打包）
+.PHONY: frontend-build
+frontend-build:
+	@echo "$(CGREEN)Building frontend ...$(CEND)"
+	cd frontend && bun run build
+	@echo "$(CGREEN)frontend build Success!$(CEND)"
+
+# 前端静态检查
+.PHONY: frontend-lint
+frontend-lint:
+	@echo "$(CGREEN)Run frontend linter ...$(CEND)"
+	cd frontend && bun run lint
+	@echo "$(CGREEN)frontend lint Success!$(CEND)"
+
+# 前端开发服务器
+.PHONY: frontend-dev
+frontend-dev:
+	@echo "$(CGREEN)Starting frontend dev server ...$(CEND)"
+	cd frontend && bun run dev
+
 # 清理
 .PHONY: clean
 clean:
