@@ -10,6 +10,15 @@ import {
 
 import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { CursorPagination } from "@/components/ui/cursor-pagination"
@@ -32,10 +41,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import {
-  ClusterFormDialog,
-  type ClusterFormValues,
-} from "@/features/clusters/cluster-form-dialog"
 import { useClusters } from "@/hooks/use-clusters"
 import { graphqlRequest } from "@/lib/api/client"
 import { REMOVE_CLUSTER_MUTATION } from "@/lib/api/queries"
@@ -43,14 +48,19 @@ import { getToken } from "@/lib/api/session"
 
 type ViewMode = "card" | "table"
 
-export function ClustersPage() {
+export interface ClustersPageProps {
+  /** 跳转到接入群集页 */
+  onCreate: () => void
+  /** 跳转到编辑群集页 */
+  onEdit: (uuid: string) => void
+}
+
+export function ClustersPage({ onCreate, onEdit }: ClustersPageProps) {
   const [view, setView] = useState<ViewMode>("card")
   const [keyword, setKeyword] = useState("")
   const [type, setType] = useState("all")
   const [group, setGroup] = useState("all")
-  const [form, setForm] = useState<
-    { mode: "create" } | { mode: "edit"; cluster: ClusterFormValues & { uuid: string } } | null
-  >(null)
+  const [removing, setRemoving] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const page = useClusters(8)
@@ -74,13 +84,16 @@ export function ClustersPage() {
     })
   }, [page.clusters, keyword, type, group])
 
-  const remove = async (uuid: string) => {
+  const remove = async () => {
+    if (!removing) return
     setError(null)
     try {
-      await graphqlRequest(REMOVE_CLUSTER_MUTATION, { id: uuid }, getToken())
+      await graphqlRequest(REMOVE_CLUSTER_MUTATION, { id: removing }, getToken())
+      setRemoving(null)
       page.refetch()
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))
+      setRemoving(null)
     }
   }
 
@@ -111,19 +124,10 @@ export function ClustersPage() {
                 <IconList size={16} stroke={1.5} />
               </Button>
             </div>
-            <ClusterFormDialog
-              open={form?.mode === "create"}
-              onOpenChange={(open) => setForm(open ? { mode: "create" } : null)}
-              onSaved={() => {
-                page.refetch()
-              }}
-              trigger={
-                <Button>
-                  <IconPlus size={16} stroke={1.5} />
-                  接入群集
-                </Button>
-              }
-            />
+            <Button onClick={onCreate}>
+              <IconPlus size={16} stroke={1.5} />
+              接入群集
+            </Button>
           </div>
         }
       />
@@ -202,25 +206,9 @@ export function ClustersPage() {
                       {cluster.type}
                     </Badge>
                     <ClusterMenu
-                      cluster={cluster}
-                      onEdit={() =>
-                        setForm({
-                          mode: "edit",
-                          cluster: {
-                          uuid: cluster.uuid,
-                          alias: cluster.alias,
-                          host: cluster.host,
-                          ip: cluster.ip,
-                          port: cluster.port,
-                          user: "",
-                          password: "",
-                          status: cluster.status === "normal" ? 1 : 2,
-                          type: cluster.type,
-                            groupUUID: "",
-                          },
-                        })
-                      }
-                      onRemove={() => remove(cluster.uuid)}
+                      alias={cluster.alias}
+                      onEdit={() => onEdit(cluster.uuid)}
+                      onRemove={() => setRemoving(cluster.uuid)}
                     />
                   </div>
                 </div>
@@ -281,25 +269,9 @@ export function ClustersPage() {
                   </TableCell>
                   <TableCell>
                     <ClusterMenu
-                      cluster={cluster}
-                      onEdit={() =>
-                        setForm({
-                          mode: "edit",
-                          cluster: {
-                          uuid: cluster.uuid,
-                          alias: cluster.alias,
-                          host: cluster.host,
-                          ip: cluster.ip,
-                          port: cluster.port,
-                          user: "",
-                          password: "",
-                          status: cluster.status === "normal" ? 1 : 2,
-                          type: cluster.type,
-                            groupUUID: "",
-                          },
-                        })
-                      }
-                      onRemove={() => remove(cluster.uuid)}
+                      alias={cluster.alias}
+                      onEdit={() => onEdit(cluster.uuid)}
+                      onRemove={() => setRemoving(cluster.uuid)}
                     />
                   </TableCell>
                 </TableRow>
@@ -319,35 +291,44 @@ export function ClustersPage() {
         />
       </SectionCard>
 
-      {form?.mode === "edit" ? (
-        <ClusterFormDialog
-          open
-          onOpenChange={(open) => {
-            if (!open) setForm(null)
-          }}
-          cluster={form.cluster}
-          onSaved={() => {
-            setForm(null)
-            page.refetch()
-          }}
-        />
-      ) : null}
+      <AlertDialog open={removing !== null} onOpenChange={(open) => !open && setRemoving(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-base font-medium text-strong">
+              删除群集
+            </AlertDialogTitle>
+            <AlertDialogDescription className="mt-1 text-sm text-muted-foreground">
+              删除后该群集不再可用，已有的工单记录保留。确认删除？
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="mt-5 flex justify-end gap-2">
+            <AlertDialogCancel asChild>
+              <Button variant="outline">取消</Button>
+            </AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button variant="danger" onClick={remove}>
+                删除
+              </Button>
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
 
 interface ClusterMenuProps {
-  cluster: { uuid: string; alias: string }
+  alias: string
   onEdit: () => void
   onRemove: () => void
 }
 
 /** 群集行操作菜单。 */
-function ClusterMenu({ cluster, onEdit, onRemove }: ClusterMenuProps) {
+function ClusterMenu({ alias, onEdit, onRemove }: ClusterMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon-sm" aria-label={`${cluster.alias} 的操作`}>
+        <Button variant="ghost" size="icon-sm" aria-label={`${alias} 的操作`}>
           <IconDotsVertical size={16} stroke={1.5} />
         </Button>
       </DropdownMenuTrigger>

@@ -250,10 +250,12 @@ export interface ClusterNode {
   Host: string
   IP: string
   Port: number
+  User: string
   Status: number
   /** 目标库类型：mysql / postgres */
   Type: string
   Group: string | null
+  GroupUUID: string | null
   CreateAt: number
 }
 
@@ -275,9 +277,11 @@ export const CLUSTERS_QUERY = `
           Host
           IP
           Port
+          User
           Status
           Type
           Group
+          GroupUUID
           CreateAt
         }
       }
@@ -401,3 +405,23 @@ export const ME_REVIEWERS_QUERY = `
     }
   }
 `
+
+export const TEST_CLUSTER_QUERY = `
+  query TestCluster($input: ValidateConnectionInput!) {
+    testCluster(input: $input) {
+      Success
+      Message
+      Version
+      LatencyMs
+      Databases
+    }
+  }
+`
+
+export interface ClusterTestResult {
+  Success: boolean
+  Message: string
+  Version: string
+  LatencyMs: number
+  Databases: string[]
+}
