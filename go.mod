@@ -20,7 +20,7 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.12.1
 	github.com/toolkits/file v0.0.0-20160325033739-a5b3c5147e07
-	github.com/vektah/gqlparser/v2 v2.5.62
+	github.com/vektah/gqlparser/v2 v2.5.63
 	golang.org/x/crypto v0.58.0
 )
 
@@ -47,7 +47,7 @@ require (
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/tklauser/go-sysconf v0.4.0 // indirect
 	github.com/tklauser/numcpus v0.12.0 // indirect
-	github.com/urfave/cli/v3 v3.11.0 // indirect
+	github.com/urfave/cli/v3 v3.14.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/mod v0.42.0 // indirect
