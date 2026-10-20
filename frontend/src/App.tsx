@@ -17,6 +17,7 @@ import { PlaceholderPage } from "@/pages/placeholder-page"
 import { RulesPage } from "@/pages/rules-page"
 import { TicketCreatePage } from "@/pages/ticket-create-page"
 import { TicketDetailPage } from "@/pages/ticket-detail-page"
+import { TicketEditPage } from "@/pages/ticket-edit-page"
 import { TicketQueuePage } from "@/pages/ticket-queue-page"
 import { TicketsPage } from "@/pages/tickets-page"
 import { ViolationsPage } from "@/pages/violations-page"
@@ -25,6 +26,7 @@ type View =
   | { kind: "nav"; key: NavKey }
   | { kind: "ticket"; uuid: string }
   | { kind: "ticket-create" }
+  | { kind: "ticket-edit"; uuid: string }
   | { kind: "cluster-form"; mode: "create" | "edit"; uuid?: string }
 
 export default function App() {
@@ -41,6 +43,23 @@ export default function App() {
   )
 
   const page = view.kind === "nav" ? view.key : "tickets"
+
+  if (view.kind === "ticket-edit") {
+    return (
+      <AppShell
+        key={nonce}
+        active="tickets"
+        onSelect={(key) => setView({ kind: "nav", key })}
+        onConnectionChange={refresh}
+      >
+        <TicketEditPage
+          uuid={view.uuid}
+          onBack={() => setView({ kind: "ticket", uuid: view.uuid })}
+          onSaved={(uuid) => setView({ kind: "ticket", uuid })}
+        />
+      </AppShell>
+    )
+  }
 
   if (view.kind === "ticket-create") {
     return (
@@ -92,6 +111,7 @@ export default function App() {
         <TicketDetailPage
           uuid={view.uuid}
           onBack={() => setView({ kind: "nav", key: "tickets" })}
+          onEdit={() => setView({ kind: "ticket-edit", uuid: view.uuid })}
         />
       </AppShell>
     )

@@ -165,7 +165,7 @@ export const TICKETS_QUERY = `
           CreateAt
           User { UUID Name }
           Reviewer { UUID Name }
-          Cluster { UUID Alias Host IP Port }
+          Cluster { UUID Alias Host IP Port Type Group }
         }
       }
     }
@@ -207,7 +207,7 @@ export const MY_TICKETS_QUERY = `
             CreateAt
             User { UUID Name }
             Reviewer { UUID Name }
-            Cluster { UUID Alias Host IP Port }
+            Cluster { UUID Alias Host IP Port Type Group }
           }
         }
       }
@@ -236,7 +236,7 @@ export const PENDING_REVIEWS_QUERY = `
             CreateAt
             User { UUID Name }
             Reviewer { UUID Name }
-            Cluster { UUID Alias Host IP Port }
+            Cluster { UUID Alias Host IP Port Type Group }
           }
         }
       }
@@ -351,6 +351,16 @@ export const CREATE_TICKET_MUTATION = `
   }
 `
 
+export const UPDATE_TICKET_MUTATION = `
+  mutation UpdateTicket($input: UpdateTicketInput!) {
+    updateTicket(input: $input) {
+      UUID
+      Subject
+      Status
+    }
+  }
+`
+
 export const TICKET_DETAIL_QUERY = `
   query Ticket($id: ID!) {
     ticket(id: $id) {
@@ -361,7 +371,7 @@ export const TICKET_DETAIL_QUERY = `
       Status
       CreateAt
       UpdateAt
-      Cluster { UUID Alias Host IP Port }
+      Cluster { UUID Alias Host IP Port Type Group }
       User { UUID Name Email }
       Reviewer { UUID Name }
       Statements(first: 20) {

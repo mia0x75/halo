@@ -12,22 +12,42 @@ import {
   CREATE_TICKET_MUTATION,
   ME_CLUSTERS_QUERY,
   ME_REVIEWERS_QUERY,
+  UPDATE_TICKET_MUTATION,
 } from "@/lib/api/queries"
 import { getToken } from "@/lib/api/session"
 import { clusters as mockClusters, users as mockUsers } from "@/lib/mock/data"
 
+export interface TicketFormValues {
+  clusterUUID: string
+  database: string
+  subject: string
+  content: string
+  reviewerUUID: string
+}
+
 export interface TicketFormProps {
-  onCreated: (uuid: string) => void
+  mode: "create" | "edit"
+  /** 编辑时带原工单 UUID */
+  ticketUUID?: string
+  /** 编辑时的初始值 */
+  initial?: TicketFormValues
+  onSubmitted: (uuid: string) => void
   onCancel: () => void
 }
 
-/** 新建工单表单：选群集、填库名与主题、正文写 SQL、指定审核人。 */
-export function TicketForm({ onCreated, onCancel }: TicketFormProps) {
-  const [clusterUUID, setClusterUUID] = useState("")
-  const [database, setDatabase] = useState("")
-  const [subject, setSubject] = useState("")
-  const [content, setContent] = useState("")
-  const [reviewerUUID, setReviewerUUID] = useState("")
+/** 工单表单：选群集、填库名与主题、正文写 SQL、指定审核人。 */
+export function TicketForm({
+  mode,
+  ticketUUID,
+  initial,
+  onSubmitted,
+  onCancel,
+}: TicketFormProps) {
+  const [clusterUUID, setClusterUUID] = useState(initial?.clusterUUID ?? "")
+  const [database, setDatabase] = useState(initial?.database ?? "")
+  const [subject, setSubject] = useState(initial?.subject ?? "")
+  const [content, setContent] = useState(initial?.content ?? "")
+  const [reviewerUUID, setReviewerUUID] = useState(initial?.reviewerUUID ?? "")
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -64,22 +84,31 @@ export function TicketForm({ onCreated, onCancel }: TicketFormProps) {
         label: `${cluster.alias} · ${cluster.type} (${cluster.ip}:${cluster.port})`,
       }))
     }
-    return edges.map((edge) => ({
+    const options = edges.map((edge) => ({
       uuid: edge.node.UUID,
       label: `${edge.node.Alias} · ${edge.node.Type} (${edge.node.IP}:${edge.node.Port})`,
     }))
-  }, [remoteClusters.data])
+    // 原工单的群集可能不在当前可选列表里，补一条免得回填的值丢失。
+    if (initial?.clusterUUID && !options.some((option) => option.uuid === initial.clusterUUID)) {
+      options.unshift({ uuid: initial.clusterUUID, label: "原工单群集" })
+    }
+    return options
+  }, [remoteClusters.data, initial])
 
   const reviewerOptions = useMemo(() => {
     const reviewers = remoteReviewers.data?.me?.Reviewers
     if (!reviewers || reviewers.length === 0) {
       return mockUsers.map((user) => ({ uuid: user.email, label: user.name }))
     }
-    return reviewers.map((user) => ({
+    const options = reviewers.map((user) => ({
       uuid: user.UUID,
       label: user.Name || user.Email,
     }))
-  }, [remoteReviewers.data])
+    if (initial?.reviewerUUID && !options.some((option) => option.uuid === initial.reviewerUUID)) {
+      options.unshift({ uuid: initial.reviewerUUID, label: "原工单审核人" })
+    }
+    return options
+  }, [remoteReviewers.data, initial])
 
   // 默认选第一项：渲染时推导，不在 effect 里改状态。
   const selectedCluster = clusterUUID || clusterOptions[0]?.uuid || ""
@@ -95,6 +124,22 @@ export function TicketForm({ onCreated, onCancel }: TicketFormProps) {
     setSubmitting(true)
     setError(null)
     try {
+      const input = {
+        ClusterUUID: selectedCluster,
+        Database: database.trim(),
+        Subject: subject.trim(),
+        Content: content,
+        ReviewerUUID: selectedReviewer,
+      }
+      if (mode === "edit") {
+        await graphqlRequest(
+          UPDATE_TICKET_MUTATION,
+          { input: { ...input, TicketUUID: ticketUUID } },
+          getToken(),
+        )
+        onSubmitted(ticketUUID ?? "")
+        return
+      }
       const data = await graphqlRequest<
         { createTicket: { UUID: string } },
         {
@@ -106,20 +151,8 @@ export function TicketForm({ onCreated, onCancel }: TicketFormProps) {
             ReviewerUUID: string
           }
         }
-      >(
-        CREATE_TICKET_MUTATION,
-        {
-          input: {
-            ClusterUUID: selectedCluster,
-            Database: database.trim(),
-            Subject: subject.trim(),
-            Content: content,
-            ReviewerUUID: selectedReviewer,
-          },
-        },
-        getToken(),
-      )
-      onCreated(data.createTicket.UUID)
+      >(CREATE_TICKET_MUTATION, { input }, getToken())
+      onSubmitted(data.createTicket.UUID)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))
     } finally {
@@ -204,7 +237,7 @@ export function TicketForm({ onCreated, onCancel }: TicketFormProps) {
         </Button>
         <Button disabled={!valid || submitting} onClick={submit}>
           <IconSend size={16} stroke={1.5} />
-          {submitting ? "提交中…" : "提交工单"}
+          {submitting ? "提交中…" : mode === "edit" ? "保存工单" : "提交工单"}
         </Button>
       </div>
     </div>

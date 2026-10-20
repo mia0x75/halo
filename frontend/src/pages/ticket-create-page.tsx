@@ -27,7 +27,7 @@ export function TicketCreatePage({ onBack, onCreated }: TicketCreatePageProps) {
       />
 
       <SectionCard title="工单内容" description="选择目标群集与审核人，正文写要执行的 SQL">
-        <TicketForm onCreated={onCreated} onCancel={onBack} />
+        <TicketForm mode="create" onSubmitted={onCreated} onCancel={onBack} />
       </SectionCard>
     </>
   )

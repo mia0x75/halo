@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react"
 
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/shared/status-badge"
 import { useGraphQL } from "@/hooks/use-graphql"
 import { formatUnix } from "@/lib/api/mappers"
@@ -17,6 +18,8 @@ import {
 
 export interface TicketDetailViewProps {
   uuid: string | null
+  /** 进入编辑页 */
+  onEdit?: () => void
 }
 
 interface StatementView {
@@ -62,8 +65,11 @@ const statusByCode: Record<number, TicketStatus> = {
   9: "closed",
 }
 
+/** 已关闭、已执行成功、执行失败的工单不可再改。 */
+const editableStatuses = new Set([1, 2, 3, 4, 5, 6])
+
 /** 工单详情内容：基本信息、语句列表与审核意见。 */
-export function TicketDetailView({ uuid }: TicketDetailViewProps) {
+export function TicketDetailView({ uuid, onEdit }: TicketDetailViewProps) {
   const [tab, setTab] = useState<"statements" | "comments">("statements")
 
   const detail = useGraphQL<{ ticket: TicketDetail | null }, { id: string }>(
@@ -120,6 +126,11 @@ export function TicketDetailView({ uuid }: TicketDetailViewProps) {
                 <Badge variant="muted">{ticket.Cluster.Group}</Badge>
               ) : null}
             </>
+          ) : null}
+          {onEdit && ticket && editableStatuses.has(ticket.Status) ? (
+            <Button variant="outline" size="sm" onClick={onEdit}>
+              编辑
+            </Button>
           ) : null}
         </div>
       </div>

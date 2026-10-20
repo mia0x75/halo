@@ -7,10 +7,12 @@ import { TicketDetailView } from "@/features/tickets/ticket-detail-view"
 export interface TicketDetailPageProps {
   uuid: string
   onBack: () => void
+  /** 进入编辑页 */
+  onEdit?: () => void
 }
 
 /** 工单详情页：内容会越来越多，独立成页而不是弹窗。 */
-export function TicketDetailPage({ uuid, onBack }: TicketDetailPageProps) {
+export function TicketDetailPage({ uuid, onBack, onEdit }: TicketDetailPageProps) {
   return (
     <>
       <PageHeader
@@ -23,7 +25,7 @@ export function TicketDetailPage({ uuid, onBack }: TicketDetailPageProps) {
           </Button>
         }
       />
-      <TicketDetailView uuid={uuid} />
+      <TicketDetailView uuid={uuid} onEdit={onEdit} />
     </>
   )
 }
