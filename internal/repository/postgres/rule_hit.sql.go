@@ -122,6 +122,35 @@ func (q *Queries) DeleteRuleHitsBefore(ctx context.Context, createAt time.Time) 
 	return result.RowsAffected()
 }
 
+const deleteRuleHitsByStatement = `-- name: DeleteRuleHitsByStatement :execrows
+DELETE FROM mm_violations WHERE ticket_id = $1 AND sequence = $2
+`
+
+type DeleteRuleHitsByStatementParams struct {
+	TicketID int64
+	Sequence int32
+}
+
+func (q *Queries) DeleteRuleHitsByStatement(ctx context.Context, arg DeleteRuleHitsByStatementParams) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteRuleHitsByStatement, arg.TicketID, arg.Sequence)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const deleteRuleHitsByTicket = `-- name: DeleteRuleHitsByTicket :execrows
+DELETE FROM mm_violations WHERE ticket_id = $1
+`
+
+func (q *Queries) DeleteRuleHitsByTicket(ctx context.Context, ticketID int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteRuleHitsByTicket, ticketID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 const listRuleHits = `-- name: ListRuleHits :many
 SELECT violation_id, uuid, ticket_id, sequence, rule_name, level, message, create_at FROM mm_violations ORDER BY create_at DESC, violation_id DESC LIMIT $1
 `

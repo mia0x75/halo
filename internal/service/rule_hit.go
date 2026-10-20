@@ -16,8 +16,24 @@ func NewRuleHitService(hits domain.RuleHitRepository) *RuleHitService {
 	return &RuleHitService{hits: hits}
 }
 
-// Record writes the hits of one statement.
-func (s *RuleHitService) Record(ctx context.Context, hits []*domain.RuleHit) error {
+// Record writes the hits of one statement, replacing the previous hits of
+// that statement: a revalidation must not leave a second copy behind.
+func (s *RuleHitService) Record(ctx context.Context, ticketID uint, sequence uint16, hits []*domain.RuleHit) error {
+	if _, err := s.hits.DeleteByStatement(ctx, ticketID, sequence); err != nil {
+		return err
+	}
+	if len(hits) == 0 {
+		return nil
+	}
+	return s.hits.CreateBatch(ctx, hits)
+}
+
+// ReplaceTicket writes the hits of every statement of one ticket, replacing
+// the previous hits of the ticket.
+func (s *RuleHitService) ReplaceTicket(ctx context.Context, ticketID uint, hits []*domain.RuleHit) error {
+	if _, err := s.hits.DeleteByTicket(ctx, ticketID); err != nil {
+		return err
+	}
 	if len(hits) == 0 {
 		return nil
 	}

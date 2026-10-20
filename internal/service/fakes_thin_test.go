@@ -273,6 +273,18 @@ func (s *stubRuleHitRepo) Create(_ context.Context, hit *domain.RuleHit) error {
 	return nil
 }
 
+func (s *stubRuleHitRepo) DeleteByStatement(context.Context, uint, uint16) (int64, error) {
+	return 0, nil
+}
+
+func (s *stubRuleHitRepo) DeleteByTicket(context.Context, uint) (int64, error) {
+	return 0, nil
+}
+
+func (s *stubRuleHitRepo) DeleteBefore(context.Context, uint) (int64, error) {
+	return 0, nil
+}
+
 func (s *stubRuleHitRepo) CreateBatch(ctx context.Context, hits []*domain.RuleHit) error {
 	for _, hit := range hits {
 		if err := s.Create(ctx, hit); err != nil {

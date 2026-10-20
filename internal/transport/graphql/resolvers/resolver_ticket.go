@@ -975,6 +975,10 @@ func (r *mutationRootResolver) validation(stmts []*models.Statement, cluster *mo
 				return err
 			}
 		}
+		// 重新校验时先清掉该工单的旧明细，避免留下两份命中。
+		if _, err := repos.RuleHit.DeleteByTicket(ctx, ticket.TicketID); err != nil {
+			return err
+		}
 		if err := repos.RuleHit.CreateBatch(ctx, hits); err != nil {
 			return err
 		}

@@ -61,6 +61,8 @@ type Querier interface {
 	DeleteRoleByUUID(ctx context.Context, uuid string) error
 	DeleteRuleByUUID(ctx context.Context, uuid string) error
 	DeleteRuleHitsBefore(ctx context.Context, createAt time.Time) (int64, error)
+	DeleteRuleHitsByStatement(ctx context.Context, arg DeleteRuleHitsByStatementParams) (int64, error)
+	DeleteRuleHitsByTicket(ctx context.Context, ticketID uint32) (int64, error)
 	DeleteStatementByTicketSequence(ctx context.Context, arg DeleteStatementByTicketSequenceParams) error
 	DeleteStatementByUUID(ctx context.Context, uuid string) error
 	DeleteStatementsByTicket(ctx context.Context, ticketID uint32) error

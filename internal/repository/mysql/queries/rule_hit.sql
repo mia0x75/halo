@@ -15,3 +15,9 @@ SELECT violation_id, uuid, ticket_id, sequence, rule_name, level, message, creat
 
 -- name: DeleteRuleHitsBefore :execrows
 DELETE FROM mm_violations WHERE create_at < ?;
+
+-- name: DeleteRuleHitsByStatement :execrows
+DELETE FROM mm_violations WHERE ticket_id = ? AND sequence = ?;
+
+-- name: DeleteRuleHitsByTicket :execrows
+DELETE FROM mm_violations WHERE ticket_id = ?;

@@ -115,3 +115,16 @@ func (r *RuleHitRepo) CountByRule(ctx context.Context, from, to uint, limit int)
 func (r *RuleHitRepo) DeleteBefore(ctx context.Context, before uint) (int64, error) {
 	return r.q.DeleteRuleHitsBefore(ctx, time.Unix(int64(before), 0).UTC())
 }
+
+// DeleteByStatement removes the hits of one statement.
+func (r *RuleHitRepo) DeleteByStatement(ctx context.Context, ticketID uint, sequence uint16) (int64, error) {
+	return r.q.DeleteRuleHitsByStatement(ctx, DeleteRuleHitsByStatementParams{
+		TicketID: uint32(ticketID),
+		Sequence: sequence,
+	})
+}
+
+// DeleteByTicket removes every hit of one ticket.
+func (r *RuleHitRepo) DeleteByTicket(ctx context.Context, ticketID uint) (int64, error) {
+	return r.q.DeleteRuleHitsByTicket(ctx, uint32(ticketID))
+}

@@ -96,7 +96,11 @@ func (s *StatementService) Submit(ctx context.Context, ticketID uint, sql string
 		if err := repos.Statement.Create(ctx, st); err != nil {
 			return err
 		}
-		// 命中明细与语句一起落库，仪表盘才能按规则和级别聚合。
+		// 命中明细与语句一起落库，仪表盘才能按规则和级别聚合；
+		// 重新校验时先清掉旧明细，避免同一语句留下两份命中。
+		if _, err := repos.RuleHit.DeleteByStatement(ctx, ticketID, st.Sequence); err != nil {
+			return err
+		}
 		return repos.RuleHit.CreateBatch(ctx, ruleHitsOf(ticketID, st.Sequence, violations))
 	}); err != nil {
 		return nil, err

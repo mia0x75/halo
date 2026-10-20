@@ -156,6 +156,11 @@ type RuleHitRepository interface {
 	CountByRule(ctx context.Context, from, to uint, limit int) ([]RuleHitCount, error)
 	// DeleteBefore removes the hits created before the given time.
 	DeleteBefore(ctx context.Context, before uint) (int64, error)
+	// DeleteByStatement removes the hits of one statement, so a revalidation
+	// replaces the previous hits instead of adding a second copy.
+	DeleteByStatement(ctx context.Context, ticketID uint, sequence uint16) (int64, error)
+	// DeleteByTicket removes every hit of one ticket.
+	DeleteByTicket(ctx context.Context, ticketID uint) (int64, error)
 }
 
 type StatementRepository interface {
