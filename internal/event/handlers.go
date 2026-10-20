@@ -30,19 +30,34 @@ func GlobalAuditLogWriter(repo domain.LogRepository) Handler {
 }
 
 // GlobalMessageWriter turns the events a user cares about into in-app
-// messages. The submitter is notified unless the actor is the submitter
-// itself.
+// messages.
+//
+// The channel split is deliberate: the in-app message goes to the party that
+// has to act or to know the result, while the mail channel keeps the offline
+// record (see ADR 0014). The actor never receives a message about their own
+// action.
 func GlobalMessageWriter(repo domain.MessageRepository) Handler {
 	return func(ctx context.Context, ev Event) error {
 		var (
-			ownerID uint
-			actorID uint
-			ticket  models.Ticket
-			title   string
-			content string
+			ownerID    uint
+			reviewerID uint
+			actorID    uint
+			ticket     models.Ticket
+			title      string
+			content    string
 		)
 
 		switch e := ev.(type) {
+		case *TicketCreated:
+			// 新工单是审核人的待办，提交人自己知道。
+			reviewerID, actorID, ticket = e.Ticket.ReviewerID, e.User.UserID, e.Ticket
+			title = "待审核工单"
+			content = fmt.Sprintf("工单「%s」等待审核。", ticket.Subject)
+		case *CommentCreated:
+			// 评论是给提交人的补充说明。
+			ownerID, actorID, ticket = e.Ticket.UserID, e.User.UserID, e.Ticket
+			title = "工单有新评论"
+			content = fmt.Sprintf("工单「%s」收到新的评论。", ticket.Subject)
 		case *TicketStatusPatched:
 			ownerID, actorID, ticket = e.Ticket.UserID, e.User.UserID, e.Ticket
 			title = "工单状态更新"
@@ -59,13 +74,17 @@ func GlobalMessageWriter(repo domain.MessageRepository) Handler {
 			return nil
 		}
 
-		if ownerID == 0 || ownerID == actorID {
+		recipient := ownerID
+		if recipient == 0 {
+			recipient = reviewerID
+		}
+		if recipient == 0 || recipient == actorID {
 			return nil
 		}
 
 		if err := repo.Create(ctx, &domain.Message{
 			UUID:     uuid.NewString(),
-			UserID:   ownerID,
+			UserID:   recipient,
 			Category: "ticket",
 			Title:    title,
 			Content:  content,
