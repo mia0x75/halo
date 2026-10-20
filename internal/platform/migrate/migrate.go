@@ -238,11 +238,19 @@ func dollarTag(runes []rune, pos int) (string, bool) {
 		if ch == '$' {
 			return string(runes[pos : i+1]), true
 		}
-		if !(ch == '_' || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9')) {
+		if !isTagChar(ch) {
 			return "", false
 		}
 	}
 	return "", false
+}
+
+// isTagChar reports whether the rune may appear inside a dollar quote tag.
+func isTagChar(ch rune) bool {
+	return ch == '_' ||
+		(ch >= 'a' && ch <= 'z') ||
+		(ch >= 'A' && ch <= 'Z') ||
+		(ch >= '0' && ch <= '9')
 }
 
 // indexRunes finds the next occurrence of the needle at or after the position.
