@@ -11,7 +11,7 @@ import (
 
 // Ticket 工单模型
 type Ticket struct {
-	TicketID   uint          `db:"ticket_id"      valid:"-"                                 json:"ticket_id"   gqlgen:"-"`                         //
+	TicketID   uint          `db:"ticket_id"      valid:"-"                                 json:"ticket_id"   gqlgen:"TicketID"`                  //
 	UUID       string        `db:"uuid" valid:"-"                                 json:"uuid"        gqlgen:"UUID"`                                //
 	ClusterID  uint          `db:"cluster_id"  valid:"required,int,range(0|4294967295)"  json:"cluster_id"  gqlgen:"-"`                            //
 	Database   string        `db:"database"           valid:"required,length(1|50)"             json:"database"    gqlgen:"Database"`              //

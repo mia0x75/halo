@@ -417,6 +417,7 @@ type ComplexityRoot struct {
 		Element     func(childComplexity int) int
 		Func        func(childComplexity int) int
 		Group       func(childComplexity int) int
+		Level       func(childComplexity int) int
 		Message     func(childComplexity int) int
 		Name        func(childComplexity int) int
 		Parameters  func(childComplexity int) int
@@ -511,6 +512,7 @@ type ComplexityRoot struct {
 		Statements func(childComplexity int, after *string, before *string, first *int, last *int) int
 		Status     func(childComplexity int) int
 		Subject    func(childComplexity int) int
+		TicketID   func(childComplexity int) int
 		UUID       func(childComplexity int) int
 		UpdateAt   func(childComplexity int) int
 		User       func(childComplexity int) int
@@ -2670,6 +2672,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Rule.Group(childComplexity), true
+	case "Rule.Level":
+		if e.ComplexityRoot.Rule.Level == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Rule.Level(childComplexity), true
 	case "Rule.Message":
 		if e.ComplexityRoot.Rule.Message == nil {
 			break
@@ -3074,6 +3082,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Ticket.Subject(childComplexity), true
+	case "Ticket.TicketID":
+		if e.ComplexityRoot.Ticket.TicketID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Ticket.TicketID(childComplexity), true
 	case "Ticket.UUID":
 		if e.ComplexityRoot.Ticket.UUID == nil {
 			break
@@ -3987,6 +4001,8 @@ func (ec *executionContext) childFields_Rule(ctx context.Context, field graphql.
 		return ec.fieldContext_Rule_Group(ctx, field)
 	case "Description":
 		return ec.fieldContext_Rule_Description(ctx, field)
+	case "Level":
+		return ec.fieldContext_Rule_Level(ctx, field)
 	case "VldrGroup":
 		return ec.fieldContext_Rule_VldrGroup(ctx, field)
 	case "Parameters":
@@ -4153,6 +4169,8 @@ func (ec *executionContext) childFields_Ticket(ctx context.Context, field graphq
 	switch field.Name {
 	case "UUID":
 		return ec.fieldContext_Ticket_UUID(ctx, field)
+	case "TicketID":
+		return ec.fieldContext_Ticket_TicketID(ctx, field)
 	case "Cluster":
 		return ec.fieldContext_Ticket_Cluster(ctx, field)
 	case "Database":
@@ -16238,6 +16256,52 @@ func (ec *executionContext) fieldContext_Rule_Description(_ context.Context, fie
 	return graphql.NewScalarFieldContext("Rule", field, false, false, "String")
 }
 
+func (ec *executionContext) _Rule_Level(ctx context.Context, field graphql.CollectedField, obj *models.Rule) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Rule_Level(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Level, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				begin, err := ec.unmarshalNInt2int(ctx, 0)
+				if err != nil {
+					var zeroVal uint8
+					return zeroVal, err
+				}
+				end, err := ec.unmarshalNInt2int(ctx, 2)
+				if err != nil {
+					var zeroVal uint8
+					return zeroVal, err
+				}
+				if ec.Directives.Range == nil {
+					var zeroVal uint8
+					return zeroVal, errors.New("directive range is not implemented")
+				}
+				return ec.Directives.Range(ctx, obj, directive0, begin, end)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v uint8) graphql.Marshaler {
+			return ec.marshalNUInt82uint8(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Rule_Level(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Rule", field, false, false, "UInt8")
+}
+
 func (ec *executionContext) _Rule_VldrGroup(ctx context.Context, field graphql.CollectedField, obj *models.Rule) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -17888,6 +17952,29 @@ func (ec *executionContext) _Ticket_UUID(ctx context.Context, field graphql.Coll
 }
 func (ec *executionContext) fieldContext_Ticket_UUID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("Ticket", field, false, false, "ID")
+}
+
+func (ec *executionContext) _Ticket_TicketID(ctx context.Context, field graphql.CollectedField, obj *models.Ticket) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Ticket_TicketID(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.TicketID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v uint) graphql.Marshaler {
+			return ec.marshalNUInt2uint(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Ticket_TicketID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Ticket", field, false, false, "UInt")
 }
 
 func (ec *executionContext) _Ticket_Cluster(ctx context.Context, field graphql.CollectedField, obj *models.Ticket) (ret graphql.Marshaler) {
@@ -26240,6 +26327,11 @@ func (ec *executionContext) _Rule(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "Level":
+			out.Values[i] = ec._Rule_Level(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "VldrGroup":
 			out.Values[i] = ec._Rule_VldrGroup(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -26791,6 +26883,11 @@ func (ec *executionContext) _Ticket(ctx context.Context, sel ast.SelectionSet, o
 			out.Values[i] = graphql.MarshalString("Ticket")
 		case "UUID":
 			out.Values[i] = ec._Ticket_UUID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "TicketID":
+			out.Values[i] = ec._Ticket_TicketID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
