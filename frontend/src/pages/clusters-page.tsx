@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/table"
 import { StatusDot } from "@/components/ui/status-dot"
 import { useCursorPagination } from "@/hooks/use-cursor-pagination"
+import { useGraphQL } from "@/hooks/use-graphql"
+import { GROUPS_QUERY, type GroupNode } from "@/lib/api/queries"
 import { clusters } from "@/lib/mock/data"
 
 const pageSize = 6
@@ -26,13 +28,19 @@ export function ClustersPage() {
   const [view, setView] = useState<ViewMode>("card")
   const { page, next, previous } = useCursorPagination(clusters, pageSize)
 
-  const groups = useMemo(() => new Set(clusters.map((cluster) => cluster.group)), [])
+  // 分组优先取接口，接口不可用时用假数据。
+  const remoteGroups = useGraphQL<{ groups: GroupNode[] }>(GROUPS_QUERY, undefined, { groups: [] })
+  const groups = useMemo(() => {
+    const remote = remoteGroups.data?.groups ?? []
+    const names = remote.length > 0 ? remote.map((group) => group.Name) : Array.from(new Set(clusters.map((cluster) => cluster.group)))
+    return names
+  }, [remoteGroups.data])
 
   return (
     <>
       <PageHeader
         title="群集"
-        description={`目标数据库服务器，按分组隔离，共 ${groups.size} 个分组`}
+        description={`目标数据库服务器，按分组隔离，共 ${groups.length} 个分组`}
         action={
           <div className="flex items-center gap-2">
             <div className="flex rounded-md border border-border">

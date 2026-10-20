@@ -16,7 +16,8 @@ export default defineConfig({
       // The Go backend serves GraphQL under /api; it listens on :443 with the
       // self-signed certificate from certs/, hence secure:false for dev only.
       "/api": {
-        target: "https://127.0.0.1:443",
+        // 后端地址可用 HALO_API 覆盖（本地测试常用 8443 端口）。
+        target: process.env.HALO_API ?? "https://127.0.0.1:443",
         changeOrigin: true,
         secure: false,
       },

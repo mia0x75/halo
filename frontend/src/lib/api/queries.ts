@@ -1,0 +1,187 @@
+/**
+ * 后端查询文档与响应类型。字段名保持服务的 PascalCase 契约，
+ * 页面层再转换成自己的 camelCase 模型。
+ */
+
+export interface MeUser {
+  UUID: string
+  Name: string | null
+  Email: string
+  Status: number
+  Roles: { UUID: string; Name: string }[] | null
+}
+
+export const ME_QUERY = `
+  query Me {
+    me {
+      UUID
+      Name
+      Email
+      Status
+      Roles { UUID Name }
+    }
+  }
+`
+
+export interface MetricNode {
+  UUID: string
+  Name: string
+  Scope: number
+  ScopeID: string | null
+  Type: number
+  Bucket: string
+  Value: number
+}
+
+export const METRICS_QUERY = `
+  query Metrics($Scope: UInt8, $Names: [String!]) {
+    metrics(Scope: $Scope, Names: $Names) {
+      UUID
+      Name
+      Scope
+      ScopeID
+      Type
+      Bucket
+      Value
+    }
+  }
+`
+
+export interface RuleHitCountNode {
+  RuleName: string | null
+  Level: number
+  Count: number
+}
+
+export const RULE_HIT_LEVELS_QUERY = `
+  query RuleHitLevels($from: UInt, $to: UInt) {
+    ruleHitLevels(from: $from, to: $to) {
+      RuleName
+      Level
+      Count
+    }
+  }
+`
+
+export const RULE_HIT_RULES_QUERY = `
+  query RuleHitRules($from: UInt, $to: UInt, $first: Int) {
+    ruleHitRules(from: $from, to: $to, first: $first) {
+      RuleName
+      Level
+      Count
+    }
+  }
+`
+
+export interface MessageNode {
+  UUID: string
+  Category: string
+  Title: string
+  Content: string
+  Link: string
+  ReadAt: number | null
+  CreateAt: number
+}
+
+export const MESSAGES_QUERY = `
+  query Messages($unreadOnly: Boolean, $first: Int) {
+    messages(unreadOnly: $unreadOnly, first: $first) {
+      UUID
+      Category
+      Title
+      Content
+      Link
+      ReadAt
+      CreateAt
+    }
+  }
+`
+
+export const UNREAD_MESSAGE_COUNT_QUERY = `
+  query UnreadMessageCount {
+    unreadMessageCount
+  }
+`
+
+export interface GroupNode {
+  UUID: string
+  Name: string
+  Description: string
+  Status: number
+  CreateAt: number
+}
+
+export const GROUPS_QUERY = `
+  query Groups {
+    groups {
+      UUID
+      Name
+      Description
+      Status
+      CreateAt
+    }
+  }
+`
+
+export interface TicketNode {
+  UUID: string
+  Database: string
+  Subject: string
+  Status: number
+  CreateAt: number
+  User: { UUID: string; Name: string | null } | null
+  Reviewer: { UUID: string; Name: string | null } | null
+  Cluster: { UUID: string; Alias: string; Host: string; IP: string; Port: number } | null
+}
+
+export interface TicketConnectionNode {
+  totalCount: number
+  edges: { cursor: string; node: TicketNode }[]
+  pageInfo: {
+    hasNextPage: boolean
+    hasPreviousPage: boolean
+    startCursor: string
+    endCursor: string
+  }
+}
+
+export const TICKETS_QUERY = `
+  query Tickets($first: Int, $after: String) {
+    tickets(first: $first, after: $after) {
+      totalCount
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      edges {
+        cursor
+        node {
+          UUID
+          Database
+          Subject
+          Status
+          CreateAt
+          User { UUID Name }
+          Reviewer { UUID Name }
+          Cluster { UUID Alias Host IP Port }
+        }
+      }
+    }
+  }
+`
+
+export interface LoginPayloadNode {
+  Me: { UUID: string; Name: string | null; Email: string }
+  Token: string
+}
+
+export const LOGIN_MUTATION = `
+  mutation Login($input: UserLoginInput!) {
+    login(input: $input) {
+      Me { UUID Name Email }
+      Token
+    }
+  }
+`

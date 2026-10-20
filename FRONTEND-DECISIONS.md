@@ -687,6 +687,24 @@ Adding any of these should be its own ADR, not an implicit dependency.
 - Consequences: 界面观感与设计稿一致而不引入 Bootstrap 依赖；数值全部落在
   `src/index.css` 的令牌里，后续微调只改一处。
 
+### ADR-009 — 先接少量 gqlapi，失败回落假数据
+- Status: accepted
+- Date: 2026-10-20
+- Context: 后端接口已就绪（指标、命中明细、站内消息、任务、分组），但界面需要
+  先按设计稿成型并可独立演示。
+- Decision: **两者并存**：接口优先，取不到就回落假数据。
+  - 传输层 `lib/api/client.ts` 只做一件事——发查询、取 data，不引查询缓存；
+  - 查询文档集中在 `lib/api/queries.ts`，字段沿用后端的 PascalCase 契约，
+    页面层再转成自己的模型（`lib/api/mappers.ts`）；
+  - 令牌存 `localStorage` 的 `halo-token`，请求带 `Authentication` 头
+    （后端从 `secret.jwt.token_name` 读取，默认即 Authentication）；
+  - 顶栏的「演示数据 / 已连接」按钮提供登录入口，未登录时界面照常可用。
+  - 当前已接入：`me`、`metrics`、`ruleHitLevels`、`ruleHitRules`、
+    `unreadMessageCount`、`groups`、`tickets`。
+- Consequences: 界面既能独立演示，也能逐步换成真实数据；接口不可用时不会白屏；
+  参数名大小写必须与 schema 一致（`metrics(Scope:)`、`ruleHitLevels(from:)`），
+  写错会在开发期直接报 GraphQL 校验错误。
+
 ### ADR-008 — 演示阶段只用假数据，不连接 gqlapi
 - Status: accepted
 - Date: 2026-10-20

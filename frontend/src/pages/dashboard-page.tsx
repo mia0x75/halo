@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { IconChecks } from "@tabler/icons-react"
 
 import { TrendChart } from "@/components/charts/trend-chart"
@@ -6,6 +6,14 @@ import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
 import { StatusBadge } from "@/components/shared/status-badge"
 import { Button } from "@/components/ui/button"
+import { useGraphQL } from "@/hooks/use-graphql"
+import {
+  METRICS_QUERY,
+  RULE_HIT_LEVELS_QUERY,
+  RULE_HIT_RULES_QUERY,
+  type MetricNode,
+  type RuleHitCountNode,
+} from "@/lib/api/queries"
 import { PeriodSelect } from "@/features/dashboard/period-select"
 import { StatCard } from "@/features/dashboard/stat-card"
 import { TopRules } from "@/features/dashboard/top-rules"
@@ -19,9 +27,52 @@ import {
   type Period,
 } from "@/lib/mock/data"
 
+/** 后端的命中级别：0 提示 / 1 错误 / 2 警告。 */
+const levelLabels: Record<number, string> = { 0: "提示", 1: "错误", 2: "警告" }
+
 export function DashboardPage() {
   const [period, setPeriod] = useState<Period>(7)
   const points = trendFor(period)
+
+  // 接口未登录或不可用时回落到假数据，演示与联调都能看。
+  const metrics = useGraphQL<{ metrics: MetricNode[] }, { scope: number }>(
+    METRICS_QUERY,
+    { scope: 1 },
+    { metrics: [] },
+  )
+  const metricValue = (name: string, fallback: number) => {
+    const found = metrics.data?.metrics.find((item) => item.Name === name)
+    return found ? found.Value : fallback
+  }
+
+  const levels = useGraphQL<{ ruleHitLevels: RuleHitCountNode[] }, { from: number; to: number }>(
+    RULE_HIT_LEVELS_QUERY,
+    { from: 0, to: 0 },
+    { ruleHitLevels: [] },
+  )
+  const rules = useGraphQL<
+    { ruleHitRules: RuleHitCountNode[] },
+    { from: number; to: number; first: number }
+  >(
+    RULE_HIT_RULES_QUERY,
+    { from: 0, to: 0, first: 5 },
+    { ruleHitRules: [] },
+  )
+
+  const levelRows = useMemo(() => {
+    const source = levels.data?.ruleHitLevels ?? []
+    if (source.length === 0) return undefined
+    return source.map((item) => ({
+      severity: levelLabels[item.Level] ?? "提示",
+      count: item.Count,
+    }))
+  }, [levels.data])
+
+  const ruleRows = useMemo(() => {
+    const source = rules.data?.ruleHitRules ?? []
+    if (source.length === 0) return undefined
+    return source.map((item) => ({ rule: item.RuleName ?? "-", count: item.Count }))
+  }, [rules.data])
 
   const pending = tickets.filter((ticket) =>
     ["waiting-vld", "waiting-mrv"].includes(ticket.status),
@@ -52,14 +103,14 @@ export function DashboardPage() {
         />
         <StatCard
           label="今日已执行"
-          value={String(executed)}
+          value={String(metricValue("tickets-executed", executed))}
           delta={8}
           hint="较昨日"
           trend={points.map((point) => point.executed)}
         />
         <StatCard
           label="失败工单"
-          value={String(failed)}
+          value={String(metricValue("tickets-failed", failed))}
           delta={-4}
           hint="较昨日"
           trend={points.map((point) => point.failed)}
@@ -96,7 +147,7 @@ export function DashboardPage() {
           bodyClassName="p-0"
           action={<PeriodSelect value={period} onChange={setPeriod} />}
         >
-          <TopRules period={period} />
+          <TopRules levels={levelRows} rules={ruleRows} />
         </SectionCard>
       </div>
 

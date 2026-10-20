@@ -18,6 +18,9 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useCursorPagination } from "@/hooks/use-cursor-pagination"
+import { useGraphQL } from "@/hooks/use-graphql"
+import { TICKETS_QUERY, type TicketConnectionNode } from "@/lib/api/queries"
+import { mapTicket } from "@/lib/api/mappers"
 import { ticketStatusMeta, tickets, type TicketStatus } from "@/lib/mock/data"
 
 const pageSize = 6
@@ -40,6 +43,24 @@ export function TicketsPage() {
 
   const { page, reset, next, previous } = useCursorPagination(filtered, pageSize)
 
+  // 接口可用时用服务端游标分页，取不到数据则回落到本地假数据。
+  const [after, setAfter] = useState<string | null>(null)
+  const [stack, setStack] = useState<(string | null)[]>([])
+  const remote = useGraphQL<{ tickets: TicketConnectionNode | null }, { first: number; after?: string }>(
+    TICKETS_QUERY,
+    { first: pageSize, after: after ?? undefined },
+    { tickets: null },
+  )
+  const remoteTickets = remote.data?.tickets ?? null
+  const rows = remoteTickets
+    ? remoteTickets.edges.map((edge) => mapTicket(edge.node))
+    : page.edges
+  const total = remoteTickets ? remoteTickets.totalCount : page.totalCount
+  const hasNext = remoteTickets ? remoteTickets.pageInfo.hasNextPage : page.pageInfo.hasNextPage
+  const hasPrevious = remoteTickets ? remoteTickets.pageInfo.hasPreviousPage : page.pageInfo.hasPreviousPage
+  const endCursor = remoteTickets ? remoteTickets.pageInfo.endCursor : page.pageInfo.endCursor
+  const startCursor = remoteTickets ? remoteTickets.pageInfo.startCursor : page.pageInfo.startCursor
+
   return (
     <>
       <PageHeader
@@ -55,7 +76,7 @@ export function TicketsPage() {
 
       <SectionCard
         title="工单列表"
-        description={`共 ${filtered.length} 条`}
+        description={`共 ${total} 条`}
         bodyClassName="p-0"
       >
         <div className="flex flex-col gap-3 border-b border-border px-5 py-4 sm:flex-row sm:items-end">
@@ -73,6 +94,8 @@ export function TicketsPage() {
                 onChange={(event) => {
                   setKeyword(event.target.value)
                   reset()
+                  setAfter(null)
+                  setStack([])
                 }}
                 placeholder="主题、目标库或群集"
                 className="pl-9"
@@ -87,6 +110,8 @@ export function TicketsPage() {
               onChange={(event) => {
                 setStatus(event.target.value as TicketStatus | "all")
                 reset()
+                setAfter(null)
+                setStack([])
               }}
             >
               <option value="all">全部状态</option>
@@ -111,7 +136,7 @@ export function TicketsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {page.edges.map((ticket) => (
+            {rows.map((ticket) => (
               <TableRow key={ticket.uuid}>
                 <TableCell className="font-medium">{ticket.subject}</TableCell>
                 <TableCell className="text-muted-foreground">{ticket.database}</TableCell>
@@ -127,13 +152,28 @@ export function TicketsPage() {
         </Table>
 
         <CursorPagination
-          total={page.totalCount}
-          hasPreviousPage={page.pageInfo.hasPreviousPage}
-          hasNextPage={page.pageInfo.hasNextPage}
-          startCursor={page.pageInfo.startCursor}
-          endCursor={page.pageInfo.endCursor}
-          onPrevious={previous}
-          onNext={next}
+          total={total}
+          hasPreviousPage={hasPrevious}
+          hasNextPage={hasNext}
+          startCursor={startCursor}
+          endCursor={endCursor}
+          onPrevious={() => {
+            if (remoteTickets) {
+              const previousCursor = stack[stack.length - 1] ?? null
+              setStack((items) => items.slice(0, -1))
+              setAfter(previousCursor)
+              return
+            }
+            previous()
+          }}
+          onNext={() => {
+            if (remoteTickets) {
+              setStack((items) => [...items, after])
+              setAfter(endCursor)
+              return
+            }
+            next()
+          }}
         />
       </SectionCard>
     </>

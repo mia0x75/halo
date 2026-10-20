@@ -95,7 +95,7 @@ export interface TrendPoint {
 }
 
 export interface SeverityPoint {
-  severity: "致命" | "高危" | "中危" | "低危"
+  severity: "错误" | "警告" | "提示"
   count: number
 }
 
@@ -194,10 +194,22 @@ export const trend: TrendPoint[] = [
 ]
 
 export const severity: SeverityPoint[] = [
-  { severity: "致命", count: 3 },
-  { severity: "高危", count: 8 },
-  { severity: "中危", count: 14 },
-  { severity: "低危", count: 21 },
+  { severity: "错误", count: 8 },
+  { severity: "警告", count: 14 },
+  { severity: "提示", count: 21 },
+]
+
+export interface TopRulePoint {
+  rule: string
+  count: number
+}
+
+export const topRules: TopRulePoint[] = [
+  { rule: "DEL-L2-001", count: 12 },
+  { rule: "UPD-L2-001", count: 9 },
+  { rule: "SEL-L2-001", count: 7 },
+  { rule: "CTB-L2-006", count: 6 },
+  { rule: "INS-L3-002", count: 4 },
 ]
 
 export const ticketStatusMeta: Record<

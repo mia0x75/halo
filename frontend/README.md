@@ -89,5 +89,19 @@ class 方案（`<html class="dark">`），选择持久化在 `localStorage` 的 
 
 ## 数据
 
-当前全部为 `src/lib/mock/data.ts` 的演示假数据，**不连接 gqlapi**。数据形态按
-GraphQL 契约的 camelCase 镜像，接入时把取值换成接口返回即可，页面组件无需改动。
+数据有���个来源：
+
+- **接口**（已登录时）：`src/lib/api/` 下的客户端与查询文档，目前接入
+  `me`、`metrics`、`ruleHitLevels`、`ruleHitRules`、`unreadMessageCount`、
+  `groups`、`tickets`；
+- **演示数据**：`src/lib/mock/data.ts`，接口未登录、超时或返回空时自动回落。
+
+顶栏右侧的「演示数据 / 已连接」按钮可以打开登录框，登录后令牌存在
+`localStorage`（`halo-token`），请求带在 `Authentication` 头里（对应后端配置
+`secret.jwt.token_name`）。
+
+后端地址默认 `https://127.0.0.1:443`，本地测试可用环境变量覆盖：
+
+```bash
+HALO_API=https://127.0.0.1:8443 bun run dev
+```

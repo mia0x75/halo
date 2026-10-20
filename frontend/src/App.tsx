@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import {
   IconCalendarTime,
   IconChartBar,
@@ -21,9 +21,12 @@ import { ViolationsPage } from "@/pages/violations-page"
 
 export default function App() {
   const [page, setPage] = useState<NavKey>("dashboard")
+  const [nonce, setNonce] = useState(0)
+
+  const refresh = useCallback(() => setNonce((value) => value + 1), [])
 
   return (
-    <AppShell active={page} onSelect={setPage}>
+    <AppShell key={nonce} active={page} onSelect={setPage} onConnectionChange={refresh}>
       {page === "dashboard" ? <DashboardPage /> : null}
       {page === "tickets" ? <TicketsPage /> : null}
       {page === "clusters" ? <ClustersPage /> : null}

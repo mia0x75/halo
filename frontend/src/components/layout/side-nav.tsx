@@ -17,6 +17,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useGraphQL } from "@/hooks/use-graphql"
+import { ME_QUERY, type MeUser } from "@/lib/api/queries"
 import { cn } from "@/lib/utils"
 
 export interface SideNavProps {
@@ -28,6 +30,12 @@ export interface SideNavProps {
 
 /** 侧边栏：15rem 宽（收起后 4rem 只留图标），顶部是当前用户，底部是帮助入口。 */
 export function SideNav({ active, onSelect, collapsed, onToggle }: SideNavProps) {
+  const me = useGraphQL<{ me: MeUser }>(ME_QUERY, undefined, {
+    me: { UUID: "u-1", Name: "张三", Email: "zhangsan@example.com", Status: 1, Roles: null },
+  })
+  const userName = me.data?.me.Name || "张三"
+  const roleName = me.data?.me.Roles?.[0]?.Name || "管理员"
+
   return (
     <aside
       className={cn(
@@ -51,17 +59,19 @@ export function SideNav({ active, onSelect, collapsed, onToggle }: SideNavProps)
               )}
               aria-label="当前用户"
             >
-              <Avatar label="张" size="md" />
+              <Avatar label={userName.slice(0, 1)} size="md" />
               {collapsed ? null : (
                 <span className="flex min-w-0 flex-col leading-tight">
-                  <span className="truncate text-sm font-medium">张三</span>
-                  <span className="truncate text-sm text-muted-foreground">管理员 · 核心交易</span>
+                  <span className="truncate text-sm font-medium">{userName}</span>
+                  <span className="truncate text-sm text-muted-foreground">{roleName}</span>
                 </span>
               )}
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-48">
-            <DropdownMenuLabel>张三 · 管理员</DropdownMenuLabel>
+            <DropdownMenuLabel>
+              {userName} · {roleName}
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <IconUserCircle size={16} stroke={1.5} />

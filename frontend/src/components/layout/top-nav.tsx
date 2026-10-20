@@ -1,5 +1,6 @@
 import { IconBell, IconDatabase, IconMoon, IconSearch, IconSun } from "@tabler/icons-react"
 
+import { ConnectionMenu } from "@/components/layout/connection-menu"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -10,12 +11,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
+import { useGraphQL } from "@/hooks/use-graphql"
 import { useTheme } from "@/hooks/use-theme"
+import { UNREAD_MESSAGE_COUNT_QUERY } from "@/lib/api/queries"
+
+export interface TopNavProps {
+  onConnectionChange: () => void
+}
 
 /** 顶栏：品牌、搜索、消息与主题切换。 */
-export function TopNav() {
+export function TopNav({ onConnectionChange }: TopNavProps) {
   const { theme, toggleTheme } = useTheme()
   const isDark = theme === "dark"
+
+  const unread = useGraphQL<{ unreadMessageCount: number }>(
+    UNREAD_MESSAGE_COUNT_QUERY,
+    undefined,
+    { unreadMessageCount: 3 },
+  )
+  const unreadCount = unread.data?.unreadMessageCount ?? 3
 
   return (
     <header className="flex h-14 items-center gap-4 border-b border-border bg-card px-4">
@@ -36,11 +50,17 @@ export function TopNav() {
       </div>
 
       <div className="ml-auto flex items-center gap-1">
+        <ConnectionMenu onChanged={onConnectionChange} />
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative" aria-label="消息">
               <IconBell size={18} stroke={1.5} />
-              <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-danger ring-2 ring-card" />
+              {unreadCount > 0 ? (
+                <span className="absolute top-1 right-1 flex size-4 items-center justify-center rounded-full bg-danger text-[0.625rem] font-medium text-danger-foreground ring-2 ring-card">
+                  {unreadCount}
+                </span>
+              ) : null}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-72">
