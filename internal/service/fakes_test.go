@@ -121,3 +121,16 @@ func (f *fakeLogRepo) DeleteByUUID(_ context.Context, _ string) error {
 func (f *fakeLogRepo) List(_ context.Context, _ int64, _ int) ([]*domain.Log, error) {
 	return nil, nil
 }
+
+// CountByStatus counts the stored tickets per status inside a time window.
+func (f *fakeTicketRepo) CountByStatus(context.Context, uint, uint) ([]domain.TicketStatusCount, error) {
+	counts := map[domain.TicketStatus]uint{}
+	for _, ticket := range f.byID {
+		counts[ticket.Status]++
+	}
+	out := make([]domain.TicketStatusCount, 0, len(counts))
+	for status, count := range counts {
+		out = append(out, domain.TicketStatusCount{Status: status, Count: count})
+	}
+	return out, nil
+}

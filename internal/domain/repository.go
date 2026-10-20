@@ -103,6 +103,8 @@ type TicketRepository interface {
 	DeleteByUUID(ctx context.Context, uuid string) error
 	List(ctx context.Context, cursor int64, limit int) ([]*Ticket, error)
 	ListByUser(ctx context.Context, userID uint) ([]*Ticket, error)
+	// CountByStatus counts the tickets per status inside a time window.
+	CountByStatus(ctx context.Context, from, to uint) ([]TicketStatusCount, error)
 }
 
 type UserRepository interface {

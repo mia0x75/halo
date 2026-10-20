@@ -31,3 +31,9 @@ type Ticket struct {
 	UpdateAt   *uint        `db:"update_at"`
 	CreateAt   uint         `db:"create_at"`
 }
+
+// TicketStatusCount counts the tickets of one status inside a time window.
+type TicketStatusCount struct {
+	Status TicketStatus
+	Count  uint
+}

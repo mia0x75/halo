@@ -8,7 +8,45 @@ package postgresrepo
 import (
 	"context"
 	"database/sql"
+	"time"
 )
+
+const countTicketsByStatus = `-- name: CountTicketsByStatus :many
+SELECT status, COUNT(*) AS count FROM mm_tickets WHERE create_at >= $1 AND create_at < $2 GROUP BY status ORDER BY status
+`
+
+type CountTicketsByStatusParams struct {
+	CreateAt   time.Time
+	CreateAt_2 time.Time
+}
+
+type CountTicketsByStatusRow struct {
+	Status int16
+	Count  int64
+}
+
+func (q *Queries) CountTicketsByStatus(ctx context.Context, arg CountTicketsByStatusParams) ([]CountTicketsByStatusRow, error) {
+	rows, err := q.db.QueryContext(ctx, countTicketsByStatus, arg.CreateAt, arg.CreateAt_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []CountTicketsByStatusRow{}
+	for rows.Next() {
+		var i CountTicketsByStatusRow
+		if err := rows.Scan(&i.Status, &i.Count); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
 
 const createTicket = `-- name: CreateTicket :one
 INSERT INTO mm_tickets (uuid, cluster_id, "database", subject, content, status, user_id, reviewer_id, cron_id, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING ticket_id

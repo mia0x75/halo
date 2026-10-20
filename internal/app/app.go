@@ -152,7 +152,7 @@ func New(ctx context.Context, cfg db.Config) (*App, error) {
 		Query:     service.NewQueryService(tx, repos.Query),
 		Role:      service.NewRoleService(tx, repos.Role),
 		Rule:      service.NewRuleService(tx, repos.Rule),
-		Metric:    service.NewMetricService(tx, repos.Metric),
+		Metric:    service.NewMetricService(tx, repos.Metric, repos.Ticket, repos.RuleHit),
 		RuleHit:   service.NewRuleHitService(repos.RuleHit),
 		Message:   service.NewMessageService(repos.Message),
 		Group:     service.NewGroupService(tx, repos.Group, logSvc),

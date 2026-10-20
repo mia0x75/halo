@@ -13,6 +13,7 @@ type Querier interface {
 	CountRuleHitsByLevel(ctx context.Context, arg CountRuleHitsByLevelParams) ([]CountRuleHitsByLevelRow, error)
 	CountRuleHitsByRule(ctx context.Context, arg CountRuleHitsByRuleParams) ([]CountRuleHitsByRuleRow, error)
 	CountTasksByStatus(ctx context.Context) ([]CountTasksByStatusRow, error)
+	CountTicketsByStatus(ctx context.Context, arg CountTicketsByStatusParams) ([]CountTicketsByStatusRow, error)
 	CountUnreadMessages(ctx context.Context, userID int64) (int64, error)
 	CreateAvatar(ctx context.Context, arg CreateAvatarParams) (int64, error)
 	CreateCluster(ctx context.Context, arg CreateClusterParams) (int64, error)

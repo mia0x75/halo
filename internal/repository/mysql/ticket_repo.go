@@ -2,6 +2,7 @@ package mysqlrepo
 
 import (
 	"context"
+	"time"
 
 	"github.com/mia0x75/halo/internal/domain"
 )
@@ -127,6 +128,22 @@ func (r *TicketRepo) ListByUser(ctx context.Context, userID uint) ([]*domain.Tic
 	out := make([]*domain.Ticket, 0, len(rows))
 	for _, row := range rows {
 		out = append(out, ticketFromRow(row))
+	}
+	return out, nil
+}
+
+// CountByStatus counts the tickets per status inside a time window.
+func (r *TicketRepo) CountByStatus(ctx context.Context, from, to uint) ([]domain.TicketStatusCount, error) {
+	rows, err := r.q.CountTicketsByStatus(ctx, CountTicketsByStatusParams{
+		CreateAt:   time.Unix(int64(from), 0).UTC(),
+		CreateAt_2: time.Unix(int64(to), 0).UTC(),
+	})
+	if err != nil {
+		return nil, wrap("ticket.CountByStatus", err)
+	}
+	out := make([]domain.TicketStatusCount, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, domain.TicketStatusCount{Status: domain.TicketStatus(row.Status), Count: uint(row.Count)})
 	}
 	return out, nil
 }

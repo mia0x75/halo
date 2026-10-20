@@ -25,3 +25,6 @@ SELECT ticket_id, uuid, cluster_id, "database", subject, content, status, user_i
 -- name: ListTicketsByUser :many
 SELECT ticket_id, uuid, cluster_id, "database", subject, content, status, user_id, reviewer_id, cron_id, version, update_at, create_at FROM mm_tickets WHERE user_id = $1 ORDER BY ticket_id;
 
+
+-- name: CountTicketsByStatus :many
+SELECT status, COUNT(*) AS count FROM mm_tickets WHERE create_at >= $1 AND create_at < $2 GROUP BY status ORDER BY status;

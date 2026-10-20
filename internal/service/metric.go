@@ -7,12 +7,14 @@ import (
 )
 
 type MetricService struct {
-	tx     TxManager
-	metric domain.MetricRepository
+	tx      TxManager
+	metric  domain.MetricRepository
+	tickets domain.TicketRepository
+	hits    domain.RuleHitRepository
 }
 
-func NewMetricService(tx TxManager, metric domain.MetricRepository) *MetricService {
-	return &MetricService{tx: tx, metric: metric}
+func NewMetricService(tx TxManager, metric domain.MetricRepository, tickets domain.TicketRepository, hits domain.RuleHitRepository) *MetricService {
+	return &MetricService{tx: tx, metric: metric, tickets: tickets, hits: hits}
 }
 
 func (s *MetricService) GetByUUID(ctx context.Context, uuid string) (*domain.Metric, error) {
