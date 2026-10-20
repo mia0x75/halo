@@ -31,7 +31,7 @@ export function BrushChart({ categories, series, target, height = 96, className 
       dataLabels: { enabled: false },
       stroke: { width: 1.5, curve: "smooth" },
       fill: { type: "gradient", gradient: { opacityFrom: 0.3, opacityTo: 0.04 } },
-      markers: { size: 0, hover: { size: 8 } },
+      markers: { size: 0, hover: { size: 4 } },
       tooltip: { enabled: false },
       grid: { borderColor: "transparent", padding: { left: 4, right: 4 } },
       xaxis: {

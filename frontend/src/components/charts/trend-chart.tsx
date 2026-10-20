@@ -37,8 +37,9 @@ export function TrendChart({
         },
         zoom: { enabled: selectable, type: "xy" },
       },
-      // 常态不画点，鼠标悬停时在曲线上标出该点
-      markers: { size: 0, hover: { size: 8 } },
+      // 常态不画点，鼠标悬停时在曲线上标出该点；
+      // ApexCharts 的 size 是半径，4 即直径 8px，与图例、提示框一致。
+      markers: { size: 0, hover: { size: 4 } },
       colors: [chartPalette.primary, chartPalette.success, chartPalette.danger],
       dataLabels: { enabled: false },
       stroke: { width: 1.5, curve: "smooth" },
@@ -48,7 +49,7 @@ export function TrendChart({
         horizontalAlign: "right",
         fontSize: "12px",
         // 图例用小圆点，圆点与文字之间留出间距
-        markers: { size: 8, shape: "circle" },
+        markers: { size: 4, shape: "circle" },
         itemMargin: { horizontal: 8, vertical: 0 },
       },
       // 紧凑提示框：单行展示，缩小行距

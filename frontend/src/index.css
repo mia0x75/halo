@@ -137,6 +137,11 @@
     border-color: var(--halo-border);
   }
 
+  /* 提示框里的圆点：内部 svg 缩放 0.8，直径由 10px 收到 8px，与图例、曲线上的点一致 */
+  .apexcharts-tooltip-marker svg {
+    transform: scale(0.8);
+  }
+
   /* 刷选滑块：半透明填充 + 可见边框，选区一眼可辨 */
   .svg_select_shape {
     fill: color-mix(in oklab, var(--halo-primary) 12%, transparent);
