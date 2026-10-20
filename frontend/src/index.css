@@ -142,6 +142,17 @@
     transform: scale(0.8);
   }
 
+  /* 圆点与文字的间距：图例与提示框统一为 12px（圆点外框 12px，圆点直径 8px） */
+  .apexcharts-legend .apexcharts-legend-text {
+    margin-left: 10px;
+  }
+  .apexcharts-tooltip .apexcharts-tooltip-marker {
+    margin-right: 10px;
+  }
+  .apexcharts-tooltip .apexcharts-tooltip-series-group {
+    gap: 0;
+  }
+
   /* 刷选滑块：半透明填充 + 可见边框，选区一眼可辨 */
   .svg_select_shape {
     fill: color-mix(in oklab, var(--halo-primary) 12%, transparent);
