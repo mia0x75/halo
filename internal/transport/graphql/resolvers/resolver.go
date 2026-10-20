@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/99designs/gqlgen/graphql/handler/transport"
@@ -187,14 +188,46 @@ func (r *Resolver) updateEdges(ctx context.Context, edgeType uint, userID uint, 
 
 func notifyTicketStatusChange(userUUID string, ticketUUID string, message string) {
 	TicketSub.Lock()
-	if sub, ok := TicketSub.Subscribers[userUUID]; ok {
-		payload := &gqlapi.TicketStatusChangePayload{
-			TicketUUID: ticketUUID,
-			Message:    message,
-		}
-		sub <- payload
-	}
+	sub, ok := TicketSub.Subscribers[userUUID]
 	TicketSub.Unlock()
+	if !ok {
+		return
+	}
+
+	payload := &gqlapi.TicketStatusChangePayload{
+		TicketUUID: ticketUUID,
+		Message:    message,
+	}
+	// 订阅者可能已经断开，发送不能阻塞事件处理；缓冲满就丢弃这条通知。
+	select {
+	case sub <- payload:
+	default:
+	}
+}
+
+// subscriptionToken reads the token from the WebSocket init payload. Both the
+// configured token name and the conventional Authorization header are accepted,
+// because clients differ in what they send.
+func subscriptionToken(payload map[string]any) string {
+	names := []string{config.Config().Secret.Jwt.TokenName, "Authorization"}
+	for _, name := range names {
+		value, ok := payload[name]
+		if !ok {
+			continue
+		}
+		token, ok := value.(string)
+		if !ok {
+			continue
+		}
+		token = strings.TrimSpace(token)
+		if after, found := strings.CutPrefix(token, "Bearer "); found {
+			token = strings.TrimSpace(after)
+		}
+		if token != "" {
+			return token
+		}
+	}
+	return ""
 }
 
 // statDatabase verifies the database exists on the target cluster. It mirrors
