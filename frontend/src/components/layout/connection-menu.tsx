@@ -18,6 +18,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useGraphQL } from "@/hooks/use-graphql"
+import { ME_QUERY, type MeUser } from "@/lib/api/queries"
 import { clearToken, getToken } from "@/lib/api/session"
 
 export interface ConnectionMenuProps {
@@ -32,7 +34,12 @@ export function ConnectionMenu({ onChanged }: ConnectionMenuProps) {
   const [open, setOpen] = useState(false)
   const [signedIn, setSignedIn] = useState(() => getToken() !== null)
 
-  if (!signedIn) {
+  // 令牌存在不代表还有效：服务端重启后旧令牌会被作废，
+  // 这里用 me 查询确认一次，连不上就按演示数据处理。
+  const me = useGraphQL<{ me: MeUser | null }>(ME_QUERY, undefined, { me: null })
+  const connected = signedIn && me.data?.me != null && !me.error
+
+  if (!connected) {
     return (
       <Dialog
         open={open}
@@ -47,7 +54,7 @@ export function ConnectionMenu({ onChanged }: ConnectionMenuProps) {
         <DialogTrigger asChild>
           <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground">
             <IconLogin size={16} stroke={1.5} />
-            演示数据
+            {signedIn ? "重新登录" : "演示数据"}
           </Button>
         </DialogTrigger>
         <DialogContent>

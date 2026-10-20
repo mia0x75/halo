@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/table"
 import { useGraphQL } from "@/hooks/use-graphql"
 import { TicketCreateDialog } from "@/features/tickets/ticket-create-dialog"
-import { TicketDetailDialog } from "@/features/tickets/ticket-detail-dialog"
 import { mapTicket } from "@/lib/api/mappers"
 import { TICKETS_QUERY, type TicketConnectionNode } from "@/lib/api/queries"
 import {
@@ -30,9 +29,12 @@ import {
 
 const pageSize = 8
 
-export function TicketsPage() {
+export interface TicketsPageProps {
+  onOpenTicket: (uuid: string) => void
+}
+
+export function TicketsPage({ onOpenTicket }: TicketsPageProps) {
   const [keyword, setKeyword] = useState("")
-  const [detailUUID, setDetailUUID] = useState<string | null>(null)
   const [status, setStatus] = useState<TicketStatus | "all">("all")
   const [after, setAfter] = useState<string | null>(null)
   const [stack, setStack] = useState<(string | null)[]>([])
@@ -154,7 +156,7 @@ export function TicketsPage() {
               <TableRow
                 key={ticket.uuid}
                 className="cursor-pointer"
-                onClick={() => setDetailUUID(ticket.uuid)}
+                onClick={() => onOpenTicket(ticket.uuid)}
               >
                 <TableCell className="font-medium">{ticket.subject}</TableCell>
                 <TableCell className="text-muted-foreground">{ticket.database}</TableCell>
@@ -186,8 +188,6 @@ export function TicketsPage() {
           }}
         />
       </SectionCard>
-
-      <TicketDetailDialog uuid={detailUUID} onClose={() => setDetailUUID(null)} />
     </>
   )
 }

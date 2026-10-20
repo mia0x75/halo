@@ -17,7 +17,7 @@ import {
 import { PeriodSelect } from "@/features/dashboard/period-select"
 import { StatCard } from "@/features/dashboard/stat-card"
 import { TicketCreateDialog } from "@/features/tickets/ticket-create-dialog"
-import { TicketDetailDialog } from "@/features/tickets/ticket-detail-dialog"
+
 import { TopRules } from "@/features/dashboard/top-rules"
 import {
   auditLogs,
@@ -35,9 +35,12 @@ const TREND_CHART_ID = "chart-ticket-trend"
 /** 后端的命中级别：0 提示 / 1 错误 / 2 警告。 */
 const levelLabels: Record<number, string> = { 0: "提示", 1: "错误", 2: "警告" }
 
-export function DashboardPage() {
+export interface DashboardPageProps {
+  onOpenTicket: (uuid: string) => void
+}
+
+export function DashboardPage({ onOpenTicket }: DashboardPageProps) {
   const [period, setPeriod] = useState<Period>(7)
-  const [detailUUID, setDetailUUID] = useState<string | null>(null)
   const mockPoints = trendFor(period)
 
   // 接口未登录或不可用时回落到假数据，演示与联调都能看。
@@ -213,7 +216,7 @@ export function DashboardPage() {
               <li
                 key={ticket.uuid}
                 className="flex cursor-pointer items-center gap-3 px-5 py-3"
-                onClick={() => setDetailUUID(ticket.uuid)}
+                onClick={() => onOpenTicket(ticket.uuid)}
               >
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{ticket.subject}</p>
@@ -243,7 +246,6 @@ export function DashboardPage() {
           </ul>
         </SectionCard>
       </div>
-      <TicketDetailDialog uuid={detailUUID} onClose={() => setDetailUUID(null)} />
     </>
   )
 }

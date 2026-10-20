@@ -14,26 +14,53 @@ import { DashboardPage } from "@/pages/dashboard-page"
 import { LogsPage } from "@/pages/logs-page"
 import { PlaceholderPage } from "@/pages/placeholder-page"
 import { RulesPage } from "@/pages/rules-page"
+import { TicketDetailPage } from "@/pages/ticket-detail-page"
 import { TicketQueuePage } from "@/pages/ticket-queue-page"
 import { TicketsPage } from "@/pages/tickets-page"
 import { ViolationsPage } from "@/pages/violations-page"
 
+type View = { kind: "nav"; key: NavKey } | { kind: "ticket"; uuid: string }
+
 export default function App() {
-  const [page, setPage] = useState<NavKey>("dashboard")
+  const [view, setView] = useState<View>({ kind: "nav", key: "dashboard" })
   const [nonce, setNonce] = useState(0)
 
   const refresh = useCallback(() => setNonce((value) => value + 1), [])
+  const openTicket = useCallback((uuid: string) => setView({ kind: "ticket", uuid }), [])
+
+  const page = view.kind === "nav" ? view.key : "tickets"
+
+  if (view.kind === "ticket") {
+    return (
+      <AppShell
+        key={nonce}
+        active="tickets"
+        onSelect={(key) => setView({ kind: "nav", key })}
+        onConnectionChange={refresh}
+      >
+        <TicketDetailPage
+          uuid={view.uuid}
+          onBack={() => setView({ kind: "nav", key: "tickets" })}
+        />
+      </AppShell>
+    )
+  }
 
   return (
-    <AppShell key={nonce} active={page} onSelect={setPage} onConnectionChange={refresh}>
-      {page === "dashboard" ? <DashboardPage /> : null}
-      {page === "tickets" ? <TicketsPage /> : null}
+    <AppShell
+      key={nonce}
+      active={page}
+      onSelect={(key) => setView({ kind: "nav", key })}
+      onConnectionChange={refresh}
+    >
+      {page === "dashboard" ? <DashboardPage onOpenTicket={openTicket} /> : null}
+      {page === "tickets" ? <TicketsPage onOpenTicket={openTicket} /> : null}
       {page === "clusters" ? <ClustersPage /> : null}
       {page === "rules" ? <RulesPage /> : null}
       {page === "violations" ? <ViolationsPage /> : null}
       {page === "logs" ? <LogsPage /> : null}
-      {page === "my-tickets" ? <TicketQueuePage mode="mine" /> : null}
-      {page === "pending-review" ? <TicketQueuePage mode="review" /> : null}
+      {page === "my-tickets" ? <TicketQueuePage mode="mine" onOpenTicket={openTicket} /> : null}
+      {page === "pending-review" ? <TicketQueuePage mode="review" onOpenTicket={openTicket} /> : null}
       {page === "statements" ? (
         <PlaceholderPage
           title="语句管理"

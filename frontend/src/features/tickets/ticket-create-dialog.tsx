@@ -78,6 +78,12 @@ export function TicketCreateDialog({ onCreated, trigger }: TicketCreateDialogPro
   const selectedReviewer = reviewerUUID || reviewerOptions[0]?.uuid || ""
 
   const submit = async () => {
+    // 没登录时接口会拒绝，这里先给出明确提示，避免只看到 1401 错误码。
+    if (!getToken()) {
+      setError("尚未登录，无法提交工单。请先在右上角登录后重试。")
+      return
+    }
+
     setSubmitting(true)
     setError(null)
     try {
@@ -191,7 +197,9 @@ export function TicketCreateDialog({ onCreated, trigger }: TicketCreateDialogPro
             </Select>
           </div>
 
-          {error ? <p className="text-sm text-danger">{error}</p> : null}
+          {error ? (
+            <p className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
+          ) : null}
         </div>
 
         <div className="mt-5 flex justify-end gap-2">
