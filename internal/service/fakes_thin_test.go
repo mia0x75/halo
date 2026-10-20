@@ -286,3 +286,40 @@ func (s *stubRuleHitRepo) CreateBatch(ctx context.Context, hits []*domain.RuleHi
 func newFakeRuleHitRepo() *stubRuleHitRepo {
 	return &stubRuleHitRepo{}
 }
+
+type stubGroupRepo struct {
+	domain.GroupRepository
+	existing *domain.Group
+	created  []*domain.Group
+	updated  []*domain.Group
+	deleted  []string
+}
+
+func (s *stubGroupRepo) Create(_ context.Context, g *domain.Group) error {
+	s.created = append(s.created, g)
+	return nil
+}
+
+func (s *stubGroupRepo) GetByUUID(_ context.Context, uuid string) (*domain.Group, error) {
+	if s.existing != nil && s.existing.UUID == uuid {
+		return s.existing, nil
+	}
+	return nil, domain.ErrNotFound
+}
+
+func (s *stubGroupRepo) GetByName(_ context.Context, name string) (*domain.Group, error) {
+	if s.existing != nil && s.existing.Name == name {
+		return s.existing, nil
+	}
+	return nil, domain.ErrNotFound
+}
+
+func (s *stubGroupRepo) Update(_ context.Context, g *domain.Group) error {
+	s.updated = append(s.updated, g)
+	return nil
+}
+
+func (s *stubGroupRepo) DeleteByUUID(_ context.Context, uuid string) error {
+	s.deleted = append(s.deleted, uuid)
+	return nil
+}

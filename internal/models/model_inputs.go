@@ -239,3 +239,18 @@ type ResetPasswdInput struct {
 type ResendActivationMailInput struct {
 	Email string `valid:"required,length(1|75)" gqlgen:"Email" json:"email"`
 }
+
+// CreateGroupInput GraphQL API交互所需要的结构体
+type CreateGroupInput struct {
+	Name        string `valid:"required,length(1|75)"  gqlgen:"Name"`           //
+	Description string `valid:"omitempty,length(0|150)" gqlgen:"Description"`   //
+	Status      uint8  `valid:"omitempty,int,matches(^(1|2)$)" gqlgen:"Status"` //
+}
+
+// UpdateGroupInput GraphQL API交互所需要的结构体
+type UpdateGroupInput struct {
+	GroupUUID   string `valid:"required,length(36|36)"    gqlgen:"GroupUUID"`   //
+	Name        string `valid:"required,length(1|75)"     gqlgen:"Name"`        //
+	Description string `valid:"omitempty,length(0|150)"  gqlgen:"Description"`  //
+	Status      uint8  `valid:"omitempty,int,matches(^(1|2)$)" gqlgen:"Status"` //
+}

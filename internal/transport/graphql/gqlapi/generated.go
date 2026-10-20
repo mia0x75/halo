@@ -255,6 +255,7 @@ type ComplexityRoot struct {
 		CancelCron            func(childComplexity int, id string) int
 		CreateCluster         func(childComplexity int, input models.CreateClusterInput) int
 		CreateComment         func(childComplexity int, input models.CreateCommentInput) int
+		CreateGroup           func(childComplexity int, input CreateGroupInput) int
 		CreateQuery           func(childComplexity int, input models.CreateQueryInput) int
 		CreateTicket          func(childComplexity int, input models.CreateTicketInput) int
 		CreateUser            func(childComplexity int, input models.CreateUserInput) int
@@ -274,6 +275,7 @@ type ComplexityRoot struct {
 		PatchUserStatus       func(childComplexity int, input models.PatchUserStatusInput) int
 		Register              func(childComplexity int, input models.UserRegisterInput) int
 		RemoveCluster         func(childComplexity int, id string) int
+		RemoveGroup           func(childComplexity int, id string) int
 		RemoveTicket          func(childComplexity int, id string) int
 		ResendActivationMail  func(childComplexity int, input models.ActivateInput) int
 		ResetPasswd           func(childComplexity int, input models.ResetPasswdInput) int
@@ -285,6 +287,7 @@ type ComplexityRoot struct {
 		ScheduleTicket        func(childComplexity int, input models.ScheduleTicketInput) int
 		UpdateCluster         func(childComplexity int, input models.UpdateClusterInput) int
 		UpdateEmail           func(childComplexity int, input models.PatchEmailInput) int
+		UpdateGroup           func(childComplexity int, input UpdateGroupInput) int
 		UpdatePassword        func(childComplexity int, input models.PatchPasswordInput) int
 		UpdateProfile         func(childComplexity int, input models.UpdateProfileInput) int
 		UpdateTemplate        func(childComplexity int, input *models.UpdateTemplateInput) int
@@ -571,6 +574,9 @@ type MutationRootResolver interface {
 	RevokeReviewers(ctx context.Context, input models.RevokeReviewersInput) (bool, error)
 	GrantClusters(ctx context.Context, input models.GrantClustersInput) (bool, error)
 	RevokeClusters(ctx context.Context, input models.RevokeClustersInput) (bool, error)
+	CreateGroup(ctx context.Context, input CreateGroupInput) (*models.Group, error)
+	UpdateGroup(ctx context.Context, input UpdateGroupInput) (*models.Group, error)
+	RemoveGroup(ctx context.Context, id string) (*bool, error)
 	GrantGroups(ctx context.Context, input GrantGroupsInput) (bool, error)
 	RevokeGroups(ctx context.Context, input GrantGroupsInput) (bool, error)
 	GrantRoles(ctx context.Context, input models.GrantRolesInput) (bool, error)
@@ -1492,6 +1498,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MutationRoot.CreateComment(childComplexity, args["input"].(models.CreateCommentInput)), true
+	case "MutationRoot.createGroup":
+		if e.ComplexityRoot.MutationRoot.CreateGroup == nil {
+			break
+		}
+
+		args, err := ec.field_MutationRoot_createGroup_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.MutationRoot.CreateGroup(childComplexity, args["input"].(CreateGroupInput)), true
 	case "MutationRoot.createQuery":
 		if e.ComplexityRoot.MutationRoot.CreateQuery == nil {
 			break
@@ -1696,6 +1713,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MutationRoot.RemoveCluster(childComplexity, args["id"].(string)), true
+	case "MutationRoot.removeGroup":
+		if e.ComplexityRoot.MutationRoot.RemoveGroup == nil {
+			break
+		}
+
+		args, err := ec.field_MutationRoot_removeGroup_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.MutationRoot.RemoveGroup(childComplexity, args["id"].(string)), true
 	case "MutationRoot.removeTicket":
 		if e.ComplexityRoot.MutationRoot.RemoveTicket == nil {
 			break
@@ -1817,6 +1845,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MutationRoot.UpdateEmail(childComplexity, args["input"].(models.PatchEmailInput)), true
+	case "MutationRoot.updateGroup":
+		if e.ComplexityRoot.MutationRoot.UpdateGroup == nil {
+			break
+		}
+
+		args, err := ec.field_MutationRoot_updateGroup_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.MutationRoot.UpdateGroup(childComplexity, args["input"].(UpdateGroupInput)), true
 	case "MutationRoot.updatePassword":
 		if e.ComplexityRoot.MutationRoot.UpdatePassword == nil {
 			break
@@ -3158,6 +3197,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputActivateInput,
 		ec.unmarshalInputCreateClusterInput,
 		ec.unmarshalInputCreateCommentInput,
+		ec.unmarshalInputCreateGroupInput,
 		ec.unmarshalInputCreateQueryInput,
 		ec.unmarshalInputCreateTicketInput,
 		ec.unmarshalInputCreateUserInput,
@@ -3182,6 +3222,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputScheduleTicketInput,
 		ec.unmarshalInputSoarQueryInput,
 		ec.unmarshalInputUpdateClusterInput,
+		ec.unmarshalInputUpdateGroupInput,
 		ec.unmarshalInputUpdateProfileInput,
 		ec.unmarshalInputUpdateTemplateInput,
 		ec.unmarshalInputUpdateTicketInput,
@@ -4524,6 +4565,20 @@ func (ec *executionContext) field_MutationRoot_createComment_args(ctx context.Co
 	return args, nil
 }
 
+func (ec *executionContext) field_MutationRoot_createGroup_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (CreateGroupInput, error) {
+			return ec.unmarshalNCreateGroupInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐCreateGroupInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_MutationRoot_createQuery_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -4776,6 +4831,20 @@ func (ec *executionContext) field_MutationRoot_removeCluster_args(ctx context.Co
 	return args, nil
 }
 
+func (ec *executionContext) field_MutationRoot_removeGroup_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_MutationRoot_removeTicket_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -4922,6 +4991,20 @@ func (ec *executionContext) field_MutationRoot_updateEmail_args(ctx context.Cont
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.PatchEmailInput, error) {
 			return ec.unmarshalNPatchEmailInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐPatchEmailInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_MutationRoot_updateGroup_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (UpdateGroupInput, error) {
+			return ec.unmarshalNUpdateGroupInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐUpdateGroupInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -9881,6 +9964,192 @@ func (ec *executionContext) fieldContext_MutationRoot_revokeClusters(ctx context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_MutationRoot_revokeClusters_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MutationRoot_createGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MutationRoot_createGroup(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.MutationRoot().CreateGroup(ctx, fc.Args["input"].(CreateGroupInput))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				if err != nil {
+					var zeroVal *models.Group
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal *models.Group
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *models.Group) graphql.Marshaler {
+			return ec.marshalOGroup2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐGroup(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_MutationRoot_createGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MutationRoot",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Group(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_MutationRoot_createGroup_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MutationRoot_updateGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MutationRoot_updateGroup(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.MutationRoot().UpdateGroup(ctx, fc.Args["input"].(UpdateGroupInput))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				if err != nil {
+					var zeroVal *models.Group
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal *models.Group
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *models.Group) graphql.Marshaler {
+			return ec.marshalOGroup2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐGroup(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_MutationRoot_updateGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MutationRoot",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Group(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_MutationRoot_updateGroup_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MutationRoot_removeGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MutationRoot_removeGroup(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.MutationRoot().RemoveGroup(ctx, fc.Args["id"].(string))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				if err != nil {
+					var zeroVal *bool
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal *bool
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *bool) graphql.Marshaler {
+			return ec.marshalOBoolean2ᚖbool(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_MutationRoot_removeGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MutationRoot",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_MutationRoot_removeGroup_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -19668,6 +19937,114 @@ func (ec *executionContext) unmarshalInputCreateCommentInput(ctx context.Context
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputCreateGroupInput(ctx context.Context, obj any) (CreateGroupInput, error) {
+	var it CreateGroupInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"Name", "Description", "Status"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "Name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
+			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalNString2string(ctx, v) }
+
+			directive1 := func(ctx context.Context) (any, error) {
+				max, err := ec.unmarshalNInt2int(ctx, 75)
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.Length == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive length is not implemented")
+				}
+				return ec.Directives.Length(ctx, obj, directive0, max)
+			}
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(string); ok {
+				it.Name = data
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+		case "Description":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Description"))
+			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalOString2ᚖstring(ctx, v) }
+
+			directive1 := func(ctx context.Context) (any, error) {
+				max, err := ec.unmarshalNInt2int(ctx, 150)
+				if err != nil {
+					var zeroVal *string
+					return zeroVal, err
+				}
+				if ec.Directives.Length == nil {
+					var zeroVal *string
+					return zeroVal, errors.New("directive length is not implemented")
+				}
+				return ec.Directives.Length(ctx, obj, directive0, max)
+			}
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(*string); ok {
+				it.Description = data
+			} else if tmp == nil {
+				it.Description = nil
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+		case "Status":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Status"))
+			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalOUInt82ᚖuint8(ctx, v) }
+
+			directive1 := func(ctx context.Context) (any, error) {
+				pattern, err := ec.unmarshalNString2string(ctx, "^(1|2)$")
+				if err != nil {
+					var zeroVal *uint8
+					return zeroVal, err
+				}
+				if ec.Directives.Matches == nil {
+					var zeroVal *uint8
+					return zeroVal, errors.New("directive matches is not implemented")
+				}
+				return ec.Directives.Matches(ctx, obj, directive0, pattern)
+			}
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(*uint8); ok {
+				it.Status = data
+			} else if tmp == nil {
+				it.Status = nil
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be *uint8`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCreateQueryInput(ctx context.Context, obj any) (models.CreateQueryInput, error) {
 	var it models.CreateQueryInput
 	if obj == nil {
@@ -21222,6 +21599,121 @@ func (ec *executionContext) unmarshalInputUpdateClusterInput(ctx context.Context
 				return it, err
 			}
 			it.GroupUUID = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateGroupInput(ctx context.Context, obj any) (UpdateGroupInput, error) {
+	var it UpdateGroupInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"GroupUUID", "Name", "Description", "Status"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "GroupUUID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("GroupUUID"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.GroupUUID = data
+		case "Name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
+			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalNString2string(ctx, v) }
+
+			directive1 := func(ctx context.Context) (any, error) {
+				max, err := ec.unmarshalNInt2int(ctx, 75)
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.Length == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive length is not implemented")
+				}
+				return ec.Directives.Length(ctx, obj, directive0, max)
+			}
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(string); ok {
+				it.Name = data
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+		case "Description":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Description"))
+			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalOString2ᚖstring(ctx, v) }
+
+			directive1 := func(ctx context.Context) (any, error) {
+				max, err := ec.unmarshalNInt2int(ctx, 150)
+				if err != nil {
+					var zeroVal *string
+					return zeroVal, err
+				}
+				if ec.Directives.Length == nil {
+					var zeroVal *string
+					return zeroVal, errors.New("directive length is not implemented")
+				}
+				return ec.Directives.Length(ctx, obj, directive0, max)
+			}
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(*string); ok {
+				it.Description = data
+			} else if tmp == nil {
+				it.Description = nil
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+		case "Status":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Status"))
+			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalOUInt82ᚖuint8(ctx, v) }
+
+			directive1 := func(ctx context.Context) (any, error) {
+				pattern, err := ec.unmarshalNString2string(ctx, "^(1|2)$")
+				if err != nil {
+					var zeroVal *uint8
+					return zeroVal, err
+				}
+				if ec.Directives.Matches == nil {
+					var zeroVal *uint8
+					return zeroVal, errors.New("directive matches is not implemented")
+				}
+				return ec.Directives.Matches(ctx, obj, directive0, pattern)
+			}
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(*uint8); ok {
+				it.Status = data
+			} else if tmp == nil {
+				it.Status = nil
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be *uint8`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
 		}
 	}
 	return it, nil
@@ -23673,6 +24165,27 @@ func (ec *executionContext) _MutationRoot(ctx context.Context, sel ast.Selection
 				return ec._MutationRoot_revokeClusters(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createGroup":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MutationRoot_createGroup(ctx, field)
+			})
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "updateGroup":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MutationRoot_updateGroup(ctx, field)
+			})
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "removeGroup":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MutationRoot_removeGroup(ctx, field)
+			})
+			if out.Values[i] == graphql.RequiredNull {
 				out.Invalids++
 			}
 		case "grantGroups":
@@ -27422,6 +27935,11 @@ func (ec *executionContext) unmarshalNCreateCommentInput2githubᚗcomᚋmia0x75�
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNCreateGroupInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐCreateGroupInput(ctx context.Context, v any) (CreateGroupInput, error) {
+	res, err := ec.unmarshalInputCreateGroupInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNCreateQueryInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCreateQueryInput(ctx context.Context, v any) (models.CreateQueryInput, error) {
 	res, err := ec.unmarshalInputCreateQueryInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -27855,6 +28373,11 @@ func (ec *executionContext) marshalNUInt82uint8(ctx context.Context, sel ast.Sel
 
 func (ec *executionContext) unmarshalNUpdateClusterInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐUpdateClusterInput(ctx context.Context, v any) (models.UpdateClusterInput, error) {
 	res, err := ec.unmarshalInputUpdateClusterInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdateGroupInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐUpdateGroupInput(ctx context.Context, v any) (UpdateGroupInput, error) {
+	res, err := ec.unmarshalInputUpdateGroupInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

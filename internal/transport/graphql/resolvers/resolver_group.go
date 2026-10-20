@@ -3,6 +3,9 @@ package resolvers
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/cache"
@@ -128,4 +131,77 @@ func resolveGroupID(groupUUID string) (uint, error) {
 		return 0, fmt.Errorf("错误代码: %s, 错误信息: 分组(uuid=%s)不存在。", gqlapi.ReturnCodeNotFound, groupUUID)
 	}
 	return group.GroupID, nil
+}
+
+// CreateGroup 创建一个群集分组
+func (r *mutationRootResolver) CreateGroup(ctx context.Context, input gqlapi.CreateGroupInput) (*models.Group, error) {
+	group := &models.Group{
+		UUID:        uuid.NewString(),
+		Name:        input.Name,
+		Description: valueOrEmpty(input.Description),
+		Status:      valueOrDefault(input.Status, domain.GroupStatusNormal),
+	}
+	if group.Status == 0 {
+		group.Status = domain.GroupStatusNormal
+	}
+	group.BeforeInsert()
+
+	credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
+	if err := r.app.Services.Group.Create(ctx, bridge.GroupToDomain(group), credential.User.UserID); err != nil {
+		return nil, err
+	}
+
+	cache.GroupsMap.Reload()
+	return group, nil
+}
+
+// UpdateGroup 更新一个群集分组
+func (r *mutationRootResolver) UpdateGroup(ctx context.Context, input gqlapi.UpdateGroupInput) (*models.Group, error) {
+	group := cache.GroupsMap.Any(func(elem *models.Group) bool {
+		return elem.UUID == input.GroupUUID
+	})
+	if group == nil {
+		return nil, fmt.Errorf("错误代码: %s, 错误信息: 分组(uuid=%s)不存在。", gqlapi.ReturnCodeNotFound, input.GroupUUID)
+	}
+
+	group.Name = input.Name
+	group.Description = valueOrEmpty(input.Description)
+	group.Status = valueOrDefault(input.Status, group.Status)
+	group.UpdateAt = uint(time.Now().Unix())
+
+	credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
+	if err := r.app.Services.Group.Update(ctx, bridge.GroupToDomain(group), credential.User.UserID); err != nil {
+		return nil, err
+	}
+
+	cache.GroupsMap.Reload()
+	return group, nil
+}
+
+// RemoveGroup 删除一个群集分组
+func (r *mutationRootResolver) RemoveGroup(ctx context.Context, id string) (*bool, error) {
+	credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
+	if err := r.app.Services.Group.DeleteByUUID(ctx, id, credential.User.UserID); err != nil {
+		return nil, err
+	}
+
+	cache.GroupsMap.Reload()
+	ok := true
+	return &ok, nil
+}
+
+// valueOrEmpty unwraps an optional GraphQL string.
+func valueOrEmpty(value *string) string {
+	if value == nil {
+		return ""
+	}
+	return *value
+}
+
+// valueOrDefault unwraps an optional GraphQL byte with a fallback.
+func valueOrDefault(value *uint8, fallback uint8) uint8 {
+	if value == nil {
+		return fallback
+	}
+	return *value
 }

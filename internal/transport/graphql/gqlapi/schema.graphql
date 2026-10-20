@@ -2519,6 +2519,45 @@ input UpdateProfileInput {
 """
 给用户授予角色
 """
+input CreateGroupInput {
+	"""
+	分组名称
+	"""
+	Name:        String! @length(max: 75)
+
+	"""
+	分组说明
+	"""
+	Description: String @length(max: 150)
+
+	"""
+	分组状态：1 正常 2 停用
+	"""
+	Status:      UInt8 @matches(pattern: "^(1|2)$")
+}
+
+input UpdateGroupInput {
+	"""
+	分组UUID
+	"""
+	GroupUUID:   ID!
+
+	"""
+	分组名称
+	"""
+	Name:        String! @length(max: 75)
+
+	"""
+	分组说明
+	"""
+	Description: String @length(max: 150)
+
+	"""
+	分组状态：1 正常 2 停用
+	"""
+	Status:      UInt8 @matches(pattern: "^(1|2)$")
+}
+
 input GrantGroupsInput {
 	"""
 	角色UUID
@@ -3143,6 +3182,36 @@ type MutationRoot {
 		"""
 		input: RevokeClustersInput!
 	): Boolean! @auth(requires: [ADMIN])
+
+	"""
+	创建群集分组
+	"""
+	createGroup(
+		"""
+		分组信息
+		"""
+		input: CreateGroupInput!
+	): Group @auth(requires: [ADMIN])
+
+	"""
+	更新群集分组
+	"""
+	updateGroup(
+		"""
+		分组信息
+		"""
+		input: UpdateGroupInput!
+	): Group @auth(requires: [ADMIN])
+
+	"""
+	删除群集分组
+	"""
+	removeGroup(
+		"""
+		分组UUID
+		"""
+		id: ID!
+	): Boolean @auth(requires: [ADMIN])
 
 	"""
 	关联角色到群集分组

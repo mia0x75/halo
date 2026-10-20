@@ -60,6 +60,16 @@ type CommentEdge struct {
 	Cursor string `json:"cursor"`
 }
 
+// 给用户授予角色
+type CreateGroupInput struct {
+	// 分组名称
+	Name string `json:"Name"`
+	// 分组说明
+	Description *string `json:"Description,omitempty"`
+	// 分组状态：1 正常 2 停用
+	Status *uint8 `json:"Status,omitempty"`
+}
+
 type CronConnection struct {
 	// 分页信息
 	PageInfo *PageInfo `json:"pageInfo"`
@@ -93,7 +103,6 @@ type Environments struct {
 	MemStats     *models.MemStats     `json:"MemStats"`
 }
 
-// 给用户授予角色
 type GrantGroupsInput struct {
 	// 角色UUID
 	RoleUUID string `json:"RoleUUID"`
@@ -264,6 +273,17 @@ type TicketEdge struct {
 type TicketStatusChangePayload struct {
 	TicketUUID string `json:"TicketUUID"`
 	Message    string `json:"Message"`
+}
+
+type UpdateGroupInput struct {
+	// 分组UUID
+	GroupUUID string `json:"GroupUUID"`
+	// 分组名称
+	Name string `json:"Name"`
+	// 分组说明
+	Description *string `json:"Description,omitempty"`
+	// 分组状态：1 正常 2 停用
+	Status *uint8 `json:"Status,omitempty"`
 }
 
 // 用户连接定义
