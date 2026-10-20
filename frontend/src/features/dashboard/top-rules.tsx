@@ -2,7 +2,7 @@ import { useMemo } from "react"
 
 import { BarChart } from "@/components/charts/bar-chart"
 import { chartPalette } from "@/components/charts/palette"
-import { severity } from "@/lib/mock/data"
+import { severity, trendFor, type Period } from "@/lib/mock/data"
 
 const severityColors: Record<string, string> = {
   致命: chartPalette.danger,
@@ -11,12 +11,18 @@ const severityColors: Record<string, string> = {
   低危: chartPalette.neutral,
 }
 
-/** 风险分级：命中数量最多的几条规则。 */
-export function TopRules() {
+export interface TopRulesProps {
+  period: Period
+}
+
+/** 风险分级：按时段缩放命中数量最多的几条规则。 */
+export function TopRules({ period }: TopRulesProps) {
+  const scale = Math.max(1, Math.round(trendFor(period).length / 7))
+
   const categories = useMemo(() => severity.map((item) => item.severity), [])
   const series = useMemo(
-    () => [{ name: "命中数", data: severity.map((item) => item.count) }],
-    [],
+    () => [{ name: "命中数", data: severity.map((item) => item.count * scale) }],
+    [scale],
   )
   const colors = useMemo(
     () => severity.map((item) => severityColors[item.severity] ?? chartPalette.primary),

@@ -22,15 +22,15 @@ bun run preview      # 预览打包产物
 ```
 src/
   components/
-    ui/          # 基础组件：button/card(区块)/badge/table/input/select/label
-                 # dropdown-menu/tabs/pagination/progress/avatar/status-dot
+    ui/          # 基础组件：button/badge/table/input/select/label
+                 # dropdown-menu/tabs/cursor-pagination/progress/avatar/status-dot
     layout/      # 应用外壳：side-nav、top-nav、page-header、nav-items
     charts/      # 图表封装：ApexChart 与调色板
     shared/      # 跨业务组件：section-card、status-badge、empty-state、subheader
   features/
-    dashboard/   # 业务域组件：stat-card、top-rules
+    dashboard/   # 业务域组件：stat-card、top-rules、period-select
   lib/
-    mock/        # 演示假数据（data.ts），接入后端后替换为接口调用
+    mock/        # 演示假数据（data.ts）与游标分页工具（cursor.ts）
     utils.ts     # cn 再导出
   pages/         # 页面级组合：dashboard、tickets、clusters、rules、violations、logs
   App.tsx
@@ -57,6 +57,12 @@ src/
 
 其余关键尺寸与设计稿一致：正文 14px、按钮 12px 字号（小号 8/4px 内边距）、
 卡片内边距 1.25rem、徽标 10px 字号、导航项 0.5rem/1rem 内边距、进度条 8px 高。
+
+## 分页
+
+统一使用**游标分页**：游标是 `base64("cursor<id>")`，与后端 `EncodeCursor` 一致，
+只做前后翻页、不算偏移。工具在 `src/lib/mock/cursor.ts`，状态封装在
+`hooks/use-cursor-pagination.ts`（过滤条件变化时 `reset()` 回到第一页）。
 
 ## 深色模式
 

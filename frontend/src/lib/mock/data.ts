@@ -214,3 +214,47 @@ export const ticketStatusMeta: Record<
   "exec-failure": { label: "执行失败", tone: "danger" },
   closed: { label: "已关闭", tone: "muted" },
 }
+
+export const periods = [7, 30, 180, 365] as const
+
+export type Period = (typeof periods)[number]
+
+export const periodLabels: Record<Period, string> = {
+  7: "近 7 天",
+  30: "近 30 天",
+  180: "近 180 天",
+  365: "近 365 天",
+}
+
+/**
+ * 按时段生成趋势数据。用固定种子的线性同余，保证同一时段每次渲染一致，
+ * 切换时段时曲线形态有变化但不随机跳动。
+ */
+export function trendFor(period: Period): TrendPoint[] {
+  if (period === 7) {
+    return trend
+  }
+
+  let seed = 20261020 + period
+  const next = () => {
+    seed = (seed * 1103515245 + 12345) % 2147483648
+    return seed / 2147483648
+  }
+
+  const points: TrendPoint[] = []
+  const step = period <= 30 ? 1 : period <= 180 ? 7 : 30
+  for (let offset = period - step; offset >= 0; offset -= step) {
+    const submitted = Math.round(6 + next() * 20)
+    const executed = Math.round(submitted * (0.55 + next() * 0.35))
+    const failed = Math.max(0, Math.round(submitted - executed) + Math.round(next() * 2))
+    const date = new Date(2026, 9, 20)
+    date.setDate(date.getDate() - offset)
+    points.push({
+      date: `${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
+      submitted,
+      executed,
+      failed,
+    })
+  }
+  return points
+}

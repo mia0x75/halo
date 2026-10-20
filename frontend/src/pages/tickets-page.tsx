@@ -5,9 +5,9 @@ import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
 import { StatusBadge } from "@/components/shared/status-badge"
 import { Button } from "@/components/ui/button"
+import { CursorPagination } from "@/components/ui/cursor-pagination"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Pagination } from "@/components/ui/pagination"
 import { Select } from "@/components/ui/select"
 import {
   Table,
@@ -17,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { useCursorPagination } from "@/hooks/use-cursor-pagination"
 import { ticketStatusMeta, tickets, type TicketStatus } from "@/lib/mock/data"
 
 const pageSize = 6
@@ -24,8 +25,6 @@ const pageSize = 6
 export function TicketsPage() {
   const [keyword, setKeyword] = useState("")
   const [status, setStatus] = useState<TicketStatus | "all">("all")
-  const [page, setPage] = useState(1)
-
   const filtered = useMemo(() => {
     const needle = keyword.trim().toLowerCase()
     return tickets.filter((ticket) => {
@@ -39,9 +38,7 @@ export function TicketsPage() {
     })
   }, [keyword, status])
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
-  const current = Math.min(page, totalPages)
-  const rows = filtered.slice((current - 1) * pageSize, current * pageSize)
+  const { page, reset, next, previous } = useCursorPagination(filtered, pageSize)
 
   return (
     <>
@@ -75,7 +72,7 @@ export function TicketsPage() {
                 value={keyword}
                 onChange={(event) => {
                   setKeyword(event.target.value)
-                  setPage(1)
+                  reset()
                 }}
                 placeholder="主题、目标库或群集"
                 className="pl-9"
@@ -89,7 +86,7 @@ export function TicketsPage() {
               value={status}
               onChange={(event) => {
                 setStatus(event.target.value as TicketStatus | "all")
-                setPage(1)
+                reset()
               }}
             >
               <option value="all">全部状态</option>
@@ -114,7 +111,7 @@ export function TicketsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {rows.map((ticket) => (
+            {page.edges.map((ticket) => (
               <TableRow key={ticket.uuid}>
                 <TableCell className="font-medium">{ticket.subject}</TableCell>
                 <TableCell className="text-muted-foreground">{ticket.database}</TableCell>
@@ -129,11 +126,14 @@ export function TicketsPage() {
           </TableBody>
         </Table>
 
-        <Pagination
-          page={current}
-          totalPages={totalPages}
-          total={filtered.length}
-          onPageChange={setPage}
+        <CursorPagination
+          total={page.totalCount}
+          hasPreviousPage={page.pageInfo.hasPreviousPage}
+          hasNextPage={page.pageInfo.hasNextPage}
+          startCursor={page.pageInfo.startCursor}
+          endCursor={page.pageInfo.endCursor}
+          onPrevious={previous}
+          onNext={next}
         />
       </SectionCard>
     </>

@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { IconAlertTriangle, IconChecks, IconClockHour4, IconServer } from "@tabler/icons-react"
 
 import { TrendChart } from "@/components/charts/trend-chart"
@@ -5,16 +6,20 @@ import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
 import { StatusBadge } from "@/components/shared/status-badge"
 import { Button } from "@/components/ui/button"
+import { PeriodSelect } from "@/features/dashboard/period-select"
 import { StatCard } from "@/features/dashboard/stat-card"
 import { TopRules } from "@/features/dashboard/top-rules"
-import { auditLogs, clusters, tickets, trend } from "@/lib/mock/data"
+import { auditLogs, clusters, periodLabels, tickets, trendFor, type Period } from "@/lib/mock/data"
 
 export function DashboardPage() {
+  const [period, setPeriod] = useState<Period>(7)
+  const points = trendFor(period)
+
   const pending = tickets.filter((ticket) =>
     ["waiting-vld", "waiting-mrv"].includes(ticket.status),
   ).length
-  const executed = trend[trend.length - 1]!.executed
-  const failed = trend[trend.length - 1]!.failed
+  const executed = points[points.length - 1]!.executed
+  const failed = points[points.length - 1]!.failed
 
   return (
     <>
@@ -29,13 +34,13 @@ export function DashboardPage() {
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="待审核工单"
           value={String(pending)}
           delta={12}
           hint="较昨日"
-          trend={trend.map((point) => point.submitted)}
+          trend={points.map((point) => point.submitted)}
           icon={<IconClockHour4 size={20} stroke={1.5} />}
         />
         <StatCard
@@ -43,7 +48,7 @@ export function DashboardPage() {
           value={String(executed)}
           delta={8}
           hint="较昨日"
-          trend={trend.map((point) => point.executed)}
+          trend={points.map((point) => point.executed)}
           icon={<IconChecks size={20} stroke={1.5} />}
         />
         <StatCard
@@ -51,7 +56,7 @@ export function DashboardPage() {
           value={String(failed)}
           delta={-4}
           hint="较昨日"
-          trend={trend.map((point) => point.failed)}
+          trend={points.map((point) => point.failed)}
           icon={<IconAlertTriangle size={20} stroke={1.5} />}
         />
         <StatCard
@@ -65,23 +70,28 @@ export function DashboardPage() {
       <div className="grid gap-4 xl:grid-cols-3">
         <SectionCard
           title="工单趋势"
-          description="近 7 天提交、执行与失败数量"
+          description={`${periodLabels[period]}提交、执行与失败数量`}
           className="xl:col-span-2"
           bodyClassName="p-0"
-          action={<Button variant="ghost" size="sm">近 7 天</Button>}
+          action={<PeriodSelect value={period} onChange={setPeriod} />}
         >
           <TrendChart
-            categories={trend.map((point) => point.date)}
+            categories={points.map((point) => point.date)}
             series={[
-              { name: "提交", data: trend.map((point) => point.submitted) },
-              { name: "执行", data: trend.map((point) => point.executed) },
-              { name: "失败", data: trend.map((point) => point.failed) },
+              { name: "提交", data: points.map((point) => point.submitted) },
+              { name: "执行", data: points.map((point) => point.executed) },
+              { name: "失败", data: points.map((point) => point.failed) },
             ]}
           />
         </SectionCard>
 
-        <SectionCard title="风险分级" description="近 7 天规则命中分布" bodyClassName="p-0">
-          <TopRules />
+        <SectionCard
+          title="风险分级"
+          description={`${periodLabels[period]}规则命中分布`}
+          bodyClassName="p-0"
+          action={<PeriodSelect value={period} onChange={setPeriod} />}
+        >
+          <TopRules period={period} />
         </SectionCard>
       </div>
 

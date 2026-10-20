@@ -1,15 +1,5 @@
-import {
-  IconBell,
-  IconChevronDown,
-  IconLogout,
-  IconMoon,
-  IconSearch,
-  IconSettings,
-  IconSun,
-  IconUserCircle,
-} from "@tabler/icons-react"
+import { IconBell, IconDatabase, IconMoon, IconSearch, IconSun } from "@tabler/icons-react"
 
-import { Avatar } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -22,13 +12,20 @@ import {
 import { Input } from "@/components/ui/input"
 import { useTheme } from "@/hooks/use-theme"
 
-/** 顶栏：搜索框、消息、主题切换、账号菜单。 */
+/** 顶栏：品牌、搜索、消息与主题切换。 */
 export function TopNav() {
   const { theme, toggleTheme } = useTheme()
   const isDark = theme === "dark"
 
   return (
     <header className="flex h-14 items-center gap-4 border-b border-border bg-card px-4">
+      <div className="flex items-center gap-2">
+        <span className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+          <IconDatabase size={18} stroke={1.5} />
+        </span>
+        <span className="text-xl font-semibold tracking-tight text-strong">Halo</span>
+      </div>
+
       <div className="relative w-full max-w-md">
         <IconSearch
           size={16}
@@ -82,37 +79,6 @@ export function TopNav() {
         >
           {isDark ? <IconSun size={18} stroke={1.5} /> : <IconMoon size={18} stroke={1.5} />}
         </Button>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-surface-secondary"
-              aria-label="账号菜单"
-            >
-              <Avatar label="张" size="sm" />
-              <span className="hidden text-sm md:inline">张三</span>
-              <IconChevronDown size={14} stroke={1.5} className="text-muted-foreground" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel>张三 · 管理员</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <IconUserCircle size={16} stroke={1.5} />
-              个人资料
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <IconSettings size={16} stroke={1.5} />
-              账号设置
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <IconLogout size={16} stroke={1.5} />
-              退出登录
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
     </header>
   )

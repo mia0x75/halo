@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 
 import { SideNav } from "@/components/layout/side-nav"
 import { TopNav } from "@/components/layout/top-nav"
@@ -10,25 +10,39 @@ export interface AppShellProps {
   children: ReactNode
 }
 
-/** 应用外壳：左侧固定导航 + 顶栏 + 内容区。 */
+/** 应用外壳：左侧可收起导航 + 顶栏 + 内容区，页脚通栏。 */
 export function AppShell({ active, onSelect, children }: AppShellProps) {
+  const [collapsed, setCollapsed] = useState(false)
+
   return (
-    <div className="flex min-h-svh bg-background text-foreground">
-      <SideNav active={active} onSelect={onSelect} />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <TopNav />
-        <main className="flex-1">
-          <div className="mx-auto w-full max-w-[1320px] px-4 py-6">
-            <div className="flex flex-col gap-4">{children}</div>
-          </div>
-        </main>
-        <footer className="border-t border-border bg-card">
-          <div className="mx-auto flex max-w-[1320px] items-center justify-between px-4 py-3 text-xs text-muted-foreground">
-            <span>Halo · SQL 变更工单与审计平台</span>
-            <span>v0.1 · 演示数据</span>
-          </div>
-        </footer>
+    <div className="flex min-h-svh flex-col bg-background text-foreground">
+      <div className="flex min-h-0 flex-1">
+        <SideNav
+          active={active}
+          onSelect={onSelect}
+          collapsed={collapsed}
+          onToggle={() => setCollapsed((value) => !value)}
+        />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <TopNav />
+          <main className="flex-1">
+            <div className="mx-auto w-full max-w-[1320px] px-4 py-6">
+              <div className="flex flex-col gap-4">{children}</div>
+            </div>
+          </main>
+        </div>
       </div>
+
+      <footer className="border-t border-border bg-card">
+        <div
+          className="flex items-center justify-between py-3 pr-4 text-xs text-muted-foreground"
+          // 页脚通栏，但内容与右侧内容区左对齐：左侧留出导航栏的宽度。
+          style={{ paddingLeft: (collapsed ? 64 : 240) + 16 }}
+        >
+          <span>Halo · SQL 变更工单与审计平台</span>
+          <span>v0.1 · 演示数据</span>
+        </div>
+      </footer>
     </div>
   )
 }
