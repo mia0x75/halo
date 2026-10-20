@@ -148,15 +148,20 @@
     width: 8px !important;
     height: 8px !important;
   }
-  /* 图例文字：ApexCharts 用 padding-left:15px + margin-left:-15px 互相抵消，
-     这里改成不留白 + 8px 左边距，间距就是 8px，不受内部魔数影响。 */
+  /* 图例文字：与提示框一致，圆点到文字 6px */
   .apexcharts-legend .apexcharts-legend-text {
     padding-left: 0 !important;
-    margin-left: 8px !important;
+    margin-left: 6px !important;
   }
-  /* 提示框：圆点缩到 8px，文字紧跟 8px */
+  /* 提示框：圆点外框同样收成 8px，内部 svg 放大 1.2 让圆点填满，
+     文字紧跟 6px，与图例完全一致 */
   .apexcharts-tooltip .apexcharts-tooltip-marker {
+    width: 8px !important;
+    height: 8px !important;
     margin-right: 6px !important;
+  }
+  .apexcharts-tooltip .apexcharts-tooltip-marker svg {
+    transform: scale(1.2);
   }
   .apexcharts-tooltip .apexcharts-tooltip-series-group {
     gap: 0 !important;
