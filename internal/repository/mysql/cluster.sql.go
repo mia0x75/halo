@@ -10,7 +10,7 @@ import (
 )
 
 const createCluster = `-- name: CreateCluster :execlastid
-INSERT INTO mm_clusters (uuid, host, alias, ip, port, ` + "`" + `user` + "`" + `, ` + "`" + `type` + "`" + `, password, fingerprint, status, version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO mm_clusters (uuid, host, alias, ip, port, ` + "`" + `user` + "`" + `, ` + "`" + `type` + "`" + `, group_id, password, fingerprint, status, version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
 type CreateClusterParams struct {
@@ -21,6 +21,7 @@ type CreateClusterParams struct {
 	Port        uint32
 	User        string
 	Type        string
+	GroupID     uint32
 	Password    []byte
 	Fingerprint []byte
 	Status      uint8
@@ -36,6 +37,7 @@ func (q *Queries) CreateCluster(ctx context.Context, arg CreateClusterParams) (i
 		arg.Port,
 		arg.User,
 		arg.Type,
+		arg.GroupID,
 		arg.Password,
 		arg.Fingerprint,
 		arg.Status,
@@ -66,7 +68,7 @@ func (q *Queries) DeleteClusterByUUID(ctx context.Context, uuid string) error {
 }
 
 const getClusterByID = `-- name: GetClusterByID :one
-SELECT cluster_id, uuid, host, alias, ip, port, ` + "`" + `user` + "`" + `, ` + "`" + `type` + "`" + `, password, fingerprint, status, version, update_at, create_at FROM mm_clusters WHERE cluster_id = ? LIMIT 1
+SELECT cluster_id, uuid, host, alias, ip, port, ` + "`" + `user` + "`" + `, ` + "`" + `type` + "`" + `, group_id, password, fingerprint, status, version, update_at, create_at FROM mm_clusters WHERE cluster_id = ? LIMIT 1
 `
 
 func (q *Queries) GetClusterByID(ctx context.Context, clusterID uint32) (MmCluster, error) {
@@ -81,6 +83,7 @@ func (q *Queries) GetClusterByID(ctx context.Context, clusterID uint32) (MmClust
 		&i.Port,
 		&i.User,
 		&i.Type,
+		&i.GroupID,
 		&i.Password,
 		&i.Fingerprint,
 		&i.Status,
@@ -92,7 +95,7 @@ func (q *Queries) GetClusterByID(ctx context.Context, clusterID uint32) (MmClust
 }
 
 const getClusterByUUID = `-- name: GetClusterByUUID :one
-SELECT cluster_id, uuid, host, alias, ip, port, ` + "`" + `user` + "`" + `, ` + "`" + `type` + "`" + `, password, fingerprint, status, version, update_at, create_at FROM mm_clusters WHERE uuid = ? LIMIT 1
+SELECT cluster_id, uuid, host, alias, ip, port, ` + "`" + `user` + "`" + `, ` + "`" + `type` + "`" + `, group_id, password, fingerprint, status, version, update_at, create_at FROM mm_clusters WHERE uuid = ? LIMIT 1
 `
 
 func (q *Queries) GetClusterByUUID(ctx context.Context, uuid string) (MmCluster, error) {
@@ -107,6 +110,7 @@ func (q *Queries) GetClusterByUUID(ctx context.Context, uuid string) (MmCluster,
 		&i.Port,
 		&i.User,
 		&i.Type,
+		&i.GroupID,
 		&i.Password,
 		&i.Fingerprint,
 		&i.Status,
@@ -118,7 +122,7 @@ func (q *Queries) GetClusterByUUID(ctx context.Context, uuid string) (MmCluster,
 }
 
 const listClusters = `-- name: ListClusters :many
-SELECT cluster_id, uuid, host, alias, ip, port, ` + "`" + `user` + "`" + `, ` + "`" + `type` + "`" + `, password, fingerprint, status, version, update_at, create_at FROM mm_clusters WHERE cluster_id < ? ORDER BY cluster_id DESC LIMIT ?
+SELECT cluster_id, uuid, host, alias, ip, port, ` + "`" + `user` + "`" + `, ` + "`" + `type` + "`" + `, group_id, password, fingerprint, status, version, update_at, create_at FROM mm_clusters WHERE cluster_id < ? ORDER BY cluster_id DESC LIMIT ?
 `
 
 type ListClustersParams struct {
@@ -144,6 +148,7 @@ func (q *Queries) ListClusters(ctx context.Context, arg ListClustersParams) ([]M
 			&i.Port,
 			&i.User,
 			&i.Type,
+			&i.GroupID,
 			&i.Password,
 			&i.Fingerprint,
 			&i.Status,
@@ -165,7 +170,7 @@ func (q *Queries) ListClusters(ctx context.Context, arg ListClustersParams) ([]M
 }
 
 const updateCluster = `-- name: UpdateCluster :exec
-UPDATE mm_clusters SET uuid = ?, host = ?, alias = ?, ip = ?, port = ?, ` + "`" + `user` + "`" + ` = ?, ` + "`" + `type` + "`" + ` = ?, password = ?, fingerprint = ?, status = ?, version = ? WHERE cluster_id = ?
+UPDATE mm_clusters SET uuid = ?, host = ?, alias = ?, ip = ?, port = ?, ` + "`" + `user` + "`" + ` = ?, ` + "`" + `type` + "`" + ` = ?, group_id = ?, password = ?, fingerprint = ?, status = ?, version = ? WHERE cluster_id = ?
 `
 
 type UpdateClusterParams struct {
@@ -176,6 +181,7 @@ type UpdateClusterParams struct {
 	Port        uint32
 	User        string
 	Type        string
+	GroupID     uint32
 	Password    []byte
 	Fingerprint []byte
 	Status      uint8
@@ -192,6 +198,7 @@ func (q *Queries) UpdateCluster(ctx context.Context, arg UpdateClusterParams) er
 		arg.Port,
 		arg.User,
 		arg.Type,
+		arg.GroupID,
 		arg.Password,
 		arg.Fingerprint,
 		arg.Status,

@@ -110,9 +110,15 @@ func NewResolver(a *app.App) *Resolver {
 	return &Resolver{app: a}
 }
 
+type clusterResolver struct{ *Resolver }
 type mutationRootResolver struct{ *Resolver }
 type queryRootResolver struct{ *Resolver }
 type subscriptionRootResolver struct{ *Resolver }
+
+// Cluster TODO: 添加描述
+func (r *Resolver) Cluster() gqlapi.ClusterResolver {
+	return &clusterResolver{r}
+}
 
 // Comment TODO: 添加描述
 func (r *Resolver) Comment() gqlapi.CommentResolver {

@@ -75,6 +75,9 @@ models:
   RuleHit:
     model: github.com/mia0x75/halo/internal/models.RuleHit
 
+  Group:
+    model: github.com/mia0x75/halo/internal/models.Group
+
   CPUStats:
     model: github.com/mia0x75/halo/internal/models.CPUStats
 

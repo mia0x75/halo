@@ -22,6 +22,7 @@ type Cluster struct {
 	Port        uint16 `db:"port" valid:"required,port"                    json:"port"        gqlgen:"Port"`                                                 //
 	Alias       string `db:"alias"              valid:"required,runelength(1|100)"       json:"alias"       gqlgen:"Alias"`                                  //
 	User        string `db:"user"                                valid:"required,length(1|50),alphanum"   json:"user"        gqlgen:"User"`                  //
+	GroupID     uint   `db:"group_id"                             valid:"-"                                json:"group_id"   gqlgen:"-"`                     // 所属分组
 	Type        string `db:"type"                                 valid:"required,in(mysql|postgres)"      json:"type"        gqlgen:"Type"`                 // 目标库类型
 	Password    []byte `db:"password"                          valid:"required"                         json:"-"           gqlgen:"-"`                       // 双向加密
 	FingerPrint []byte `db:"fingerprint"                       valid:"required"                         json:"-"           gqlgen:"-"`                       //

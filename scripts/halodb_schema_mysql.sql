@@ -179,6 +179,10 @@ CREATE TABLE `mm_clusters` (
                 NOT NULL
                 DEFAULT 'mysql'
                 COMMENT '数据库类型',
+  `group_id`    INT UNSIGNED
+                NOT NULL
+                DEFAULT 0
+                COMMENT '所属分组，0 表示未分组',
   `password`    VARBINARY(48)
                 NOT NULL
                 COMMENT '密码',
@@ -776,4 +780,40 @@ ENGINE = InnoDB
 CHARSET = utf8mb4
 COLLATE = utf8mb4_unicode_ci
 COMMENT = '站内消息表'
+;
+
+DROP TABLE IF EXISTS `mm_groups`;
+CREATE TABLE `mm_groups` (
+  `group_id`    INT UNSIGNED
+                NOT NULL
+                AUTO_INCREMENT
+                COMMENT '自增主键',
+  `uuid`        CHAR(36)
+                NOT NULL
+                COMMENT 'UUID',
+  `name`        VARCHAR(75)
+                NOT NULL
+                COMMENT '分组名称',
+  `description` VARCHAR(150)
+                NOT NULL DEFAULT ''
+                COMMENT '分组说明',
+  `status`      TINYINT UNSIGNED
+                NOT NULL DEFAULT 1
+                COMMENT '状态：1 正常 2 停用',
+  `version`     INT UNSIGNED
+                NOT NULL DEFAULT 0
+                COMMENT '版本',
+  `update_at`   DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+                COMMENT '修改时间',
+  `create_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                COMMENT '创建时间',
+
+  PRIMARY KEY (`group_id`),
+  UNIQUE KEY `unique_1` (`uuid`),
+  UNIQUE KEY `unique_2` (`name`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '群集分组表'
 ;

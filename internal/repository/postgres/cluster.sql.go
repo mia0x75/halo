@@ -10,7 +10,7 @@ import (
 )
 
 const createCluster = `-- name: CreateCluster :one
-INSERT INTO mm_clusters (uuid, host, alias, ip, port, "user", "type", password, fingerprint, status, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING cluster_id
+INSERT INTO mm_clusters (uuid, host, alias, ip, port, "user", "type", group_id, password, fingerprint, status, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING cluster_id
 `
 
 type CreateClusterParams struct {
@@ -21,6 +21,7 @@ type CreateClusterParams struct {
 	Port        int64
 	User        string
 	Type        string
+	GroupID     int64
 	Password    []byte
 	Fingerprint []byte
 	Status      int16
@@ -36,6 +37,7 @@ func (q *Queries) CreateCluster(ctx context.Context, arg CreateClusterParams) (i
 		arg.Port,
 		arg.User,
 		arg.Type,
+		arg.GroupID,
 		arg.Password,
 		arg.Fingerprint,
 		arg.Status,
@@ -65,7 +67,7 @@ func (q *Queries) DeleteClusterByUUID(ctx context.Context, uuid string) error {
 }
 
 const getClusterByID = `-- name: GetClusterByID :one
-SELECT cluster_id, uuid, host, alias, ip, port, "user", "type", password, fingerprint, status, version, update_at, create_at FROM mm_clusters WHERE cluster_id = $1 LIMIT 1
+SELECT cluster_id, uuid, host, alias, ip, port, "user", "type", group_id, password, fingerprint, status, version, update_at, create_at FROM mm_clusters WHERE cluster_id = $1 LIMIT 1
 `
 
 func (q *Queries) GetClusterByID(ctx context.Context, clusterID int64) (MmCluster, error) {
@@ -80,6 +82,7 @@ func (q *Queries) GetClusterByID(ctx context.Context, clusterID int64) (MmCluste
 		&i.Port,
 		&i.User,
 		&i.Type,
+		&i.GroupID,
 		&i.Password,
 		&i.Fingerprint,
 		&i.Status,
@@ -91,7 +94,7 @@ func (q *Queries) GetClusterByID(ctx context.Context, clusterID int64) (MmCluste
 }
 
 const getClusterByUUID = `-- name: GetClusterByUUID :one
-SELECT cluster_id, uuid, host, alias, ip, port, "user", "type", password, fingerprint, status, version, update_at, create_at FROM mm_clusters WHERE uuid = $1 LIMIT 1
+SELECT cluster_id, uuid, host, alias, ip, port, "user", "type", group_id, password, fingerprint, status, version, update_at, create_at FROM mm_clusters WHERE uuid = $1 LIMIT 1
 `
 
 func (q *Queries) GetClusterByUUID(ctx context.Context, uuid string) (MmCluster, error) {
@@ -106,6 +109,7 @@ func (q *Queries) GetClusterByUUID(ctx context.Context, uuid string) (MmCluster,
 		&i.Port,
 		&i.User,
 		&i.Type,
+		&i.GroupID,
 		&i.Password,
 		&i.Fingerprint,
 		&i.Status,
@@ -117,7 +121,7 @@ func (q *Queries) GetClusterByUUID(ctx context.Context, uuid string) (MmCluster,
 }
 
 const listClusters = `-- name: ListClusters :many
-SELECT cluster_id, uuid, host, alias, ip, port, "user", "type", password, fingerprint, status, version, update_at, create_at FROM mm_clusters WHERE cluster_id < $1 ORDER BY cluster_id DESC LIMIT $2
+SELECT cluster_id, uuid, host, alias, ip, port, "user", "type", group_id, password, fingerprint, status, version, update_at, create_at FROM mm_clusters WHERE cluster_id < $1 ORDER BY cluster_id DESC LIMIT $2
 `
 
 type ListClustersParams struct {
@@ -143,6 +147,7 @@ func (q *Queries) ListClusters(ctx context.Context, arg ListClustersParams) ([]M
 			&i.Port,
 			&i.User,
 			&i.Type,
+			&i.GroupID,
 			&i.Password,
 			&i.Fingerprint,
 			&i.Status,
@@ -164,7 +169,7 @@ func (q *Queries) ListClusters(ctx context.Context, arg ListClustersParams) ([]M
 }
 
 const updateCluster = `-- name: UpdateCluster :exec
-UPDATE mm_clusters SET uuid = $1, host = $2, alias = $3, ip = $4, port = $5, "user" = $6, "type" = $7, password = $8, fingerprint = $9, status = $10, version = $11, update_at = NOW() WHERE cluster_id = $12
+UPDATE mm_clusters SET uuid = $1, host = $2, alias = $3, ip = $4, port = $5, "user" = $6, "type" = $7, group_id = $8, password = $9, fingerprint = $10, status = $11, version = $12, update_at = NOW() WHERE cluster_id = $13
 `
 
 type UpdateClusterParams struct {
@@ -175,6 +180,7 @@ type UpdateClusterParams struct {
 	Port        int64
 	User        string
 	Type        string
+	GroupID     int64
 	Password    []byte
 	Fingerprint []byte
 	Status      int16
@@ -191,6 +197,7 @@ func (q *Queries) UpdateCluster(ctx context.Context, arg UpdateClusterParams) er
 		arg.Port,
 		arg.User,
 		arg.Type,
+		arg.GroupID,
 		arg.Password,
 		arg.Fingerprint,
 		arg.Status,

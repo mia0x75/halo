@@ -29,6 +29,7 @@ type MmCluster struct {
 	Port        int64
 	User        string
 	Type        string
+	GroupID     int64
 	Password    []byte
 	Fingerprint []byte
 	Status      int16
@@ -87,6 +88,18 @@ type MmGlossary struct {
 	Value       string
 	Uuid        string
 	Description string
+	Version     int64
+	UpdateAt    sql.NullTime
+	CreateAt    time.Time
+}
+
+// 群集分组表
+type MmGroup struct {
+	GroupID     int64
+	Uuid        string
+	Name        string
+	Description string
+	Status      int16
 	Version     int64
 	UpdateAt    sql.NullTime
 	CreateAt    time.Time

@@ -93,6 +93,14 @@ type Environments struct {
 	MemStats     *models.MemStats     `json:"MemStats"`
 }
 
+// 给用户授予角色
+type GrantGroupsInput struct {
+	// 角色UUID
+	RoleUUID string `json:"RoleUUID"`
+	// 分组UUID列表
+	GroupUUIDs []string `json:"GroupUUIDs"`
+}
+
 type LogConnection struct {
 	// 分页信息
 	PageInfo *PageInfo `json:"pageInfo"`
@@ -307,17 +315,20 @@ const (
 	EdgeEnumUserToRole EdgeEnum = "USER_TO_ROLE"
 	// 用户到群集的多对多关系
 	EdgeEnumUserToCluster EdgeEnum = "USER_TO_CLUSTER"
+	// 角色到群集分组的多对多关系
+	EdgeEnumRoleToGroup EdgeEnum = "ROLE_TO_GROUP"
 )
 
 var AllEdgeEnum = []EdgeEnum{
 	EdgeEnumUserToReviewer,
 	EdgeEnumUserToRole,
 	EdgeEnumUserToCluster,
+	EdgeEnumRoleToGroup,
 }
 
 func (e EdgeEnum) IsValid() bool {
 	switch e {
-	case EdgeEnumUserToReviewer, EdgeEnumUserToRole, EdgeEnumUserToCluster:
+	case EdgeEnumUserToReviewer, EdgeEnumUserToRole, EdgeEnumUserToCluster, EdgeEnumRoleToGroup:
 		return true
 	}
 	return false

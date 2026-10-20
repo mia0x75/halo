@@ -27,6 +27,7 @@ type Cluster struct {
 	Port        uint          `db:"port"`
 	User        string        `db:"user"`
 	Type        ClusterType   `db:"type"`
+	GroupID     uint          `db:"group_id"`
 	Password    []byte        `db:"password"`
 	Fingerprint []byte        `db:"fingerprint"`
 	Status      ClusterStatus `db:"status"`

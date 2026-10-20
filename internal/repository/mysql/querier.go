@@ -19,6 +19,7 @@ type Querier interface {
 	CreateCron(ctx context.Context, arg CreateCronParams) (int64, error)
 	CreateEdge(ctx context.Context, arg CreateEdgeParams) (int64, error)
 	CreateGlossary(ctx context.Context, arg CreateGlossaryParams) error
+	CreateGroup(ctx context.Context, arg CreateGroupParams) error
 	CreateLog(ctx context.Context, arg CreateLogParams) (int64, error)
 	CreateMessage(ctx context.Context, arg CreateMessageParams) error
 	CreateMetric(ctx context.Context, arg CreateMetricParams) error
@@ -44,6 +45,7 @@ type Querier interface {
 	DeleteEdgesByTypeAncestor(ctx context.Context, arg DeleteEdgesByTypeAncestorParams) error
 	DeleteGlossaryByKey(ctx context.Context, arg DeleteGlossaryByKeyParams) error
 	DeleteGlossaryByUUID(ctx context.Context, uuid string) error
+	DeleteGroupByUUID(ctx context.Context, uuid string) error
 	DeleteLogByID(ctx context.Context, logID uint32) error
 	DeleteLogByUUID(ctx context.Context, uuid string) error
 	DeleteMetricByUUID(ctx context.Context, uuid string) error
@@ -73,6 +75,8 @@ type Querier interface {
 	GetEdgeByUUID(ctx context.Context, uuid string) (MmEdge, error)
 	GetGlossaryByKey(ctx context.Context, arg GetGlossaryByKeyParams) (MmGlossary, error)
 	GetGlossaryByUUID(ctx context.Context, uuid string) (MmGlossary, error)
+	GetGroupByName(ctx context.Context, name string) (MmGroup, error)
+	GetGroupByUUID(ctx context.Context, uuid string) (MmGroup, error)
 	GetLogByID(ctx context.Context, logID uint32) (MmLog, error)
 	GetLogByUUID(ctx context.Context, uuid string) (MmLog, error)
 	GetMessageByUUID(ctx context.Context, uuid string) (MmMessage, error)
@@ -104,6 +108,7 @@ type Querier interface {
 	ListCrons(ctx context.Context, arg ListCronsParams) ([]MmCron, error)
 	ListEdges(ctx context.Context, arg ListEdgesParams) ([]MmEdge, error)
 	ListGlossaries(ctx context.Context, arg ListGlossariesParams) ([]MmGlossary, error)
+	ListGroups(ctx context.Context, arg ListGroupsParams) ([]MmGroup, error)
 	ListLogs(ctx context.Context, arg ListLogsParams) ([]MmLog, error)
 	ListMessagesByUser(ctx context.Context, arg ListMessagesByUserParams) ([]MmMessage, error)
 	ListMetrics(ctx context.Context, arg ListMetricsParams) ([]MmMetric, error)
@@ -130,6 +135,7 @@ type Querier interface {
 	UpdateCron(ctx context.Context, arg UpdateCronParams) error
 	UpdateEdge(ctx context.Context, arg UpdateEdgeParams) error
 	UpdateGlossary(ctx context.Context, arg UpdateGlossaryParams) error
+	UpdateGroup(ctx context.Context, arg UpdateGroupParams) error
 	UpdateLog(ctx context.Context, arg UpdateLogParams) error
 	UpdateMetric(ctx context.Context, arg UpdateMetricParams) error
 	UpdateOption(ctx context.Context, arg UpdateOptionParams) error

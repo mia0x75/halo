@@ -13,7 +13,7 @@ type RuleHit struct {
 	UUID     string `db:"uuid"         valid:"-"                              json:"uuid"      gqlgen:"UUID"`     //
 	TicketID uint   `db:"ticket_id"    valid:"required"                       json:"ticket_id" gqlgen:"TicketID"` //
 	Sequence uint16 `db:"sequence"     valid:"-"                              json:"sequence"  gqlgen:"Sequence"` //
-	RuleName string `db:"rule_name"    valid:"required,length(1|75)"         json:"rule"      gqlgen:"RuleName"`      //
+	RuleName string `db:"rule_name"    valid:"required,length(1|75)"         json:"rule"      gqlgen:"RuleName"`  //
 	Level    uint8  `db:"level"        valid:"required"                       json:"level"     gqlgen:"Level"`    //
 	Message  string `db:"message"      valid:"required,length(1|150)"        json:"message"   gqlgen:"Message"`   //
 	CreateAt uint   `db:"create_at"    valid:"-"                              json:"create_at" gqlgen:"CreateAt"` //

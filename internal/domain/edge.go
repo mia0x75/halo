@@ -7,6 +7,8 @@ const (
 	EdgeTypeUserToReviewer EdgeType = 1
 	EdgeTypeUserToRole     EdgeType = 2
 	EdgeTypeUserToCluster  EdgeType = 3
+	// EdgeTypeRoleToGroup links a role to the cluster groups it may manage.
+	EdgeTypeRoleToGroup EdgeType = 4
 )
 
 // Edge is a row of mm_edges; it links two entities by kind.

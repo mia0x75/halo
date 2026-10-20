@@ -29,6 +29,7 @@ func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 type ResolverRoot interface {
+	Cluster() ClusterResolver
 	Comment() CommentResolver
 	Log() LogResolver
 	MutationRoot() MutationRootResolver
@@ -83,6 +84,7 @@ type ComplexityRoot struct {
 	Cluster struct {
 		Alias    func(childComplexity int) int
 		CreateAt func(childComplexity int) int
+		Group    func(childComplexity int) int
 		Host     func(childComplexity int) int
 		IP       func(childComplexity int) int
 		Port     func(childComplexity int) int
@@ -172,6 +174,14 @@ type ComplexityRoot struct {
 		Value       func(childComplexity int) int
 	}
 
+	Group struct {
+		CreateAt    func(childComplexity int) int
+		Description func(childComplexity int) int
+		Name        func(childComplexity int) int
+		Status      func(childComplexity int) int
+		UUID        func(childComplexity int) int
+	}
+
 	HostInfos struct {
 		BitWidth  func(childComplexity int) int
 		HostName  func(childComplexity int) int
@@ -250,6 +260,7 @@ type ComplexityRoot struct {
 		CreateUser            func(childComplexity int, input models.CreateUserInput) int
 		ExecuteTicket         func(childComplexity int, id string) int
 		GrantClusters         func(childComplexity int, input models.GrantClustersInput) int
+		GrantGroups           func(childComplexity int, input GrantGroupsInput) int
 		GrantReviewers        func(childComplexity int, input models.GrantReviewersInput) int
 		GrantRoles            func(childComplexity int, input models.GrantRolesInput) int
 		Login                 func(childComplexity int, input models.UserLoginInput) int
@@ -267,6 +278,7 @@ type ComplexityRoot struct {
 		ResendActivationMail  func(childComplexity int, input models.ActivateInput) int
 		ResetPasswd           func(childComplexity int, input models.ResetPasswdInput) int
 		RevokeClusters        func(childComplexity int, input models.RevokeClustersInput) int
+		RevokeGroups          func(childComplexity int, input GrantGroupsInput) int
 		RevokeReviewers       func(childComplexity int, input models.RevokeReviewersInput) int
 		RevokeRoles           func(childComplexity int, input models.RevokeRolesInput) int
 		RewriteQuery          func(childComplexity int, input models.SoarQueryInput) int
@@ -339,6 +351,7 @@ type ComplexityRoot struct {
 		Databases          func(childComplexity int, clusterUUID string) int
 		Environments       func(childComplexity int) int
 		Glossaries         func(childComplexity int, groups []string) int
+		Groups             func(childComplexity int) int
 		Logs               func(childComplexity int, after *string, before *string, first *int, last *int) int
 		MarkMessageRead    func(childComplexity int, uuid string) int
 		Me                 func(childComplexity int) int
@@ -373,6 +386,7 @@ type ComplexityRoot struct {
 	Role struct {
 		CreateAt    func(childComplexity int) int
 		Description func(childComplexity int) int
+		Groups      func(childComplexity int) int
 		Name        func(childComplexity int) int
 		UUID        func(childComplexity int) int
 		UpdateAt    func(childComplexity int) int
@@ -514,6 +528,9 @@ type ComplexityRoot struct {
 
 // region    ************************** generated!.gotpl **************************
 
+type ClusterResolver interface {
+	Group(ctx context.Context, obj *models.Cluster) (*string, error)
+}
 type CommentResolver interface {
 	User(ctx context.Context, obj *models.Comment) (*models.User, error)
 	Ticket(ctx context.Context, obj *models.Comment) (*models.Ticket, error)
@@ -532,6 +549,8 @@ type MutationRootResolver interface {
 	RevokeReviewers(ctx context.Context, input models.RevokeReviewersInput) (bool, error)
 	GrantClusters(ctx context.Context, input models.GrantClustersInput) (bool, error)
 	RevokeClusters(ctx context.Context, input models.RevokeClustersInput) (bool, error)
+	GrantGroups(ctx context.Context, input GrantGroupsInput) (bool, error)
+	RevokeGroups(ctx context.Context, input GrantGroupsInput) (bool, error)
 	GrantRoles(ctx context.Context, input models.GrantRolesInput) (bool, error)
 	RevokeRoles(ctx context.Context, input models.RevokeRolesInput) (bool, error)
 	CreateUser(ctx context.Context, input models.CreateUserInput) (*models.User, error)
@@ -594,6 +613,7 @@ type QueryRootResolver interface {
 	Crons(ctx context.Context, after *string, before *string, first *int, last *int) (*CronConnection, error)
 	Tasks(ctx context.Context) ([]*models.Cron, error)
 	Databases(ctx context.Context, clusterUUID string) ([]*Database, error)
+	Groups(ctx context.Context) ([]*models.Group, error)
 	Messages(ctx context.Context, unreadOnly *bool, first *int) ([]*Message, error)
 	UnreadMessageCount(ctx context.Context) (uint, error)
 	MarkMessageRead(ctx context.Context, uuid string) (*bool, error)
@@ -607,6 +627,7 @@ type QueryRootResolver interface {
 	TestRegexp(ctx context.Context, input *models.ValidatePatternInput) (bool, error)
 }
 type RoleResolver interface {
+	Groups(ctx context.Context, obj *models.Role) ([]*models.Group, error)
 	Users(ctx context.Context, obj *models.Role, after *string, before *string, first *int, last *int) (*UserConnection, error)
 }
 type StatementResolver interface {
@@ -753,6 +774,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Cluster.CreateAt(childComplexity), true
+	case "Cluster.Group":
+		if e.ComplexityRoot.Cluster.Group == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Cluster.Group(childComplexity), true
 	case "Cluster.Host":
 		if e.ComplexityRoot.Cluster.Host == nil {
 			break
@@ -1088,6 +1115,37 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Glossary.Value(childComplexity), true
+
+	case "Group.CreateAt":
+		if e.ComplexityRoot.Group.CreateAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Group.CreateAt(childComplexity), true
+	case "Group.Description":
+		if e.ComplexityRoot.Group.Description == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Group.Description(childComplexity), true
+	case "Group.Name":
+		if e.ComplexityRoot.Group.Name == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Group.Name(childComplexity), true
+	case "Group.Status":
+		if e.ComplexityRoot.Group.Status == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Group.Status(childComplexity), true
+	case "Group.UUID":
+		if e.ComplexityRoot.Group.UUID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Group.UUID(childComplexity), true
 
 	case "HostInfos.BitWidth":
 		if e.ComplexityRoot.HostInfos.BitWidth == nil {
@@ -1465,6 +1523,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MutationRoot.GrantClusters(childComplexity, args["input"].(models.GrantClustersInput)), true
+	case "MutationRoot.grantGroups":
+		if e.ComplexityRoot.MutationRoot.GrantGroups == nil {
+			break
+		}
+
+		args, err := ec.field_MutationRoot_grantGroups_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.MutationRoot.GrantGroups(childComplexity, args["input"].(GrantGroupsInput)), true
 	case "MutationRoot.grantReviewers":
 		if e.ComplexityRoot.MutationRoot.GrantReviewers == nil {
 			break
@@ -1647,6 +1716,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MutationRoot.RevokeClusters(childComplexity, args["input"].(models.RevokeClustersInput)), true
+	case "MutationRoot.revokeGroups":
+		if e.ComplexityRoot.MutationRoot.RevokeGroups == nil {
+			break
+		}
+
+		args, err := ec.field_MutationRoot_revokeGroups_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.MutationRoot.RevokeGroups(childComplexity, args["input"].(GrantGroupsInput)), true
 	case "MutationRoot.revokeReviewers":
 		if e.ComplexityRoot.MutationRoot.RevokeReviewers == nil {
 			break
@@ -2050,6 +2130,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.QueryRoot.Glossaries(childComplexity, args["groups"].([]string)), true
+	case "QueryRoot.groups":
+		if e.ComplexityRoot.QueryRoot.Groups == nil {
+			break
+		}
+
+		return e.ComplexityRoot.QueryRoot.Groups(childComplexity), true
 
 	case "QueryRoot.logs":
 		if e.ComplexityRoot.QueryRoot.Logs == nil {
@@ -2348,6 +2434,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Role.Description(childComplexity), true
+	case "Role.Groups":
+		if e.ComplexityRoot.Role.Groups == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Role.Groups(childComplexity), true
 	case "Role.Name":
 		if e.ComplexityRoot.Role.Name == nil {
 			break
@@ -2943,6 +3035,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCreateTicketInput,
 		ec.unmarshalInputCreateUserInput,
 		ec.unmarshalInputGrantClustersInput,
+		ec.unmarshalInputGrantGroupsInput,
 		ec.unmarshalInputGrantReviewersInput,
 		ec.unmarshalInputGrantRolesInput,
 		ec.unmarshalInputLostPasswdInput,
@@ -3143,6 +3236,8 @@ func (ec *executionContext) childFields_Cluster(ctx context.Context, field graph
 		return ec.fieldContext_Cluster_Alias(ctx, field)
 	case "IP":
 		return ec.fieldContext_Cluster_IP(ctx, field)
+	case "Group":
+		return ec.fieldContext_Cluster_Group(ctx, field)
 	case "Port":
 		return ec.fieldContext_Cluster_Port(ctx, field)
 	case "User":
@@ -3315,6 +3410,22 @@ func (ec *executionContext) childFields_Glossary(ctx context.Context, field grap
 		return ec.fieldContext_Glossary_UpdateAt(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Glossary", field.Name)
+}
+
+func (ec *executionContext) childFields_Group(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "UUID":
+		return ec.fieldContext_Group_UUID(ctx, field)
+	case "Name":
+		return ec.fieldContext_Group_Name(ctx, field)
+	case "Description":
+		return ec.fieldContext_Group_Description(ctx, field)
+	case "Status":
+		return ec.fieldContext_Group_Status(ctx, field)
+	case "CreateAt":
+		return ec.fieldContext_Group_CreateAt(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type Group", field.Name)
 }
 
 func (ec *executionContext) childFields_HostInfos(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
@@ -3557,6 +3668,8 @@ func (ec *executionContext) childFields_Role(ctx context.Context, field graphql.
 		return ec.fieldContext_Role_Name(ctx, field)
 	case "Description":
 		return ec.fieldContext_Role_Description(ctx, field)
+	case "Groups":
+		return ec.fieldContext_Role_Groups(ctx, field)
 	case "Users":
 		return ec.fieldContext_Role_Users(ctx, field)
 	case "CreateAt":
@@ -4314,6 +4427,20 @@ func (ec *executionContext) field_MutationRoot_grantClusters_args(ctx context.Co
 	return args, nil
 }
 
+func (ec *executionContext) field_MutationRoot_grantGroups_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (GrantGroupsInput, error) {
+			return ec.unmarshalNGrantGroupsInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐGrantGroupsInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_MutationRoot_grantReviewers_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -4530,6 +4657,20 @@ func (ec *executionContext) field_MutationRoot_revokeClusters_args(ctx context.C
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.RevokeClustersInput, error) {
 			return ec.unmarshalNRevokeClustersInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRevokeClustersInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_MutationRoot_revokeGroups_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (GrantGroupsInput, error) {
+			return ec.unmarshalNGrantGroupsInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐGrantGroupsInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -6230,6 +6371,29 @@ func (ec *executionContext) fieldContext_Cluster_IP(_ context.Context, field gra
 	return graphql.NewScalarFieldContext("Cluster", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
+func (ec *executionContext) _Cluster_Group(ctx context.Context, field graphql.CollectedField, obj *models.Cluster) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Cluster_Group(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Cluster().Group(ctx, obj)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Cluster_Group(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Cluster", field, true, true, errors.New("field of type String does not have child fields"))
+}
+
 func (ec *executionContext) _Cluster_Port(ctx context.Context, field graphql.CollectedField, obj *models.Cluster) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -7748,6 +7912,157 @@ func (ec *executionContext) _Glossary_UpdateAt(ctx context.Context, field graphq
 }
 func (ec *executionContext) fieldContext_Glossary_UpdateAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("Glossary", field, false, false, errors.New("field of type UInt does not have child fields"))
+}
+
+func (ec *executionContext) _Group_UUID(ctx context.Context, field graphql.CollectedField, obj *models.Group) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Group_UUID(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.UUID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Group_UUID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Group", field, false, false, errors.New("field of type ID does not have child fields"))
+}
+
+func (ec *executionContext) _Group_Name(ctx context.Context, field graphql.CollectedField, obj *models.Group) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Group_Name(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				max, err := ec.unmarshalNInt2int(ctx, 75)
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.Length == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive length is not implemented")
+				}
+				return ec.Directives.Length(ctx, obj, directive0, max)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Group_Name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Group", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _Group_Description(ctx context.Context, field graphql.CollectedField, obj *models.Group) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Group_Description(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Description, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				max, err := ec.unmarshalNInt2int(ctx, 150)
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.Length == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive length is not implemented")
+				}
+				return ec.Directives.Length(ctx, obj, directive0, max)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Group_Description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Group", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _Group_Status(ctx context.Context, field graphql.CollectedField, obj *models.Group) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Group_Status(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Status, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v uint8) graphql.Marshaler {
+			return ec.marshalNUInt82uint8(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Group_Status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Group", field, false, false, errors.New("field of type UInt8 does not have child fields"))
+}
+
+func (ec *executionContext) _Group_CreateAt(ctx context.Context, field graphql.CollectedField, obj *models.Group) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Group_CreateAt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.CreateAt, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v uint) graphql.Marshaler {
+			return ec.marshalNUInt2uint(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Group_CreateAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Group", field, false, false, errors.New("field of type UInt does not have child fields"))
 }
 
 func (ec *executionContext) _HostInfos_OSName(ctx context.Context, field graphql.CollectedField, obj *models.HostInfos) (ret graphql.Marshaler) {
@@ -9377,6 +9692,130 @@ func (ec *executionContext) fieldContext_MutationRoot_revokeClusters(ctx context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_MutationRoot_revokeClusters_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MutationRoot_grantGroups(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MutationRoot_grantGroups(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.MutationRoot().GrantGroups(ctx, fc.Args["input"].(GrantGroupsInput))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				if err != nil {
+					var zeroVal bool
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_MutationRoot_grantGroups(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MutationRoot",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_MutationRoot_grantGroups_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MutationRoot_revokeGroups(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MutationRoot_revokeGroups(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.MutationRoot().RevokeGroups(ctx, fc.Args["input"].(GrantGroupsInput))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				if err != nil {
+					var zeroVal bool
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_MutationRoot_revokeGroups(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MutationRoot",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_MutationRoot_revokeGroups_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -13538,6 +13977,38 @@ func (ec *executionContext) fieldContext_QueryRoot_databases(ctx context.Context
 	return fc, nil
 }
 
+func (ec *executionContext) _QueryRoot_groups(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_QueryRoot_groups(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.QueryRoot().Groups(ctx)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*models.Group) graphql.Marshaler {
+			return ec.marshalOGroup2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐGroup(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_QueryRoot_groups(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QueryRoot",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Group(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _QueryRoot_messages(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -14222,6 +14693,38 @@ func (ec *executionContext) _Role_Description(ctx context.Context, field graphql
 }
 func (ec *executionContext) fieldContext_Role_Description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("Role", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _Role_Groups(ctx context.Context, field graphql.CollectedField, obj *models.Role) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Role_Groups(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Role().Groups(ctx, obj)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*models.Group) graphql.Marshaler {
+			return ec.marshalOGroup2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐGroup(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Role_Groups(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Role",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Group(ctx, field)
+		},
+	}
+	return fc, nil
 }
 
 func (ec *executionContext) _Role_Users(ctx context.Context, field graphql.CollectedField, obj *models.Role) (ret graphql.Marshaler) {
@@ -18777,6 +19280,43 @@ func (ec *executionContext) unmarshalInputGrantClustersInput(ctx context.Context
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputGrantGroupsInput(ctx context.Context, obj any) (GrantGroupsInput, error) {
+	var it GrantGroupsInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"RoleUUID", "GroupUUIDs"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "RoleUUID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("RoleUUID"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.RoleUUID = data
+		case "GroupUUIDs":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("GroupUUIDs"))
+			data, err := ec.unmarshalNString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.GroupUUIDs = data
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputGrantReviewersInput(ctx context.Context, obj any) (models.GrantReviewersInput, error) {
 	var it models.GrantReviewersInput
 	if obj == nil {
@@ -20893,47 +21433,85 @@ func (ec *executionContext) _Cluster(ctx context.Context, sel ast.SelectionSet, 
 		case "UUID":
 			out.Values[i] = ec._Cluster_UUID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "Host":
 			out.Values[i] = ec._Cluster_Host(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "Alias":
 			out.Values[i] = ec._Cluster_Alias(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "IP":
 			out.Values[i] = ec._Cluster_IP(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "Group":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Cluster_Group(ctx, field, obj)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.IsDeferred() {
+				deferredFieldSet.AddField(field)
+				fieldIndex := len(deferredFieldSet.Values) - 1
+				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, deferredFieldSet)
+				})
+
+				for _, deferrable := range field.Deferrables {
+					view, ok := deferLabelToView[deferrable.Label]
+					if !ok {
+						view = deferredFieldSet.NewView()
+						deferLabelToView[deferrable.Label] = view
+					}
+					view.AddIndices(fieldIndex)
+				}
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "Port":
 			out.Values[i] = ec._Cluster_Port(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "User":
 			out.Values[i] = ec._Cluster_User(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "Status":
 			out.Values[i] = ec._Cluster_Status(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "CreateAt":
 			out.Values[i] = ec._Cluster_CreateAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "UpdateAt":
 			out.Values[i] = ec._Cluster_UpdateAt(ctx, field, obj)
 			if out.Values[i] == graphql.RequiredNull {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -21620,6 +22198,64 @@ func (ec *executionContext) _Glossary(ctx context.Context, sel ast.SelectionSet,
 	return out
 }
 
+var groupImplementors = []string{"Group"}
+
+func (ec *executionContext) _Group(ctx context.Context, sel ast.SelectionSet, obj *models.Group) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, groupImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferredFieldSet := graphql.NewFieldSet(nil)
+	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Group")
+		case "UUID":
+			out.Values[i] = ec._Group_UUID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Name":
+			out.Values[i] = ec._Group_Name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Description":
+			out.Values[i] = ec._Group_Description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Status":
+			out.Values[i] = ec._Group_Status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "CreateAt":
+			out.Values[i] = ec._Group_CreateAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
+
+	ec.ProcessDeferredGroup(graphql.DeferredGroup{
+		Defers:   deferLabelToView,
+		Path:     graphql.GetPath(ctx),
+		FieldSet: deferredFieldSet,
+		Context:  ctx,
+	})
+
+	return out
+}
+
 var hostInfosImplementors = []string{"HostInfos"}
 
 func (ec *executionContext) _HostInfos(ctx context.Context, sel ast.SelectionSet, obj *models.HostInfos) graphql.Marshaler {
@@ -22218,6 +22854,20 @@ func (ec *executionContext) _MutationRoot(ctx context.Context, sel ast.Selection
 		case "revokeClusters":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._MutationRoot_revokeClusters(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "grantGroups":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MutationRoot_grantGroups(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "revokeGroups":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MutationRoot_revokeGroups(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -23472,6 +24122,28 @@ func (ec *executionContext) _QueryRoot(ctx context.Context, sel ast.SelectionSet
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "groups":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._QueryRoot_groups(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "messages":
 			field := field
 
@@ -23776,6 +24448,44 @@ func (ec *executionContext) _Role(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "Groups":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Role_Groups(ctx, field, obj)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.IsDeferred() {
+				deferredFieldSet.AddField(field)
+				fieldIndex := len(deferredFieldSet.Values) - 1
+				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, deferredFieldSet)
+				})
+
+				for _, deferrable := range field.Deferrables {
+					view, ok := deferLabelToView[deferrable.Label]
+					if !ok {
+						view = deferredFieldSet.NewView()
+						deferLabelToView[deferrable.Label] = view
+					}
+					view.AddIndices(fieldIndex)
+				}
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "Users":
 			field := field
 
@@ -25771,6 +26481,11 @@ func (ec *executionContext) unmarshalNGrantClustersInput2githubᚗcomᚋmia0x75�
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNGrantGroupsInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐGrantGroupsInput(ctx context.Context, v any) (GrantGroupsInput, error) {
+	res, err := ec.unmarshalInputGrantGroupsInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNGrantReviewersInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐGrantReviewersInput(ctx context.Context, v any) (models.GrantReviewersInput, error) {
 	res, err := ec.unmarshalInputGrantReviewersInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -26544,6 +27259,26 @@ func (ec *executionContext) marshalOGlossary2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋ
 		return graphql.Null
 	}
 	return ec._Glossary(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOGroup2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐGroup(ctx context.Context, sel ast.SelectionSet, v []*models.Group) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalOGroup2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐGroup(ctx, sel, v[i])
+	})
+
+	return ret
+}
+
+func (ec *executionContext) marshalOGroup2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐGroup(ctx context.Context, sel ast.SelectionSet, v *models.Group) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Group(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v any) (*int, error) {

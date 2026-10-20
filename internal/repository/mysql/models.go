@@ -43,6 +43,8 @@ type MmCluster struct {
 	User string
 	// 数据库类型
 	Type string
+	// 所属分组，0 表示未分组
+	GroupID uint32
 	// 密码
 	Password []byte
 	// 指纹
@@ -143,6 +145,26 @@ type MmGlossary struct {
 	Uuid string
 	// 值描述
 	Description string
+	// 版本
+	Version uint32
+	// 修改时间
+	UpdateAt sql.NullTime
+	// 创建时间
+	CreateAt time.Time
+}
+
+// 群集分组表
+type MmGroup struct {
+	// 自增主键
+	GroupID uint32
+	// UUID
+	Uuid string
+	// 分组名称
+	Name string
+	// 分组说明
+	Description string
+	// 状态：1 正常 2 停用
+	Status uint8
 	// 版本
 	Version uint32
 	// 修改时间

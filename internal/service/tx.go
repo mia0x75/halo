@@ -31,6 +31,7 @@ type Repos struct {
 	Metric    domain.MetricRepository
 	RuleHit   domain.RuleHitRepository
 	Message   domain.MessageRepository
+	Group     domain.GroupRepository
 	Template  domain.TemplateRepository
 	Ticket    domain.TicketRepository
 	User      domain.UserRepository

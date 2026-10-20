@@ -142,6 +142,11 @@ enum EdgeEnum {
 	用户到群集的多对多关系
 	"""
 	USER_TO_CLUSTER  @enumInt(value: 3)
+
+	"""
+	角色到群集分组的多对多关系
+	"""
+	ROLE_TO_GROUP   @enumInt(value: 4)
 }
 
 """
@@ -608,6 +613,11 @@ type Cluster implements Node {
 	IP:       String! @matches(pattern: "^(\\d{1,3}\\.){3}\\d{1,3}$")
 
 	"""
+	所属分组名称，未分组时为空
+	"""
+	Group:    String
+
+	"""
 	群集的端口号
 	"""
 	Port:     UInt16! @range(begin: 0, end: 65535)
@@ -863,6 +873,11 @@ type Role implements Node {
 	角色的描述
 	"""
 	Description: String! @length(max: 75)
+
+	"""
+	角色可管理的群集分组
+	"""
+	Groups: [Group]
 
 	"""
 	角色关联的用户
@@ -1150,6 +1165,36 @@ type StatementEdge {
 	分页时使用的光标
 	"""
 	cursor: ID!
+}
+
+"""
+群集分组
+"""
+type Group {
+	"""
+	分组的UUID
+	"""
+	UUID:        ID!
+
+	"""
+	分组名称
+	"""
+	Name:        String! @length(max: 75)
+
+	"""
+	分组说明
+	"""
+	Description: String! @length(max: 150)
+
+	"""
+	状态：1 正常 2 停用
+	"""
+	Status:      UInt8!
+
+	"""
+	记录创建时间
+	"""
+	CreateAt:   UInt!
 }
 
 """
@@ -2089,6 +2134,11 @@ type QueryRoot {
 	): [Database!] @auth(requires: [DEVELOPER, REVIEWER, ADMIN])
 
 	"""
+	获取群集分组
+	"""
+	groups: [Group]
+
+	"""
 	获取当前用户的站内消息
 	"""
 	messages(
@@ -2369,6 +2419,18 @@ input UpdateProfileInput {
 """
 给用户授予角色
 """
+input GrantGroupsInput {
+	"""
+	角色UUID
+	"""
+	RoleUUID: ID!
+
+	"""
+	分组UUID列表
+	"""
+	GroupUUIDs: [String!]!
+}
+
 input GrantRolesInput {
 	"""
 	用户UUID
@@ -2970,6 +3032,26 @@ type MutationRoot {
 		即将收回的群集
 		"""
 		input: RevokeClustersInput!
+	): Boolean! @auth(requires: [ADMIN])
+
+	"""
+	关联角色到群集分组
+	"""
+	grantGroups(
+		"""
+		即将关联的分组
+		"""
+		input: GrantGroupsInput!
+	): Boolean! @auth(requires: [ADMIN])
+
+	"""
+	收回角色到群集分组的关联
+	"""
+	revokeGroups(
+		"""
+		即将收回的分组
+		"""
+		input: GrantGroupsInput!
 	): Boolean! @auth(requires: [ADMIN])
 
 	"""
