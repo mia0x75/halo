@@ -255,6 +255,7 @@ type ComplexityRoot struct {
 		CancelCron            func(childComplexity int, id string) int
 		CreateCluster         func(childComplexity int, input models.CreateClusterInput) int
 		CreateComment         func(childComplexity int, input models.CreateCommentInput) int
+		CreateCron            func(childComplexity int, input CreateCronInput) int
 		CreateGroup           func(childComplexity int, input CreateGroupInput) int
 		CreateQuery           func(childComplexity int, input models.CreateQueryInput) int
 		CreateTicket          func(childComplexity int, input models.CreateTicketInput) int
@@ -275,6 +276,7 @@ type ComplexityRoot struct {
 		PatchUserStatus       func(childComplexity int, input models.PatchUserStatusInput) int
 		Register              func(childComplexity int, input models.UserRegisterInput) int
 		RemoveCluster         func(childComplexity int, id string) int
+		RemoveCron            func(childComplexity int, id string) int
 		RemoveGroup           func(childComplexity int, id string) int
 		RemoveTicket          func(childComplexity int, id string) int
 		ResendActivationMail  func(childComplexity int, input models.ActivateInput) int
@@ -574,6 +576,8 @@ type MutationRootResolver interface {
 	RevokeReviewers(ctx context.Context, input models.RevokeReviewersInput) (bool, error)
 	GrantClusters(ctx context.Context, input models.GrantClustersInput) (bool, error)
 	RevokeClusters(ctx context.Context, input models.RevokeClustersInput) (bool, error)
+	CreateCron(ctx context.Context, input CreateCronInput) (*models.Cron, error)
+	RemoveCron(ctx context.Context, id string) (*bool, error)
 	CreateGroup(ctx context.Context, input CreateGroupInput) (*models.Group, error)
 	UpdateGroup(ctx context.Context, input UpdateGroupInput) (*models.Group, error)
 	RemoveGroup(ctx context.Context, id string) (*bool, error)
@@ -1498,6 +1502,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MutationRoot.CreateComment(childComplexity, args["input"].(models.CreateCommentInput)), true
+	case "MutationRoot.createCron":
+		if e.ComplexityRoot.MutationRoot.CreateCron == nil {
+			break
+		}
+
+		args, err := ec.field_MutationRoot_createCron_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.MutationRoot.CreateCron(childComplexity, args["input"].(CreateCronInput)), true
 	case "MutationRoot.createGroup":
 		if e.ComplexityRoot.MutationRoot.CreateGroup == nil {
 			break
@@ -1713,6 +1728,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MutationRoot.RemoveCluster(childComplexity, args["id"].(string)), true
+	case "MutationRoot.removeCron":
+		if e.ComplexityRoot.MutationRoot.RemoveCron == nil {
+			break
+		}
+
+		args, err := ec.field_MutationRoot_removeCron_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.MutationRoot.RemoveCron(childComplexity, args["id"].(string)), true
 	case "MutationRoot.removeGroup":
 		if e.ComplexityRoot.MutationRoot.RemoveGroup == nil {
 			break
@@ -3197,6 +3223,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputActivateInput,
 		ec.unmarshalInputCreateClusterInput,
 		ec.unmarshalInputCreateCommentInput,
+		ec.unmarshalInputCreateCronInput,
 		ec.unmarshalInputCreateGroupInput,
 		ec.unmarshalInputCreateQueryInput,
 		ec.unmarshalInputCreateTicketInput,
@@ -4565,6 +4592,20 @@ func (ec *executionContext) field_MutationRoot_createComment_args(ctx context.Co
 	return args, nil
 }
 
+func (ec *executionContext) field_MutationRoot_createCron_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (CreateCronInput, error) {
+			return ec.unmarshalNCreateCronInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐCreateCronInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_MutationRoot_createGroup_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -4818,6 +4859,20 @@ func (ec *executionContext) field_MutationRoot_register_args(ctx context.Context
 }
 
 func (ec *executionContext) field_MutationRoot_removeCluster_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_MutationRoot_removeCron_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
@@ -9964,6 +10019,130 @@ func (ec *executionContext) fieldContext_MutationRoot_revokeClusters(ctx context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_MutationRoot_revokeClusters_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MutationRoot_createCron(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MutationRoot_createCron(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.MutationRoot().CreateCron(ctx, fc.Args["input"].(CreateCronInput))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				if err != nil {
+					var zeroVal *models.Cron
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal *models.Cron
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *models.Cron) graphql.Marshaler {
+			return ec.marshalOCron2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCron(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_MutationRoot_createCron(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MutationRoot",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Cron(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_MutationRoot_createCron_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MutationRoot_removeCron(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MutationRoot_removeCron(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.MutationRoot().RemoveCron(ctx, fc.Args["id"].(string))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				if err != nil {
+					var zeroVal *bool
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal *bool
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *bool) graphql.Marshaler {
+			return ec.marshalOBoolean2ᚖbool(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_MutationRoot_removeCron(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MutationRoot",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_MutationRoot_removeCron_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -19937,6 +20116,97 @@ func (ec *executionContext) unmarshalInputCreateCommentInput(ctx context.Context
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputCreateCronInput(ctx context.Context, obj any) (CreateCronInput, error) {
+	var it CreateCronInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"Name", "Job", "Interval", "Days"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "Name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
+			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalNString2string(ctx, v) }
+
+			directive1 := func(ctx context.Context) (any, error) {
+				max, err := ec.unmarshalNInt2int(ctx, 75)
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.Length == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive length is not implemented")
+				}
+				return ec.Directives.Length(ctx, obj, directive0, max)
+			}
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(string); ok {
+				it.Name = data
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+		case "Job":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Job"))
+			data, err := ec.unmarshalNCronJobEnum2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐCronJobEnum(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Job = data
+		case "Interval":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Interval"))
+			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalNString2string(ctx, v) }
+
+			directive1 := func(ctx context.Context) (any, error) {
+				max, err := ec.unmarshalNInt2int(ctx, 20)
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.Length == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive length is not implemented")
+				}
+				return ec.Directives.Length(ctx, obj, directive0, max)
+			}
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(string); ok {
+				it.Interval = data
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+		case "Days":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Days"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Days = data
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCreateGroupInput(ctx context.Context, obj any) (CreateGroupInput, error) {
 	var it CreateGroupInput
 	if obj == nil {
@@ -24167,6 +24437,20 @@ func (ec *executionContext) _MutationRoot(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "createCron":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MutationRoot_createCron(ctx, field)
+			})
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "removeCron":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MutationRoot_removeCron(ctx, field)
+			})
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "createGroup":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._MutationRoot_createGroup(ctx, field)
@@ -27935,6 +28219,11 @@ func (ec *executionContext) unmarshalNCreateCommentInput2githubᚗcomᚋmia0x75�
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNCreateCronInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐCreateCronInput(ctx context.Context, v any) (CreateCronInput, error) {
+	res, err := ec.unmarshalInputCreateCronInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNCreateGroupInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐCreateGroupInput(ctx context.Context, v any) (CreateGroupInput, error) {
 	res, err := ec.unmarshalInputCreateGroupInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -27963,6 +28252,16 @@ func (ec *executionContext) marshalNCronEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋ
 		return graphql.Null
 	}
 	return ec._CronEdge(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNCronJobEnum2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐCronJobEnum(ctx context.Context, v any) (CronJobEnum, error) {
+	var res CronJobEnum
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNCronJobEnum2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐCronJobEnum(ctx context.Context, sel ast.SelectionSet, v CronJobEnum) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) marshalNDatabase2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐDatabase(ctx context.Context, sel ast.SelectionSet, v *Database) graphql.Marshaler {

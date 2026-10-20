@@ -61,6 +61,17 @@ type CommentEdge struct {
 }
 
 // 给用户授予角色
+type CreateCronInput struct {
+	// 任务名称
+	Name string `json:"Name"`
+	// 系统作业类型
+	Job CronJobEnum `json:"Job"`
+	// 执行间隔，如 24h
+	Interval string `json:"Interval"`
+	// 清理作业的保留天数
+	Days *int `json:"Days,omitempty"`
+}
+
 type CreateGroupInput struct {
 	// 分组名称
 	Name string `json:"Name"`
@@ -356,6 +367,64 @@ func (e *ClusterStatusEnum) UnmarshalJSON(b []byte) error {
 }
 
 func (e ClusterStatusEnum) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+// 可调度的系统作业
+type CronJobEnum string
+
+const (
+	// 每日汇总工单与规则命中
+	CronJobEnumMetricsRollup CronJobEnum = "METRICS_ROLLUP"
+	// 清理过期指标与命中明细
+	CronJobEnumMetricsCleanup CronJobEnum = "METRICS_CLEANUP"
+)
+
+var AllCronJobEnum = []CronJobEnum{
+	CronJobEnumMetricsRollup,
+	CronJobEnumMetricsCleanup,
+}
+
+func (e CronJobEnum) IsValid() bool {
+	switch e {
+	case CronJobEnumMetricsRollup, CronJobEnumMetricsCleanup:
+		return true
+	}
+	return false
+}
+
+func (e CronJobEnum) String() string {
+	return string(e)
+}
+
+func (e *CronJobEnum) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = CronJobEnum(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid CronJobEnum", str)
+	}
+	return nil
+}
+
+func (e CronJobEnum) MarshalGQL(w io.Writer) {
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *CronJobEnum) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e CronJobEnum) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

@@ -3,12 +3,17 @@ package resolvers
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"math"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/event"
 	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/platform/config"
@@ -160,4 +165,121 @@ func (r *queryRootResolver) Crons(ctx context.Context, after *string, before *st
 func (r *queryRootResolver) Tasks(ctx context.Context) (L []*models.Cron, err error) {
 	s := worker.NewScheduler()
 	return s.Crons()
+}
+
+// cronJob is one schedulable system job. The command is fixed by the server:
+// the API never accepts a free-form command, so scheduling a job cannot turn
+// into remote command execution.
+type cronJob struct {
+	cmd    string
+	params []string
+}
+
+// cronJobs maps the public job types to their fixed commands.
+var cronJobs = map[gqlapi.CronJobEnum]cronJob{
+	gqlapi.CronJobEnumMetricsRollup: {
+		cmd:    "halocli",
+		params: []string{"metrics", "rollup"},
+	},
+	gqlapi.CronJobEnumMetricsCleanup: {
+		cmd:    "halocli",
+		params: []string{"metrics", "cleanup", "--days=90"},
+	},
+}
+
+// resolveCronJob returns the fixed command of a job type. The days argument
+// only applies to the cleanup job.
+func resolveCronJob(jobType gqlapi.CronJobEnum, days *int) (cronJob, error) {
+	job, ok := cronJobs[jobType]
+	if !ok {
+		return cronJob{}, fmt.Errorf("错误代码: %s, 错误信息: 不支持的作业类型(job=%s)。", gqlapi.ReturnCodeInvalidParams, jobType)
+	}
+
+	params := append([]string{}, job.params...)
+	if days != nil && *days > 0 {
+		// 清理作业的保留天数由调用方决定。
+		params[len(params)-1] = fmt.Sprintf("--days=%d", *days)
+	}
+	job.params = params
+	return job, nil
+}
+
+// CreateCron 创建一个系统定时作业
+func (r *mutationRootResolver) CreateCron(ctx context.Context, input gqlapi.CreateCronInput) (*models.Cron, error) {
+	job, err := resolveCronJob(input.Job, input.Days)
+	if err != nil {
+		return nil, err
+	}
+
+	interval, err := time.ParseDuration(input.Interval)
+	if err != nil || interval <= 0 {
+		return nil, fmt.Errorf("错误代码: %s, 错误信息: 执行间隔(interval=%s)无效。", gqlapi.ReturnCodeInvalidParams, input.Interval)
+	}
+
+	encoded, err := json.Marshal(job.params)
+	if err != nil {
+		return nil, err
+	}
+
+	now := time.Now()
+	cron := &models.Cron{
+		UUID:      uuid.NewString(),
+		Status:    string(domain.CronStatusPending),
+		Name:      input.Name,
+		Cmd:       job.cmd,
+		Params:    string(encoded),
+		Interval:  interval.String(),
+		Duration:  "0s",
+		LastRun:   now.UTC().Format(time.RFC3339),
+		NextRun:   now.Add(interval).UTC().Format(time.RFC3339),
+		Recurrent: 1,
+		Version:   1,
+	}
+	cron.BeforeInsert()
+
+	credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
+	if _, err := r.app.Services.Cron.Create(ctx, cronToDomain(cron), credential.User.UserID); err != nil {
+		return nil, err
+	}
+
+	// 让调度器立刻装载新作业，不必等下一次周期装载。
+	worker.Reload()
+	return cron, nil
+}
+
+// RemoveCron 删除一个系统定时作业
+func (r *mutationRootResolver) RemoveCron(ctx context.Context, id string) (*bool, error) {
+	cron, err := r.app.Services.Cron.GetByUUID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
+	if err := r.app.Services.Cron.Delete(ctx, cron.CronID, credential.User.UserID); err != nil {
+		return nil, err
+	}
+
+	worker.Reload()
+	ok := true
+	return &ok, nil
+}
+
+// cronToDomain converts a cron model into its domain entity.
+func cronToDomain(cron *models.Cron) *domain.Cron {
+	return &domain.Cron{
+		CronID:    cron.CronID,
+		UUID:      cron.UUID,
+		Status:    domain.CronStatus(cron.Status),
+		Name:      cron.Name,
+		Cmd:       cron.Cmd,
+		Params:    cron.Params,
+		Interval:  &cron.Interval,
+		Duration:  &cron.Duration,
+		LastRun:   &cron.LastRun,
+		NextRun:   &cron.NextRun,
+		Recurrent: &cron.Recurrent,
+		Version:   cron.Version,
+		UpdateAt:  &cron.UpdateAt,
+		CreateAt:  cron.CreateAt,
+	}
 }

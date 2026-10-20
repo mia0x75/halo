@@ -22,6 +22,9 @@ var (
 	once      sync.Once
 )
 
+// reloadInterval is how often the scheduler re-reads the schedulable crons.
+const reloadInterval = 60 * time.Second
+
 // repos is injected once at startup via Init so the scheduler reloads and
 // persists tasks through the repository layer.
 
@@ -105,10 +108,15 @@ func (s *Scheduler) Start() error {
 
 	go func() {
 		ticker := time.NewTicker(1 * time.Second)
+		reload := time.NewTicker(reloadInterval)
 		for {
 			select {
 			case <-ticker.C:
 				s.runPending()
+			case <-reload.C:
+				if err := s.reload(); err != nil {
+					log.Errorf("[E] Failed to reload scheduled tasks, err: %s", err.Error())
+				}
 			case <-s.stopChan:
 				close(s.stopChan)
 			}
@@ -164,57 +172,100 @@ R - Runing - 正在执行
 H - Halt - 任务暂停
 */
 func (s *Scheduler) load() error {
-	domainCrons, err := repos.Cron.ListSchedulable(context.Background())
+	tasks, err := s.schedulableTasks()
 	if err != nil {
 		return err
 	}
-	crons := make([]*models.Cron, 0, len(domainCrons))
-	for _, c := range domainCrons {
-		crons = append(crons, bridge.CronFromDomain(c))
-	}
-	tasks := map[string]*Task{}
+
 	s.Lock()
 	defer s.Unlock()
-	for _, cron := range crons {
-		lastRun, err := time.Parse(time.RFC3339, cron.LastRun)
-		if err != nil {
-			log.Errorf("[E] %s", err.Error())
-			return err
-		}
-
-		nextRun, err := time.Parse(time.RFC3339, cron.NextRun)
-		if err != nil {
-			log.Errorf("[E] %s", err.Error())
-			return err
-		}
-
-		interval, err := time.ParseDuration(cron.Interval)
-		if err != nil {
-			log.Errorf("[E] %s", err.Error())
-			return err
-		}
-
-		isRecurring := cron.Recurrent == 1
-
-		params := []string{}
-		err = json.Unmarshal([]byte(cron.Params), &params)
-		if err != nil {
-			log.Errorf("[E] %s", err.Error())
-			return err
-		}
-
-		task := NewTaskWithSchedule(cron.Name, cron.Cmd, params, Schedule{
-			IsRecurring: isRecurring,
-			Interval:    time.Duration(interval),
-			LastRun:     lastRun,
-			NextRun:     nextRun,
-		})
-		task.UUID = cron.UUID
-		tasks[cron.UUID] = task
-	}
-
 	s.tasks = tasks
 	return nil
+}
+
+// schedulableTasks builds the task set from the schedulable crons.
+func (s *Scheduler) schedulableTasks() (map[string]*Task, error) {
+	domainCrons, err := repos.Cron.ListSchedulable(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	tasks := map[string]*Task{}
+	for _, c := range domainCrons {
+		cron := bridge.CronFromDomain(c)
+		task, err := taskFromCron(cron)
+		if err != nil {
+			return nil, err
+		}
+		tasks[cron.UUID] = task
+	}
+	return tasks, nil
+}
+
+// taskFromCron rebuilds an in-memory task from its stored schedule.
+func taskFromCron(cron *models.Cron) (*Task, error) {
+	lastRun, err := time.Parse(time.RFC3339, cron.LastRun)
+	if err != nil {
+		return nil, fmt.Errorf("cron %s last_run: %w", cron.UUID, err)
+	}
+
+	nextRun, err := time.Parse(time.RFC3339, cron.NextRun)
+	if err != nil {
+		return nil, fmt.Errorf("cron %s next_run: %w", cron.UUID, err)
+	}
+
+	interval, err := time.ParseDuration(cron.Interval)
+	if err != nil {
+		return nil, fmt.Errorf("cron %s interval: %w", cron.UUID, err)
+	}
+
+	params := []string{}
+	if err := json.Unmarshal([]byte(cron.Params), &params); err != nil {
+		return nil, fmt.Errorf("cron %s params: %w", cron.UUID, err)
+	}
+
+	task := NewTaskWithSchedule(cron.Name, cron.Cmd, params, Schedule{
+		IsRecurring: cron.Recurrent == 1,
+		Interval:    interval,
+		LastRun:     lastRun,
+		NextRun:     nextRun,
+	})
+	task.UUID = cron.UUID
+	return task, nil
+}
+
+// reload refreshes the task set from the database: crons created after startup
+// are picked up, and crons deleted in the meantime are dropped. Tasks that are
+// running keep their in-memory state.
+func (s *Scheduler) reload() error {
+	tasks, err := s.schedulableTasks()
+	if err != nil {
+		return err
+	}
+
+	s.Lock()
+	defer s.Unlock()
+	for uuid, task := range tasks {
+		if _, ok := s.tasks[uuid]; !ok {
+			s.tasks[uuid] = task
+		}
+	}
+	for uuid, task := range s.tasks {
+		if _, ok := tasks[uuid]; !ok && !task.IsRunning {
+			delete(s.tasks, uuid)
+		}
+	}
+	return nil
+}
+
+// Reload refreshes the running scheduler from the database. It is called after
+// the cron rows change so a new schedule does not wait for a restart.
+func Reload() {
+	if scheduler == nil {
+		return
+	}
+	if err := scheduler.reload(); err != nil {
+		log.Errorf("[E] Failed to reload scheduled tasks, err: %s", err.Error())
+	}
 }
 
 func (s *Scheduler) runPending() {

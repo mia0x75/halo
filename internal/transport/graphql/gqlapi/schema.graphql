@@ -236,6 +236,21 @@ enum GenderEnum {
 #     => 人工审核通过，等待上线执行
 #       => 上线执行完成，订单关闭
 #       => 上线执行失败，请转到工单详情进一步了解
+"""
+可调度的系统作业
+"""
+enum CronJobEnum {
+	"""
+	每日汇总工单与规则命中
+	"""
+	METRICS_ROLLUP @enumInt(value: 1)
+
+	"""
+	清理过期指标与命中明细
+	"""
+	METRICS_CLEANUP @enumInt(value: 2)
+}
+
 enum TicketStatusEnum {
 	"""
 	工单保存成功，等待系统审核
@@ -2519,6 +2534,28 @@ input UpdateProfileInput {
 """
 给用户授予角色
 """
+input CreateCronInput {
+	"""
+	任务名称
+	"""
+	Name: String! @length(max: 75)
+
+	"""
+	系统作业类型
+	"""
+	Job:  CronJobEnum!
+
+	"""
+	执行间隔，如 24h
+	"""
+	Interval: String! @length(max: 20)
+
+	"""
+	清理作业的保留天数
+	"""
+	Days: Int
+}
+
 input CreateGroupInput {
 	"""
 	分组名称
@@ -3182,6 +3219,26 @@ type MutationRoot {
 		"""
 		input: RevokeClustersInput!
 	): Boolean! @auth(requires: [ADMIN])
+
+	"""
+	创建一个系统定时作业
+	"""
+	createCron(
+		"""
+		作业信息
+		"""
+		input: CreateCronInput!
+	): Cron @auth(requires: [ADMIN])
+
+	"""
+	删除一个系统定时作业
+	"""
+	removeCron(
+		"""
+		作业UUID
+		"""
+		id: ID!
+	): Boolean @auth(requires: [ADMIN])
 
 	"""
 	创建群集分组
