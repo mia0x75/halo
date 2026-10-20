@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { IconSearch } from "@tabler/icons-react"
+import { IconPlus, IconSearch } from "@tabler/icons-react"
 
 import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
@@ -7,6 +7,8 @@ import { StatusBadge } from "@/components/shared/status-badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Pagination } from "@/components/ui/pagination"
+import { Select } from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -15,35 +17,53 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { mockTickets } from "@/lib/api/mock"
-import { formatDateTime } from "@/lib/format"
+import { ticketStatusMeta, tickets, type TicketStatus } from "@/lib/mock/data"
+
+const pageSize = 6
 
 export function TicketsPage() {
   const [keyword, setKeyword] = useState("")
+  const [status, setStatus] = useState<TicketStatus | "all">("all")
+  const [page, setPage] = useState(1)
 
-  const tickets = useMemo(() => {
+  const filtered = useMemo(() => {
     const needle = keyword.trim().toLowerCase()
-    if (!needle) return mockTickets
-    return mockTickets.filter(
-      (ticket) =>
+    return tickets.filter((ticket) => {
+      if (status !== "all" && ticket.status !== status) return false
+      if (!needle) return true
+      return (
         ticket.subject.toLowerCase().includes(needle) ||
         ticket.database.toLowerCase().includes(needle) ||
-        ticket.cluster.alias.toLowerCase().includes(needle),
-    )
-  }, [keyword])
+        ticket.cluster.toLowerCase().includes(needle)
+      )
+    })
+  }, [keyword, status])
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
+  const current = Math.min(page, totalPages)
+  const rows = filtered.slice((current - 1) * pageSize, current * pageSize)
 
   return (
     <>
       <PageHeader
         title="工单"
         description="变更工单的提交与审核状态"
-        action={<Button>新建工单</Button>}
+        action={
+          <Button>
+            <IconPlus size={16} stroke={1.5} />
+            新建工单
+          </Button>
+        }
       />
 
-      <SectionCard title="工单列表" description={`共 ${tickets.length} 条`} bodyClassName="p-0">
-        <div className="flex flex-col gap-3 border-b border-border px-5 py-3 sm:flex-row sm:items-end">
+      <SectionCard
+        title="工单列表"
+        description={`共 ${filtered.length} 条`}
+        bodyClassName="p-0"
+      >
+        <div className="flex flex-col gap-3 border-b border-border px-5 py-4 sm:flex-row sm:items-end">
           <div className="flex flex-col gap-1.5 sm:w-72">
-            <Label htmlFor="ticket-keyword">搜索</Label>
+            <Label htmlFor="ticket-keyword">关键词</Label>
             <div className="relative">
               <IconSearch
                 size={16}
@@ -53,11 +73,32 @@ export function TicketsPage() {
               <Input
                 id="ticket-keyword"
                 value={keyword}
-                onChange={(event) => setKeyword(event.target.value)}
-                placeholder="主题、库名或群集别名"
+                onChange={(event) => {
+                  setKeyword(event.target.value)
+                  setPage(1)
+                }}
+                placeholder="主题、目标库或群集"
                 className="pl-9"
               />
             </div>
+          </div>
+          <div className="flex flex-col gap-1.5 sm:w-52">
+            <Label htmlFor="ticket-status">状态</Label>
+            <Select
+              id="ticket-status"
+              value={status}
+              onChange={(event) => {
+                setStatus(event.target.value as TicketStatus | "all")
+                setPage(1)
+              }}
+            >
+              <option value="all">全部状态</option>
+              {Object.entries(ticketStatusMeta).map(([key, meta]) => (
+                <option key={key} value={key}>
+                  {meta.label}
+                </option>
+              ))}
+            </Select>
           </div>
         </div>
 
@@ -68,27 +109,32 @@ export function TicketsPage() {
               <TableHead>目标库</TableHead>
               <TableHead>群集</TableHead>
               <TableHead>状态</TableHead>
-              <TableHead>提交时间</TableHead>
+              <TableHead>提交人</TableHead>
+              <TableHead>创建时间</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {tickets.map((ticket) => (
+            {rows.map((ticket) => (
               <TableRow key={ticket.uuid}>
-                <TableCell className="max-w-[320px] truncate font-medium">
-                  {ticket.subject}
-                </TableCell>
+                <TableCell className="font-medium">{ticket.subject}</TableCell>
                 <TableCell className="text-muted-foreground">{ticket.database}</TableCell>
-                <TableCell className="text-muted-foreground">{ticket.cluster.alias}</TableCell>
+                <TableCell className="text-muted-foreground">{ticket.cluster}</TableCell>
                 <TableCell>
                   <StatusBadge status={ticket.status} />
                 </TableCell>
-                <TableCell className="text-muted-foreground">
-                  {formatDateTime(ticket.createAt)}
-                </TableCell>
+                <TableCell className="text-muted-foreground">{ticket.submitter}</TableCell>
+                <TableCell className="text-muted-foreground">{ticket.createdAt}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
+
+        <Pagination
+          page={current}
+          totalPages={totalPages}
+          total={filtered.length}
+          onPageChange={setPage}
+        />
       </SectionCard>
     </>
   )

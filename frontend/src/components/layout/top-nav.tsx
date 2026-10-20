@@ -1,62 +1,118 @@
-import { IconDatabase, IconShieldCheck } from "@tabler/icons-react"
+import {
+  IconBell,
+  IconChevronDown,
+  IconLogout,
+  IconMoon,
+  IconSearch,
+  IconSettings,
+  IconSun,
+  IconUserCircle,
+} from "@tabler/icons-react"
 
-import { ThemeToggle } from "@/components/layout/theme-toggle"
+import { Avatar } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
+import { useTheme } from "@/hooks/use-theme"
 
-export type NavKey = "dashboard" | "tickets"
+/** 顶栏：搜索框、消息、主题切换、账号菜单。 */
+export function TopNav() {
+  const { theme, toggleTheme } = useTheme()
+  const isDark = theme === "dark"
 
-interface NavItem {
-  key: NavKey
-  label: string
-}
-
-const navItems: NavItem[] = [
-  { key: "dashboard", label: "概览" },
-  { key: "tickets", label: "工单" },
-]
-
-export interface TopNavProps {
-  active: NavKey
-  onSelect: (key: NavKey) => void
-}
-
-export function TopNav({ active, onSelect }: TopNavProps) {
   return (
-    <header className="sticky top-0 z-20 border-b border-border bg-card/95 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-[1320px] items-center gap-6 px-4">
-        <div className="flex items-center gap-2">
-          <span className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <IconDatabase size={16} stroke={1.5} />
-          </span>
-          <span className="text-sm font-semibold tracking-tight">Halo</span>
-        </div>
+    <header className="flex h-14 items-center gap-4 border-b border-border bg-card px-4">
+      <div className="relative w-full max-w-md">
+        <IconSearch
+          size={16}
+          stroke={1.5}
+          className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
+        />
+        <Input placeholder="搜索工单、群集、规则…" className="h-9 pl-9" />
+      </div>
 
-        <nav className="flex items-center gap-1" aria-label="主导航">
-          {navItems.map((item) => (
-            <Button
-              key={item.key}
-              variant="ghost"
-              size="sm"
-              aria-current={active === item.key ? "page" : undefined}
-              onClick={() => onSelect(item.key)}
-              className={cn(
-                "text-sm",
-                active === item.key ? "bg-accent text-accent-foreground" : "text-muted-foreground",
-              )}
-            >
-              {item.label}
+      <div className="ml-auto flex items-center gap-1">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="relative" aria-label="消息">
+              <IconBell size={18} stroke={1.5} />
+              <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-danger ring-2 ring-card" />
             </Button>
-          ))}
-        </nav>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-72">
+            <DropdownMenuLabel>消息</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <IconBell size={16} stroke={1.5} />
+              <span className="flex flex-col">
+                <span>工单「订单归档字段」审核通过</span>
+                <span className="text-xs text-muted-foreground">2 分钟前</span>
+              </span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <IconBell size={16} stroke={1.5} />
+              <span className="flex flex-col">
+                <span>工单「报表视图重建」待审核</span>
+                <span className="text-xs text-muted-foreground">1 小时前</span>
+              </span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <IconBell size={16} stroke={1.5} />
+              <span className="flex flex-col">
+                <span>工单「清理历史数据」执行失败</span>
+                <span className="text-xs text-muted-foreground">昨天</span>
+              </span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-        <div className="ml-auto flex items-center gap-1">
-          <Button variant="ghost" size="sm" aria-label="规则与审计">
-            <IconShieldCheck size={16} stroke={1.5} />
-            <span className="hidden sm:inline">规则与审计</span>
-          </Button>
-          <ThemeToggle />
-        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleTheme}
+          aria-label={isDark ? "切换到浅色主题" : "切换到深色主题"}
+          title={isDark ? "切换到浅色主题" : "切换到深色主题"}
+        >
+          {isDark ? <IconSun size={18} stroke={1.5} /> : <IconMoon size={18} stroke={1.5} />}
+        </Button>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-surface-secondary"
+              aria-label="账号菜单"
+            >
+              <Avatar label="张" size="sm" />
+              <span className="hidden text-sm md:inline">张三</span>
+              <IconChevronDown size={14} stroke={1.5} className="text-muted-foreground" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuLabel>张三 · 管理员</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <IconUserCircle size={16} stroke={1.5} />
+              个人资料
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <IconSettings size={16} stroke={1.5} />
+              账号设置
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <IconLogout size={16} stroke={1.5} />
+              退出登录
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   )

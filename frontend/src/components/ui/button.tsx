@@ -3,23 +3,25 @@ import type { ButtonHTMLAttributes } from "react"
 
 import { cn } from "@/lib/utils"
 
+// 尺寸与内边距按设计稿：主按钮 0.6875rem/1.75rem、小按钮 0.3125rem/0.5rem，字号 0.75rem。
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        outline: "border border-border bg-card hover:bg-accent hover:text-accent-foreground",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+        outline: "border border-border bg-card text-foreground hover:bg-surface-secondary",
+        ghost: "text-foreground hover:bg-surface-secondary",
+        subtle: "bg-surface-secondary text-foreground hover:bg-surface-tertiary",
         danger: "bg-danger text-danger-foreground hover:bg-danger/90",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 rounded-md px-6",
+        default: "h-9 px-7 py-2.75",
+        sm: "h-8 rounded-sm px-2",
+        lg: "h-10 px-8 text-sm",
         icon: "size-9",
+        "icon-sm": "size-8 rounded-sm",
       },
     },
     defaultVariants: {
@@ -35,11 +37,6 @@ export interface ButtonProps
 
 export function Button({ className, variant, size, type = "button", ...props }: ButtonProps) {
   return (
-    <button
-      type={type}
-      className={cn(buttonVariants({ variant, size }), className)}
-      {...props}
-    />
+    <button type={type} className={cn(buttonVariants({ variant, size }), className)} {...props} />
   )
 }
-

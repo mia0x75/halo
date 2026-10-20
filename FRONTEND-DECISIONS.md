@@ -670,3 +670,27 @@ Adding any of these should be its own ADR, not an implicit dependency.
 - Consequences: 当前产物约 1.19 MB（gzip 355 KB），ApexCharts 占主要部分；
   若首屏体积成为问题，改为动态 `import("apexcharts")` 拆包。
 
+### ADR-007 — 视觉基准取自 Tabler，令牌统一用 `--halo-*`
+- Status: accepted
+- Date: 2026-10-20
+- Context: 界面需要一套密集型企业后台的视觉规范。Tabler 的设计稿（preview.tabler.io）
+  给出了成体系的尺寸、间距、圆角、阴影与配色，但它的实现基于 Bootstrap；
+  本项目不用 Bootstrap，也不引入其 CSS 变量命名。
+- Decision: **从 Tabler 的样式表提取确切数值，用 Tailwind CSS v4 重新实现组件**，
+  变量一律命名为 `--halo-*`。落地要点：
+  - 配色取其调色板（primary `oklch(54.6% 0.1724 254.2deg)`、success/info/warning/danger、
+    gray-50…900），页面底色 `oklch(98.51% 0 0)`、卡片 `#ffffff`、描边 `oklch(92.19% 0 0)`；
+  - 圆角 4/6/8/16px，卡片阴影 `0 1px 3px 0 rgb(18 18 23 / .1), 0 1px 2px 0 rgb(18 18 23 / .06)`；
+  - 正文 14px、按钮 12px 字号（小号 0.3125rem/0.5rem）、卡片内边距 1.25rem、
+    徽标 10px 字号、导航项 0.5rem/1rem、进度条 8px、表格头 12px 大写。
+  - 组件代码自持（shadcn 模式），不复制 Bootstrap 样式表。
+- Consequences: 界面观感与设计稿一致而不引入 Bootstrap 依赖；数值全部落在
+  `src/index.css` 的令牌里，后续微调只改一处。
+
+### ADR-008 — 演示阶段只用假数据，不连接 gqlapi
+- Status: accepted
+- Date: 2026-10-20
+- Context: 后端接口已就绪，但界面需要先按设计稿成型并可独立演示。
+- Decision: 数据统一放在 `src/lib/mock/data.ts`，形态按 GraphQL 契约的 camelCase 镜像；
+  删掉原 `src/lib/api/client.ts`（gqlapi 传输层），避免留下未接线的死代码。
+- Consequences: 页面可离线演示；接入后端时按页替换取值来源，组件结构不变。

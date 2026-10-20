@@ -11,11 +11,7 @@ export interface SectionCardProps {
   bodyClassName?: string
 }
 
-/**
- * Purpose-built shell for table/chart cards. shadcn cards drive spacing from a
- * CSS variable, which is fragile to override with utilities (see the decision
- * record §10), so dense cards use this explicit wrapper instead.
- */
+/** 区块卡片：头部 1.25rem 内边距 + 1px 边线，内容区可自定义内边距。 */
 export function SectionCard({
   title,
   description,
@@ -31,9 +27,9 @@ export function SectionCard({
         className,
       )}
     >
-      <div className="flex min-h-14 items-center justify-between gap-2 border-b border-border px-5">
-        <div className="flex flex-col gap-0.5">
-          <h3 className="text-base font-semibold tracking-tight">{title}</h3>
+      <div className="flex min-h-14 items-center justify-between gap-2 border-b border-border px-5 py-4">
+        <div className="flex flex-col">
+          <h3 className="text-base font-medium text-strong">{title}</h3>
           {description ? (
             <p className="text-xs text-muted-foreground">{description}</p>
           ) : null}

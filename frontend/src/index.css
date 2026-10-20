@@ -1,9 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "@fontsource/inter/latin-400.css";
-@import "@fontsource/inter/latin-500.css";
-@import "@fontsource/inter/latin-600.css";
-@import "@fontsource/inter/latin-700.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -11,122 +11,103 @@
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-heading: var(--font-sans);
 
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
+  --color-background: var(--halo-canvas);
+  --color-foreground: var(--halo-text);
+  --color-card: var(--halo-surface);
+  --color-card-foreground: var(--halo-text);
+  --color-popover: var(--halo-surface);
+  --color-popover-foreground: var(--halo-text);
+  --color-primary: var(--halo-primary);
+  --color-primary-foreground: var(--halo-primary-foreground);
+  --color-secondary: var(--halo-secondary);
+  --color-secondary-foreground: var(--halo-primary-foreground);
+  --color-muted: var(--halo-surface-secondary);
+  --color-muted-foreground: var(--halo-text-muted);
+  --color-accent: var(--halo-surface-secondary);
+  --color-accent-foreground: var(--halo-text);
+  --color-destructive: var(--halo-danger);
+  --color-border: var(--halo-border);
+  --color-input: var(--halo-border);
+  --color-ring: var(--halo-primary);
 
+  --color-surface: var(--halo-surface);
+  --color-surface-secondary: var(--halo-surface-secondary);
+  --color-surface-tertiary: var(--halo-surface-tertiary);
   --color-success: var(--halo-success);
+  --color-success-foreground: var(--halo-primary-foreground);
   --color-warning: var(--halo-warning);
+  --color-warning-foreground: var(--halo-primary-foreground);
   --color-danger: var(--halo-danger);
-  --color-danger-foreground: var(--halo-danger-foreground);
+  --color-danger-foreground: var(--halo-primary-foreground);
+  --color-info: var(--halo-info);
+  --color-info-foreground: var(--halo-primary-foreground);
   --color-strong: var(--halo-text-strong);
+
+  /* 卡片阴影：1px 描边下的一层极淡投影 */
+  --shadow-xs: var(--halo-shadow);
 
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
-  --radius-xl: 12px;
+  --radius-xl: 16px;
   --radius-2xl: 16px;
   --radius-3xl: 24px;
   --radius-4xl: 32px;
 }
 
 :root {
-  /* surfaces & text */
-  --halo-canvas: #fafafa;
+  /* 品牌与状态色 */
+  --halo-primary: oklch(54.6% 0.1724 254.2deg);
+  --halo-primary-foreground: #ffffff;
+  --halo-secondary: oklch(55.55% 0 0);
+  --halo-success: oklch(67.38% 0.1885 145.43deg);
+  --halo-info: oklch(66.26% 0.1358 246.81deg);
+  --halo-warning: oklch(77.02% 0.1658 71.02deg);
+  --halo-danger: oklch(58.29% 0.1941 25.59deg);
+  --halo-muted: oklch(55.55% 0 0);
+
+  /* 表面与文字 */
+  --halo-canvas: oklch(98.51% 0 0);
   --halo-surface: #ffffff;
-  --halo-text: oklch(37.15% 0 0);          /* ~#404040 */
-  --halo-text-strong: #171717;
-  --halo-text-muted: oklch(55.55% 0 0);    /* ~#737373 */
-  --halo-border: color-mix(in oklab, oklch(26.86% 0 0) 11.9%, transparent);
+  --halo-surface-secondary: oklch(97.02% 0 0);
+  --halo-surface-tertiary: oklch(97.02% 0 0);
+  --halo-text: oklch(26.86% 0 0);
+  --halo-text-muted: oklch(55.55% 0 0);
+  --halo-text-strong: oklch(20.46% 0 0);
+  --halo-border: oklch(92.19% 0 0);
+  --halo-border-muted: color-mix(in oklab, oklch(26.86% 0 0) 11.9%, transparent);
 
-  /* brand & status */
-  --halo-primary: #066fd1;
-  --halo-success: #2fb344;
-  --halo-warning: #f59f00;
-  --halo-danger: #d63939;
-  --halo-danger-foreground: #ffffff;
-
-  /* geometry */
-  --halo-radius-card: 8px;
-  --halo-radius-control: 6px;
-
-  /* shadcn semantic mapping */
-  --background: var(--halo-canvas);
-  --foreground: var(--halo-text);
-  --card: var(--halo-surface);
-  --card-foreground: var(--halo-text);
-  --popover: var(--halo-surface);
-  --popover-foreground: var(--halo-text);
-  --primary: var(--halo-primary);
-  --primary-foreground: #ffffff;
-  --secondary: oklch(96.7% 0 0);
-  --secondary-foreground: var(--halo-text);
-  --muted: oklch(96.7% 0 0);
-  --muted-foreground: var(--halo-text-muted);
-  --accent: oklch(96.7% 0 0);
-  --accent-foreground: var(--halo-text);
-  --destructive: var(--halo-danger);
-  --border: var(--halo-border);
-  --input: var(--halo-border);
-  --ring: var(--halo-primary);
-  --radius: var(--halo-radius-control);
+  /* 几何 */
+  --halo-radius-sm: 4px;
+  --halo-radius: 6px;
+  --halo-radius-lg: 8px;
+  --halo-radius-xl: 16px;
+  --halo-shadow: 0 1px 3px 0 rgb(18 18 23 / 0.1), 0 1px 2px 0 rgb(18 18 23 / 0.06);
 
   color-scheme: light;
 }
 
 .dark {
-  --halo-canvas: oklch(20.46% 0 0);        /* ~neutral-900 */
-  --halo-surface: oklch(26.86% 0 0);       /* ~neutral-800 */
+  --halo-canvas: oklch(20.46% 0 0);
+  --halo-surface: oklch(26.86% 0 0);
+  --halo-surface-secondary: oklch(20.46% 0 0);
+  --halo-surface-tertiary: oklch(26.86% 0 0);
   --halo-text: oklch(92.19% 0 0);
-  --halo-text-strong: #ffffff;
   --halo-text-muted: oklch(71.55% 0 0);
-  --halo-border: rgba(128, 150, 172, 0.2);
-  --halo-danger-foreground: #ffffff;
-
-  --background: var(--halo-canvas);
-  --foreground: var(--halo-text);
-  --card: var(--halo-surface);
-  --card-foreground: var(--halo-text);
-  --popover: var(--halo-surface);
-  --popover-foreground: var(--halo-text);
-  --primary: var(--halo-primary);
-  --primary-foreground: #ffffff;
-  --secondary: oklch(32% 0 0);
-  --secondary-foreground: var(--halo-text);
-  --muted: oklch(32% 0 0);
-  --muted-foreground: var(--halo-text-muted);
-  --accent: oklch(32% 0 0);
-  --accent-foreground: var(--halo-text);
-  --destructive: var(--halo-danger);
-  --border: var(--halo-border);
-  --input: var(--halo-border);
-  --ring: var(--halo-primary);
-  --radius: var(--halo-radius-control);
+  --halo-text-strong: #ffffff;
+  --halo-border: oklch(34.86% 0 0);
+  --halo-border-muted: color-mix(in oklab, oklch(92.19% 0 0) 11.9%, transparent);
+  --halo-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px 0 rgb(0 0 0 / 0.2);
 
   color-scheme: dark;
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
   html {
-    @apply font-sans;
+    @apply font-sans text-sm;
   }
   body {
     @apply bg-background text-foreground;
@@ -134,8 +115,7 @@
 }
 
 @layer components {
-  /* Apex renders SVG and needs concrete colors, so the theme is applied
-     through CSS overrides instead of theme re-renders. */
+  /* 图表渲染为 SVG，配色需要具体值，主题色由 CSS 变量覆盖。 */
   .apexcharts-gridline,
   .apexcharts-xaxis line,
   .apexcharts-yaxis line {

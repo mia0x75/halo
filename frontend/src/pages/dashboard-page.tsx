@@ -1,27 +1,20 @@
-import { IconArrowRight } from "@tabler/icons-react"
+import { IconAlertTriangle, IconChecks, IconClockHour4, IconServer } from "@tabler/icons-react"
 
 import { TrendChart } from "@/components/charts/trend-chart"
 import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
 import { StatusBadge } from "@/components/shared/status-badge"
-import { Subheader } from "@/components/shared/subheader"
 import { Button } from "@/components/ui/button"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { KpiCard } from "@/features/dashboard/kpi-card"
-import { SeverityBreakdownChart } from "@/features/dashboard/severity-breakdown-chart"
-import { formatNumber, formatRelativeTime } from "@/lib/format"
-import { mockDashboardSummary } from "@/lib/api/mock"
+import { StatCard } from "@/features/dashboard/stat-card"
+import { TopRules } from "@/features/dashboard/top-rules"
+import { auditLogs, clusters, tickets, trend } from "@/lib/mock/data"
 
 export function DashboardPage() {
-  const summary = mockDashboardSummary
-  const categories = summary.trend.map((point) => point.date)
+  const pending = tickets.filter((ticket) =>
+    ["waiting-vld", "waiting-mrv"].includes(ticket.status),
+  ).length
+  const executed = trend[trend.length - 1]!.executed
+  const failed = trend[trend.length - 1]!.failed
 
   return (
     <>
@@ -31,50 +24,64 @@ export function DashboardPage() {
         action={
           <Button>
             新建工单
-            <IconArrowRight size={16} stroke={1.5} />
+            <IconChecks size={16} stroke={1.5} />
           </Button>
         }
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard
+        <StatCard
           label="待审核工单"
-          value={formatNumber(summary.pendingTickets)}
-          hint="系统审核 + 人工审核"
-          trend={summary.trend.map((point) => point.submitted)}
+          value={String(pending)}
+          delta={12}
+          hint="较昨日"
+          trend={trend.map((point) => point.submitted)}
+          icon={<IconClockHour4 size={20} stroke={1.5} />}
         />
-        <KpiCard
+        <StatCard
           label="今日已执行"
-          value={formatNumber(summary.executedToday)}
-          hint="上线执行完成"
-          trend={summary.trend.map((point) => point.executed)}
+          value={String(executed)}
+          delta={8}
+          hint="较昨日"
+          trend={trend.map((point) => point.executed)}
+          icon={<IconChecks size={20} stroke={1.5} />}
         />
-        <KpiCard
+        <StatCard
           label="失败工单"
-          value={formatNumber(summary.failedTickets)}
-          hint="需要重新提交"
+          value={String(failed)}
+          delta={-4}
+          hint="较昨日"
+          trend={trend.map((point) => point.failed)}
+          icon={<IconAlertTriangle size={20} stroke={1.5} />}
         />
-        <KpiCard label="接入群集" value={formatNumber(summary.clusters)} hint="MySQL + PostgreSQL" />
+        <StatCard
+          label="接入群集"
+          value={String(clusters.length)}
+          hint={`${clusters.filter((c) => c.status === "normal").length} 个正常`}
+          icon={<IconServer size={20} stroke={1.5} />}
+        />
       </div>
 
       <div className="grid gap-4 xl:grid-cols-3">
         <SectionCard
           title="工单趋势"
-          description="近 7 天提交与执行数量"
+          description="近 7 天提交、执行与失败数量"
           className="xl:col-span-2"
           bodyClassName="p-0"
+          action={<Button variant="ghost" size="sm">近 7 天</Button>}
         >
           <TrendChart
-            categories={categories}
+            categories={trend.map((point) => point.date)}
             series={[
-              { name: "提交", data: summary.trend.map((point) => point.submitted) },
-              { name: "执行", data: summary.trend.map((point) => point.executed) },
+              { name: "提交", data: trend.map((point) => point.submitted) },
+              { name: "执行", data: trend.map((point) => point.executed) },
+              { name: "失败", data: trend.map((point) => point.failed) },
             ]}
           />
         </SectionCard>
 
-        <SectionCard title="风险分级" description="按规则命中级别统计">
-          <SeverityBreakdownChart data={summary.severity} />
+        <SectionCard title="风险分级" description="近 7 天规则命中分布" bodyClassName="p-0">
+          <TopRules />
         </SectionCard>
       </div>
 
@@ -85,53 +92,37 @@ export function DashboardPage() {
           bodyClassName="p-0"
           action={<Button variant="ghost" size="sm">查看全部</Button>}
         >
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>主题</TableHead>
-                <TableHead>群集</TableHead>
-                <TableHead>状态</TableHead>
-                <TableHead>提交时间</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {summary.recentTickets.map((ticket) => (
-                <TableRow key={ticket.uuid}>
-                  <TableCell className="max-w-[280px] truncate font-medium">
-                    {ticket.subject}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{ticket.cluster.alias}</TableCell>
-                  <TableCell>
-                    <StatusBadge status={ticket.status} />
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {formatRelativeTime(ticket.createAt)}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </SectionCard>
-
-        <SectionCard title="操作日志" description="最近审计记录">
-          <ul className="flex flex-col gap-3">
-            {summary.recentLogs.map((log) => (
-              <li key={log.uuid} className="flex flex-col gap-1 border-b border-border pb-3 last:border-0 last:pb-0">
-                <span className="text-sm">{log.operation}</span>
-                <span className="text-xs text-muted-foreground">
-                  {log.user.name ?? log.user.email} · {formatRelativeTime(log.createAt)}
+          <ul className="divide-y divide-border">
+            {tickets.slice(0, 5).map((ticket) => (
+              <li key={ticket.uuid} className="flex items-center gap-3 px-5 py-3">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{ticket.subject}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {ticket.database} · {ticket.cluster} · {ticket.submitter}
+                  </p>
+                </div>
+                <StatusBadge status={ticket.status} />
+                <span className="w-28 shrink-0 text-right text-xs text-muted-foreground">
+                  {ticket.createdAt}
                 </span>
               </li>
             ))}
           </ul>
         </SectionCard>
-      </div>
 
-      <Subheader>系统说明</Subheader>
-      <p className="text-xs text-muted-foreground">
-        当前页面数据来自类型化 mock（src/lib/api/mock.ts）。接入后端 GraphQL 后，仅需替换数据来源，
-        页面组件无需改动。
-      </p>
+        <SectionCard title="操作日志" description="最近审计记录" bodyClassName="p-0">
+          <ul className="divide-y divide-border">
+            {auditLogs.slice(0, 6).map((log) => (
+              <li key={log.id} className="px-5 py-3">
+                <p className="text-sm">{log.operation}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {log.actor} · {log.ip} · {log.createdAt}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </SectionCard>
+      </div>
     </>
   )
 }
