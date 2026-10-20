@@ -653,8 +653,8 @@ Adding any of these should be its own ADR, not an implicit dependency.
 - Consequences: 组件代码完全自持、可读可改；缺少 dialog/dropdown/select 等组件，
   需要时再从 shadcn 引入并立刻修正图标导入。
 
-### ADR-005 — 字体仅打包 latin 子集
-- Status: accepted
+### ADR-005 — 字体仅打包 latin 子集（已被 ADR-010 取代）
+- Status: superseded
 - Date: 2026-10-20
 - Context: `@fontsource/inter` 默认 CSS 会引入全部语言子集，产物体积偏大。
 - Decision: `src/index.css` 只引入 `@fontsource/inter/latin-{400,500,600,700}.css`。
@@ -686,6 +686,20 @@ Adding any of these should be its own ADR, not an implicit dependency.
   - 组件代码自持（shadcn 模式），不复制 Bootstrap 样式表。
 - Consequences: 界面观感与设计稿一致而不引入 Bootstrap 依赖；数值全部落在
   `src/index.css` 的令牌里，后续微调只改一处。
+
+### ADR-010 — 默认字体改为寒蝉团圆体（Chill Reunion Sans）
+- Status: accepted
+- Date: 2026-10-20
+- Context: 界面是中文为主的企业后台，Inter 的中文覆盖不全；寒蝉团圆体是配套的
+  中文开源字体，单字更饱满，适合密集型界面。
+- Decision: **默认字体换成寒蝉团圆体 Sans，自持并子集化**。
+  - 源文件来自 `@fontpkg/chill-reunion-sans`（OFT，2.1MB，单字重）；
+  - 用 fontTools 按界面实际用到的字符（592 个，含 ASCII 与全部中文文案）
+    子集化为 woff2（154KB），放在 `src/assets/fonts/`；
+  - `@font-face` 声明 `font-weight: 100 900`，缺失字形回落到系统字体；
+  - 原 ADR 005 的 Inter 依赖一并移除（`bun remove @fontsource/inter`）。
+- Consequences: 界面观感与设计稿的中文排版更接近；后端返回的生僻字不在子集内，
+  会回落到系统字体，若这类文案变多需要重新子集化。
 
 ### ADR-009 — 先接少量 gqlapi，失败回落假数据
 - Status: accepted

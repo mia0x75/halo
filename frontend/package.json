@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fontsource/inter": "^5.3.0",
+    "@fontpkg/chill-reunion-sans": "^2.700.0",
     "@tabler/icons-react": "^3.49.0",
     "apexcharts": "^8.3.1",
     "class-variance-authority": "^0.7.1",

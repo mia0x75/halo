@@ -55,6 +55,13 @@ src/
 | `--halo-radius / -sm / -lg` | `6px / 4px / 8px` | 圆角 |
 | `--halo-shadow` | `0 1px 3px 0 rgb(18 18 23 / .1), 0 1px 2px 0 rgb(18 18 23 / .06)` | 卡片投影 |
 
+### 字体
+
+界面默认字体是**寒蝉团圆体 Sans（Chill Reunion Sans）**，自持于
+`src/assets/fonts/ChillReunionSans.woff2`。原始字体为 2.1MB 的 OTF，已按界面
+实际用到的字符（含 ASCII 与全部中文文案）子集化到 154KB；后端返回的生僻字会
+回落到系统字体。字体权重声明为 100–900（源文件只有一档字重）。
+
 ### 字号基准
 
 以卡片为准：**标题 16px/500**（`text-base font-medium`）、**副标题 14px**
