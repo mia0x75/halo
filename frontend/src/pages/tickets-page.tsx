@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react"
-import { IconSearch } from "@tabler/icons-react"
+import { IconPlus, IconSearch } from "@tabler/icons-react"
 
 import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
 import { StatusBadge } from "@/components/shared/status-badge"
+import { Button } from "@/components/ui/button"
 import { CursorPagination } from "@/components/ui/cursor-pagination"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -17,7 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useGraphQL } from "@/hooks/use-graphql"
-import { TicketCreateDialog } from "@/features/tickets/ticket-create-dialog"
+
 import { mapTicket } from "@/lib/api/mappers"
 import { TICKETS_QUERY, type TicketConnectionNode } from "@/lib/api/queries"
 import {
@@ -31,9 +32,10 @@ const pageSize = 8
 
 export interface TicketsPageProps {
   onOpenTicket: (uuid: string) => void
+  onCreateTicket: () => void
 }
 
-export function TicketsPage({ onOpenTicket }: TicketsPageProps) {
+export function TicketsPage({ onOpenTicket, onCreateTicket }: TicketsPageProps) {
   const [keyword, setKeyword] = useState("")
   const [status, setStatus] = useState<TicketStatus | "all">("all")
   const [after, setAfter] = useState<string | null>(null)
@@ -90,11 +92,10 @@ export function TicketsPage({ onOpenTicket }: TicketsPageProps) {
         title="工单"
         description="变更工单的提交与审核状态"
         action={
-          <TicketCreateDialog
-            onCreated={() => {
-              remote.refetch()
-            }}
-          />
+          <Button onClick={onCreateTicket}>
+            <IconPlus size={16} stroke={1.5} />
+            新建工单
+          </Button>
         }
       />
 

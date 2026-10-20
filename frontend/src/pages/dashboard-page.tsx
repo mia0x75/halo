@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react"
+import { IconPlus } from "@tabler/icons-react"
 
 import { BrushChart } from "@/components/charts/brush-chart"
 import { TrendChart } from "@/components/charts/trend-chart"
@@ -17,7 +18,6 @@ import {
 } from "@/lib/api/queries"
 import { PeriodSelect } from "@/features/dashboard/period-select"
 import { StatCard } from "@/features/dashboard/stat-card"
-import { TicketCreateDialog } from "@/features/tickets/ticket-create-dialog"
 
 import { TopRules } from "@/features/dashboard/top-rules"
 import {
@@ -37,9 +37,10 @@ const levelLabels: Record<number, string> = { 0: "提示", 1: "错误", 2: "警�
 
 export interface DashboardPageProps {
   onOpenTicket: (uuid: string) => void
+  onCreateTicket: () => void
 }
 
-export function DashboardPage({ onOpenTicket }: DashboardPageProps) {
+export function DashboardPage({ onOpenTicket, onCreateTicket }: DashboardPageProps) {
   const [period, setPeriod] = useState<Period>(7)
   const mockPoints = trendFor(period)
   const clusterPage = useClusters(50)
@@ -131,11 +132,10 @@ export function DashboardPage({ onOpenTicket }: DashboardPageProps) {
         title="概览"
         description="SQL 变更工单的提交、审核与执行情况"
         action={
-          <TicketCreateDialog
-            onCreated={() => {
-              metrics.refetch()
-            }}
-          />
+          <Button onClick={onCreateTicket}>
+            <IconPlus size={16} stroke={1.5} />
+            新建工单
+          </Button>
         }
       />
 

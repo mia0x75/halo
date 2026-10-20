@@ -15,6 +15,7 @@ import { DashboardPage } from "@/pages/dashboard-page"
 import { LogsPage } from "@/pages/logs-page"
 import { PlaceholderPage } from "@/pages/placeholder-page"
 import { RulesPage } from "@/pages/rules-page"
+import { TicketCreatePage } from "@/pages/ticket-create-page"
 import { TicketDetailPage } from "@/pages/ticket-detail-page"
 import { TicketQueuePage } from "@/pages/ticket-queue-page"
 import { TicketsPage } from "@/pages/tickets-page"
@@ -23,6 +24,7 @@ import { ViolationsPage } from "@/pages/violations-page"
 type View =
   | { kind: "nav"; key: NavKey }
   | { kind: "ticket"; uuid: string }
+  | { kind: "ticket-create" }
   | { kind: "cluster-form"; mode: "create" | "edit"; uuid?: string }
 
 export default function App() {
@@ -31,6 +33,7 @@ export default function App() {
 
   const refresh = useCallback(() => setNonce((value) => value + 1), [])
   const openTicket = useCallback((uuid: string) => setView({ kind: "ticket", uuid }), [])
+  const createTicket = useCallback(() => setView({ kind: "ticket-create" }), [])
   const createCluster = useCallback(() => setView({ kind: "cluster-form", mode: "create" }), [])
   const editCluster = useCallback(
     (uuid: string) => setView({ kind: "cluster-form", mode: "edit", uuid }),
@@ -38,6 +41,24 @@ export default function App() {
   )
 
   const page = view.kind === "nav" ? view.key : "tickets"
+
+  if (view.kind === "ticket-create") {
+    return (
+      <AppShell
+        key={nonce}
+        active="tickets"
+        onSelect={(key) => setView({ kind: "nav", key })}
+        onConnectionChange={refresh}
+      >
+        <TicketCreatePage
+          onBack={() => setView({ kind: "nav", key: "tickets" })}
+          onCreated={(uuid) => {
+            setView({ kind: "ticket", uuid })
+          }}
+        />
+      </AppShell>
+    )
+  }
 
   if (view.kind === "cluster-form") {
     return (
@@ -83,8 +104,12 @@ export default function App() {
       onSelect={(key) => setView({ kind: "nav", key })}
       onConnectionChange={refresh}
     >
-      {page === "dashboard" ? <DashboardPage onOpenTicket={openTicket} /> : null}
-      {page === "tickets" ? <TicketsPage onOpenTicket={openTicket} /> : null}
+      {page === "dashboard" ? (
+        <DashboardPage onOpenTicket={openTicket} onCreateTicket={createTicket} />
+      ) : null}
+      {page === "tickets" ? (
+        <TicketsPage onOpenTicket={openTicket} onCreateTicket={createTicket} />
+      ) : null}
       {page === "clusters" ? (
         <ClustersPage onCreate={createCluster} onEdit={editCluster} />
       ) : null}
