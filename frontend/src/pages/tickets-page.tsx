@@ -17,49 +17,68 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { useCursorPagination } from "@/hooks/use-cursor-pagination"
 import { useGraphQL } from "@/hooks/use-graphql"
-import { TICKETS_QUERY, type TicketConnectionNode } from "@/lib/api/queries"
 import { mapTicket } from "@/lib/api/mappers"
-import { ticketStatusMeta, tickets, type TicketStatus } from "@/lib/mock/data"
+import { TICKETS_QUERY, type TicketConnectionNode } from "@/lib/api/queries"
+import {
+  ticketStatusMeta,
+  tickets as mockTickets,
+  type Ticket,
+  type TicketStatus,
+} from "@/lib/mock/data"
 
-const pageSize = 6
+const pageSize = 8
 
 export function TicketsPage() {
   const [keyword, setKeyword] = useState("")
   const [status, setStatus] = useState<TicketStatus | "all">("all")
-  const filtered = useMemo(() => {
-    const needle = keyword.trim().toLowerCase()
-    return tickets.filter((ticket) => {
-      if (status !== "all" && ticket.status !== status) return false
-      if (!needle) return true
-      return (
-        ticket.subject.toLowerCase().includes(needle) ||
-        ticket.database.toLowerCase().includes(needle) ||
-        ticket.cluster.toLowerCase().includes(needle)
-      )
-    })
-  }, [keyword, status])
-
-  const { page, reset, next, previous } = useCursorPagination(filtered, pageSize)
-
-  // 接口可用时用服务端游标分页，取不到数据则回落到本地假数据。
   const [after, setAfter] = useState<string | null>(null)
   const [stack, setStack] = useState<(string | null)[]>([])
-  const remote = useGraphQL<{ tickets: TicketConnectionNode | null }, { first: number; after?: string }>(
+
+  const remote = useGraphQL<
+    { tickets: TicketConnectionNode | null },
+    { first: number; after?: string; status?: number; keyword?: string }
+  >(
     TICKETS_QUERY,
-    { first: pageSize, after: after ?? undefined },
+    {
+      first: pageSize,
+      after: after ?? undefined,
+      status: status === "all" ? 0 : statusCode(status),
+      keyword: keyword.trim() || undefined,
+    },
     { tickets: null },
   )
-  const remoteTickets = remote.data?.tickets ?? null
-  const rows = remoteTickets
-    ? remoteTickets.edges.map((edge) => mapTicket(edge.node))
-    : page.edges
-  const total = remoteTickets ? remoteTickets.totalCount : page.totalCount
-  const hasNext = remoteTickets ? remoteTickets.pageInfo.hasNextPage : page.pageInfo.hasNextPage
-  const hasPrevious = remoteTickets ? remoteTickets.pageInfo.hasPreviousPage : page.pageInfo.hasPreviousPage
-  const endCursor = remoteTickets ? remoteTickets.pageInfo.endCursor : page.pageInfo.endCursor
-  const startCursor = remoteTickets ? remoteTickets.pageInfo.startCursor : page.pageInfo.startCursor
+
+  const connection = remote.data?.tickets ?? null
+
+  const rows = useMemo<Ticket[]>(() => {
+    if (connection) {
+      return connection.edges.map((edge) => mapTicket(edge.node))
+    }
+    // 接口不可用时回落假数据，并在本地做同样的过滤
+    const needle = keyword.trim().toLowerCase()
+    return mockTickets
+      .filter((ticket) => {
+        if (status !== "all" && ticket.status !== status) return false
+        if (!needle) return true
+        return (
+          ticket.subject.toLowerCase().includes(needle) ||
+          ticket.database.toLowerCase().includes(needle) ||
+          ticket.cluster.toLowerCase().includes(needle)
+        )
+      })
+      .slice(0, pageSize)
+  }, [connection, keyword, status])
+
+  const total = connection?.totalCount ?? rows.length
+  const hasNext = connection?.pageInfo.hasNextPage ?? false
+  const hasPrevious = connection?.pageInfo.hasPreviousPage ?? false
+  const endCursor = connection?.pageInfo.endCursor ?? ""
+
+  const reset = () => {
+    setAfter(null)
+    setStack([])
+  }
 
   return (
     <>
@@ -74,12 +93,8 @@ export function TicketsPage() {
         }
       />
 
-      <SectionCard
-        title="工单列表"
-        description={`共 ${total} 条`}
-        bodyClassName="p-0"
-      >
-        <div className="flex flex-col gap-3 border-b border-border px-5 py-4 sm:flex-row sm:items-end">
+      <SectionCard title="工单列表" description={`共 ${total} 条`} bodyClassName="p-0">
+        <div className="flex flex-wrap items-end gap-3 border-b border-border px-5 py-4">
           <div className="flex flex-col gap-1.5 sm:w-72">
             <Label htmlFor="ticket-keyword">关键词</Label>
             <div className="relative">
@@ -94,8 +109,6 @@ export function TicketsPage() {
                 onChange={(event) => {
                   setKeyword(event.target.value)
                   reset()
-                  setAfter(null)
-                  setStack([])
                 }}
                 placeholder="主题、目标库或群集"
                 className="pl-9"
@@ -110,8 +123,6 @@ export function TicketsPage() {
               onChange={(event) => {
                 setStatus(event.target.value as TicketStatus | "all")
                 reset()
-                setAfter(null)
-                setStack([])
               }}
             >
               <option value="all">全部状态</option>
@@ -155,27 +166,35 @@ export function TicketsPage() {
           total={total}
           hasPreviousPage={hasPrevious}
           hasNextPage={hasNext}
-          startCursor={startCursor}
+          startCursor={connection?.pageInfo.startCursor}
           endCursor={endCursor}
           onPrevious={() => {
-            if (remoteTickets) {
-              const previousCursor = stack[stack.length - 1] ?? null
-              setStack((items) => items.slice(0, -1))
-              setAfter(previousCursor)
-              return
-            }
-            previous()
+            const previousCursor = stack[stack.length - 1] ?? null
+            setStack((items) => items.slice(0, -1))
+            setAfter(previousCursor)
           }}
           onNext={() => {
-            if (remoteTickets) {
-              setStack((items) => [...items, after])
-              setAfter(endCursor)
-              return
-            }
-            next()
+            setStack((items) => [...items, after])
+            setAfter(endCursor || null)
           }}
         />
       </SectionCard>
     </>
   )
+}
+
+/** 状态枚举值：与后端 mm_tickets.status 一致。 */
+function statusCode(status: TicketStatus): number {
+  const codes: Record<TicketStatus, number> = {
+    "waiting-vld": 1,
+    "vld-failure": 2,
+    "vld-warning": 3,
+    "waiting-mrv": 4,
+    "mrv-failure": 5,
+    ltgm: 6,
+    done: 7,
+    "exec-failure": 8,
+    closed: 9,
+  }
+  return codes[status]
 }

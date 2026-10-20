@@ -126,7 +126,7 @@ func (r *TicketRepo) ListFiltered(ctx context.Context, cursor int64, limit int, 
 	rows, err := r.q.ListTicketsFiltered(ctx, ListTicketsFilteredParams{
 		TicketID: uint32(cursor),
 		Status:   status,
-		Column3:  0,
+		Column3:  int64(status),
 		Subject:  pattern,
 		Database: pattern,
 		Limit:    clampInt32(limit),

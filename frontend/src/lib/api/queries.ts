@@ -146,8 +146,8 @@ export interface TicketConnectionNode {
 }
 
 export const TICKETS_QUERY = `
-  query Tickets($first: Int, $after: String) {
-    tickets(first: $first, after: $after) {
+  query Tickets($first: Int, $after: String, $status: UInt8, $keyword: String) {
+    tickets(first: $first, after: $after, status: $status, keyword: $keyword) {
       totalCount
       pageInfo {
         hasNextPage
@@ -238,6 +238,44 @@ export const PENDING_REVIEWS_QUERY = `
             Reviewer { UUID Name }
             Cluster { UUID Alias Host IP Port }
           }
+        }
+      }
+    }
+  }
+`
+
+export interface ClusterNode {
+  UUID: string
+  Alias: string
+  Host: string
+  IP: string
+  Port: number
+  Status: number
+  Group: string | null
+  CreateAt: number
+}
+
+export const CLUSTERS_QUERY = `
+  query Clusters($first: Int, $after: String) {
+    clusters(first: $first, after: $after) {
+      totalCount
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      edges {
+        cursor
+        node {
+          UUID
+          Alias
+          Host
+          IP
+          Port
+          Status
+          Group
+          CreateAt
         }
       }
     }
