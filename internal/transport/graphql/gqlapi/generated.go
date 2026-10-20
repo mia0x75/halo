@@ -383,7 +383,7 @@ type ComplexityRoot struct {
 		TestRegexp           func(childComplexity int, input *models.ValidatePatternInput) int
 		Ticket               func(childComplexity int, id string) int
 		TicketSearch         func(childComplexity int, search string, after *string, before *string, first *int, last *int) int
-		Tickets              func(childComplexity int, after *string, before *string, first *int, last *int) int
+		Tickets              func(childComplexity int, after *string, before *string, first *int, last *int, status *uint8, keyword *string) int
 		UnreadMessageCount   func(childComplexity int) int
 		User                 func(childComplexity int, id string) int
 		UserSearch           func(childComplexity int, search string, after *string, before *string, first *int, last *int) int
@@ -632,7 +632,7 @@ type QueryRootResolver interface {
 	QuerySearch(ctx context.Context, search string, after *string, before *string, first *int, last *int) (*QueryConnection, error)
 	Templates(ctx context.Context) ([]*models.Template, error)
 	Ticket(ctx context.Context, id string) (*models.Ticket, error)
-	Tickets(ctx context.Context, after *string, before *string, first *int, last *int) (*TicketConnection, error)
+	Tickets(ctx context.Context, after *string, before *string, first *int, last *int, status *uint8, keyword *string) (*TicketConnection, error)
 	TicketSearch(ctx context.Context, search string, after *string, before *string, first *int, last *int) (*TicketConnection, error)
 	User(ctx context.Context, id string) (*models.User, error)
 	Users(ctx context.Context, after *string, before *string, first *int, last *int) (*UserConnection, error)
@@ -2491,7 +2491,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.QueryRoot.Tickets(childComplexity, args["after"].(*string), args["before"].(*string), args["first"].(*int), args["last"].(*int)), true
+		return e.ComplexityRoot.QueryRoot.Tickets(childComplexity, args["after"].(*string), args["before"].(*string), args["first"].(*int), args["last"].(*int), args["status"].(*uint8), args["keyword"].(*string)), true
 	case "QueryRoot.unreadMessageCount":
 		if e.ComplexityRoot.QueryRoot.UnreadMessageCount == nil {
 			break
@@ -5855,6 +5855,22 @@ func (ec *executionContext) field_QueryRoot_tickets_args(ctx context.Context, ra
 		return nil, err
 	}
 	args["last"] = arg3
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "status",
+		func(ctx context.Context, v any) (*uint8, error) {
+			return ec.unmarshalOUInt82ᚖuint8(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["status"] = arg4
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "keyword",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["keyword"] = arg5
 	return args, nil
 }
 
@@ -13850,7 +13866,7 @@ func (ec *executionContext) _QueryRoot_tickets(ctx context.Context, field graphq
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.QueryRoot().Tickets(ctx, fc.Args["after"].(*string), fc.Args["before"].(*string), fc.Args["first"].(*int), fc.Args["last"].(*int))
+			return ec.Resolvers.QueryRoot().Tickets(ctx, fc.Args["after"].(*string), fc.Args["before"].(*string), fc.Args["first"].(*int), fc.Args["last"].(*int), fc.Args["status"].(*uint8), fc.Args["keyword"].(*string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next

@@ -304,6 +304,66 @@ func (q *Queries) ListTicketsByUser(ctx context.Context, userID int64) ([]MmTick
 	return items, nil
 }
 
+const listTicketsFiltered = `-- name: ListTicketsFiltered :many
+SELECT ticket_id, uuid, cluster_id, "database", subject, content, status, user_id, reviewer_id, cron_id, version, update_at, create_at FROM mm_tickets
+WHERE ticket_id < $1
+  AND (status = $2 OR $3 = 0)
+  AND (subject LIKE $4 OR "database" LIKE $4)
+ORDER BY ticket_id DESC LIMIT $5
+`
+
+type ListTicketsFilteredParams struct {
+	TicketID int64
+	Status   int16
+	Column3  interface{}
+	Subject  string
+	Limit    int32
+}
+
+// status 传 0 表示不限状态；pattern 形如 %关键词%，空关键词用 %% 匹配全部
+func (q *Queries) ListTicketsFiltered(ctx context.Context, arg ListTicketsFilteredParams) ([]MmTicket, error) {
+	rows, err := q.db.QueryContext(ctx, listTicketsFiltered,
+		arg.TicketID,
+		arg.Status,
+		arg.Column3,
+		arg.Subject,
+		arg.Limit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []MmTicket{}
+	for rows.Next() {
+		var i MmTicket
+		if err := rows.Scan(
+			&i.TicketID,
+			&i.Uuid,
+			&i.ClusterID,
+			&i.Database,
+			&i.Subject,
+			&i.Content,
+			&i.Status,
+			&i.UserID,
+			&i.ReviewerID,
+			&i.CronID,
+			&i.Version,
+			&i.UpdateAt,
+			&i.CreateAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateTicket = `-- name: UpdateTicket :exec
 UPDATE mm_tickets SET uuid = $1, cluster_id = $2, "database" = $3, subject = $4, content = $5, status = $6, user_id = $7, reviewer_id = $8, cron_id = $9, version = $10, update_at = NOW() WHERE ticket_id = $11
 `

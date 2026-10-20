@@ -119,6 +119,28 @@ func (r *TicketRepo) List(ctx context.Context, cursor int64, limit int) ([]*doma
 	return out, nil
 }
 
+// ListFiltered lists the tickets matching the filters, newest first. A zero
+// status means every status; the pattern is matched against the subject and the
+// database name.
+func (r *TicketRepo) ListFiltered(ctx context.Context, cursor int64, limit int, status uint8, pattern string) ([]*domain.Ticket, error) {
+	rows, err := r.q.ListTicketsFiltered(ctx, ListTicketsFilteredParams{
+		TicketID: uint32(cursor),
+		Status:   status,
+		Column3:  0,
+		Subject:  pattern,
+		Database: pattern,
+		Limit:    clampInt32(limit),
+	})
+	if err != nil {
+		return nil, wrap("ticket.ListFiltered", err)
+	}
+	out := make([]*domain.Ticket, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, ticketFromRow(row))
+	}
+	return out, nil
+}
+
 // ListByUser returns every ticket raised by one user, oldest first.
 func (r *TicketRepo) ListByUser(ctx context.Context, userID uint) ([]*domain.Ticket, error) {
 	rows, err := r.q.ListTicketsByUser(ctx, clampUint(userID))

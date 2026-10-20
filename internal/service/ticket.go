@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"fmt"
+	"math"
+	"strings"
 
 	"github.com/google/uuid"
 
@@ -112,6 +114,29 @@ func (s *TicketService) List(ctx context.Context, cursor int64, limit int) ([]*d
 // ListByUser returns every ticket raised by one user.
 func (s *TicketService) ListByUser(ctx context.Context, userID uint) ([]*domain.Ticket, error) {
 	return s.tickets.ListByUser(ctx, userID)
+}
+
+// TicketFilter narrows a ticket listing. A zero status means every status and
+// an empty keyword matches every subject and database.
+type TicketFilter struct {
+	Status   uint8
+	Keyword  string
+	Limit    int
+	CursorID int64
+}
+
+// ListFiltered lists the tickets matching the filter, newest first.
+func (s *TicketService) ListFiltered(ctx context.Context, filter TicketFilter) ([]*domain.Ticket, error) {
+	limit := filter.Limit
+	if limit <= 0 {
+		limit = 20
+	}
+	cursor := filter.CursorID
+	if cursor <= 0 {
+		cursor = math.MaxInt64
+	}
+	pattern := "%" + strings.TrimSpace(filter.Keyword) + "%"
+	return s.tickets.ListFiltered(ctx, cursor, limit, filter.Status, pattern)
 }
 
 // ListPendingReviews returns the tickets waiting for the user's manual

@@ -678,7 +678,7 @@ func (r *queryRootResolver) Ticket(ctx context.Context, id string) (ticket *mode
 }
 
 // Tickets 分页查看全部工单
-func (r *queryRootResolver) Tickets(ctx context.Context, after *string, before *string, first *int, last *int) (*gqlapi.TicketConnection, error) {
+func (r *queryRootResolver) Tickets(ctx context.Context, after *string, before *string, first *int, last *int, status *uint8, keyword *string) (*gqlapi.TicketConnection, error) {
 	rc := gqlapi.ReturnCodeOK
 
 	// 参数判断，只允许 first/before first/after last/before last/after 模式
@@ -713,7 +713,14 @@ func (r *queryRootResolver) Tickets(ctx context.Context, after *string, before *
 	edges := []*gqlapi.TicketEdge{}
 
 	// 列表不允许查询Content内容
-	domainTickets, err := r.app.Services.Ticket.List(ctx, int64(from), *first)
+	filter := service.TicketFilter{CursorID: int64(from), Limit: *first}
+	if status != nil {
+		filter.Status = *status
+	}
+	if keyword != nil {
+		filter.Keyword = *keyword
+	}
+	domainTickets, err := r.app.Services.Ticket.ListFiltered(ctx, filter)
 	if err != nil {
 		return nil, err
 	}

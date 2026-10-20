@@ -2092,6 +2092,16 @@ type QueryRoot {
 		Returns the last _n_ elements from the list.
 		"""
 		last: Int
+
+		"""
+		按状态过滤，0 表示不限
+		"""
+		status: UInt8
+
+		"""
+		按主题或库名过滤
+		"""
+		keyword: String
 	): TicketConnection @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
 
 	"""

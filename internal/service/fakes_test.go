@@ -88,6 +88,10 @@ func (f *fakeTicketRepo) List(_ context.Context, _ int64, _ int) ([]*domain.Tick
 	return nil, nil
 }
 
+func (f *fakeTicketRepo) ListFiltered(_ context.Context, _ int64, _ int, _ uint8, _ string) ([]*domain.Ticket, error) {
+	return f.reviewer, nil
+}
+
 func (f *fakeTicketRepo) ListByUser(_ context.Context, _ uint) ([]*domain.Ticket, error) {
 	return nil, nil
 }

@@ -22,6 +22,14 @@ DELETE FROM mm_tickets WHERE uuid = $1;
 -- name: ListTickets :many
 SELECT ticket_id, uuid, cluster_id, "database", subject, content, status, user_id, reviewer_id, cron_id, version, update_at, create_at FROM mm_tickets WHERE ticket_id < $1 ORDER BY ticket_id DESC LIMIT $2;
 
+-- name: ListTicketsFiltered :many
+-- status 传 0 表示不限状态；pattern 形如 %关键词%，空关键词用 %% 匹配全部
+SELECT ticket_id, uuid, cluster_id, "database", subject, content, status, user_id, reviewer_id, cron_id, version, update_at, create_at FROM mm_tickets
+WHERE ticket_id < $1
+  AND (status = $2 OR $3 = 0)
+  AND (subject LIKE $4 OR "database" LIKE $4)
+ORDER BY ticket_id DESC LIMIT $5;
+
 -- name: ListTicketsByUser :many
 SELECT ticket_id, uuid, cluster_id, "database", subject, content, status, user_id, reviewer_id, cron_id, version, update_at, create_at FROM mm_tickets WHERE user_id = $1 ORDER BY ticket_id;
 

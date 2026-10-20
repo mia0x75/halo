@@ -138,6 +138,8 @@ type Querier interface {
 	ListTickets(ctx context.Context, arg ListTicketsParams) ([]MmTicket, error)
 	ListTicketsByReviewer(ctx context.Context, reviewerID uint32) ([]MmTicket, error)
 	ListTicketsByUser(ctx context.Context, userID uint32) ([]MmTicket, error)
+	// status 传 0 表示不限状态；pattern 形如 %关键词%，空关键词用 %% 匹配全部
+	ListTicketsFiltered(ctx context.Context, arg ListTicketsFilteredParams) ([]MmTicket, error)
 	ListUnreadMessagesByUser(ctx context.Context, arg ListUnreadMessagesByUserParams) ([]MmMessage, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]MmUser, error)
 	MarkMessageRead(ctx context.Context, arg MarkMessageReadParams) error
