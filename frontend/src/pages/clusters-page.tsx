@@ -75,7 +75,7 @@ export function ClustersPage() {
                   <IconServer size={20} stroke={1.5} className="text-muted-foreground" />
                   <div className="flex flex-col leading-tight">
                     <span className="text-sm font-semibold">{cluster.alias}</span>
-                    <span className="text-xs text-muted-foreground">{cluster.host}</span>
+                    <span className="text-sm text-muted-foreground">{cluster.host}</span>
                   </div>
                 </div>
                 <Badge variant={cluster.type === "mysql" ? "info" : "default"}>
@@ -85,7 +85,7 @@ export function ClustersPage() {
 
               <dl className="mt-4 grid grid-cols-2 gap-y-2 text-sm">
                 <dt className="text-muted-foreground">地址</dt>
-                <dd className="text-right font-mono text-xs">
+                <dd className="text-right font-mono text-sm">
                   {cluster.ip}:{cluster.port}
                 </dd>
                 <dt className="text-muted-foreground">分组</dt>
@@ -101,7 +101,7 @@ export function ClustersPage() {
                   tone={cluster.status === "normal" ? "success" : "danger"}
                   label={cluster.status === "normal" ? "正常" : "已停用"}
                 />
-                <span className="text-xs text-muted-foreground">分组：{cluster.group}</span>
+                <span className="text-sm text-muted-foreground">分组：{cluster.group}</span>
               </div>
             </div>
           ))}
@@ -125,7 +125,7 @@ export function ClustersPage() {
                 <TableRow key={cluster.uuid}>
                   <TableCell className="font-medium">{cluster.alias}</TableCell>
                   <TableCell className="text-muted-foreground">{cluster.host}</TableCell>
-                  <TableCell className="font-mono text-xs text-muted-foreground">
+                  <TableCell className="font-mono text-sm text-muted-foreground">
                     {cluster.ip}:{cluster.port}
                   </TableCell>
                   <TableCell>

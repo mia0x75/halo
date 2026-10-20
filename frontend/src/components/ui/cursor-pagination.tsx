@@ -34,7 +34,7 @@ export function CursorPagination({
         divided && "border-t border-border",
       )}
     >
-      <span className="text-xs text-muted-foreground">共 {total} 条</span>
+      <span className="text-sm text-muted-foreground">共 {total} 条</span>
       <div className="flex items-center gap-2">
         {startCursor ? (
           <span className="hidden font-mono text-[0.625rem] text-muted-foreground sm:inline">

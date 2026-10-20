@@ -21,7 +21,7 @@ export function StatCard({ label, value, delta, hint, trend, icon }: StatCardPro
   return (
     <div className="flex flex-col rounded-lg border border-border bg-card p-5 shadow-xs">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">
+        <p className="text-sm font-medium text-muted-foreground">
           {label}
         </p>
         {icon ? <span className="text-muted-foreground [&_svg]:size-5">{icon}</span> : null}
@@ -30,7 +30,7 @@ export function StatCard({ label, value, delta, hint, trend, icon }: StatCardPro
       <div className="mt-3 flex items-end justify-between gap-3">
         <div>
           <p className="text-2xl font-semibold tracking-tight text-strong">{value}</p>
-          <div className="mt-1 flex items-center gap-2 text-xs">
+          <div className="mt-1 flex items-center gap-2 text-sm">
             {delta !== undefined ? (
               <span
                 className={cn(

@@ -90,11 +90,11 @@ export function LogsPage() {
               </span>
               <div className="min-w-0 flex-1">
                 <p className="text-sm">{log.operation}</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
+                <p className="mt-0.5 text-sm text-muted-foreground">
                   {log.actor} · {log.target} · {log.ip}
                 </p>
               </div>
-              <span className="shrink-0 text-xs text-muted-foreground">{log.createdAt}</span>
+              <span className="shrink-0 text-sm text-muted-foreground">{log.createdAt}</span>
             </li>
           ))}
         </ul>

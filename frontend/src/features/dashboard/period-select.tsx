@@ -1,4 +1,4 @@
-import { IconCalendar } from "@tabler/icons-react"
+import { IconChevronDown } from "@tabler/icons-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -14,19 +14,27 @@ export interface PeriodSelectProps {
   onChange: (period: Period) => void
 }
 
-/** 时段选择：7d / 30d / 180d / 365d。 */
+/** 卡片右上角的时段菜单：只留一个下拉小箭头，当前时段显示在卡片描述里。 */
 export function PeriodSelect({ value, onChange }: PeriodSelectProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1.5">
-          <IconCalendar size={14} stroke={1.5} />
-          {periodLabels[value]}
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={`时间范围：${periodLabels[value]}`}
+          title={periodLabels[value]}
+        >
+          <IconChevronDown size={16} stroke={1.5} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {periods.map((period) => (
-          <DropdownMenuItem key={period} onSelect={() => onChange(period)}>
+          <DropdownMenuItem
+            key={period}
+            onSelect={() => onChange(period)}
+            className={period === value ? "font-medium text-primary" : undefined}
+          >
             {periodLabels[period]}
           </DropdownMenuItem>
         ))}

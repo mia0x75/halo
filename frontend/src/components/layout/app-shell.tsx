@@ -35,7 +35,7 @@ export function AppShell({ active, onSelect, children }: AppShellProps) {
 
       <footer className="border-t border-border bg-card">
         <div
-          className="flex items-center justify-between py-3 pr-4 text-xs text-muted-foreground"
+          className="flex items-center justify-between py-3 pr-4 text-sm text-muted-foreground"
           // 页脚通栏，但内容与右侧内容区左对齐：左侧留出导航栏的宽度。
           style={{ paddingLeft: (collapsed ? 64 : 240) + 16 }}
         >

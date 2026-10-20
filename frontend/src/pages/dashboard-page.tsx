@@ -107,12 +107,12 @@ export function DashboardPage() {
               <li key={ticket.uuid} className="flex items-center gap-3 px-5 py-3">
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{ticket.subject}</p>
-                  <p className="truncate text-xs text-muted-foreground">
+                  <p className="truncate text-sm text-muted-foreground">
                     {ticket.database} · {ticket.cluster} · {ticket.submitter}
                   </p>
                 </div>
                 <StatusBadge status={ticket.status} />
-                <span className="w-28 shrink-0 text-right text-xs text-muted-foreground">
+                <span className="w-28 shrink-0 text-right text-sm text-muted-foreground">
                   {ticket.createdAt}
                 </span>
               </li>
@@ -125,7 +125,7 @@ export function DashboardPage() {
             {auditLogs.slice(0, 6).map((log) => (
               <li key={log.id} className="px-5 py-3">
                 <p className="text-sm">{log.operation}</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
+                <p className="mt-0.5 text-sm text-muted-foreground">
                   {log.actor} · {log.ip} · {log.createdAt}
                 </p>
               </li>

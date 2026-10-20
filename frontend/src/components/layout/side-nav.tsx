@@ -55,7 +55,7 @@ export function SideNav({ active, onSelect, collapsed, onToggle }: SideNavProps)
               {collapsed ? null : (
                 <span className="flex min-w-0 flex-col leading-tight">
                   <span className="truncate text-sm font-medium">张三</span>
-                  <span className="truncate text-xs text-muted-foreground">管理员 · 核心交易</span>
+                  <span className="truncate text-sm text-muted-foreground">管理员 · 核心交易</span>
                 </span>
               )}
             </button>

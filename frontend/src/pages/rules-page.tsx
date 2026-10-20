@@ -148,7 +148,7 @@ export function RulesPage() {
           <TableBody>
             {page.edges.map((rule) => (
               <TableRow key={rule.name}>
-                <TableCell className="font-mono text-xs font-medium">{rule.name}</TableCell>
+                <TableCell className="font-mono text-sm font-medium">{rule.name}</TableCell>
                 <TableCell className="text-muted-foreground">{rule.group}</TableCell>
                 <TableCell>
                   <Badge variant={levelTone[rule.level]}>{rule.level}</Badge>

@@ -50,21 +50,21 @@ export function TopNav() {
               <IconBell size={16} stroke={1.5} />
               <span className="flex flex-col">
                 <span>工单「订单归档字段」审核通过</span>
-                <span className="text-xs text-muted-foreground">2 分钟前</span>
+                <span className="text-sm text-muted-foreground">2 分钟前</span>
               </span>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <IconBell size={16} stroke={1.5} />
               <span className="flex flex-col">
                 <span>工单「报表视图重建」待审核</span>
-                <span className="text-xs text-muted-foreground">1 小时前</span>
+                <span className="text-sm text-muted-foreground">1 小时前</span>
               </span>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <IconBell size={16} stroke={1.5} />
               <span className="flex flex-col">
                 <span>工单「清理历史数据」执行失败</span>
-                <span className="text-xs text-muted-foreground">昨天</span>
+                <span className="text-sm text-muted-foreground">昨天</span>
               </span>
             </DropdownMenuItem>
           </DropdownMenuContent>

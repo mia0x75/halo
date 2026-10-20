@@ -7,7 +7,7 @@ export function Label({ className, ...props }: ComponentProps<typeof LabelPrimit
   return (
     <LabelPrimitive.Root
       className={cn(
-        "text-xs font-medium text-muted-foreground select-none",
+        "text-sm font-medium text-muted-foreground select-none",
         "peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
         className,
       )}

@@ -127,7 +127,7 @@ export function ViolationsPage() {
           <TableBody>
             {page.edges.map((violation) => (
               <TableRow key={violation.id}>
-                <TableCell className="font-mono text-xs font-medium">{violation.rule}</TableCell>
+                <TableCell className="font-mono text-sm font-medium">{violation.rule}</TableCell>
                 <TableCell>
                   <Badge variant={levelTone[violation.level]}>{violation.level}</Badge>
                 </TableCell>

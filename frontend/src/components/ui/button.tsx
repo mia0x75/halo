@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 
 // 尺寸与内边距按设计稿：主按钮 0.6875rem/1.75rem、小按钮 0.3125rem/0.5rem，字号 0.75rem。
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -18,7 +18,7 @@ const buttonVariants = cva(
       },
       size: {
         // 0.5625rem/1rem 内边距 + 1.25rem 行高 = 2.375rem，与设计稿一致
-        default: "px-4 py-[0.5625rem] text-sm",
+        default: "px-4 py-[0.5625rem]",
         sm: "rounded-sm px-2 py-[0.3125rem] text-xs",
         lg: "px-6 py-3 text-sm",
         icon: "size-9",
