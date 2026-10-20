@@ -164,6 +164,8 @@ type CreateClusterInput struct {
 	Status   uint8  `valid:"required,int,matches(^(1|2)$)" gqlgen:"Status"`   //
 	// GroupUUID 所属分组，不填表示未分组
 	GroupUUID string `valid:"omitempty,length(36|36)"       gqlgen:"GroupUUID"` //
+	// Type 目标库类型，不填按 mysql 处理
+	Type string `valid:"omitempty,oneof(mysql postgres)" gqlgen:"Type"` //
 }
 
 // UpdateClusterInput GraphQL API交互所需要的结构体
@@ -178,6 +180,8 @@ type UpdateClusterInput struct {
 	Password    string `valid:"required,length(4|40)"         gqlgen:"Password"`    //
 	// GroupUUID 所属分组，不填表示未分组
 	GroupUUID string `valid:"omitempty,length(36|36)"       gqlgen:"GroupUUID"` //
+	// Type 目标库类型，不填表示不修改
+	Type string `valid:"omitempty,oneof(mysql postgres)" gqlgen:"Type"` //
 }
 
 // PatchClusterStatusInput GraphQL API交互所需要的结构体

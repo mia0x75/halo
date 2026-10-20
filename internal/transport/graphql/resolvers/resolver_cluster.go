@@ -13,6 +13,7 @@ import (
 	"github.com/mia0x75/halo/internal/agent/meta"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/cache"
+	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/event"
 	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/platform/config"
@@ -324,8 +325,12 @@ L:
 		cluster.IP = input.IP
 		cluster.User = input.User
 		cluster.Status = input.Status
+		if input.Type != "" {
+			cluster.Type = clusterType(input.Type)
+		}
 		cluster.Password = passwd
 		cluster.Alias = input.Alias
+		cluster.Type = clusterType(input.Type)
 		cluster.GroupID, err = resolveGroupID(input.GroupUUID)
 		if err != nil {
 			rc = gqlapi.ReturnCodeNotFound
@@ -516,4 +521,12 @@ func (r *mutationRootResolver) PatchClusterStatus(ctx context.Context, input mod
 	}
 
 	return
+}
+
+// clusterType 归一化目标库类型，未指定时按 mysql 处理。
+func clusterType(value string) string {
+	if value == string(domain.ClusterTypePostgres) {
+		return string(domain.ClusterTypePostgres)
+	}
+	return string(domain.ClusterTypeMySQL)
 }

@@ -89,6 +89,7 @@ type ComplexityRoot struct {
 		IP       func(childComplexity int) int
 		Port     func(childComplexity int) int
 		Status   func(childComplexity int) int
+		Type     func(childComplexity int) int
 		UUID     func(childComplexity int) int
 		UpdateAt func(childComplexity int) int
 		User     func(childComplexity int) int
@@ -842,6 +843,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Cluster.Status(childComplexity), true
+	case "Cluster.Type":
+		if e.ComplexityRoot.Cluster.Type == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Cluster.Type(childComplexity), true
 	case "Cluster.UUID":
 		if e.ComplexityRoot.Cluster.UUID == nil {
 			break
@@ -3465,6 +3472,8 @@ func (ec *executionContext) childFields_Cluster(ctx context.Context, field graph
 		return ec.fieldContext_Cluster_Port(ctx, field)
 	case "User":
 		return ec.fieldContext_Cluster_User(ctx, field)
+	case "Type":
+		return ec.fieldContext_Cluster_Type(ctx, field)
 	case "Status":
 		return ec.fieldContext_Cluster_Status(ctx, field)
 	case "CreateAt":
@@ -6929,6 +6938,47 @@ func (ec *executionContext) _Cluster_User(ctx context.Context, field graphql.Col
 	)
 }
 func (ec *executionContext) fieldContext_Cluster_User(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Cluster", field, false, false, "String")
+}
+
+func (ec *executionContext) _Cluster_Type(ctx context.Context, field graphql.CollectedField, obj *models.Cluster) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Cluster_Type(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				pattern, err := ec.unmarshalNString2string(ctx, "^(mysql|postgres)$")
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.Matches == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive matches is not implemented")
+				}
+				return ec.Directives.Matches(ctx, obj, directive0, pattern)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Cluster_Type(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("Cluster", field, false, false, "String")
 }
 
@@ -20090,7 +20140,7 @@ func (ec *executionContext) unmarshalInputCreateClusterInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"Host", "IP", "Port", "Alias", "User", "Password", "Status", "GroupUUID"}
+	fieldsInOrder := [...]string{"Host", "IP", "Port", "Alias", "User", "Password", "Status", "GroupUUID", "Type"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -20298,6 +20348,33 @@ func (ec *executionContext) unmarshalInputCreateClusterInput(ctx context.Context
 				return it, err
 			}
 			it.GroupUUID = data
+		case "Type":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Type"))
+			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalOString2string(ctx, v) }
+
+			directive1 := func(ctx context.Context) (any, error) {
+				pattern, err := ec.unmarshalNString2string(ctx, "^(mysql|postgres)$")
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.Matches == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive matches is not implemented")
+				}
+				return ec.Directives.Matches(ctx, obj, directive0, pattern)
+			}
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(string); ok {
+				it.Type = data
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
 		}
 	}
 	return it, nil
@@ -22202,7 +22279,7 @@ func (ec *executionContext) unmarshalInputUpdateClusterInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"ClusterUUID", "Host", "IP", "Port", "Alias", "User", "Status", "Password", "GroupUUID"}
+	fieldsInOrder := [...]string{"ClusterUUID", "Host", "IP", "Port", "Alias", "User", "Status", "Password", "GroupUUID", "Type"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -22417,6 +22494,33 @@ func (ec *executionContext) unmarshalInputUpdateClusterInput(ctx context.Context
 				return it, err
 			}
 			it.GroupUUID = data
+		case "Type":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Type"))
+			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalOString2string(ctx, v) }
+
+			directive1 := func(ctx context.Context) (any, error) {
+				pattern, err := ec.unmarshalNString2string(ctx, "^(mysql|postgres)$")
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.Matches == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive matches is not implemented")
+				}
+				return ec.Directives.Matches(ctx, obj, directive0, pattern)
+			}
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(string); ok {
+				it.Type = data
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
 		}
 	}
 	return it, nil
@@ -23694,6 +23798,11 @@ func (ec *executionContext) _Cluster(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "User":
 			out.Values[i] = ec._Cluster_User(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "Type":
+			out.Values[i] = ec._Cluster_Type(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}

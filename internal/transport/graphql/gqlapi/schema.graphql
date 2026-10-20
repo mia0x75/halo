@@ -643,6 +643,11 @@ type Cluster implements Node {
 	User:     String! @length(max: 75)
 
 	"""
+	目标库类型（mysql|postgres）
+	"""
+	Type:     String! @matches(pattern: "^(mysql|postgres)$")
+
+	"""
 	群集的状态
 	"""
 	Status:   UInt8!  @range(begin: 0, end: 255) @matches(pattern: "^(1|2)$")
@@ -2827,6 +2832,11 @@ input CreateClusterInput {
 	所属分组UUID，不填表示未分组
 	"""
 	GroupUUID: ID
+
+	"""
+	目标库类型（mysql|postgres），不填按 mysql 处理
+	"""
+	Type: String @matches(pattern: "^(mysql|postgres)$")
 }
 
 """
@@ -2877,6 +2887,11 @@ input UpdateClusterInput {
 	所属分组UUID，不填表示未分组
 	"""
 	GroupUUID:    ID
+
+	"""
+	目标库类型（mysql|postgres）
+	"""
+	Type:         String @matches(pattern: "^(mysql|postgres)$")
 }
 
 """
