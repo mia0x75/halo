@@ -11,46 +11,55 @@ export interface StatCardProps {
   delta?: number
   hint?: string
   trend?: number[]
-  icon?: ReactNode
+  /** 右上角操作区 */
+  action?: ReactNode
 }
 
-/** 指标卡：标签 + 数值 + 环比 + 迷你趋势图。 */
-export function StatCard({ label, value, delta, hint, trend, icon }: StatCardProps) {
+/**
+ * 指标卡。结构对齐设计稿的 Revenue / Active subscriptions：
+ * 第一行标签与右上角操作，第二行大数值与环比，第三行图表独占一块贴底。
+ */
+export function StatCard({ label, value, delta, hint, trend, action }: StatCardProps) {
   const rising = (delta ?? 0) >= 0
 
   return (
-    <div className="flex flex-col rounded-lg border border-border bg-card p-5 shadow-xs">
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-sm font-medium text-muted-foreground">
-          {label}
-        </p>
-        {icon ? <span className="text-muted-foreground [&_svg]:size-5">{icon}</span> : null}
+    <div className="flex flex-col overflow-hidden rounded-lg border border-border bg-card shadow-xs">
+      <div className="p-5 pb-0">
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-medium text-muted-foreground">{label}</p>
+          {action ? <div className="ml-auto">{action}</div> : null}
+        </div>
+
+        <div className="mt-2 flex items-baseline gap-2">
+          <span className="text-2xl font-semibold leading-8 tracking-tight text-strong">
+            {value}
+          </span>
+          {delta !== undefined ? (
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 text-sm leading-4 font-medium",
+                rising ? "text-success" : "text-danger",
+              )}
+            >
+              {rising ? (
+                <IconTrendingUp size={16} stroke={1.5} />
+              ) : (
+                <IconTrendingDown size={16} stroke={1.5} />
+              )}
+              {Math.abs(delta)}%
+            </span>
+          ) : null}
+          {hint ? <span className="text-sm text-muted-foreground">{hint}</span> : null}
+        </div>
       </div>
 
-      <div className="mt-3 flex items-end justify-between gap-3">
-        <div>
-          <p className="text-2xl font-semibold tracking-tight text-strong">{value}</p>
-          <div className="mt-1 flex items-center gap-2 text-sm">
-            {delta !== undefined ? (
-              <span
-                className={cn(
-                  "inline-flex items-center gap-0.5 font-medium",
-                  rising ? "text-success" : "text-danger",
-                )}
-              >
-                {rising ? (
-                  <IconTrendingUp size={14} stroke={1.5} />
-                ) : (
-                  <IconTrendingDown size={14} stroke={1.5} />
-                )}
-                {Math.abs(delta)}%
-              </span>
-            ) : null}
-            {hint ? <span className="text-muted-foreground">{hint}</span> : null}
-          </div>
+      {trend ? (
+        <div className="mt-3 px-2 pb-2">
+          <Sparkline data={trend} height={56} />
         </div>
-        {trend ? <Sparkline data={trend} className="w-24" /> : null}
-      </div>
+      ) : (
+        <div className="mt-3" />
+      )}
     </div>
   )
 }

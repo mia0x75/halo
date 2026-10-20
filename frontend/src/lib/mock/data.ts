@@ -258,3 +258,6 @@ export function trendFor(period: Period): TrendPoint[] {
   }
   return points
 }
+
+/** 接入群集数量的历史，用于第四张指标卡的趋势。 */
+export const clusterTrend = [4, 5, 5, 6, 7, 7, 8]

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { IconAlertTriangle, IconChecks, IconClockHour4, IconServer } from "@tabler/icons-react"
+import { IconChecks } from "@tabler/icons-react"
 
 import { TrendChart } from "@/components/charts/trend-chart"
 import { PageHeader } from "@/components/layout/page-header"
@@ -9,7 +9,15 @@ import { Button } from "@/components/ui/button"
 import { PeriodSelect } from "@/features/dashboard/period-select"
 import { StatCard } from "@/features/dashboard/stat-card"
 import { TopRules } from "@/features/dashboard/top-rules"
-import { auditLogs, clusters, periodLabels, tickets, trendFor, type Period } from "@/lib/mock/data"
+import {
+  auditLogs,
+  clusterTrend,
+  clusters,
+  periodLabels,
+  tickets,
+  trendFor,
+  type Period,
+} from "@/lib/mock/data"
 
 export function DashboardPage() {
   const [period, setPeriod] = useState<Period>(7)
@@ -41,7 +49,6 @@ export function DashboardPage() {
           delta={12}
           hint="较昨日"
           trend={points.map((point) => point.submitted)}
-          icon={<IconClockHour4 size={20} stroke={1.5} />}
         />
         <StatCard
           label="今日已执行"
@@ -49,7 +56,6 @@ export function DashboardPage() {
           delta={8}
           hint="较昨日"
           trend={points.map((point) => point.executed)}
-          icon={<IconChecks size={20} stroke={1.5} />}
         />
         <StatCard
           label="失败工单"
@@ -57,13 +63,12 @@ export function DashboardPage() {
           delta={-4}
           hint="较昨日"
           trend={points.map((point) => point.failed)}
-          icon={<IconAlertTriangle size={20} stroke={1.5} />}
         />
         <StatCard
           label="接入群集"
           value={String(clusters.length)}
           hint={`${clusters.filter((c) => c.status === "normal").length} 个正常`}
-          icon={<IconServer size={20} stroke={1.5} />}
+          trend={clusterTrend}
         />
       </div>
 
