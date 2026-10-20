@@ -102,6 +102,19 @@ type MmLog struct {
 	CreateAt  time.Time
 }
 
+// 站内消息表
+type MmMessage struct {
+	MessageID int64
+	Uuid      string
+	UserID    int64
+	Category  string
+	Title     string
+	Content   string
+	Link      string
+	ReadAt    sql.NullTime
+	CreateAt  time.Time
+}
+
 // 指标表
 type MmMetric struct {
 	MetricID int64

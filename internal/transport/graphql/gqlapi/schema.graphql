@@ -1153,6 +1153,46 @@ type StatementEdge {
 }
 
 """
+站内消息
+"""
+type Message {
+	"""
+	消息的UUID
+	"""
+	UUID:     ID!
+
+	"""
+	消息分类
+	"""
+	Category: String!
+
+	"""
+	标题
+	"""
+	Title:    String! @length(max: 75)
+
+	"""
+	内容
+	"""
+	Content:  String!
+
+	"""
+	跳转链接
+	"""
+	Link:     String!
+
+	"""
+	已读时间，未读为空
+	"""
+	ReadAt:   UInt
+
+	"""
+	记录创建时间
+	"""
+	CreateAt: UInt!
+}
+
+"""
 规则命中明细
 """
 type RuleHit implements Node {
@@ -2047,6 +2087,36 @@ type QueryRoot {
 		"""
 		ClusterUUID: String!
 	): [Database!] @auth(requires: [DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	获取当前用户的站内消息
+	"""
+	messages(
+		"""
+		只返回未读消息
+		"""
+		unreadOnly: Boolean
+
+		"""
+		返回条数上限
+		"""
+		first: Int
+	): [Message]
+
+	"""
+	当前用户的未读消息数
+	"""
+	unreadMessageCount: UInt!
+
+	"""
+	把一条消息标记为已读
+	"""
+	markMessageRead(
+		"""
+		消息的UUID
+		"""
+		uuid: ID!
+	): Boolean
 
 	"""
 	获取规则命中明细

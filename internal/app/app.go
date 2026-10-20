@@ -51,6 +51,7 @@ type Services struct {
 	Rule      *service.RuleService
 	Metric    *service.MetricService
 	RuleHit   *service.RuleHitService
+	Message   *service.MessageService
 	Template  *service.TemplateService
 	User      *service.UserService
 }
@@ -87,6 +88,7 @@ func New(ctx context.Context, cfg db.Config) (*App, error) {
 			Statement: postgresrepo.NewStatementRepo(q),
 			Metric:    postgresrepo.NewMetricRepo(q),
 			RuleHit:   postgresrepo.NewRuleHitRepo(q),
+			Message:   postgresrepo.NewMessageRepo(q),
 			Template:  postgresrepo.NewTemplateRepo(q),
 			Ticket:    postgresrepo.NewTicketRepo(q),
 			User:      postgresrepo.NewUserRepo(q),
@@ -111,6 +113,7 @@ func New(ctx context.Context, cfg db.Config) (*App, error) {
 			Statement: mysqlrepo.NewStatementRepo(q),
 			Metric:    mysqlrepo.NewMetricRepo(q),
 			RuleHit:   mysqlrepo.NewRuleHitRepo(q),
+			Message:   mysqlrepo.NewMessageRepo(q),
 			Template:  mysqlrepo.NewTemplateRepo(q),
 			Ticket:    mysqlrepo.NewTicketRepo(q),
 			User:      mysqlrepo.NewUserRepo(q),
@@ -145,6 +148,7 @@ func New(ctx context.Context, cfg db.Config) (*App, error) {
 		Rule:      service.NewRuleService(tx, repos.Rule),
 		Metric:    service.NewMetricService(tx, repos.Metric),
 		RuleHit:   service.NewRuleHitService(repos.RuleHit),
+		Message:   service.NewMessageService(repos.Message),
 		Template:  service.NewTemplateService(tx, repos.Template),
 		User:      service.NewUserService(tx, repos.User),
 	}
@@ -158,6 +162,7 @@ func New(ctx context.Context, cfg db.Config) (*App, error) {
 	event.Register(a.EventBus, event.Deps{
 		Log:      repos.Log,
 		Metric:   repos.Metric,
+		Message:  repos.Message,
 		User:     repos.User,
 		Notifier: notify.NewMulti(notify.EmailNotifier{}),
 	})

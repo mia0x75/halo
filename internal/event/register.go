@@ -11,6 +11,7 @@ import (
 type Deps struct {
 	Log      domain.LogRepository
 	Metric   domain.MetricRepository
+	Message  domain.MessageRepository
 	User     domain.UserRepository
 	Notifier notify.Notifier
 }
@@ -25,6 +26,7 @@ func Register(bus *Bus, deps Deps) {
 	// Global statistics: one wildcard handler replaces the 11 per-event
 	// statistic updaters, dispatching on the concrete event type.
 	bus.OnNotify("*", GlobalMetricsUpdater(deps.Metric))
+	bus.OnNotify("*", GlobalMessageWriter(deps.Message))
 
 	// Mail: per-topic handlers (template + recipients differ per event). The
 	// registry is local to Register so no package-level state leaks.

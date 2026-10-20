@@ -167,6 +167,28 @@ type MmLog struct {
 	CreateAt time.Time
 }
 
+// 站内消息表
+type MmMessage struct {
+	// 自增主键
+	MessageID uint32
+	// UUID
+	Uuid string
+	// 接收人
+	UserID uint32
+	// 消息分类
+	Category string
+	// 标题
+	Title string
+	// 内容
+	Content string
+	// 跳转链接
+	Link string
+	// 已读时间
+	ReadAt sql.NullTime
+	// 创建时间
+	CreateAt time.Time
+}
+
 // 指标表
 type MmMetric struct {
 	// 自增主键

@@ -12,6 +12,7 @@ import (
 type Querier interface {
 	CountRuleHitsByLevel(ctx context.Context, arg CountRuleHitsByLevelParams) ([]CountRuleHitsByLevelRow, error)
 	CountRuleHitsByRule(ctx context.Context, arg CountRuleHitsByRuleParams) ([]CountRuleHitsByRuleRow, error)
+	CountUnreadMessages(ctx context.Context, userID uint32) (int64, error)
 	CreateAvatar(ctx context.Context, arg CreateAvatarParams) (int64, error)
 	CreateCluster(ctx context.Context, arg CreateClusterParams) (int64, error)
 	CreateComment(ctx context.Context, arg CreateCommentParams) (int64, error)
@@ -19,6 +20,7 @@ type Querier interface {
 	CreateEdge(ctx context.Context, arg CreateEdgeParams) (int64, error)
 	CreateGlossary(ctx context.Context, arg CreateGlossaryParams) error
 	CreateLog(ctx context.Context, arg CreateLogParams) (int64, error)
+	CreateMessage(ctx context.Context, arg CreateMessageParams) error
 	CreateMetric(ctx context.Context, arg CreateMetricParams) error
 	CreateOption(ctx context.Context, arg CreateOptionParams) error
 	CreateQuery(ctx context.Context, arg CreateQueryParams) (int64, error)
@@ -73,6 +75,7 @@ type Querier interface {
 	GetGlossaryByUUID(ctx context.Context, uuid string) (MmGlossary, error)
 	GetLogByID(ctx context.Context, logID uint32) (MmLog, error)
 	GetLogByUUID(ctx context.Context, uuid string) (MmLog, error)
+	GetMessageByUUID(ctx context.Context, uuid string) (MmMessage, error)
 	GetMetricByKey(ctx context.Context, arg GetMetricByKeyParams) (MmMetric, error)
 	GetMetricByUUID(ctx context.Context, uuid string) (MmMetric, error)
 	GetOptionByName(ctx context.Context, name string) (MmOption, error)
@@ -102,6 +105,7 @@ type Querier interface {
 	ListEdges(ctx context.Context, arg ListEdgesParams) ([]MmEdge, error)
 	ListGlossaries(ctx context.Context, arg ListGlossariesParams) ([]MmGlossary, error)
 	ListLogs(ctx context.Context, arg ListLogsParams) ([]MmLog, error)
+	ListMessagesByUser(ctx context.Context, arg ListMessagesByUserParams) ([]MmMessage, error)
 	ListMetrics(ctx context.Context, arg ListMetricsParams) ([]MmMetric, error)
 	ListOptions(ctx context.Context, arg ListOptionsParams) ([]MmOption, error)
 	ListQueries(ctx context.Context, arg ListQueriesParams) ([]MmQuery, error)
@@ -115,7 +119,9 @@ type Querier interface {
 	ListTemplates(ctx context.Context, arg ListTemplatesParams) ([]MmTemplate, error)
 	ListTickets(ctx context.Context, arg ListTicketsParams) ([]MmTicket, error)
 	ListTicketsByUser(ctx context.Context, userID uint32) ([]MmTicket, error)
+	ListUnreadMessagesByUser(ctx context.Context, arg ListUnreadMessagesByUserParams) ([]MmMessage, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]MmUser, error)
+	MarkMessageRead(ctx context.Context, arg MarkMessageReadParams) error
 	// Gauge semantics: the delta is the new value, not an increment.
 	SetGaugeMetric(ctx context.Context, arg SetGaugeMetricParams) error
 	UpdateAvatar(ctx context.Context, arg UpdateAvatarParams) error

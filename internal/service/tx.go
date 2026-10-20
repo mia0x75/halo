@@ -30,6 +30,7 @@ type Repos struct {
 	Statement domain.StatementRepository
 	Metric    domain.MetricRepository
 	RuleHit   domain.RuleHitRepository
+	Message   domain.MessageRepository
 	Template  domain.TemplateRepository
 	Ticket    domain.TicketRepository
 	User      domain.UserRepository

@@ -117,6 +117,24 @@ type LoginPayload struct {
 	Token string `json:"Token"`
 }
 
+// 站内消息
+type Message struct {
+	// 消息的UUID
+	UUID string `json:"UUID"`
+	// 消息分类
+	Category string `json:"Category"`
+	// 标题
+	Title string `json:"Title"`
+	// 内容
+	Content string `json:"Content"`
+	// 跳转链接
+	Link string `json:"Link"`
+	// 已读时间，未读为空
+	ReadAt *uint `json:"ReadAt,omitempty"`
+	// 记录创建时间
+	CreateAt uint `json:"CreateAt"`
+}
+
 // 数据修改入口
 type MutationRoot struct {
 }

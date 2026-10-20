@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/mia0x75/halo/internal/domain"
+	"github.com/mia0x75/halo/internal/models"
 )
 
 // GlobalAuditLogWriter returns an audit handler that persists the event's
@@ -22,6 +24,55 @@ func GlobalAuditLogWriter(repo domain.LogRepository) Handler {
 		if _, err := repo.Create(ctx, rec); err != nil {
 			log.Errorf("[E] audit log write failed, topic=%s: %s", ev.Topic(), err.Error())
 			return fmt.Errorf("event: audit %s: %w", ev.Topic(), err)
+		}
+		return nil
+	}
+}
+
+// GlobalMessageWriter turns the events a user cares about into in-app
+// messages. The submitter is notified unless the actor is the submitter
+// itself.
+func GlobalMessageWriter(repo domain.MessageRepository) Handler {
+	return func(ctx context.Context, ev Event) error {
+		var (
+			ownerID uint
+			actorID uint
+			ticket  models.Ticket
+			title   string
+			content string
+		)
+
+		switch e := ev.(type) {
+		case *TicketStatusPatched:
+			ownerID, actorID, ticket = e.Ticket.UserID, e.User.UserID, e.Ticket
+			title = "工单状态更新"
+			content = fmt.Sprintf("工单「%s」的状态已更新。", ticket.Subject)
+		case *TicketExecuted:
+			ownerID, actorID, ticket = e.Ticket.UserID, e.UserID, e.Ticket
+			title = "工单执行完成"
+			content = fmt.Sprintf("工单「%s」已执行完成。", ticket.Subject)
+		case *TicketFailed:
+			ownerID, actorID, ticket = e.Ticket.UserID, e.UserID, e.Ticket
+			title = "工单执行失败"
+			content = fmt.Sprintf("工单「%s」执行失败。", ticket.Subject)
+		default:
+			return nil
+		}
+
+		if ownerID == 0 || ownerID == actorID {
+			return nil
+		}
+
+		if err := repo.Create(ctx, &domain.Message{
+			UUID:     uuid.NewString(),
+			UserID:   ownerID,
+			Category: "ticket",
+			Title:    title,
+			Content:  content,
+			Link:     "/tickets/" + ticket.UUID,
+		}); err != nil {
+			log.Errorf("[E] message write failed, topic=%s: %s", ev.Topic(), err.Error())
+			return fmt.Errorf("event: message %s: %w", ev.Topic(), err)
 		}
 		return nil
 	}
