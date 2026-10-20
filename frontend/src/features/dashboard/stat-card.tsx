@@ -26,7 +26,7 @@ export function StatCard({ label, value, delta, hint, trend, action }: StatCardP
     <div className="flex flex-col overflow-hidden rounded-lg border border-border bg-card shadow-xs">
       <div className="p-5 pb-0">
         <div className="flex items-center gap-2">
-          <p className="text-sm font-medium text-muted-foreground">{label}</p>
+          <p className="text-sm font-medium text-strong">{label}</p>
           {action ? <div className="ml-auto">{action}</div> : null}
         </div>
 

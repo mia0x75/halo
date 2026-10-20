@@ -19,7 +19,8 @@ export function Sparkline({ data, color = chartPalette.primary, height = 40, cla
         chart: { sparkline: { enabled: true } },
         colors: [color],
         stroke: { width: 1.5, curve: "smooth" },
-        fill: { type: "gradient", gradient: { opacityFrom: 0.25, opacityTo: 0.02 } },
+        // 指标卡里的迷你趋势图面积用更实的渐变，颜色更重
+        fill: { type: "gradient", gradient: { opacityFrom: 0.5, opacityTo: 0.08 } },
         tooltip: { enabled: false },
       }) as ApexOptions,
     [color],

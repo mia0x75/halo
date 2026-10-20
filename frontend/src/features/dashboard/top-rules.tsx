@@ -34,14 +34,14 @@ export function TopRules({ levels = severity, rules = topRules }: TopRulesProps)
       <BarChart categories={categories} series={series} colors={colors} height={160} />
 
       <div>
-        <p className="px-3 pb-1 text-xs font-medium text-muted-foreground">命中最多的规则</p>
+        <p className="px-3 pb-1.5 text-sm font-medium text-muted-foreground">命中最多的规则</p>
         <ul className="flex flex-col">
           {rules.map((item) => (
             <li
               key={item.rule}
               className="flex items-center gap-2 border-t border-border px-3 py-2 text-sm"
             >
-              <span className="font-mono text-xs text-muted-foreground">{item.rule}</span>
+              <span className="font-mono text-sm text-muted-foreground">{item.rule}</span>
               <span className="ml-auto font-medium">{item.count}</span>
             </li>
           ))}
