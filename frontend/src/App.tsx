@@ -1,21 +1,19 @@
 import { useCallback, useState } from "react"
-import {
-  IconCalendarTime,
-  IconChartBar,
-  IconDatabase,
-  IconSettings,
-  IconUsers,
-} from "@tabler/icons-react"
-
 import { AppShell } from "@/components/layout/app-shell"
 import type { NavKey } from "@/components/layout/nav-items"
 import { ClusterFormPage } from "@/pages/cluster-form-page"
+import { DatabasesPage } from "@/pages/databases-page"
+import { CronCreatePage } from "@/pages/cron-create-page"
+import { CronsPage } from "@/pages/crons-page"
 import { ClustersPage } from "@/pages/clusters-page"
 import { DashboardPage } from "@/pages/dashboard-page"
 import { LogsPage } from "@/pages/logs-page"
-import { PlaceholderPage } from "@/pages/placeholder-page"
+import { OptionsPage } from "@/pages/options-page"
+import { StatementsPage } from "@/pages/statements-page"
+import { StatsPage } from "@/pages/stats-page"
 import { RulesPage } from "@/pages/rules-page"
 import { TicketCreatePage } from "@/pages/ticket-create-page"
+import { UsersPage } from "@/pages/users-page"
 import { TicketDetailPage } from "@/pages/ticket-detail-page"
 import { TicketEditPage } from "@/pages/ticket-edit-page"
 import { TicketQueuePage } from "@/pages/ticket-queue-page"
@@ -27,6 +25,7 @@ type View =
   | { kind: "ticket"; uuid: string }
   | { kind: "ticket-create" }
   | { kind: "ticket-edit"; uuid: string }
+  | { kind: "cron-create" }
   | { kind: "cluster-form"; mode: "create" | "edit"; uuid?: string }
 
 export default function App() {
@@ -43,6 +42,22 @@ export default function App() {
   )
 
   const page = view.kind === "nav" ? view.key : "tickets"
+
+  if (view.kind === "cron-create") {
+    return (
+      <AppShell
+        key={nonce}
+        active="crons"
+        onSelect={(key) => setView({ kind: "nav", key })}
+        onConnectionChange={refresh}
+      >
+        <CronCreatePage
+          onBack={() => setView({ kind: "nav", key: "crons" })}
+          onSaved={() => setView({ kind: "nav", key: "crons" })}
+        />
+      </AppShell>
+    )
+  }
 
   if (view.kind === "ticket-edit") {
     return (
@@ -138,48 +153,14 @@ export default function App() {
       {page === "logs" ? <LogsPage /> : null}
       {page === "my-tickets" ? <TicketQueuePage mode="mine" onOpenTicket={openTicket} /> : null}
       {page === "pending-review" ? <TicketQueuePage mode="review" onOpenTicket={openTicket} /> : null}
-      {page === "statements" ? (
-        <PlaceholderPage
-          title="语句管理"
-          description="工单下的 SQL 语句与执行计划"
-          icon={IconDatabase}
-        />
-      ) : null}
+      {page === "statements" ? <StatementsPage /> : null}
       {page === "crons" ? (
-        <PlaceholderPage
-          title="定时任务"
-          description="系统作业与工单预约执行"
-          icon={IconCalendarTime}
-        />
+        <CronsPage onCreate={() => setView({ kind: "cron-create" })} />
       ) : null}
-      {page === "databases" ? (
-        <PlaceholderPage
-          title="数据库"
-          description="目标库清单与字符集"
-          icon={IconDatabase}
-        />
-      ) : null}
-      {page === "users" ? (
-        <PlaceholderPage
-          title="用户与角色"
-          description="账号、角色与分组授权"
-          icon={IconUsers}
-        />
-      ) : null}
-      {page === "options" ? (
-        <PlaceholderPage
-          title="系统选项"
-          description="平台级配置项"
-          icon={IconSettings}
-        />
-      ) : null}
-      {page === "stats" ? (
-        <PlaceholderPage
-          title="统计报表"
-          description="按天汇总的工单与命中指标"
-          icon={IconChartBar}
-        />
-      ) : null}
+      {page === "databases" ? <DatabasesPage /> : null}
+      {page === "users" ? <UsersPage /> : null}
+      {page === "options" ? <OptionsPage /> : null}
+      {page === "stats" ? <StatsPage /> : null}
     </AppShell>
   )
 }

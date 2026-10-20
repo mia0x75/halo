@@ -57,8 +57,9 @@ export function TrendChart({
       grid: { borderColor: "transparent", padding: { left: 4, right: 4 } },
       xaxis: {
         categories,
-        // range 表示从末尾算起的点数，初始只显示最近的一段
-        ...(range ? { range } : {}),
+        // range 表示从末尾算起的点数，初始只显示最近的一段；
+        // 点数不足时不能照搬，否则整段数据会被挤到一侧。
+        ...(range ? { range: Math.min(range, categories.length) } : {}),
         labels: { style: { colors: chartPalette.textMuted, fontSize: "11px" } },
       },
       yaxis: { labels: { style: { colors: chartPalette.textMuted, fontSize: "11px" } } },

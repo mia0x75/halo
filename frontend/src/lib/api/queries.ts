@@ -330,11 +330,16 @@ export const REMOVE_CLUSTER_MUTATION = `
 
 export interface StatementNode {
   UUID: string
+  /** 所属工单的自增 ID */
+  TicketID: number
   Sequence: number
   Content: string
   TypeDesc: string
   Status: number
   Report: string
+  RowsAffected: number | null
+  CreateAt: number
+  UpdateAt: number | null
 }
 
 export interface CommentNode {
@@ -525,3 +530,251 @@ export interface LogNode {
   Operation: string
   CreateAt: number
 }
+
+export const CRONS_QUERY = `
+  query Crons($first: Int, $after: String) {
+    crons(first: $first, after: $after) {
+      totalCount
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      edges {
+        cursor
+        node {
+          UUID
+          Name
+          Cmd
+          Params
+          Interval
+          Duration
+          LastRun
+          NextRun
+          Recurrent
+          Status
+          CreateAt
+        }
+      }
+    }
+  }
+`
+
+export const PENDING_TASKS_QUERY = `
+  query PendingTasks {
+    tasks {
+      UUID
+      Name
+      Cmd
+      Params
+      Interval
+      LastRun
+      NextRun
+      Recurrent
+      Status
+    }
+  }
+`
+
+export const TASK_EXECUTIONS_QUERY = `
+  query TaskExecutions($status: UInt8, $first: Int) {
+    taskExecutions(status: $status, first: $first) {
+      UUID
+      Name
+      Type
+      Payload
+      Status
+      Attempt
+      CronID
+      ScheduledAt
+      StartedAt
+      FinishedAt
+      Error
+      CreateAt
+    }
+    taskExecutionSummary {
+      Status
+      Count
+    }
+  }
+`
+
+export const CREATE_CRON_MUTATION = `
+  mutation CreateCron($input: CreateCronInput!) {
+    createCron(input: $input) {
+      UUID
+      Name
+      Interval
+      Status
+    }
+  }
+`
+
+export const REMOVE_CRON_MUTATION = `
+  mutation RemoveCron($id: ID!) {
+    removeCron(id: $id)
+  }
+`
+
+export const DATABASES_QUERY = `
+  query Databases($clusterUUID: String!) {
+    databases(ClusterUUID: $clusterUUID) {
+      Name
+      Charset
+      Collate
+    }
+  }
+`
+
+export const USERS_QUERY = `
+  query Users($first: Int, $after: String) {
+    users(first: $first, after: $after) {
+      totalCount
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      edges {
+        cursor
+        node {
+          UUID
+          Email
+          Name
+          Status
+          Roles { UUID Name }
+          Reviewers { UUID Name Email }
+        }
+      }
+    }
+  }
+`
+
+export const ROLES_QUERY = `
+  query Roles {
+    roles {
+      UUID
+      Name
+      Description
+      Groups { UUID Name }
+    }
+  }
+`
+
+export const OPTIONS_QUERY = `
+  query Options {
+    options {
+      UUID
+      Name
+      Parameter
+      Writable
+      Description
+      Element
+    }
+  }
+`
+
+export const PATCH_OPTION_MUTATION = `
+  mutation PatchOption($input: PatchOptionParameterInput!) {
+    patchOptionParameters(input: $input)
+  }
+`
+
+export const METRIC_SUMMARY_QUERY = `
+  query MetricSummary($Scope: UInt8, $Names: [String!]) {
+    metrics(Scope: $Scope, Names: $Names) {
+      Name
+      Scope
+      ScopeID
+      Type
+      Bucket
+      Value
+      CreateAt
+    }
+  }
+`
+
+export interface CronNode {
+  UUID: string
+  Name: string
+  Cmd: string
+  Params: string | null
+  Interval: string | null
+  Duration: string | null
+  LastRun: string | null
+  NextRun: string | null
+  Recurrent: number
+  Status: string
+  CreateAt: number
+}
+
+export interface TaskExecutionNode {
+  UUID: string
+  Name: string
+  Type: string
+  Payload: string
+  Status: number
+  Attempt: number
+  CronID: number
+  ScheduledAt: number
+  StartedAt: number | null
+  FinishedAt: number | null
+  Error: string
+  CreateAt: number
+}
+
+export interface UserNode {
+  UUID: string
+  Email: string
+  Name: string | null
+  Status: number
+  Roles: { UUID: string; Name: string }[] | null
+  Reviewers: { UUID: string; Name: string | null; Email: string }[] | null
+}
+
+export interface RoleNode {
+  UUID: string
+  Name: string
+  Description: string
+  Groups: { UUID: string; Name: string }[] | null
+}
+
+export interface OptionNode {
+  UUID: string
+  Name: string
+  Parameter: string
+  Writable: number
+  Description: string
+  Element: string
+}
+
+export const STATEMENTS_QUERY = `
+  query Statements($first: Int, $after: String) {
+    statements(first: $first, after: $after) {
+      totalCount
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      edges {
+        cursor
+        node {
+          UUID
+          TicketID
+          Sequence
+          Content
+          TypeDesc
+          Status
+          Report
+          RowsAffected
+          CreateAt
+          UpdateAt
+        }
+      }
+    }
+  }
+`
