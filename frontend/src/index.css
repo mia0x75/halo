@@ -148,8 +148,10 @@
     width: 8px !important;
     height: 8px !important;
   }
-  /* 图例文字：与提示框一致，圆点到文字 8px */
+  /* 图例文字：ApexCharts 用 padding-left:15px + margin-left:-15px 互相抵消，
+     这里改成不留白 + 8px 左边距，间距就是 8px，不受内部魔数影响。 */
   .apexcharts-legend .apexcharts-legend-text {
+    padding-left: 0 !important;
     margin-left: 8px !important;
   }
   /* 提示框：圆点缩到 8px，文字紧跟 8px */
