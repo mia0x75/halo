@@ -496,35 +496,49 @@ COLLATE = utf8mb4_unicode_ci
 COMMENT = '工单分解表'
 ;
 
-DROP TABLE IF EXISTS `mm_statistics`;
-CREATE TABLE `mm_statistics` (
-  `group`        VARCHAR(36)
-                 NOT NULL
-                 COMMENT '分组',
-  `key`          VARCHAR(50)
-                 NOT NULL
-                 COMMENT '键',
-  `uuid`         CHAR(36)
-                 NOT NULL
-                 COMMENT 'UUID',
-  `value`        DECIMAL(18,4)
-                 NOT NULL
-                 COMMENT '值',
-  `version`      INT UNSIGNED
-                 NOT NULL
-                 COMMENT '版本',
-  `update_at`    DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
-                 COMMENT '修改时间',
-  `create_at`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-                 COMMENT '创建时间',
+DROP TABLE IF EXISTS `mm_metrics`;
+CREATE TABLE `mm_metrics` (
+  `metric_id`   INT UNSIGNED
+                NOT NULL
+                AUTO_INCREMENT
+                COMMENT '自增主键',
+  `uuid`        CHAR(36)
+                NOT NULL
+                COMMENT 'UUID',
+  `name`        VARCHAR(75)
+                NOT NULL
+                COMMENT '指标名称',
+  `scope`       TINYINT UNSIGNED
+                NOT NULL DEFAULT 0
+                COMMENT '作用域：0 全局 1 按天 2 用户 3 群集 4 分组',
+  `scope_id`    CHAR(36)
+                NOT NULL DEFAULT ''
+                COMMENT '作用域实体 UUID，全局作用域为空串',
+  `type`        TINYINT UNSIGNED
+                NOT NULL DEFAULT 0
+                COMMENT '类型：0 counter 累加 1 gauge 覆盖',
+  `bucket`      VARCHAR(20)
+                NOT NULL DEFAULT ''
+                COMMENT '时间桶，如 2026-10-20',
+  `value`       DECIMAL(18,4)
+                NOT NULL DEFAULT 0
+                COMMENT '指标值',
+  `version`     INT UNSIGNED
+                NOT NULL DEFAULT 0
+                COMMENT '版本',
+  `update_at`   DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+                COMMENT '修改时间',
+  `create_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                COMMENT '创建时间',
 
-  PRIMARY KEY (`group`, `key`),
-  UNIQUE KEY `unique_1` (`uuid`)
+  PRIMARY KEY (`metric_id`),
+  UNIQUE KEY `unique_1` (`uuid`),
+  UNIQUE KEY `unique_2` (`name`, `scope`, `scope_id`, `bucket`)
 )
 ENGINE = InnoDB
 CHARSET = utf8mb4
 COLLATE = utf8mb4_unicode_ci
-COMMENT = '统计表'
+COMMENT = '指标表'
 ;
 
 

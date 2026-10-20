@@ -27,10 +27,9 @@ func GlobalAuditLogWriter(repo domain.LogRepository) Handler {
 	}
 }
 
-// GlobalMetricsUpdater returns a statistics handler covering every event that
-// maintains counters. The per-event group/key/delta behaviour mirrors the
-// former per-event *StatisticUpdater handlers.
-func GlobalMetricsUpdater(repo domain.StatisticRepository) Handler {
+// GlobalMetricsUpdater returns a metrics handler covering every event that
+// maintains counters or gauges.
+func GlobalMetricsUpdater(repo domain.MetricRepository) Handler {
 	return func(ctx context.Context, ev Event) error {
 		switch e := ev.(type) {
 		case *TicketCreated:
@@ -44,23 +43,25 @@ func GlobalMetricsUpdater(repo domain.StatisticRepository) Handler {
 		case *QueryRewrited:
 			return queryStats(ctx, repo, e.User.UUID, "total-rewrites")
 		case *UserRegistered:
-			return bump(ctx, repo, "overall", "total-users", 1)
+			return bump(ctx, repo, overallKey("total-users"), 1)
 		case *UserCreated:
-			return bump(ctx, repo, "overall", "total-users", 1)
+			return bump(ctx, repo, overallKey("total-users"), 1)
 		case *UserSignedIn:
-			if err := bump(ctx, repo, e.User.UUID, "total-logins", 1); err != nil {
+			if err := bump(ctx, repo, userKey(e.User.UUID, "total-logins"), 1); err != nil {
 				return err
 			}
-			return bump(ctx, repo, e.User.UUID, "latest-login", float64(time.Now().Unix()))
+			// latest-login is a gauge: it holds the last sign-in time instead of
+			// accumulating it.
+			return setGauge(ctx, repo, userKey(e.User.UUID, "latest-login"), float64(time.Now().Unix()))
 		case *CommentCreated:
-			if err := bump(ctx, repo, "overall", "total-comments", 1); err != nil {
+			if err := bump(ctx, repo, overallKey("total-comments"), 1); err != nil {
 				return err
 			}
-			return bump(ctx, repo, e.User.UUID, "total-comments", 1)
+			return bump(ctx, repo, userKey(e.User.UUID, "total-comments"), 1)
 		case *ClusterCreated:
-			return bump(ctx, repo, "overall", "total-clusters", 1)
+			return bump(ctx, repo, overallKey("total-clusters"), 1)
 		case *ClusterRemoved:
-			return bump(ctx, repo, "overall", "total-clusters", -1)
+			return bump(ctx, repo, overallKey("total-clusters"), -1)
 		default:
 			// Events without counters are a no-op.
 			return nil
@@ -69,35 +70,56 @@ func GlobalMetricsUpdater(repo domain.StatisticRepository) Handler {
 }
 
 // ticketStats updates the overall, daily and per-user ticket counters.
-func ticketStats(ctx context.Context, repo domain.StatisticRepository, userUUID string, delta float64) error {
-	if err := bump(ctx, repo, "overall", "total-tickets", delta); err != nil {
+func ticketStats(ctx context.Context, repo domain.MetricRepository, userUUID string, delta float64) error {
+	if err := bump(ctx, repo, overallKey("total-tickets"), delta); err != nil {
 		return err
 	}
-	today := time.Now().Format("2006-01-02")
-	if err := bump(ctx, repo, "tickets-daily", today, delta); err != nil {
+	if err := bump(ctx, repo, dailyKey("total-tickets", time.Now().Format("2006-01-02")), delta); err != nil {
 		return err
 	}
-	return bump(ctx, repo, userUUID, "total-tickets", delta)
+	return bump(ctx, repo, userKey(userUUID, "total-tickets"), delta)
 }
 
 // queryStats updates the overall, daily and per-user query counters. counter is
-// the per-user key ("total-queries" / "total-analyses" / "total-rewrites").
-func queryStats(ctx context.Context, repo domain.StatisticRepository, userUUID, counter string) error {
-	if err := bump(ctx, repo, "overall", "total-queries", 1); err != nil {
+// the per-user metric name ("total-queries" / "total-analyses" / "total-rewrites").
+func queryStats(ctx context.Context, repo domain.MetricRepository, userUUID, counter string) error {
+	if err := bump(ctx, repo, overallKey("total-queries"), 1); err != nil {
 		return err
 	}
-	today := time.Now().Format("2006-01-02")
-	if err := bump(ctx, repo, "queries-daily", today, 1); err != nil {
+	if err := bump(ctx, repo, dailyKey("total-queries", time.Now().Format("2006-01-02")), 1); err != nil {
 		return err
 	}
-	return bump(ctx, repo, userUUID, counter, 1)
+	return bump(ctx, repo, userKey(userUUID, counter), 1)
 }
 
-// bump applies a single statistic increment, logging (not failing) errors to
+// overallKey builds the key of a platform wide counter.
+func overallKey(name string) domain.MetricKey {
+	return domain.MetricKey{Name: name, Scope: domain.MetricScopeOverall}
+}
+
+// dailyKey builds the key of a counter inside a time bucket.
+func dailyKey(name, bucket string) domain.MetricKey {
+	return domain.MetricKey{Name: name, Scope: domain.MetricScopeDaily, Bucket: bucket}
+}
+
+// userKey builds the key of a counter or gauge scoped to a user.
+func userKey(userUUID, name string) domain.MetricKey {
+	return domain.MetricKey{Name: name, Scope: domain.MetricScopeUser, ScopeID: userUUID}
+}
+
+// bump applies a single counter increment, logging (not failing) errors to
 // match the former best-effort behaviour.
-func bump(ctx context.Context, repo domain.StatisticRepository, group, key string, delta float64) error {
-	if err := repo.UpsertIncrement(ctx, group, key, delta); err != nil {
-		log.Warnf("[W] statistics upsert failed, group=%s key=%s: %s", group, key, err.Error())
+func bump(ctx context.Context, repo domain.MetricRepository, key domain.MetricKey, delta float64) error {
+	if err := repo.Increment(ctx, key, delta); err != nil {
+		log.Warnf("[W] metric increment failed, name=%s scope=%d: %s", key.Name, key.Scope, err.Error())
+	}
+	return nil
+}
+
+// setGauge overwrites a gauge metric with the given value.
+func setGauge(ctx context.Context, repo domain.MetricRepository, key domain.MetricKey, value float64) error {
+	if err := repo.SetGauge(ctx, key, value); err != nil {
+		log.Warnf("[W] metric gauge write failed, name=%s scope=%d: %s", key.Name, key.Scope, err.Error())
 	}
 	return nil
 }

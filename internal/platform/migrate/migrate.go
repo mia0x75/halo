@@ -183,6 +183,19 @@ func SplitStatements(content string) ([]string, error) {
 		case '`':
 			inBacktick = true
 			current.WriteRune(ch)
+		case '$':
+			// PostgreSQL dollar quoting: $tag$ ... $tag$ keeps the body verbatim.
+			tag, ok := dollarTag(runes, i)
+			if !ok {
+				current.WriteRune(ch)
+				continue
+			}
+			end := indexRunes(runes, i+len(tag), tag)
+			if end < 0 {
+				return nil, fmt.Errorf("unterminated dollar quote %s", tag)
+			}
+			current.WriteString(string(runes[i : end+len(tag)]))
+			i = end + len(tag) - 1
 		case '-':
 			if next == '-' {
 				inLine = true
@@ -212,4 +225,40 @@ func SplitStatements(content string) ([]string, error) {
 	}
 
 	return statements, nil
+}
+
+// dollarTag returns the dollar quote tag starting at the given position, for
+// example "$$" or "$halo$". It fails when the position does not start one.
+func dollarTag(runes []rune, pos int) (string, bool) {
+	if pos >= len(runes) || runes[pos] != '$' {
+		return "", false
+	}
+	for i := pos + 1; i < len(runes); i++ {
+		ch := runes[i]
+		if ch == '$' {
+			return string(runes[pos : i+1]), true
+		}
+		if !(ch == '_' || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9')) {
+			return "", false
+		}
+	}
+	return "", false
+}
+
+// indexRunes finds the next occurrence of the needle at or after the position.
+func indexRunes(runes []rune, pos int, needle string) int {
+	target := []rune(needle)
+	for i := pos; i+len(target) <= len(runes); i++ {
+		match := true
+		for j := range target {
+			if runes[i+j] != target[j] {
+				match = false
+				break
+			}
+		}
+		if match {
+			return i
+		}
+	}
+	return -1
 }

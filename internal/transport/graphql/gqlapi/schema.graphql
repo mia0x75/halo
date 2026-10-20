@@ -1153,26 +1153,41 @@ type StatementEdge {
 }
 
 """
-系统统计信息
+指标信息
 """
-type Statistic implements Node {
+type Metric implements Node {
 	"""
-	统计的UUID
+	指标的UUID
 	"""
 	UUID:     ID!
 
 	"""
-	分组
+	指标名称
 	"""
-	Group:    String!
+	Name:     String! @length(max: 75)
 
 	"""
-	统计的名称
+	作用域：0 全局 1 按天 2 用户 3 群集 4 分组
 	"""
-	Key:      String! @length(max: 50)
+	Scope:    UInt8!
 
 	"""
-	统计的值
+	作用域实体UUID，全局作用域为空串
+	"""
+	ScopeID:  String
+
+	"""
+	类型：0 counter 累加 1 gauge 覆盖
+	"""
+	Type:     UInt8!
+
+	"""
+	时间桶，如 2026-10-20
+	"""
+	Bucket:   String!
+
+	"""
+	指标值
 	"""
 	Value:    Float!
 
@@ -1405,9 +1420,9 @@ type User implements Node {
 	Reviewers:  [User]
 
 	"""
-	用户维度的统计信息
+	用户维度的指标信息
 	"""
-	Statistics: [Statistic]
+	Metrics: [Metric]
 
 	"""
 	用户的关联群集
@@ -1969,14 +1984,19 @@ type QueryRoot {
 	): [Database!] @auth(requires: [DEVELOPER, REVIEWER, ADMIN])
 
 	"""
-	获取统计信息
+	获取指标信息
 	"""
-	statistics(
+	metrics(
 		"""
-		分组列表
+		作用域，缺省返回全部作用域
 		"""
-		Groups: [String!]!
-	): [Statistic]
+		Scope: UInt8
+
+		"""
+		指标名称列表，缺省返回全部指标
+		"""
+		Names: [String!]
+	): [Metric]
 
 	"""
 	服务器当前信息

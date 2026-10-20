@@ -49,7 +49,7 @@ type Services struct {
 	Query     *service.QueryService
 	Role      *service.RoleService
 	Rule      *service.RuleService
-	Statistic *service.StatisticService
+	Metric    *service.MetricService
 	Template  *service.TemplateService
 	User      *service.UserService
 }
@@ -84,7 +84,7 @@ func New(ctx context.Context, cfg db.Config) (*App, error) {
 			Role:      postgresrepo.NewRoleRepo(q),
 			Rule:      postgresrepo.NewRuleRepo(q),
 			Statement: postgresrepo.NewStatementRepo(q),
-			Statistic: postgresrepo.NewStatisticRepo(q),
+			Metric:    postgresrepo.NewMetricRepo(q),
 			Template:  postgresrepo.NewTemplateRepo(q),
 			Ticket:    postgresrepo.NewTicketRepo(q),
 			User:      postgresrepo.NewUserRepo(q),
@@ -107,7 +107,7 @@ func New(ctx context.Context, cfg db.Config) (*App, error) {
 			Role:      mysqlrepo.NewRoleRepo(q),
 			Rule:      mysqlrepo.NewRuleRepo(q),
 			Statement: mysqlrepo.NewStatementRepo(q),
-			Statistic: mysqlrepo.NewStatisticRepo(q),
+			Metric:    mysqlrepo.NewMetricRepo(q),
 			Template:  mysqlrepo.NewTemplateRepo(q),
 			Ticket:    mysqlrepo.NewTicketRepo(q),
 			User:      mysqlrepo.NewUserRepo(q),
@@ -140,7 +140,7 @@ func New(ctx context.Context, cfg db.Config) (*App, error) {
 		Query:     service.NewQueryService(tx, repos.Query),
 		Role:      service.NewRoleService(tx, repos.Role),
 		Rule:      service.NewRuleService(tx, repos.Rule),
-		Statistic: service.NewStatisticService(tx, repos.Statistic),
+		Metric:    service.NewMetricService(tx, repos.Metric),
 		Template:  service.NewTemplateService(tx, repos.Template),
 		User:      service.NewUserService(tx, repos.User),
 	}
@@ -152,10 +152,10 @@ func New(ctx context.Context, cfg db.Config) (*App, error) {
 	// the former package-level init().
 	a.EventBus = event.NewBus(100)
 	event.Register(a.EventBus, event.Deps{
-		Log:       repos.Log,
-		Statistic: repos.Statistic,
-		User:      repos.User,
-		Notifier:  notify.NewMulti(notify.EmailNotifier{}),
+		Log:      repos.Log,
+		Metric:   repos.Metric,
+		User:     repos.User,
+		Notifier: notify.NewMulti(notify.EmailNotifier{}),
 	})
 
 	// The caches read through the repositories, so they can only be populated

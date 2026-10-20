@@ -167,6 +167,48 @@ type MmLog struct {
 	CreateAt time.Time
 }
 
+// 指标表
+type MmMetric struct {
+	// 自增主键
+	MetricID uint32
+	// UUID
+	Uuid string
+	// 指标名称
+	Name string
+	// 作用域：0 全局 1 按天 2 用户 3 群集 4 分组
+	Scope uint8
+	// 作用域实体 UUID，全局作用域为空串
+	ScopeID string
+	// 类型：0 counter 累加 1 gauge 覆盖
+	Type uint8
+	// 时间桶，如 2026-10-20
+	Bucket string
+	// 指标值
+	Value string
+	// 版本
+	Version uint32
+	// 修改时间
+	UpdateAt sql.NullTime
+	// 创建时间
+	CreateAt time.Time
+}
+
+// 迁移版本台账
+type MmMigration struct {
+	// 迁移版本号
+	Version uint32
+	// 迁移名称
+	Name string
+	// 迁移文件内容 sha256
+	Checksum string
+	// 执行耗时（毫秒）
+	DurationMs uint32
+	// 是否执行成功
+	Success uint8
+	// 应用时间
+	ApplyAt time.Time
+}
+
 // 系统选项表
 type MmOption struct {
 	// 配置项
@@ -289,24 +331,6 @@ type MmStatement struct {
 	Results sql.NullString
 	// 在服务器正确执行后影响的行数
 	RowsAffected sql.NullInt32
-	// 版本
-	Version uint32
-	// 修改时间
-	UpdateAt sql.NullTime
-	// 创建时间
-	CreateAt time.Time
-}
-
-// 统计表
-type MmStatistic struct {
-	// 分组
-	Group string
-	// 键
-	Key string
-	// UUID
-	Uuid string
-	// 值
-	Value string
 	// 版本
 	Version uint32
 	// 修改时间

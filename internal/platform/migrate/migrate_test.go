@@ -158,3 +158,18 @@ func TestEmbeddedSetsAreLoadable(t *testing.T) {
 		require.NotEmpty(t, mig.Statements, "migration %s has no statement", mig.Filename)
 	}
 }
+
+func TestSplitStatementsKeepsDollarQuotedBody(t *testing.T) {
+	script := `DO $halo$
+BEGIN
+    IF EXISTS(SELECT 1 FROM t) THEN
+        INSERT INTO a VALUES (1);
+    END IF;
+END
+$halo$;`
+
+	stmts, err := SplitStatements(script)
+	require.NoError(t, err)
+	require.Len(t, stmts, 1)
+	require.Contains(t, stmts[0], "INSERT INTO a VALUES (1);")
+}

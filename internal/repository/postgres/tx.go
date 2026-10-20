@@ -44,7 +44,7 @@ func (m *TxManager) WithTx(ctx context.Context, fn func(ctx context.Context, rep
 		Role:      NewRoleRepo(q),
 		Rule:      NewRuleRepo(q),
 		Statement: NewStatementRepo(q),
-		Statistic: NewStatisticRepo(q),
+		Metric: NewMetricRepo(q),
 		Template:  NewTemplateRepo(q),
 		Ticket:    NewTicketRepo(q),
 		User:      NewUserRepo(q),

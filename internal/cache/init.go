@@ -69,8 +69,8 @@ type CacheInit struct {
 var cacheInits = []CacheInit{
 	{
 		Name:            "fast",
-		InitFuncs:       []func() error{AvatarsInit, EdgesInit, UsersInit, StatisticsInit},
-		RefreshFuncs:    []func() error{EdgesInit, UsersInit, StatisticsInit},
+		InitFuncs:       []func() error{AvatarsInit, EdgesInit, UsersInit, MetricsInit},
+		RefreshFuncs:    []func() error{EdgesInit, UsersInit, MetricsInit},
 		RefreshInterval: 10 * time.Second,
 	},
 	{

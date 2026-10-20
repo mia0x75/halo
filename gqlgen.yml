@@ -69,8 +69,8 @@ models:
   User:
     model: github.com/mia0x75/halo/internal/models.User
 
-  Statistic:
-    model: github.com/mia0x75/halo/internal/models.Statistic
+  Metric:
+    model: github.com/mia0x75/halo/internal/models.Metric
 
   CPUStats:
     model: github.com/mia0x75/halo/internal/models.CPUStats

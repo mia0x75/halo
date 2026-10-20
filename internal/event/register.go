@@ -9,10 +9,10 @@ import (
 // event package depends only on domain repositories and the notifier
 // abstraction, never on the service or transport layers.
 type Deps struct {
-	Log       domain.LogRepository
-	Statistic domain.StatisticRepository
-	User      domain.UserRepository
-	Notifier  notify.Notifier
+	Log      domain.LogRepository
+	Metric   domain.MetricRepository
+	User     domain.UserRepository
+	Notifier notify.Notifier
 }
 
 // Register wires the standard handlers onto the bus and records it as the
@@ -24,7 +24,7 @@ func Register(bus *Bus, deps Deps) {
 
 	// Global statistics: one wildcard handler replaces the 11 per-event
 	// statistic updaters, dispatching on the concrete event type.
-	bus.OnNotify("*", GlobalMetricsUpdater(deps.Statistic))
+	bus.OnNotify("*", GlobalMetricsUpdater(deps.Metric))
 
 	// Mail: per-topic handlers (template + recipients differ per event). The
 	// registry is local to Register so no package-level state leaks.

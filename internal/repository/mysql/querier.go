@@ -17,12 +17,12 @@ type Querier interface {
 	CreateEdge(ctx context.Context, arg CreateEdgeParams) (int64, error)
 	CreateGlossary(ctx context.Context, arg CreateGlossaryParams) error
 	CreateLog(ctx context.Context, arg CreateLogParams) (int64, error)
+	CreateMetric(ctx context.Context, arg CreateMetricParams) error
 	CreateOption(ctx context.Context, arg CreateOptionParams) error
 	CreateQuery(ctx context.Context, arg CreateQueryParams) (int64, error)
 	CreateRole(ctx context.Context, arg CreateRoleParams) (int64, error)
 	CreateRule(ctx context.Context, arg CreateRuleParams) error
 	CreateStatement(ctx context.Context, arg CreateStatementParams) error
-	CreateStatistic(ctx context.Context, arg CreateStatisticParams) error
 	CreateTemplate(ctx context.Context, arg CreateTemplateParams) error
 	CreateTicket(ctx context.Context, arg CreateTicketParams) (int64, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (int64, error)
@@ -41,6 +41,7 @@ type Querier interface {
 	DeleteGlossaryByUUID(ctx context.Context, uuid string) error
 	DeleteLogByID(ctx context.Context, logID uint32) error
 	DeleteLogByUUID(ctx context.Context, uuid string) error
+	DeleteMetricByUUID(ctx context.Context, uuid string) error
 	DeleteOptionByUUID(ctx context.Context, uuid string) error
 	DeleteQueryByID(ctx context.Context, queryID uint32) error
 	DeleteQueryByUUID(ctx context.Context, uuid string) error
@@ -50,7 +51,6 @@ type Querier interface {
 	DeleteStatementByTicketSequence(ctx context.Context, arg DeleteStatementByTicketSequenceParams) error
 	DeleteStatementByUUID(ctx context.Context, uuid string) error
 	DeleteStatementsByTicket(ctx context.Context, ticketID uint32) error
-	DeleteStatisticByUUID(ctx context.Context, uuid string) error
 	DeleteTemplateByUUID(ctx context.Context, uuid string) error
 	DeleteTicketByID(ctx context.Context, ticketID uint32) error
 	DeleteTicketByUUID(ctx context.Context, uuid string) error
@@ -70,6 +70,8 @@ type Querier interface {
 	GetGlossaryByUUID(ctx context.Context, uuid string) (MmGlossary, error)
 	GetLogByID(ctx context.Context, logID uint32) (MmLog, error)
 	GetLogByUUID(ctx context.Context, uuid string) (MmLog, error)
+	GetMetricByKey(ctx context.Context, arg GetMetricByKeyParams) (MmMetric, error)
+	GetMetricByUUID(ctx context.Context, uuid string) (MmMetric, error)
 	GetOptionByName(ctx context.Context, name string) (MmOption, error)
 	GetOptionByUUID(ctx context.Context, uuid string) (MmOption, error)
 	GetQueryByID(ctx context.Context, queryID uint32) (MmQuery, error)
@@ -80,14 +82,15 @@ type Querier interface {
 	GetRuleByUUID(ctx context.Context, uuid string) (MmRule, error)
 	GetStatementByTicketSequence(ctx context.Context, arg GetStatementByTicketSequenceParams) (MmStatement, error)
 	GetStatementByUUID(ctx context.Context, uuid string) (MmStatement, error)
-	GetStatisticByKey(ctx context.Context, arg GetStatisticByKeyParams) (MmStatistic, error)
-	GetStatisticByUUID(ctx context.Context, uuid string) (MmStatistic, error)
 	GetTemplateByUUID(ctx context.Context, uuid string) (MmTemplate, error)
 	GetTicketByCronID(ctx context.Context, cronID sql.NullInt32) (MmTicket, error)
 	GetTicketByID(ctx context.Context, ticketID uint32) (MmTicket, error)
 	GetTicketByUUID(ctx context.Context, uuid string) (MmTicket, error)
 	GetUserByID(ctx context.Context, userID uint32) (MmUser, error)
 	GetUserByUUID(ctx context.Context, uuid string) (MmUser, error)
+	// Counter semantics: the new value is the old value plus the delta, so
+	// concurrent writers never lose an update.
+	IncrementMetric(ctx context.Context, arg IncrementMetricParams) error
 	ListAvatars(ctx context.Context, arg ListAvatarsParams) ([]MmAvatar, error)
 	ListClusters(ctx context.Context, arg ListClustersParams) ([]MmCluster, error)
 	ListComments(ctx context.Context, arg ListCommentsParams) ([]MmComment, error)
@@ -96,6 +99,7 @@ type Querier interface {
 	ListEdges(ctx context.Context, arg ListEdgesParams) ([]MmEdge, error)
 	ListGlossaries(ctx context.Context, arg ListGlossariesParams) ([]MmGlossary, error)
 	ListLogs(ctx context.Context, arg ListLogsParams) ([]MmLog, error)
+	ListMetrics(ctx context.Context, arg ListMetricsParams) ([]MmMetric, error)
 	ListOptions(ctx context.Context, arg ListOptionsParams) ([]MmOption, error)
 	ListQueries(ctx context.Context, arg ListQueriesParams) ([]MmQuery, error)
 	ListQueriesByUser(ctx context.Context, userID uint32) ([]MmQuery, error)
@@ -103,11 +107,12 @@ type Querier interface {
 	ListRules(ctx context.Context, arg ListRulesParams) ([]MmRule, error)
 	ListSchedulableCrons(ctx context.Context) ([]MmCron, error)
 	ListStatements(ctx context.Context, arg ListStatementsParams) ([]MmStatement, error)
-	ListStatistics(ctx context.Context, arg ListStatisticsParams) ([]MmStatistic, error)
 	ListTemplates(ctx context.Context, arg ListTemplatesParams) ([]MmTemplate, error)
 	ListTickets(ctx context.Context, arg ListTicketsParams) ([]MmTicket, error)
 	ListTicketsByUser(ctx context.Context, userID uint32) ([]MmTicket, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]MmUser, error)
+	// Gauge semantics: the delta is the new value, not an increment.
+	SetGaugeMetric(ctx context.Context, arg SetGaugeMetricParams) error
 	UpdateAvatar(ctx context.Context, arg UpdateAvatarParams) error
 	UpdateCluster(ctx context.Context, arg UpdateClusterParams) error
 	UpdateComment(ctx context.Context, arg UpdateCommentParams) error
@@ -115,20 +120,15 @@ type Querier interface {
 	UpdateEdge(ctx context.Context, arg UpdateEdgeParams) error
 	UpdateGlossary(ctx context.Context, arg UpdateGlossaryParams) error
 	UpdateLog(ctx context.Context, arg UpdateLogParams) error
+	UpdateMetric(ctx context.Context, arg UpdateMetricParams) error
 	UpdateOption(ctx context.Context, arg UpdateOptionParams) error
 	UpdateQuery(ctx context.Context, arg UpdateQueryParams) error
 	UpdateRole(ctx context.Context, arg UpdateRoleParams) error
 	UpdateRule(ctx context.Context, arg UpdateRuleParams) error
 	UpdateStatement(ctx context.Context, arg UpdateStatementParams) error
-	UpdateStatistic(ctx context.Context, arg UpdateStatisticParams) error
 	UpdateTemplate(ctx context.Context, arg UpdateTemplateParams) error
 	UpdateTicket(ctx context.Context, arg UpdateTicketParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
-	// TODO(dialect): MySQL/MariaDB-specific upsert. Migrate to the dialect layer
-	// when the metadata store gains PostgreSQL / SQLite:
-	//   PG:     INSERT ... ON CONFLICT (`group`, `key`) DO UPDATE SET value = mm_statistics.value + EXCLUDED.value
-	//   SQLite: INSERT ... ON CONFLICT(`group`, `key`) DO UPDATE SET value = value + excluded.value
-	UpsertStatistic(ctx context.Context, arg UpsertStatisticParams) error
 }
 
 var _ Querier = (*Queries)(nil)

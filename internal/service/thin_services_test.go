@@ -322,24 +322,24 @@ func TestRoleServiceErrors(t *testing.T) {
 	require.ErrorIs(t, svc.Delete(ctx, 1, 1), boom)
 }
 
-func TestStatisticService(t *testing.T) {
+func TestMetricService(t *testing.T) {
 	ctx := context.Background()
-	repo := &stubStatisticRepo{got: &domain.Statistic{UUID: "s1"}}
+	repo := &stubMetricRepo{got: &domain.Metric{UUID: "m1"}}
 	logs := &fakeLogRepo{}
-	svc := NewStatisticService(&fakeTx{repos: Repos{Statistic: repo, Log: logs}}, repo)
+	svc := NewMetricService(&fakeTx{repos: Repos{Metric: repo, Log: logs}}, repo)
 
-	got, err := svc.GetByUUID(ctx, "s1")
+	got, err := svc.GetByUUID(ctx, "m1")
 	require.NoError(t, err)
 	require.Equal(t, repo.got, got)
-	_, err = svc.GetByKey(ctx, "g", "k")
+	_, err = svc.GetByKey(ctx, domain.MetricKey{Name: "n"})
 	require.NoError(t, err)
 	_, err = svc.List(ctx, "", 10)
 	require.NoError(t, err)
 
-	require.NoError(t, svc.Create(ctx, &domain.Statistic{UUID: "s1"}, 3))
-	require.Equal(t, "statistic.create|statistic:s1|", logs.entries[0].Operation)
-	require.NoError(t, svc.Update(ctx, &domain.Statistic{UUID: "s1"}, 3))
-	require.NoError(t, svc.DeleteByUUID(ctx, "s1", 3))
+	require.NoError(t, svc.Create(ctx, &domain.Metric{UUID: "m1"}, 3))
+	require.Equal(t, "metric.create|metric:m1|", logs.entries[0].Operation)
+	require.NoError(t, svc.Update(ctx, &domain.Metric{UUID: "m1"}, 3))
+	require.NoError(t, svc.DeleteByUUID(ctx, "m1", 3))
 	require.Len(t, logs.entries, 3)
 }
 
@@ -371,12 +371,12 @@ func TestErrorOnlyServices(t *testing.T) {
 	require.ErrorIs(t, NewGlossaryService(&fakeTx{repos: Repos{Glossary: &stubGlossaryRepo{createErr: boom}, Log: &fakeLogRepo{}}}, &stubGlossaryRepo{}).Create(ctx, &domain.Glossary{}, 1), boom)
 	require.ErrorIs(t, NewOptionService(&fakeTx{repos: Repos{Option: &stubOptionRepo{createErr: boom}, Log: &fakeLogRepo{}}}, &stubOptionRepo{}).Create(ctx, &domain.Option{}, 1), boom)
 	require.ErrorIs(t, NewRuleService(&fakeTx{repos: Repos{Rule: &stubRuleRepo{createErr: boom}, Log: &fakeLogRepo{}}}, &stubRuleRepo{}).Create(ctx, &domain.Rule{}, 1), boom)
-	require.ErrorIs(t, NewStatisticService(&fakeTx{repos: Repos{Statistic: &stubStatisticRepo{createErr: boom}, Log: &fakeLogRepo{}}}, &stubStatisticRepo{}).Create(ctx, &domain.Statistic{}, 1), boom)
+	require.ErrorIs(t, NewMetricService(&fakeTx{repos: Repos{Metric: &stubMetricRepo{createErr: boom}, Log: &fakeLogRepo{}}}, &stubMetricRepo{}).Create(ctx, &domain.Metric{}, 1), boom)
 	require.ErrorIs(t, NewTemplateService(&fakeTx{repos: Repos{Template: &stubTemplateRepo{createErr: boom}, Log: &fakeLogRepo{}}}, &stubTemplateRepo{}).Create(ctx, &domain.Template{}, 1), boom)
 
 	require.ErrorIs(t, NewGlossaryService(&fakeTx{repos: Repos{Glossary: &stubGlossaryRepo{}, Log: &fakeLogRepo{err: boom}}}, &stubGlossaryRepo{}).Create(ctx, &domain.Glossary{}, 1), boom)
 	require.ErrorIs(t, NewOptionService(&fakeTx{repos: Repos{Option: &stubOptionRepo{}, Log: &fakeLogRepo{err: boom}}}, &stubOptionRepo{}).Create(ctx, &domain.Option{}, 1), boom)
 	require.ErrorIs(t, NewRuleService(&fakeTx{repos: Repos{Rule: &stubRuleRepo{}, Log: &fakeLogRepo{err: boom}}}, &stubRuleRepo{}).Create(ctx, &domain.Rule{}, 1), boom)
-	require.ErrorIs(t, NewStatisticService(&fakeTx{repos: Repos{Statistic: &stubStatisticRepo{}, Log: &fakeLogRepo{err: boom}}}, &stubStatisticRepo{}).Create(ctx, &domain.Statistic{}, 1), boom)
+	require.ErrorIs(t, NewMetricService(&fakeTx{repos: Repos{Metric: &stubMetricRepo{}, Log: &fakeLogRepo{err: boom}}}, &stubMetricRepo{}).Create(ctx, &domain.Metric{}, 1), boom)
 	require.ErrorIs(t, NewTemplateService(&fakeTx{repos: Repos{Template: &stubTemplateRepo{}, Log: &fakeLogRepo{err: boom}}}, &stubTemplateRepo{}).Create(ctx, &domain.Template{}, 1), boom)
 }

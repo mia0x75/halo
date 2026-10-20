@@ -228,24 +228,24 @@ func (s *stubRuleRepo) List(context.Context, string, int) ([]*domain.Rule, error
 func (s *stubRuleRepo) Update(context.Context, *domain.Rule) error                { return s.updateErr }
 func (s *stubRuleRepo) DeleteByUUID(context.Context, string) error                { return s.deleteErr }
 
-type stubStatisticRepo struct {
-	domain.StatisticRepository
+type stubMetricRepo struct {
+	domain.MetricRepository
 	createErr, updateErr, deleteErr error
-	got                             *domain.Statistic
+	got                             *domain.Metric
 }
 
-func (s *stubStatisticRepo) Create(context.Context, *domain.Statistic) error { return s.createErr }
-func (s *stubStatisticRepo) GetByUUID(context.Context, string) (*domain.Statistic, error) {
+func (s *stubMetricRepo) Create(context.Context, *domain.Metric) error { return s.createErr }
+func (s *stubMetricRepo) GetByUUID(context.Context, string) (*domain.Metric, error) {
 	return s.got, nil
 }
-func (s *stubStatisticRepo) GetByKey(context.Context, string, string) (*domain.Statistic, error) {
+func (s *stubMetricRepo) GetByKey(context.Context, domain.MetricKey) (*domain.Metric, error) {
 	return s.got, nil
 }
-func (s *stubStatisticRepo) List(context.Context, string, int) ([]*domain.Statistic, error) {
+func (s *stubMetricRepo) List(context.Context, string, int) ([]*domain.Metric, error) {
 	return nil, nil
 }
-func (s *stubStatisticRepo) Update(context.Context, *domain.Statistic) error { return s.updateErr }
-func (s *stubStatisticRepo) DeleteByUUID(context.Context, string) error      { return s.deleteErr }
+func (s *stubMetricRepo) Update(context.Context, *domain.Metric) error { return s.updateErr }
+func (s *stubMetricRepo) DeleteByUUID(context.Context, string) error  { return s.deleteErr }
 
 type stubTemplateRepo struct {
 	domain.TemplateRepository

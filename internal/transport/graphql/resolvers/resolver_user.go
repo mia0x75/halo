@@ -18,6 +18,7 @@ import (
 
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/cache"
+	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/event"
 	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/platform/config"
@@ -1508,10 +1509,10 @@ func (r *userResolver) Queries(ctx context.Context, obj *models.User, after *str
 	}, nil
 }
 
-// Statistics 用户维度的统计信息
-func (r *userResolver) Statistics(ctx context.Context, obj *models.User) (L []*models.Statistic, err error) {
-	L = cache.StatisticsMap.Filter(func(elem *models.Statistic) bool {
-		return elem.Group == obj.UUID
+// Metrics 用户维度的指标信息
+func (r *userResolver) Metrics(ctx context.Context, obj *models.User) (L []*models.Metric, err error) {
+	L = cache.MetricsMap.Filter(func(elem *models.Metric) bool {
+		return elem.Scope == domain.MetricScopeUser && elem.ScopeID == obj.UUID
 	})
 
 	return

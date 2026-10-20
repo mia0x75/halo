@@ -102,6 +102,31 @@ type MmLog struct {
 	CreateAt  time.Time
 }
 
+// 指标表
+type MmMetric struct {
+	MetricID int64
+	Uuid     string
+	Name     string
+	Scope    int16
+	ScopeID  string
+	Type     int16
+	Bucket   string
+	Value    string
+	Version  int64
+	UpdateAt sql.NullTime
+	CreateAt time.Time
+}
+
+// 迁移版本台账
+type MmMigration struct {
+	Version    int32
+	Name       string
+	Checksum   string
+	DurationMs int32
+	Success    bool
+	ApplyAt    time.Time
+}
+
 // 系统选项表
 type MmOption struct {
 	Name        string
@@ -175,17 +200,6 @@ type MmStatement struct {
 	Version      int64
 	UpdateAt     sql.NullTime
 	CreateAt     time.Time
-}
-
-// 统计表
-type MmStatistic struct {
-	Group    string
-	Key      string
-	Uuid     string
-	Value    string
-	Version  int64
-	UpdateAt sql.NullTime
-	CreateAt time.Time
 }
 
 // 邮件模板表

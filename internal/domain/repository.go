@@ -125,14 +125,18 @@ type GlossaryRepository interface {
 	List(ctx context.Context, cursor string, limit int) ([]*Glossary, error)
 }
 
-type StatisticRepository interface {
-	Create(ctx context.Context, s *Statistic) error
-	GetByUUID(ctx context.Context, uuid string) (*Statistic, error)
-	GetByKey(ctx context.Context, group, key string) (*Statistic, error)
-	Update(ctx context.Context, s *Statistic) error
+type MetricRepository interface {
+	Create(ctx context.Context, m *Metric) error
+	GetByUUID(ctx context.Context, uuid string) (*Metric, error)
+	GetByKey(ctx context.Context, key MetricKey) (*Metric, error)
+	Update(ctx context.Context, m *Metric) error
 	DeleteByUUID(ctx context.Context, uuid string) error
-	List(ctx context.Context, cursor string, limit int) ([]*Statistic, error)
-	UpsertIncrement(ctx context.Context, group, key string, delta float64) error
+	List(ctx context.Context, cursor string, limit int) ([]*Metric, error)
+	// Increment atomically adds delta to a counter metric, creating the row
+	// when it does not exist yet.
+	Increment(ctx context.Context, key MetricKey, delta float64) error
+	// SetGauge overwrites the value of a gauge metric.
+	SetGauge(ctx context.Context, key MetricKey, value float64) error
 }
 
 type StatementRepository interface {

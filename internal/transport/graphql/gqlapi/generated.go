@@ -217,6 +217,18 @@ type ComplexityRoot struct {
 		Used      func(childComplexity int) int
 	}
 
+	Metric struct {
+		Bucket   func(childComplexity int) int
+		CreateAt func(childComplexity int) int
+		Name     func(childComplexity int) int
+		Scope    func(childComplexity int) int
+		ScopeID  func(childComplexity int) int
+		Type     func(childComplexity int) int
+		UUID     func(childComplexity int) int
+		UpdateAt func(childComplexity int) int
+		Value    func(childComplexity int) int
+	}
+
 	MutationRoot struct {
 		Activate              func(childComplexity int, input models.ActivateInput) int
 		AnalyzeQuery          func(childComplexity int, input models.SoarQueryInput) int
@@ -320,6 +332,7 @@ type ComplexityRoot struct {
 		Logs          func(childComplexity int, after *string, before *string, first *int, last *int) int
 		Me            func(childComplexity int) int
 		Metadata      func(childComplexity int, clusterUUID string, database string) int
+		Metrics       func(childComplexity int, scope *uint8, names []string) int
 		Option        func(childComplexity int, id string) int
 		Options       func(childComplexity int) int
 		Queries       func(childComplexity int, after *string, before *string, first *int, last *int) int
@@ -329,7 +342,6 @@ type ComplexityRoot struct {
 		Roles         func(childComplexity int) int
 		Rule          func(childComplexity int, id string) int
 		Rules         func(childComplexity int) int
-		Statistics    func(childComplexity int, groups []string) int
 		Tasks         func(childComplexity int) int
 		Templates     func(childComplexity int) int
 		TestCluster   func(childComplexity int, input *models.ValidateConnectionInput) int
@@ -391,15 +403,6 @@ type ComplexityRoot struct {
 		Node   func(childComplexity int) int
 	}
 
-	Statistic struct {
-		CreateAt func(childComplexity int) int
-		Group    func(childComplexity int) int
-		Key      func(childComplexity int) int
-		UUID     func(childComplexity int) int
-		UpdateAt func(childComplexity int) int
-		Value    func(childComplexity int) int
-	}
-
 	SubscriptionRoot struct {
 		TicketStatusChanged func(childComplexity int) int
 	}
@@ -446,20 +449,20 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		Avatar     func(childComplexity int) int
-		Clusters   func(childComplexity int, after *string, before *string, first *int, last *int) int
-		CreateAt   func(childComplexity int) int
-		Email      func(childComplexity int) int
-		Name       func(childComplexity int) int
-		Phone      func(childComplexity int) int
-		Queries    func(childComplexity int, after *string, before *string, first *int, last *int) int
-		Reviewers  func(childComplexity int) int
-		Roles      func(childComplexity int) int
-		Statistics func(childComplexity int) int
-		Status     func(childComplexity int) int
-		Tickets    func(childComplexity int, after *string, before *string, first *int, last *int) int
-		UUID       func(childComplexity int) int
-		UpdateAt   func(childComplexity int) int
+		Avatar    func(childComplexity int) int
+		Clusters  func(childComplexity int, after *string, before *string, first *int, last *int) int
+		CreateAt  func(childComplexity int) int
+		Email     func(childComplexity int) int
+		Metrics   func(childComplexity int) int
+		Name      func(childComplexity int) int
+		Phone     func(childComplexity int) int
+		Queries   func(childComplexity int, after *string, before *string, first *int, last *int) int
+		Reviewers func(childComplexity int) int
+		Roles     func(childComplexity int) int
+		Status    func(childComplexity int) int
+		Tickets   func(childComplexity int, after *string, before *string, first *int, last *int) int
+		UUID      func(childComplexity int) int
+		UpdateAt  func(childComplexity int) int
 	}
 
 	UserConnection struct {
@@ -558,7 +561,7 @@ type QueryRootResolver interface {
 	Crons(ctx context.Context, after *string, before *string, first *int, last *int) (*CronConnection, error)
 	Tasks(ctx context.Context) ([]*models.Cron, error)
 	Databases(ctx context.Context, clusterUUID string) ([]*Database, error)
-	Statistics(ctx context.Context, groups []string) ([]*models.Statistic, error)
+	Metrics(ctx context.Context, scope *uint8, names []string) ([]*models.Metric, error)
 	Environments(ctx context.Context) (*Environments, error)
 	Metadata(ctx context.Context, clusterUUID string, database string) (string, error)
 	TestCluster(ctx context.Context, input *models.ValidateConnectionInput) (bool, error)
@@ -588,7 +591,7 @@ type UserResolver interface {
 	Avatar(ctx context.Context, obj *models.User) (*models.Avatar, error)
 	Roles(ctx context.Context, obj *models.User) ([]*models.Role, error)
 	Reviewers(ctx context.Context, obj *models.User) ([]*models.User, error)
-	Statistics(ctx context.Context, obj *models.User) ([]*models.Statistic, error)
+	Metrics(ctx context.Context, obj *models.User) ([]*models.Metric, error)
 	Clusters(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*ClusterConnection, error)
 	Tickets(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*TicketConnection, error)
 	Queries(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*QueryConnection, error)
@@ -1214,6 +1217,61 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MemStats.Used(childComplexity), true
+
+	case "Metric.Bucket":
+		if e.ComplexityRoot.Metric.Bucket == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Metric.Bucket(childComplexity), true
+	case "Metric.CreateAt":
+		if e.ComplexityRoot.Metric.CreateAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Metric.CreateAt(childComplexity), true
+	case "Metric.Name":
+		if e.ComplexityRoot.Metric.Name == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Metric.Name(childComplexity), true
+	case "Metric.Scope":
+		if e.ComplexityRoot.Metric.Scope == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Metric.Scope(childComplexity), true
+	case "Metric.ScopeID":
+		if e.ComplexityRoot.Metric.ScopeID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Metric.ScopeID(childComplexity), true
+	case "Metric.Type":
+		if e.ComplexityRoot.Metric.Type == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Metric.Type(childComplexity), true
+	case "Metric.UUID":
+		if e.ComplexityRoot.Metric.UUID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Metric.UUID(childComplexity), true
+	case "Metric.UpdateAt":
+		if e.ComplexityRoot.Metric.UpdateAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Metric.UpdateAt(childComplexity), true
+	case "Metric.Value":
+		if e.ComplexityRoot.Metric.Value == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Metric.Value(childComplexity), true
 
 	case "MutationRoot.activate":
 		if e.ComplexityRoot.MutationRoot.Activate == nil {
@@ -1939,6 +1997,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.QueryRoot.Metadata(childComplexity, args["ClusterUUID"].(string), args["database"].(string)), true
+	case "QueryRoot.metrics":
+		if e.ComplexityRoot.QueryRoot.Metrics == nil {
+			break
+		}
+
+		args, err := ec.field_QueryRoot_metrics_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.QueryRoot.Metrics(childComplexity, args["Scope"].(*uint8), args["Names"].([]string)), true
 	case "QueryRoot.option":
 		if e.ComplexityRoot.QueryRoot.Option == nil {
 			break
@@ -2023,17 +2092,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.QueryRoot.Rules(childComplexity), true
-	case "QueryRoot.statistics":
-		if e.ComplexityRoot.QueryRoot.Statistics == nil {
-			break
-		}
-
-		args, err := ec.field_QueryRoot_statistics_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.QueryRoot.Statistics(childComplexity, args["Groups"].([]string)), true
 	case "QueryRoot.tasks":
 		if e.ComplexityRoot.QueryRoot.Tasks == nil {
 			break
@@ -2349,43 +2407,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.StatementEdge.Node(childComplexity), true
 
-	case "Statistic.CreateAt":
-		if e.ComplexityRoot.Statistic.CreateAt == nil {
-			break
-		}
-
-		return e.ComplexityRoot.Statistic.CreateAt(childComplexity), true
-	case "Statistic.Group":
-		if e.ComplexityRoot.Statistic.Group == nil {
-			break
-		}
-
-		return e.ComplexityRoot.Statistic.Group(childComplexity), true
-	case "Statistic.Key":
-		if e.ComplexityRoot.Statistic.Key == nil {
-			break
-		}
-
-		return e.ComplexityRoot.Statistic.Key(childComplexity), true
-	case "Statistic.UUID":
-		if e.ComplexityRoot.Statistic.UUID == nil {
-			break
-		}
-
-		return e.ComplexityRoot.Statistic.UUID(childComplexity), true
-	case "Statistic.UpdateAt":
-		if e.ComplexityRoot.Statistic.UpdateAt == nil {
-			break
-		}
-
-		return e.ComplexityRoot.Statistic.UpdateAt(childComplexity), true
-	case "Statistic.Value":
-		if e.ComplexityRoot.Statistic.Value == nil {
-			break
-		}
-
-		return e.ComplexityRoot.Statistic.Value(childComplexity), true
-
 	case "SubscriptionRoot.ticketStatusChanged":
 		if e.ComplexityRoot.SubscriptionRoot.TicketStatusChanged == nil {
 			break
@@ -2593,6 +2614,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.Email(childComplexity), true
+	case "User.Metrics":
+		if e.ComplexityRoot.User.Metrics == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.Metrics(childComplexity), true
 	case "User.Name":
 		if e.ComplexityRoot.User.Name == nil {
 			break
@@ -2628,12 +2655,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.Roles(childComplexity), true
-	case "User.Statistics":
-		if e.ComplexityRoot.User.Statistics == nil {
-			break
-		}
-
-		return e.ComplexityRoot.User.Statistics(childComplexity), true
 	case "User.Status":
 		if e.ComplexityRoot.User.Status == nil {
 			break
@@ -3175,6 +3196,30 @@ func (ec *executionContext) childFields_MemStats(ctx context.Context, field grap
 	return nil, fmt.Errorf("no field named %q was found under type MemStats", field.Name)
 }
 
+func (ec *executionContext) childFields_Metric(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "UUID":
+		return ec.fieldContext_Metric_UUID(ctx, field)
+	case "Name":
+		return ec.fieldContext_Metric_Name(ctx, field)
+	case "Scope":
+		return ec.fieldContext_Metric_Scope(ctx, field)
+	case "ScopeID":
+		return ec.fieldContext_Metric_ScopeID(ctx, field)
+	case "Type":
+		return ec.fieldContext_Metric_Type(ctx, field)
+	case "Bucket":
+		return ec.fieldContext_Metric_Bucket(ctx, field)
+	case "Value":
+		return ec.fieldContext_Metric_Value(ctx, field)
+	case "CreateAt":
+		return ec.fieldContext_Metric_CreateAt(ctx, field)
+	case "UpdateAt":
+		return ec.fieldContext_Metric_UpdateAt(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type Metric", field.Name)
+}
+
 func (ec *executionContext) childFields_Option(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "UUID":
@@ -3371,24 +3416,6 @@ func (ec *executionContext) childFields_StatementEdge(ctx context.Context, field
 	return nil, fmt.Errorf("no field named %q was found under type StatementEdge", field.Name)
 }
 
-func (ec *executionContext) childFields_Statistic(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-	switch field.Name {
-	case "UUID":
-		return ec.fieldContext_Statistic_UUID(ctx, field)
-	case "Group":
-		return ec.fieldContext_Statistic_Group(ctx, field)
-	case "Key":
-		return ec.fieldContext_Statistic_Key(ctx, field)
-	case "Value":
-		return ec.fieldContext_Statistic_Value(ctx, field)
-	case "CreateAt":
-		return ec.fieldContext_Statistic_CreateAt(ctx, field)
-	case "UpdateAt":
-		return ec.fieldContext_Statistic_UpdateAt(ctx, field)
-	}
-	return nil, fmt.Errorf("no field named %q was found under type Statistic", field.Name)
-}
-
 func (ec *executionContext) childFields_Template(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "UUID":
@@ -3489,8 +3516,8 @@ func (ec *executionContext) childFields_User(ctx context.Context, field graphql.
 		return ec.fieldContext_User_Roles(ctx, field)
 	case "Reviewers":
 		return ec.fieldContext_User_Reviewers(ctx, field)
-	case "Statistics":
-		return ec.fieldContext_User_Statistics(ctx, field)
+	case "Metrics":
+		return ec.fieldContext_User_Metrics(ctx, field)
 	case "Clusters":
 		return ec.fieldContext_User_Clusters(ctx, field)
 	case "Tickets":
@@ -4652,6 +4679,28 @@ func (ec *executionContext) field_QueryRoot_metadata_args(ctx context.Context, r
 	return args, nil
 }
 
+func (ec *executionContext) field_QueryRoot_metrics_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "Scope",
+		func(ctx context.Context, v any) (*uint8, error) {
+			return ec.unmarshalOUInt82ᚖuint8(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["Scope"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "Names",
+		func(ctx context.Context, v any) ([]string, error) {
+			return ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["Names"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_QueryRoot_option_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -4789,20 +4838,6 @@ func (ec *executionContext) field_QueryRoot_rule_args(ctx context.Context, rawAr
 		return nil, err
 	}
 	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_QueryRoot_statistics_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "Groups",
-		func(ctx context.Context, v any) ([]string, error) {
-			return ec.unmarshalNString2ᚕstringᚄ(ctx, v)
-		})
-	if err != nil {
-		return nil, err
-	}
-	args["Groups"] = arg0
 	return args, nil
 }
 
@@ -7988,6 +8023,231 @@ func (ec *executionContext) _MemStats_SwapFree(ctx context.Context, field graphq
 }
 func (ec *executionContext) fieldContext_MemStats_SwapFree(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("MemStats", field, false, false, errors.New("field of type Int does not have child fields"))
+}
+
+func (ec *executionContext) _Metric_UUID(ctx context.Context, field graphql.CollectedField, obj *models.Metric) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Metric_UUID(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.UUID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Metric_UUID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Metric", field, false, false, errors.New("field of type ID does not have child fields"))
+}
+
+func (ec *executionContext) _Metric_Name(ctx context.Context, field graphql.CollectedField, obj *models.Metric) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Metric_Name(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				max, err := ec.unmarshalNInt2int(ctx, 75)
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.Length == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive length is not implemented")
+				}
+				return ec.Directives.Length(ctx, obj, directive0, max)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Metric_Name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Metric", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _Metric_Scope(ctx context.Context, field graphql.CollectedField, obj *models.Metric) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Metric_Scope(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Scope, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v uint8) graphql.Marshaler {
+			return ec.marshalNUInt82uint8(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Metric_Scope(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Metric", field, false, false, errors.New("field of type UInt8 does not have child fields"))
+}
+
+func (ec *executionContext) _Metric_ScopeID(ctx context.Context, field graphql.CollectedField, obj *models.Metric) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Metric_ScopeID(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ScopeID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalOString2string(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Metric_ScopeID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Metric", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _Metric_Type(ctx context.Context, field graphql.CollectedField, obj *models.Metric) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Metric_Type(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v uint8) graphql.Marshaler {
+			return ec.marshalNUInt82uint8(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Metric_Type(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Metric", field, false, false, errors.New("field of type UInt8 does not have child fields"))
+}
+
+func (ec *executionContext) _Metric_Bucket(ctx context.Context, field graphql.CollectedField, obj *models.Metric) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Metric_Bucket(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Bucket, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Metric_Bucket(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Metric", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _Metric_Value(ctx context.Context, field graphql.CollectedField, obj *models.Metric) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Metric_Value(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Value, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v float64) graphql.Marshaler {
+			return ec.marshalNFloat2float64(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Metric_Value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Metric", field, false, false, errors.New("field of type Float does not have child fields"))
+}
+
+func (ec *executionContext) _Metric_CreateAt(ctx context.Context, field graphql.CollectedField, obj *models.Metric) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Metric_CreateAt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.CreateAt, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v uint) graphql.Marshaler {
+			return ec.marshalNUInt2uint(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Metric_CreateAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Metric", field, false, false, errors.New("field of type UInt does not have child fields"))
+}
+
+func (ec *executionContext) _Metric_UpdateAt(ctx context.Context, field graphql.CollectedField, obj *models.Metric) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Metric_UpdateAt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.UpdateAt, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v uint) graphql.Marshaler {
+			return ec.marshalOUInt2uint(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Metric_UpdateAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Metric", field, false, false, errors.New("field of type UInt does not have child fields"))
 }
 
 func (ec *executionContext) _MutationRoot_register(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -12708,34 +12968,34 @@ func (ec *executionContext) fieldContext_QueryRoot_databases(ctx context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _QueryRoot_statistics(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _QueryRoot_metrics(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_QueryRoot_statistics(ctx, field)
+			return ec.fieldContext_QueryRoot_metrics(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.QueryRoot().Statistics(ctx, fc.Args["Groups"].([]string))
+			return ec.Resolvers.QueryRoot().Metrics(ctx, fc.Args["Scope"].(*uint8), fc.Args["Names"].([]string))
 		},
 		nil,
-		func(ctx context.Context, selections ast.SelectionSet, v []*models.Statistic) graphql.Marshaler {
-			return ec.marshalOStatistic2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐStatistic(ctx, selections, v)
+		func(ctx context.Context, selections ast.SelectionSet, v []*models.Metric) graphql.Marshaler {
+			return ec.marshalOMetric2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐMetric(ctx, selections, v)
 		},
 		true,
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_QueryRoot_statistics(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_QueryRoot_metrics(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "QueryRoot",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Statistic(ctx, field)
+			return ec.childFields_Metric(ctx, field)
 		},
 	}
 	defer func() {
@@ -12745,7 +13005,7 @@ func (ec *executionContext) fieldContext_QueryRoot_statistics(ctx context.Contex
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_QueryRoot_statistics_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_QueryRoot_metrics_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -14204,162 +14464,6 @@ func (ec *executionContext) fieldContext_StatementEdge_cursor(_ context.Context,
 	return graphql.NewScalarFieldContext("StatementEdge", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
-func (ec *executionContext) _Statistic_UUID(ctx context.Context, field graphql.CollectedField, obj *models.Statistic) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Statistic_UUID(ctx, field)
-		},
-		func(ctx context.Context) (any, error) {
-			return obj.UUID, nil
-		},
-		nil,
-		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
-			return ec.marshalNID2string(ctx, selections, v)
-		},
-		true,
-		true,
-	)
-}
-func (ec *executionContext) fieldContext_Statistic_UUID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Statistic", field, false, false, errors.New("field of type ID does not have child fields"))
-}
-
-func (ec *executionContext) _Statistic_Group(ctx context.Context, field graphql.CollectedField, obj *models.Statistic) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Statistic_Group(ctx, field)
-		},
-		func(ctx context.Context) (any, error) {
-			return obj.Group, nil
-		},
-		nil,
-		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
-			return ec.marshalNString2string(ctx, selections, v)
-		},
-		true,
-		true,
-	)
-}
-func (ec *executionContext) fieldContext_Statistic_Group(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Statistic", field, false, false, errors.New("field of type String does not have child fields"))
-}
-
-func (ec *executionContext) _Statistic_Key(ctx context.Context, field graphql.CollectedField, obj *models.Statistic) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Statistic_Key(ctx, field)
-		},
-		func(ctx context.Context) (any, error) {
-			return obj.Key, nil
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				max, err := ec.unmarshalNInt2int(ctx, 50)
-				if err != nil {
-					var zeroVal string
-					return zeroVal, err
-				}
-				if ec.Directives.Length == nil {
-					var zeroVal string
-					return zeroVal, errors.New("directive length is not implemented")
-				}
-				return ec.Directives.Length(ctx, obj, directive0, max)
-			}
-
-			next = directive1
-			return next
-		},
-		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
-			return ec.marshalNString2string(ctx, selections, v)
-		},
-		true,
-		true,
-	)
-}
-func (ec *executionContext) fieldContext_Statistic_Key(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Statistic", field, false, false, errors.New("field of type String does not have child fields"))
-}
-
-func (ec *executionContext) _Statistic_Value(ctx context.Context, field graphql.CollectedField, obj *models.Statistic) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Statistic_Value(ctx, field)
-		},
-		func(ctx context.Context) (any, error) {
-			return obj.Value, nil
-		},
-		nil,
-		func(ctx context.Context, selections ast.SelectionSet, v float64) graphql.Marshaler {
-			return ec.marshalNFloat2float64(ctx, selections, v)
-		},
-		true,
-		true,
-	)
-}
-func (ec *executionContext) fieldContext_Statistic_Value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Statistic", field, false, false, errors.New("field of type Float does not have child fields"))
-}
-
-func (ec *executionContext) _Statistic_CreateAt(ctx context.Context, field graphql.CollectedField, obj *models.Statistic) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Statistic_CreateAt(ctx, field)
-		},
-		func(ctx context.Context) (any, error) {
-			return obj.CreateAt, nil
-		},
-		nil,
-		func(ctx context.Context, selections ast.SelectionSet, v uint) graphql.Marshaler {
-			return ec.marshalNUInt2uint(ctx, selections, v)
-		},
-		true,
-		true,
-	)
-}
-func (ec *executionContext) fieldContext_Statistic_CreateAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Statistic", field, false, false, errors.New("field of type UInt does not have child fields"))
-}
-
-func (ec *executionContext) _Statistic_UpdateAt(ctx context.Context, field graphql.CollectedField, obj *models.Statistic) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Statistic_UpdateAt(ctx, field)
-		},
-		func(ctx context.Context) (any, error) {
-			return obj.UpdateAt, nil
-		},
-		nil,
-		func(ctx context.Context, selections ast.SelectionSet, v uint) graphql.Marshaler {
-			return ec.marshalOUInt2uint(ctx, selections, v)
-		},
-		true,
-		false,
-	)
-}
-func (ec *executionContext) fieldContext_Statistic_UpdateAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Statistic", field, false, false, errors.New("field of type UInt does not have child fields"))
-}
-
 func (ec *executionContext) _SubscriptionRoot_ticketStatusChanged(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	return graphql.ResolveFieldStream(
 		ctx,
@@ -15454,33 +15558,33 @@ func (ec *executionContext) fieldContext_User_Reviewers(_ context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _User_Statistics(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_Metrics(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_User_Statistics(ctx, field)
+			return ec.fieldContext_User_Metrics(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
-			return ec.Resolvers.User().Statistics(ctx, obj)
+			return ec.Resolvers.User().Metrics(ctx, obj)
 		},
 		nil,
-		func(ctx context.Context, selections ast.SelectionSet, v []*models.Statistic) graphql.Marshaler {
-			return ec.marshalOStatistic2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐStatistic(ctx, selections, v)
+		func(ctx context.Context, selections ast.SelectionSet, v []*models.Metric) graphql.Marshaler {
+			return ec.marshalOMetric2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐMetric(ctx, selections, v)
 		},
 		true,
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_User_Statistics(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_User_Metrics(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Statistic(ctx, field)
+			return ec.childFields_Metric(ctx, field)
 		},
 	}
 	return fc, nil
@@ -19396,11 +19500,6 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._Template(ctx, sel, obj)
-	case *models.Statistic:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Statistic(ctx, sel, obj)
 	case *models.Statement:
 		if obj == nil {
 			return graphql.Null
@@ -19426,6 +19525,11 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._Option(ctx, sel, obj)
+	case *models.Metric:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Metric(ctx, sel, obj)
 	case *models.Glossary:
 		if obj == nil {
 			return graphql.Null
@@ -20752,6 +20856,84 @@ func (ec *executionContext) _MemStats(ctx context.Context, sel ast.SelectionSet,
 		case "SwapFree":
 			out.Values[i] = ec._MemStats_SwapFree(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
+
+	ec.ProcessDeferredGroup(graphql.DeferredGroup{
+		Defers:   deferLabelToView,
+		Path:     graphql.GetPath(ctx),
+		FieldSet: deferredFieldSet,
+		Context:  ctx,
+	})
+
+	return out
+}
+
+var metricImplementors = []string{"Metric", "Node"}
+
+func (ec *executionContext) _Metric(ctx context.Context, sel ast.SelectionSet, obj *models.Metric) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, metricImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferredFieldSet := graphql.NewFieldSet(nil)
+	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Metric")
+		case "UUID":
+			out.Values[i] = ec._Metric_UUID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Name":
+			out.Values[i] = ec._Metric_Name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Scope":
+			out.Values[i] = ec._Metric_Scope(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "ScopeID":
+			out.Values[i] = ec._Metric_ScopeID(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "Type":
+			out.Values[i] = ec._Metric_Type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Bucket":
+			out.Values[i] = ec._Metric_Bucket(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Value":
+			out.Values[i] = ec._Metric_Value(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "CreateAt":
+			out.Values[i] = ec._Metric_CreateAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "UpdateAt":
+			out.Values[i] = ec._Metric_UpdateAt(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
 				out.Invalids++
 			}
 		default:
@@ -22115,7 +22297,7 @@ func (ec *executionContext) _QueryRoot(ctx context.Context, sel ast.SelectionSet
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "statistics":
+		case "metrics":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -22124,7 +22306,7 @@ func (ec *executionContext) _QueryRoot(ctx context.Context, sel ast.SelectionSet
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._QueryRoot_statistics(ctx, field)
+				res = ec._QueryRoot_metrics(ctx, field)
 				if res == graphql.RequiredNull {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -22671,69 +22853,6 @@ func (ec *executionContext) _StatementEdge(ctx context.Context, sel ast.Selectio
 		case "cursor":
 			out.Values[i] = ec._StatementEdge_cursor(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
-
-	ec.ProcessDeferredGroup(graphql.DeferredGroup{
-		Defers:   deferLabelToView,
-		Path:     graphql.GetPath(ctx),
-		FieldSet: deferredFieldSet,
-		Context:  ctx,
-	})
-
-	return out
-}
-
-var statisticImplementors = []string{"Statistic", "Node"}
-
-func (ec *executionContext) _Statistic(ctx context.Context, sel ast.SelectionSet, obj *models.Statistic) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, statisticImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferredFieldSet := graphql.NewFieldSet(nil)
-	deferLabelToView := make(map[string]*graphql.FieldSetView)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Statistic")
-		case "UUID":
-			out.Values[i] = ec._Statistic_UUID(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "Group":
-			out.Values[i] = ec._Statistic_Group(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "Key":
-			out.Values[i] = ec._Statistic_Key(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "Value":
-			out.Values[i] = ec._Statistic_Value(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "CreateAt":
-			out.Values[i] = ec._Statistic_CreateAt(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "UpdateAt":
-			out.Values[i] = ec._Statistic_UpdateAt(ctx, field, obj)
-			if out.Values[i] == graphql.RequiredNull {
 				out.Invalids++
 			}
 		default:
@@ -23421,7 +23540,7 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "Statistics":
+		case "Metrics":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -23430,7 +23549,7 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._User_Statistics(ctx, field, obj)
+				res = ec._User_Metrics(ctx, field, obj)
 				if res == graphql.RequiredNull {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -25057,6 +25176,26 @@ func (ec *executionContext) marshalOLoginPayload2ᚖgithubᚗcomᚋmia0x75ᚋhal
 	return ec._LoginPayload(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOMetric2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐMetric(ctx context.Context, sel ast.SelectionSet, v []*models.Metric) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalOMetric2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐMetric(ctx, sel, v[i])
+	})
+
+	return ret
+}
+
+func (ec *executionContext) marshalOMetric2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐMetric(ctx context.Context, sel ast.SelectionSet, v *models.Metric) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Metric(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalOOption2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐOption(ctx context.Context, sel ast.SelectionSet, v []*models.Option) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -25176,26 +25315,6 @@ func (ec *executionContext) marshalOStatementEdge2ᚕᚖgithubᚗcomᚋmia0x75�
 	return ret
 }
 
-func (ec *executionContext) marshalOStatistic2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐStatistic(ctx context.Context, sel ast.SelectionSet, v []*models.Statistic) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
-		fc := graphql.GetFieldContext(ctx)
-		fc.Result = &v[i]
-		return ec.marshalOStatistic2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐStatistic(ctx, sel, v[i])
-	})
-
-	return ret
-}
-
-func (ec *executionContext) marshalOStatistic2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐStatistic(ctx context.Context, sel ast.SelectionSet, v *models.Statistic) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Statistic(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v any) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -25206,6 +25325,41 @@ func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.S
 	_ = ctx
 	res := graphql.MarshalString(v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	vSlice := graphql.CoerceList(v)
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOString2ᚕᚖstring(ctx context.Context, v any) ([]*string, error) {
@@ -25341,6 +25495,24 @@ func (ec *executionContext) marshalOUInt82uint8(ctx context.Context, sel ast.Sel
 	_ = sel
 	_ = ctx
 	res := MarshalUInt8(v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOUInt82ᚖuint8(ctx context.Context, v any) (*uint8, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := UnmarshalUInt8(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOUInt82ᚖuint8(ctx context.Context, sel ast.SelectionSet, v *uint8) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := MarshalUInt8(*v)
 	return res
 }
 
