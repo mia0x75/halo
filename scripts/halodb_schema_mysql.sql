@@ -655,3 +655,32 @@ CHARSET = utf8mb4
 COLLATE = utf8mb4_unicode_ci
 COMMENT = '邮件模板表'
 ;
+
+DROP TABLE IF EXISTS `mm_migrations`;
+CREATE TABLE `mm_migrations` (
+  `version`     INT UNSIGNED
+                NOT NULL
+                COMMENT '迁移版本号',
+  `name`        VARCHAR(75)
+                NOT NULL
+                COMMENT '迁移名称',
+  `checksum`    CHAR(64)
+                NOT NULL
+                COMMENT '迁移文件内容 sha256',
+  `duration_ms` INT UNSIGNED
+                NOT NULL DEFAULT 0
+                COMMENT '执行耗时（毫秒）',
+  `success`     TINYINT(1)
+                NOT NULL DEFAULT 1
+                COMMENT '是否执行成功',
+  `apply_at`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                COMMENT '应用时间',
+
+  PRIMARY KEY (`version`),
+  UNIQUE KEY `unique_1` (`name`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '迁移版本台账'
+;

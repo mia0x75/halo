@@ -186,9 +186,14 @@ switch c.Type {
 
 ### Schema 迁移
 
-- 文件：`NNNN_name.sql`
+- 文件：`migrations/<engine>/NNNN_name.sql`（MySQL / PostgreSQL 各一份，同号同内容）
+- 台账：`mm_migrations`（元数据库），由 `halocli migrate up` 写入
+- 执行：`make migrate-up`（需 `HALO_CFG`）；**服务启动不自动迁移**
 - 迁移前暂停写入 + 备份
-- 迁移在事务内，失败回滚
+- 迁移在事务内，失败回滚（PostgreSQL）；MySQL 的 DDL 隐式提交，失败需人工修复
+- 已应用的迁移文件不可修改（checksum 校验），改错只能追加新迁移
+- 基线与权威 schema 脚本同步：`make check-migrations`
+- 详见 `docs/adr/0011-schema-migration-ledger.md`
 
 ---
 

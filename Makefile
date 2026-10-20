@@ -155,6 +155,24 @@ lint: build
 	retool do golangci-lint --tests=false run
 	@echo "gometalinter check your code is pretty good"
 
+# 校验迁移基线与权威 schema 脚本是否同步
+.PHONY: check-migrations
+check-migrations:
+	@echo "$(CGREEN)Checking migration baselines against schema scripts ...$(CEND)"
+	@bash scripts/check_migrations_sync.sh
+
+# 执行元数据库 schema 迁移（需先设置 HALO_CFG）
+.PHONY: migrate-up
+migrate-up:
+	@echo "$(CGREEN)Applying metadata migrations ...$(CEND)"
+	@go run ./cmd/halocli migrate up
+
+# 查看元数据库迁移状态
+.PHONY: migrate-status
+migrate-status:
+	@echo "$(CGREEN)Migration status ...$(CEND)"
+	@go run ./cmd/halocli migrate status
+
 # 前端依赖安装
 .PHONY: frontend-install
 frontend-install:

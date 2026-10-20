@@ -289,3 +289,16 @@ CREATE TABLE mm_templates (
     create_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 COMMENT ON TABLE mm_templates IS '邮件模板表';
+
+DROP TABLE IF EXISTS mm_migrations;
+CREATE TABLE mm_migrations (
+    version     INTEGER NOT NULL,
+    name        VARCHAR(75) NOT NULL,
+    checksum    CHAR(64) NOT NULL,
+    duration_ms INTEGER NOT NULL DEFAULT 0,
+    success     BOOLEAN NOT NULL DEFAULT TRUE,
+    apply_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (version),
+    CONSTRAINT uq_mm_migrations_name UNIQUE (name)
+);
+COMMENT ON TABLE mm_migrations IS '迁移版本台账';

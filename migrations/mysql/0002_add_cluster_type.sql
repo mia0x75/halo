@@ -1,2 +1,5 @@
 -- 群集表新增 type 列，区分目标库类型。存量记录一律视为 MySQL。
-ALTER TABLE mm_clusters ADD COLUMN `type` VARCHAR(20) NOT NULL DEFAULT 'mysql';
+--
+-- 本变更已包含在基线迁移 0001_init.sql 中（项目尚未发布，没有任何数据库
+-- 执行过本文件），因此迁移器只登记台账、不执行语句。
+-- migrate:folded-into-baseline

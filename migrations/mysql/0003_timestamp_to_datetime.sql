@@ -3,6 +3,10 @@
 --
 -- 注意：MySQL 的 DDL 会隐式提交，无法整体回滚；执行前必须备份，
 -- 且应用侧需暂停写入（见 AGENTS「Schema 迁移」）。
+--
+-- 本变更已包含在基线迁移 0001_init.sql 中（项目尚未发布，没有任何数据库
+-- 执行过本文件），因此迁移器只登记台账、不执行语句。
+-- migrate:folded-into-baseline
 
 SET time_zone = '+00:00';
 
