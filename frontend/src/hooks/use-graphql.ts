@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
 import { graphqlRequest } from "@/lib/api/client"
 import { getToken } from "@/lib/api/session"
@@ -23,7 +23,9 @@ export function useGraphQL<TData, TVariables extends Record<string, unknown> = R
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [nonce, setNonce] = useState(0)
-  const serialized = useRef(JSON.stringify(variables ?? {}))
+  // 变量每次渲染都是新对象，序列化成字符串后再放进依赖，
+  // 只有内容变化才会重新发请求。
+  const serialized = useMemo(() => JSON.stringify(variables ?? {}), [variables])
 
   useEffect(() => {
     let cancelled = false
@@ -54,7 +56,7 @@ export function useGraphQL<TData, TVariables extends Record<string, unknown> = R
       cancelled = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, nonce, serialized.current])
+  }, [query, nonce, serialized])
 
   const refetch = useCallback(() => setNonce((value) => value + 1), [])
 
