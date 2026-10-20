@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"time"
 
 	"github.com/mia0x75/halo/internal/agent/meta"
 	"github.com/mia0x75/halo/internal/domain"
@@ -63,4 +64,28 @@ func (LocalExecutor) Databases(ctx context.Context, c *domain.Cluster, password 
 	defer func() { _ = target.Close() }()
 
 	return target.Databases(ctx)
+}
+
+// TestConnection 直连目标库试连，返回版本、可见用户库与耗时。
+func (LocalExecutor) TestConnection(ctx context.Context, c *domain.Cluster, password string) (*ConnInfo, error) {
+	start := time.Now()
+	target, err := openTarget(ctx, c, password)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = target.Close() }()
+
+	info := &ConnInfo{}
+	if info.Version, err = target.dialect.Version(ctx, target.db); err != nil {
+		return nil, err
+	}
+	databases, err := target.Databases(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, database := range databases {
+		info.Databases = append(info.Databases, database.Name)
+	}
+	info.Latency = time.Since(start)
+	return info, nil
 }

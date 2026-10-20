@@ -13,6 +13,15 @@ import (
 // MySQL 目标库方言。
 type MySQL struct{}
 
+// Version 返回 MySQL 服务端版本。
+func (MySQL) Version(ctx context.Context, db *sqlx.DB) (string, error) {
+	var version string
+	if err := db.GetContext(ctx, &version, "SELECT VERSION()"); err != nil {
+		return "", fmt.Errorf("query mysql version: %w", err)
+	}
+	return version, nil
+}
+
 // QuoteIdent MySQL 用反引号，`type` 等保留字必须引用。
 func (MySQL) QuoteIdent(s string) string {
 	return "`" + s + "`"

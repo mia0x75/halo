@@ -3,17 +3,44 @@ package service
 import (
 	"context"
 	"fmt"
+	"time"
 
+	"github.com/mia0x75/halo/internal/agent"
 	"github.com/mia0x75/halo/internal/domain"
 )
 
 type ClusterService struct {
 	tx       TxManager
 	clusters domain.ClusterRepository
+	executor agent.Executor
 }
 
-func NewClusterService(tx TxManager, clusters domain.ClusterRepository) *ClusterService {
-	return &ClusterService{tx: tx, clusters: clusters}
+func NewClusterService(tx TxManager, clusters domain.ClusterRepository, executor agent.Executor) *ClusterService {
+	return &ClusterService{tx: tx, clusters: clusters, executor: executor}
+}
+
+// ConnectionResult 试连目标库的结果。连不上不是错误，Success 为 false 并带上原因。
+type ConnectionResult struct {
+	Success   bool
+	Message   string
+	Version   string
+	Latency   time.Duration
+	Databases []string
+}
+
+// TestConnection 用给定的凭据试连目标库。不落库，密码不出内存。
+func (s *ClusterService) TestConnection(ctx context.Context, c *domain.Cluster, password string) (*ConnectionResult, error) {
+	info, err := s.executor.TestConnection(ctx, c, password)
+	if err != nil {
+		return &ConnectionResult{Success: false, Message: err.Error()}, nil
+	}
+	return &ConnectionResult{
+		Success:   true,
+		Message:   "连接成功",
+		Version:   info.Version,
+		Latency:   info.Latency,
+		Databases: info.Databases,
+	}, nil
 }
 
 func (s *ClusterService) Get(ctx context.Context, id uint) (*domain.Cluster, error) {

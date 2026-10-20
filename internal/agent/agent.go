@@ -22,6 +22,15 @@ type Executor interface {
 	LoadObjects(ctx context.Context, c *domain.Cluster, password string, databases ...string) (map[string]*meta.Objects, error)
 	// Databases 列举目标实例的用户库及其默认字符集/排序规则。
 	Databases(ctx context.Context, c *domain.Cluster, password string) ([]*meta.Database, error)
+	// TestConnection 试连目标库，返回服务端版本、可见用户库与耗时。
+	TestConnection(ctx context.Context, c *domain.Cluster, password string) (*ConnInfo, error)
+}
+
+// ConnInfo 试连目标库得到的服务端信息。
+type ConnInfo struct {
+	Version   string
+	Databases []string
+	Latency   time.Duration
 }
 
 // ExecResult 单条语句在目标库上的执行结果。

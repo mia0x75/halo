@@ -17,6 +17,8 @@ type Dialect interface {
 	LoadObjects(ctx context.Context, db *sqlx.DB, database string) (*meta.Objects, error)
 	// Databases 返回实例内的用户库/模式及其默认字符集与排序规则。
 	Databases(ctx context.Context, db *sqlx.DB) ([]*meta.Database, error)
+	// Version 返回目标库服务端版本串。
+	Version(ctx context.Context, db *sqlx.DB) (string, error)
 	// QuoteIdent 按方言加标识符引用，规避保留字冲突。
 	QuoteIdent(s string) string
 }

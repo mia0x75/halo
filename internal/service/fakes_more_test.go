@@ -156,6 +156,7 @@ func (f *fakeClusterRepo) List(_ context.Context, _ int64, _ int) ([]*domain.Clu
 type fakeExecutor struct {
 	results map[string]*agent.ExecResult
 	err     error
+	connErr error
 	calls   int
 }
 
@@ -184,6 +185,13 @@ func (f *fakeExecutor) Query(_ context.Context, _ *domain.Cluster, _, _ string) 
 
 func (f *fakeExecutor) Databases(_ context.Context, _ *domain.Cluster, _ string) ([]*meta.Database, error) {
 	return nil, nil
+}
+
+func (f *fakeExecutor) TestConnection(_ context.Context, _ *domain.Cluster, _ string) (*agent.ConnInfo, error) {
+	if f.connErr != nil {
+		return nil, f.connErr
+	}
+	return &agent.ConnInfo{Version: "8.0.36", Databases: []string{"app"}}, nil
 }
 
 type fakeValidator struct {

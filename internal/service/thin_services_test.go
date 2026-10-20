@@ -67,7 +67,7 @@ func TestClusterService(t *testing.T) {
 	_, seedErr := repo.Create(ctx, &domain.Cluster{ClusterID: 1, UUID: "c1"})
 	require.NoError(t, seedErr)
 	logs := &fakeLogRepo{}
-	svc := NewClusterService(&fakeTx{repos: Repos{Cluster: repo, Log: logs}}, repo)
+	svc := NewClusterService(&fakeTx{repos: Repos{Cluster: repo, Log: logs}}, repo, &fakeExecutor{})
 
 	got, err := svc.Get(ctx, 1)
 	require.NoError(t, err)

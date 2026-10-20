@@ -13,6 +13,15 @@ import (
 // Postgres 目标库方言。
 type Postgres struct{}
 
+// Version 返回 PostgreSQL 服务端版本。
+func (Postgres) Version(ctx context.Context, db *sqlx.DB) (string, error) {
+	var version string
+	if err := db.GetContext(ctx, &version, "SELECT version()"); err != nil {
+		return "", fmt.Errorf("query postgres version: %w", err)
+	}
+	return version, nil
+}
+
 // QuoteIdent Postgres 用双引号，内部双引号需转义。
 func (Postgres) QuoteIdent(s string) string {
 	return `"` + strings.ReplaceAll(s, `"`, `""`) + `"`

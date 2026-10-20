@@ -143,7 +143,7 @@ func New(ctx context.Context, cfg db.Config) (*App, error) {
 		Review:    service.NewReviewService(tx, repos.Ticket, validator),
 		Agent:     service.NewAgentService(tx, agent.LocalExecutor{}),
 		Avatar:    service.NewAvatarService(tx, repos.Avatar),
-		Cluster:   service.NewClusterService(tx, repos.Cluster),
+		Cluster:   service.NewClusterService(tx, repos.Cluster, agent.LocalExecutor{}),
 		Comment:   service.NewCommentService(tx, repos.Comment),
 		Cron:      service.NewCronService(tx, repos.Cron),
 		Edge:      service.NewEdgeService(tx, repos.Edge),
