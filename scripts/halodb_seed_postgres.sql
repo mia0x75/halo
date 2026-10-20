@@ -201,20 +201,20 @@ INSERT INTO mm_glossaries VALUES
 ('users.status',2,'禁用','f97cb12f-5082-45bb-b0b5-52510859a53e','禁用',1, to_timestamp(1552357174), NOW());
 
 INSERT INTO mm_options VALUES
-('0b66b11d-fc6b-44cc-84e1-852c8cb09b7b','smtp.enabled','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
-('766efa82-6c66-4b5e-b3e4-7d633a09839c','smtp.host','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
-('39cd3a0e-355d-4494-9b9b-e288a26bf3a2','smtp.port','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
-('42c9c43c-5c22-4501-a74a-e9b0e3bac6f3','smtp.user','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
-('5cf28fe0-9d75-4da5-95a8-9bec61985553','smtp.password','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
-('a558ccae-9b61-476c-a3ed-e2b7bcc0ed5b','smtp.encryption','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
-('ff68ad88-1d85-4306-b5f2-20ea1779dc2c','ldap.enabled','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
-('23cd8cd9-0ddd-4a88-b009-484a7fef0b37','ldap.host','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
-('217bd72d-464a-475c-9dd5-3d788ec92f0e','ldap.domain','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
-('caf3cb07-3fa9-41ed-9f30-7fd17342e7c5','ldap.type','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
-('55720a44-f204-4d5f-8ab4-12665d840540','ldap.user','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
-('32f77401-0b1f-40e5-b6a8-bdebfb219ce2','ldap.password','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
-('6e200836-4cb7-4088-8b7f-ea8c110692c3','ldap.sc','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
-('43549a0d-aa4c-43ea-848a-41cc41517277','ldap.ou','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW());
+('smtp.enabled','0b66b11d-fc6b-44cc-84e1-852c8cb09b7b','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
+('smtp.host','766efa82-6c66-4b5e-b3e4-7d633a09839c','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
+('smtp.port','39cd3a0e-355d-4494-9b9b-e288a26bf3a2','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
+('smtp.user','42c9c43c-5c22-4501-a74a-e9b0e3bac6f3','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
+('smtp.password','5cf28fe0-9d75-4da5-95a8-9bec61985553','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
+('smtp.encryption','a558ccae-9b61-476c-a3ed-e2b7bcc0ed5b','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
+('ldap.enabled','ff68ad88-1d85-4306-b5f2-20ea1779dc2c','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
+('ldap.host','23cd8cd9-0ddd-4a88-b009-484a7fef0b37','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
+('ldap.domain','217bd72d-464a-475c-9dd5-3d788ec92f0e','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
+('ldap.type','caf3cb07-3fa9-41ed-9f30-7fd17342e7c5','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
+('ldap.user','55720a44-f204-4d5f-8ab4-12665d840540','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
+('ldap.password','32f77401-0b1f-40e5-b6a8-bdebfb219ce2','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
+('ldap.sc','6e200836-4cb7-4088-8b7f-ea8c110692c3','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW()),
+('ldap.ou','43549a0d-aa4c-43ea-848a-41cc41517277','127.0.0.1','','-',0,2, to_timestamp(1545013963), NOW());
 
 INSERT INTO mm_edges VALUES
 (1, 'dfd02e74-cd54-4ca8-984a-42dcfc2f4d35', 3, 1, 1,  1, NULL, NOW()),
