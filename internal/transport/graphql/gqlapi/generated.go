@@ -82,17 +82,18 @@ type ComplexityRoot struct {
 	}
 
 	Cluster struct {
-		Alias    func(childComplexity int) int
-		CreateAt func(childComplexity int) int
-		Group    func(childComplexity int) int
-		Host     func(childComplexity int) int
-		IP       func(childComplexity int) int
-		Port     func(childComplexity int) int
-		Status   func(childComplexity int) int
-		Type     func(childComplexity int) int
-		UUID     func(childComplexity int) int
-		UpdateAt func(childComplexity int) int
-		User     func(childComplexity int) int
+		Alias     func(childComplexity int) int
+		CreateAt  func(childComplexity int) int
+		Group     func(childComplexity int) int
+		GroupUUID func(childComplexity int) int
+		Host      func(childComplexity int) int
+		IP        func(childComplexity int) int
+		Port      func(childComplexity int) int
+		Status    func(childComplexity int) int
+		Type      func(childComplexity int) int
+		UUID      func(childComplexity int) int
+		UpdateAt  func(childComplexity int) int
+		User      func(childComplexity int) int
 	}
 
 	ClusterConnection struct {
@@ -568,6 +569,7 @@ type ComplexityRoot struct {
 
 type ClusterResolver interface {
 	Group(ctx context.Context, obj *models.Cluster) (*string, error)
+	GroupUUID(ctx context.Context, obj *models.Cluster) (*string, error)
 }
 type CommentResolver interface {
 	User(ctx context.Context, obj *models.Comment) (*models.User, error)
@@ -827,6 +829,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Cluster.Group(childComplexity), true
+	case "Cluster.GroupUUID":
+		if e.ComplexityRoot.Cluster.GroupUUID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Cluster.GroupUUID(childComplexity), true
 	case "Cluster.Host":
 		if e.ComplexityRoot.Cluster.Host == nil {
 			break
@@ -3507,6 +3515,8 @@ func (ec *executionContext) childFields_Cluster(ctx context.Context, field graph
 		return ec.fieldContext_Cluster_IP(ctx, field)
 	case "Group":
 		return ec.fieldContext_Cluster_Group(ctx, field)
+	case "GroupUUID":
+		return ec.fieldContext_Cluster_GroupUUID(ctx, field)
 	case "Port":
 		return ec.fieldContext_Cluster_Port(ctx, field)
 	case "User":
@@ -6907,6 +6917,29 @@ func (ec *executionContext) _Cluster_Group(ctx context.Context, field graphql.Co
 }
 func (ec *executionContext) fieldContext_Cluster_Group(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("Cluster", field, true, true, "String")
+}
+
+func (ec *executionContext) _Cluster_GroupUUID(ctx context.Context, field graphql.CollectedField, obj *models.Cluster) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Cluster_GroupUUID(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Cluster().GroupUUID(ctx, obj)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOID2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Cluster_GroupUUID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Cluster", field, true, true, "ID")
 }
 
 func (ec *executionContext) _Cluster_Port(ctx context.Context, field graphql.CollectedField, obj *models.Cluster) (ret graphql.Marshaler) {
@@ -23995,6 +24028,12 @@ func (ec *executionContext) _Cluster(ctx context.Context, sel ast.SelectionSet, 
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._Cluster_Group(ctx, field, obj)
 				})
+		case "GroupUUID":
+			out.ResolveConcurrently(ec.OperationContext, &deferred, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Cluster_GroupUUID(ctx, field, obj)
+				})
 		case "Port":
 			out.Values[i] = ec._Cluster_Port(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -28437,6 +28476,24 @@ func (ec *executionContext) marshalOID2string(ctx context.Context, sel ast.Selec
 	_ = sel
 	_ = ctx
 	res := graphql.MarshalID(v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v any) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalID(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalID(*v)
 	return res
 }
 

@@ -633,6 +633,11 @@ type Cluster implements Node {
 	Group:    String
 
 	"""
+	所属分组UUID，未分组时为空
+	"""
+	GroupUUID: ID
+
+	"""
 	群集的端口号
 	"""
 	Port:     UInt16! @range(begin: 0, end: 65535)

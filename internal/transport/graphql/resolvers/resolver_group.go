@@ -37,6 +37,21 @@ func (r *clusterResolver) Group(ctx context.Context, obj *models.Cluster) (*stri
 	return &name, nil
 }
 
+// GroupUUID 群集所属分组的UUID
+func (r *clusterResolver) GroupUUID(ctx context.Context, obj *models.Cluster) (*string, error) {
+	if obj.GroupID == 0 {
+		return nil, nil
+	}
+	group := cache.GroupsMap.Any(func(elem *models.Group) bool {
+		return elem.GroupID == obj.GroupID
+	})
+	if group == nil {
+		return nil, nil
+	}
+	uuid := group.UUID
+	return &uuid, nil
+}
+
 // Groups 角色可管理的群集分组
 func (r *roleResolver) Groups(ctx context.Context, obj *models.Role) (L []*models.Group, err error) {
 	edgeType := gqlapi.EdgeEnumMap[gqlapi.EdgeEnumRoleToGroup]
