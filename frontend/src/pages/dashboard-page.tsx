@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
 import { StatusBadge } from "@/components/shared/status-badge"
 import { Button } from "@/components/ui/button"
+import { useClusters } from "@/hooks/use-clusters"
 import { useGraphQL } from "@/hooks/use-graphql"
 import {
   METRICS_QUERY,
@@ -22,7 +23,6 @@ import { TopRules } from "@/features/dashboard/top-rules"
 import {
   auditLogs,
   clusterTrend,
-  clusters,
   periodLabels,
   tickets,
   trendFor,
@@ -42,6 +42,7 @@ export interface DashboardPageProps {
 export function DashboardPage({ onOpenTicket }: DashboardPageProps) {
   const [period, setPeriod] = useState<Period>(7)
   const mockPoints = trendFor(period)
+  const clusterPage = useClusters(50)
 
   // 接口未登录或不可用时回落到假数据，演示与联调都能看。
   const metrics = useGraphQL<{ metrics: MetricNode[] }, { scope: number }>(
@@ -162,8 +163,8 @@ export function DashboardPage({ onOpenTicket }: DashboardPageProps) {
         />
         <StatCard
           label="接入群集"
-          value={String(clusters.length)}
-          hint={`${clusters.filter((c) => c.status === "normal").length} 个正常`}
+          value={String(clusterPage.total)}
+          hint={`${clusterPage.clusters.filter((c) => c.status === "normal").length} 个正常`}
           trend={clusterTrend}
         />
       </div>

@@ -251,6 +251,8 @@ export interface ClusterNode {
   IP: string
   Port: number
   Status: number
+  /** 目标库类型：mysql / postgres */
+  Type: string
   Group: string | null
   CreateAt: number
 }
@@ -274,11 +276,48 @@ export const CLUSTERS_QUERY = `
           IP
           Port
           Status
+          Type
           Group
           CreateAt
         }
       }
     }
+  }
+`
+
+export const CREATE_CLUSTER_MUTATION = `
+  mutation CreateCluster($input: CreateClusterInput!) {
+    createCluster(input: $input) {
+      UUID
+      Alias
+      Host
+      IP
+      Port
+      Status
+      Type
+      Group
+    }
+  }
+`
+
+export const UPDATE_CLUSTER_MUTATION = `
+  mutation UpdateCluster($input: UpdateClusterInput!) {
+    updateCluster(input: $input) {
+      UUID
+      Alias
+      Host
+      IP
+      Port
+      Status
+      Type
+      Group
+    }
+  }
+`
+
+export const REMOVE_CLUSTER_MUTATION = `
+  mutation RemoveCluster($id: ID!) {
+    removeCluster(id: $id)
   }
 `
 
@@ -342,6 +381,8 @@ export const ME_CLUSTERS_QUERY = `
             Host
             IP
             Port
+            Type
+            Group
           }
         }
       }

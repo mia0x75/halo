@@ -40,7 +40,23 @@ export function TicketCreateDialog({ onCreated, trigger }: TicketCreateDialogPro
   const [submitting, setSubmitting] = useState(false)
 
   const remoteClusters = useGraphQL<
-    { me: { Clusters?: { edges: { node: { UUID: string; Alias: string; Host: string; IP: string; Port: number; Type: string } }[] } | null } | null },
+    {
+      me: {
+        Clusters?: {
+          edges: {
+            node: {
+              UUID: string
+              Alias: string
+              Host: string
+              IP: string
+              Port: number
+              Type: string
+              Group: string | null
+            }
+          }[]
+        } | null
+      } | null
+    },
     { first: number }
   >(ME_CLUSTERS_QUERY, { first: 50 }, { me: null })
 
@@ -53,12 +69,12 @@ export function TicketCreateDialog({ onCreated, trigger }: TicketCreateDialogPro
     if (!edges || edges.length === 0) {
       return mockClusters.map((cluster) => ({
         uuid: cluster.uuid,
-        label: `${cluster.alias} (${cluster.ip}:${cluster.port})`,
+        label: `${cluster.alias} · ${cluster.type} (${cluster.ip}:${cluster.port})`,
       }))
     }
     return edges.map((edge) => ({
       uuid: edge.node.UUID,
-      label: `${edge.node.Alias} (${edge.node.IP}:${edge.node.Port})`,
+      label: `${edge.node.Alias} · ${edge.node.Type} (${edge.node.IP}:${edge.node.Port})`,
     }))
   }, [remoteClusters.data])
 

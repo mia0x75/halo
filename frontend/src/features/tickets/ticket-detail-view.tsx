@@ -43,7 +43,7 @@ interface TicketDetail {
   Status: number
   CreateAt: number
   UpdateAt: number | null
-  Cluster: { UUID: string; Alias: string; Host: string; IP: string; Port: number }
+  Cluster: { UUID: string; Alias: string; Host: string; IP: string; Port: number; Type: string; Group: string | null }
   User: { UUID: string; Name: string | null; Email: string }
   Reviewer: { UUID: string; Name: string | null }
   Statements: { edges: { node: StatementNode }[] }
@@ -111,9 +111,15 @@ export function TicketDetailView({ uuid }: TicketDetailViewProps) {
           <StatusBadge status={statusByCode[ticket?.Status ?? 0] ?? "waiting-vld"} />
           <Badge variant="muted">工单 {(ticket?.UUID ?? mock?.uuid ?? "").slice(0, 8)}</Badge>
           {ticket?.Cluster ? (
-            <Badge variant="outline">
-              {ticket.Cluster.IP}:{ticket.Cluster.Port}
-            </Badge>
+            <>
+              <Badge variant="outline">
+                {ticket.Cluster.IP}:{ticket.Cluster.Port}
+              </Badge>
+              <Badge variant="muted">{ticket.Cluster.Type}</Badge>
+              {ticket.Cluster.Group ? (
+                <Badge variant="muted">{ticket.Cluster.Group}</Badge>
+              ) : null}
+            </>
           ) : null}
         </div>
       </div>
