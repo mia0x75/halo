@@ -80,6 +80,7 @@ type Querier interface {
 	GetGlossaryByUUID(ctx context.Context, uuid string) (MmGlossary, error)
 	GetGroupByName(ctx context.Context, name string) (MmGroup, error)
 	GetGroupByUUID(ctx context.Context, uuid string) (MmGroup, error)
+	GetLatestTaskByCron(ctx context.Context, cronID int64) (MmTask, error)
 	GetLogByID(ctx context.Context, logID int64) (MmLog, error)
 	GetLogByUUID(ctx context.Context, uuid string) (MmLog, error)
 	GetMessageByUUID(ctx context.Context, uuid string) (MmMessage, error)

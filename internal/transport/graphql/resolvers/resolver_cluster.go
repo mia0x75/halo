@@ -326,6 +326,11 @@ L:
 		cluster.Status = input.Status
 		cluster.Password = passwd
 		cluster.Alias = input.Alias
+		cluster.GroupID, err = resolveGroupID(input.GroupUUID)
+		if err != nil {
+			rc = gqlapi.ReturnCodeNotFound
+			break L
+		}
 		cluster.BeforeInsert()
 
 		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
@@ -406,6 +411,11 @@ L:
 		cluster.User = input.User
 		cluster.Alias = input.Alias
 		cluster.Status = input.Status
+		cluster.GroupID, err = resolveGroupID(input.GroupUUID)
+		if err != nil {
+			rc = gqlapi.ReturnCodeNotFound
+			break L
+		}
 		cluster.BeforeUpdate()
 
 		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)

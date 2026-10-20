@@ -308,6 +308,11 @@ func (s *Scheduler) persist(task *Task) (err error) {
 		cron.CronID = uint(newID)
 		task.UUID = cron.UUID
 	}
+
+	// 任务执行记录：调度即建行，执行后回写状态与失败原因。
+	if err = s.syncTask(task, cron.CronID); err != nil {
+		log.Errorf("[E] Failed to record task execution, err: %s", err.Error())
+	}
 	return
 }
 

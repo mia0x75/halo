@@ -48,6 +48,8 @@ type TaskRepository interface {
 	List(ctx context.Context, cursor string, limit int) ([]*Task, error)
 	// ListPending returns the tasks waiting for a worker.
 	ListPending(ctx context.Context, limit int) ([]*Task, error)
+	// GetLatestByCron returns the newest task execution of one schedule.
+	GetLatestByCron(ctx context.Context, cronID uint) (*Task, error)
 	// CountByStatus counts the task executions per status.
 	CountByStatus(ctx context.Context) ([]TaskStatusCount, error)
 }

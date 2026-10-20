@@ -114,3 +114,18 @@ func (r *mutationRootResolver) RevokeGroups(ctx context.Context, input gqlapi.Gr
 	cache.EdgesMap.Reload()
 	return true, nil
 }
+
+// resolveGroupID turns a group uuid into the group id stored on a cluster. An
+// empty uuid means "no group".
+func resolveGroupID(groupUUID string) (uint, error) {
+	if groupUUID == "" {
+		return 0, nil
+	}
+	group := cache.GroupsMap.Any(func(elem *models.Group) bool {
+		return elem.UUID == groupUUID
+	})
+	if group == nil {
+		return 0, fmt.Errorf("错误代码: %s, 错误信息: 分组(uuid=%s)不存在。", gqlapi.ReturnCodeNotFound, groupUUID)
+	}
+	return group.GroupID, nil
+}

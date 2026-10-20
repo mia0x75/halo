@@ -616,6 +616,15 @@ func (r *mutationRootResolver) ScheduleTicket(ctx context.Context, input models.
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, cronErr.Error())
 			break
 		}
+		// 定时任务归属到预约人与目标群集，审计时能回答「谁预约的、跑在哪」。
+		domainCron.UserID = user.UserID
+		domainCron.ClusterID = ticket.ClusterID
+		if updErr := r.app.Services.Cron.Update(ctx, domainCron, user.UserID); updErr != nil {
+			cron = nil
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, updErr.Error())
+			break
+		}
 		cron = bridge.CronFromDomain(domainCron)
 
 		if updErr := r.app.Services.Ticket.UpdateCron(ctx, input.TicketUUID, cron.CronID); updErr != nil {

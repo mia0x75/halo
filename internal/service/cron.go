@@ -30,6 +30,8 @@ func (s *CronService) List(ctx context.Context, cursor int64, limit int) ([]*dom
 
 func (s *CronService) Create(ctx context.Context, c *domain.Cron, operatorID uint) (uint, error) {
 	var id uint
+	// 创建人取操作者，定时任务因此可追溯到人。
+	c.UserID = operatorID
 	err := s.tx.WithTx(ctx, func(ctx context.Context, repos Repos) error {
 		newID, err := repos.Cron.Create(ctx, c)
 		if err != nil {

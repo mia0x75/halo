@@ -342,45 +342,47 @@ type ComplexityRoot struct {
 	}
 
 	QueryRoot struct {
-		Avatars            func(childComplexity int) int
-		Cluster            func(childComplexity int, id string) int
-		ClusterSearch      func(childComplexity int, search string, after *string, before *string, first *int, last *int) int
-		Clusters           func(childComplexity int, after *string, before *string, first *int, last *int) int
-		Cron               func(childComplexity int, id string) int
-		Crons              func(childComplexity int, after *string, before *string, first *int, last *int) int
-		Databases          func(childComplexity int, clusterUUID string) int
-		Environments       func(childComplexity int) int
-		Glossaries         func(childComplexity int, groups []string) int
-		Groups             func(childComplexity int) int
-		Logs               func(childComplexity int, after *string, before *string, first *int, last *int) int
-		MarkMessageRead    func(childComplexity int, uuid string) int
-		Me                 func(childComplexity int) int
-		Messages           func(childComplexity int, unreadOnly *bool, first *int) int
-		Metadata           func(childComplexity int, clusterUUID string, database string) int
-		Metrics            func(childComplexity int, scope *uint8, names []string) int
-		Option             func(childComplexity int, id string) int
-		Options            func(childComplexity int) int
-		Queries            func(childComplexity int, after *string, before *string, first *int, last *int) int
-		Query              func(childComplexity int, id string) int
-		QuerySearch        func(childComplexity int, search string, after *string, before *string, first *int, last *int) int
-		Role               func(childComplexity int, id string) int
-		Roles              func(childComplexity int) int
-		Rule               func(childComplexity int, id string) int
-		RuleHitLevels      func(childComplexity int, from *uint, to *uint) int
-		RuleHitRules       func(childComplexity int, from *uint, to *uint, first *int) int
-		RuleHits           func(childComplexity int, ticketID *uint, rule *string, level *uint8, first *int) int
-		Rules              func(childComplexity int) int
-		Tasks              func(childComplexity int) int
-		Templates          func(childComplexity int) int
-		TestCluster        func(childComplexity int, input *models.ValidateConnectionInput) int
-		TestRegexp         func(childComplexity int, input *models.ValidatePatternInput) int
-		Ticket             func(childComplexity int, id string) int
-		TicketSearch       func(childComplexity int, search string, after *string, before *string, first *int, last *int) int
-		Tickets            func(childComplexity int, after *string, before *string, first *int, last *int) int
-		UnreadMessageCount func(childComplexity int) int
-		User               func(childComplexity int, id string) int
-		UserSearch         func(childComplexity int, search string, after *string, before *string, first *int, last *int) int
-		Users              func(childComplexity int, after *string, before *string, first *int, last *int) int
+		Avatars              func(childComplexity int) int
+		Cluster              func(childComplexity int, id string) int
+		ClusterSearch        func(childComplexity int, search string, after *string, before *string, first *int, last *int) int
+		Clusters             func(childComplexity int, after *string, before *string, first *int, last *int) int
+		Cron                 func(childComplexity int, id string) int
+		Crons                func(childComplexity int, after *string, before *string, first *int, last *int) int
+		Databases            func(childComplexity int, clusterUUID string) int
+		Environments         func(childComplexity int) int
+		Glossaries           func(childComplexity int, groups []string) int
+		Groups               func(childComplexity int) int
+		Logs                 func(childComplexity int, after *string, before *string, first *int, last *int) int
+		MarkMessageRead      func(childComplexity int, uuid string) int
+		Me                   func(childComplexity int) int
+		Messages             func(childComplexity int, unreadOnly *bool, first *int) int
+		Metadata             func(childComplexity int, clusterUUID string, database string) int
+		Metrics              func(childComplexity int, scope *uint8, names []string) int
+		Option               func(childComplexity int, id string) int
+		Options              func(childComplexity int) int
+		Queries              func(childComplexity int, after *string, before *string, first *int, last *int) int
+		Query                func(childComplexity int, id string) int
+		QuerySearch          func(childComplexity int, search string, after *string, before *string, first *int, last *int) int
+		Role                 func(childComplexity int, id string) int
+		Roles                func(childComplexity int) int
+		Rule                 func(childComplexity int, id string) int
+		RuleHitLevels        func(childComplexity int, from *uint, to *uint) int
+		RuleHitRules         func(childComplexity int, from *uint, to *uint, first *int) int
+		RuleHits             func(childComplexity int, ticketID *uint, rule *string, level *uint8, first *int) int
+		Rules                func(childComplexity int) int
+		TaskExecutionSummary func(childComplexity int) int
+		TaskExecutions       func(childComplexity int, status *uint8, first *int) int
+		Tasks                func(childComplexity int) int
+		Templates            func(childComplexity int) int
+		TestCluster          func(childComplexity int, input *models.ValidateConnectionInput) int
+		TestRegexp           func(childComplexity int, input *models.ValidatePatternInput) int
+		Ticket               func(childComplexity int, id string) int
+		TicketSearch         func(childComplexity int, search string, after *string, before *string, first *int, last *int) int
+		Tickets              func(childComplexity int, after *string, before *string, first *int, last *int) int
+		UnreadMessageCount   func(childComplexity int) int
+		User                 func(childComplexity int, id string) int
+		UserSearch           func(childComplexity int, search string, after *string, before *string, first *int, last *int) int
+		Users                func(childComplexity int, after *string, before *string, first *int, last *int) int
 	}
 
 	Role struct {
@@ -452,6 +454,26 @@ type ComplexityRoot struct {
 
 	SubscriptionRoot struct {
 		TicketStatusChanged func(childComplexity int) int
+	}
+
+	TaskExecution struct {
+		Attempt     func(childComplexity int) int
+		CreateAt    func(childComplexity int) int
+		CronID      func(childComplexity int) int
+		Error       func(childComplexity int) int
+		FinishedAt  func(childComplexity int) int
+		Name        func(childComplexity int) int
+		Payload     func(childComplexity int) int
+		ScheduledAt func(childComplexity int) int
+		StartedAt   func(childComplexity int) int
+		Status      func(childComplexity int) int
+		Type        func(childComplexity int) int
+		UUID        func(childComplexity int) int
+	}
+
+	TaskExecutionCount struct {
+		Count  func(childComplexity int) int
+		Status func(childComplexity int) int
 	}
 
 	Template struct {
@@ -614,6 +636,8 @@ type QueryRootResolver interface {
 	Tasks(ctx context.Context) ([]*models.Cron, error)
 	Databases(ctx context.Context, clusterUUID string) ([]*Database, error)
 	Groups(ctx context.Context) ([]*models.Group, error)
+	TaskExecutions(ctx context.Context, status *uint8, first *int) ([]*TaskExecution, error)
+	TaskExecutionSummary(ctx context.Context) ([]*TaskExecutionCount, error)
 	Messages(ctx context.Context, unreadOnly *bool, first *int) ([]*Message, error)
 	UnreadMessageCount(ctx context.Context) (uint, error)
 	MarkMessageRead(ctx context.Context, uuid string) (*bool, error)
@@ -2315,6 +2339,23 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.QueryRoot.Rules(childComplexity), true
+	case "QueryRoot.taskExecutionSummary":
+		if e.ComplexityRoot.QueryRoot.TaskExecutionSummary == nil {
+			break
+		}
+
+		return e.ComplexityRoot.QueryRoot.TaskExecutionSummary(childComplexity), true
+	case "QueryRoot.taskExecutions":
+		if e.ComplexityRoot.QueryRoot.TaskExecutions == nil {
+			break
+		}
+
+		args, err := ec.field_QueryRoot_taskExecutions_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.QueryRoot.TaskExecutions(childComplexity, args["status"].(*uint8), args["first"].(*int)), true
 	case "QueryRoot.tasks":
 		if e.ComplexityRoot.QueryRoot.Tasks == nil {
 			break
@@ -2716,6 +2757,92 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.SubscriptionRoot.TicketStatusChanged(childComplexity), true
+
+	case "TaskExecution.Attempt":
+		if e.ComplexityRoot.TaskExecution.Attempt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaskExecution.Attempt(childComplexity), true
+	case "TaskExecution.CreateAt":
+		if e.ComplexityRoot.TaskExecution.CreateAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaskExecution.CreateAt(childComplexity), true
+	case "TaskExecution.CronID":
+		if e.ComplexityRoot.TaskExecution.CronID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaskExecution.CronID(childComplexity), true
+	case "TaskExecution.Error":
+		if e.ComplexityRoot.TaskExecution.Error == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaskExecution.Error(childComplexity), true
+	case "TaskExecution.FinishedAt":
+		if e.ComplexityRoot.TaskExecution.FinishedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaskExecution.FinishedAt(childComplexity), true
+	case "TaskExecution.Name":
+		if e.ComplexityRoot.TaskExecution.Name == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaskExecution.Name(childComplexity), true
+	case "TaskExecution.Payload":
+		if e.ComplexityRoot.TaskExecution.Payload == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaskExecution.Payload(childComplexity), true
+	case "TaskExecution.ScheduledAt":
+		if e.ComplexityRoot.TaskExecution.ScheduledAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaskExecution.ScheduledAt(childComplexity), true
+	case "TaskExecution.StartedAt":
+		if e.ComplexityRoot.TaskExecution.StartedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaskExecution.StartedAt(childComplexity), true
+	case "TaskExecution.Status":
+		if e.ComplexityRoot.TaskExecution.Status == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaskExecution.Status(childComplexity), true
+	case "TaskExecution.Type":
+		if e.ComplexityRoot.TaskExecution.Type == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaskExecution.Type(childComplexity), true
+	case "TaskExecution.UUID":
+		if e.ComplexityRoot.TaskExecution.UUID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaskExecution.UUID(childComplexity), true
+
+	case "TaskExecutionCount.Count":
+		if e.ComplexityRoot.TaskExecutionCount.Count == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaskExecutionCount.Count(childComplexity), true
+	case "TaskExecutionCount.Status":
+		if e.ComplexityRoot.TaskExecutionCount.Status == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TaskExecutionCount.Status(childComplexity), true
 
 	case "Template.Body":
 		if e.ComplexityRoot.Template.Body == nil {
@@ -3792,6 +3919,46 @@ func (ec *executionContext) childFields_StatementEdge(ctx context.Context, field
 		return ec.fieldContext_StatementEdge_cursor(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type StatementEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_TaskExecution(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "UUID":
+		return ec.fieldContext_TaskExecution_UUID(ctx, field)
+	case "Name":
+		return ec.fieldContext_TaskExecution_Name(ctx, field)
+	case "Type":
+		return ec.fieldContext_TaskExecution_Type(ctx, field)
+	case "Payload":
+		return ec.fieldContext_TaskExecution_Payload(ctx, field)
+	case "Status":
+		return ec.fieldContext_TaskExecution_Status(ctx, field)
+	case "Attempt":
+		return ec.fieldContext_TaskExecution_Attempt(ctx, field)
+	case "CronID":
+		return ec.fieldContext_TaskExecution_CronID(ctx, field)
+	case "ScheduledAt":
+		return ec.fieldContext_TaskExecution_ScheduledAt(ctx, field)
+	case "StartedAt":
+		return ec.fieldContext_TaskExecution_StartedAt(ctx, field)
+	case "FinishedAt":
+		return ec.fieldContext_TaskExecution_FinishedAt(ctx, field)
+	case "Error":
+		return ec.fieldContext_TaskExecution_Error(ctx, field)
+	case "CreateAt":
+		return ec.fieldContext_TaskExecution_CreateAt(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type TaskExecution", field.Name)
+}
+
+func (ec *executionContext) childFields_TaskExecutionCount(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "Status":
+		return ec.fieldContext_TaskExecutionCount_Status(ctx, field)
+	case "Count":
+		return ec.fieldContext_TaskExecutionCount_Count(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type TaskExecutionCount", field.Name)
 }
 
 func (ec *executionContext) childFields_Template(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
@@ -5370,6 +5537,28 @@ func (ec *executionContext) field_QueryRoot_rule_args(ctx context.Context, rawAr
 		return nil, err
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_QueryRoot_taskExecutions_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "status",
+		func(ctx context.Context, v any) (*uint8, error) {
+			return ec.unmarshalOUInt82ᚖuint8(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["status"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg1
 	return args, nil
 }
 
@@ -14009,6 +14198,82 @@ func (ec *executionContext) fieldContext_QueryRoot_groups(_ context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _QueryRoot_taskExecutions(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_QueryRoot_taskExecutions(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.QueryRoot().TaskExecutions(ctx, fc.Args["status"].(*uint8), fc.Args["first"].(*int))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*TaskExecution) graphql.Marshaler {
+			return ec.marshalOTaskExecution2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTaskExecution(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_QueryRoot_taskExecutions(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QueryRoot",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_TaskExecution(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_QueryRoot_taskExecutions_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QueryRoot_taskExecutionSummary(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_QueryRoot_taskExecutionSummary(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.QueryRoot().TaskExecutionSummary(ctx)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*TaskExecutionCount) graphql.Marshaler {
+			return ec.marshalOTaskExecutionCount2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTaskExecutionCount(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_QueryRoot_taskExecutionSummary(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QueryRoot",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_TaskExecutionCount(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _QueryRoot_messages(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -16099,6 +16364,364 @@ func (ec *executionContext) fieldContext_SubscriptionRoot_ticketStatusChanged(_ 
 		},
 	}
 	return fc, nil
+}
+
+func (ec *executionContext) _TaskExecution_UUID(ctx context.Context, field graphql.CollectedField, obj *TaskExecution) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_TaskExecution_UUID(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.UUID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_TaskExecution_UUID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("TaskExecution", field, false, false, errors.New("field of type ID does not have child fields"))
+}
+
+func (ec *executionContext) _TaskExecution_Name(ctx context.Context, field graphql.CollectedField, obj *TaskExecution) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_TaskExecution_Name(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				max, err := ec.unmarshalNInt2int(ctx, 75)
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.Length == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive length is not implemented")
+				}
+				return ec.Directives.Length(ctx, obj, directive0, max)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_TaskExecution_Name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("TaskExecution", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _TaskExecution_Type(ctx context.Context, field graphql.CollectedField, obj *TaskExecution) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_TaskExecution_Type(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				max, err := ec.unmarshalNInt2int(ctx, 30)
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.Length == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive length is not implemented")
+				}
+				return ec.Directives.Length(ctx, obj, directive0, max)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_TaskExecution_Type(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("TaskExecution", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _TaskExecution_Payload(ctx context.Context, field graphql.CollectedField, obj *TaskExecution) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_TaskExecution_Payload(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Payload, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_TaskExecution_Payload(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("TaskExecution", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _TaskExecution_Status(ctx context.Context, field graphql.CollectedField, obj *TaskExecution) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_TaskExecution_Status(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Status, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v uint8) graphql.Marshaler {
+			return ec.marshalNUInt82uint8(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_TaskExecution_Status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("TaskExecution", field, false, false, errors.New("field of type UInt8 does not have child fields"))
+}
+
+func (ec *executionContext) _TaskExecution_Attempt(ctx context.Context, field graphql.CollectedField, obj *TaskExecution) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_TaskExecution_Attempt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Attempt, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v uint8) graphql.Marshaler {
+			return ec.marshalNUInt82uint8(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_TaskExecution_Attempt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("TaskExecution", field, false, false, errors.New("field of type UInt8 does not have child fields"))
+}
+
+func (ec *executionContext) _TaskExecution_CronID(ctx context.Context, field graphql.CollectedField, obj *TaskExecution) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_TaskExecution_CronID(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.CronID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v uint) graphql.Marshaler {
+			return ec.marshalNUInt2uint(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_TaskExecution_CronID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("TaskExecution", field, false, false, errors.New("field of type UInt does not have child fields"))
+}
+
+func (ec *executionContext) _TaskExecution_ScheduledAt(ctx context.Context, field graphql.CollectedField, obj *TaskExecution) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_TaskExecution_ScheduledAt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ScheduledAt, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v uint) graphql.Marshaler {
+			return ec.marshalNUInt2uint(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_TaskExecution_ScheduledAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("TaskExecution", field, false, false, errors.New("field of type UInt does not have child fields"))
+}
+
+func (ec *executionContext) _TaskExecution_StartedAt(ctx context.Context, field graphql.CollectedField, obj *TaskExecution) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_TaskExecution_StartedAt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.StartedAt, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *uint) graphql.Marshaler {
+			return ec.marshalOUInt2ᚖuint(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_TaskExecution_StartedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("TaskExecution", field, false, false, errors.New("field of type UInt does not have child fields"))
+}
+
+func (ec *executionContext) _TaskExecution_FinishedAt(ctx context.Context, field graphql.CollectedField, obj *TaskExecution) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_TaskExecution_FinishedAt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.FinishedAt, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *uint) graphql.Marshaler {
+			return ec.marshalOUInt2ᚖuint(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_TaskExecution_FinishedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("TaskExecution", field, false, false, errors.New("field of type UInt does not have child fields"))
+}
+
+func (ec *executionContext) _TaskExecution_Error(ctx context.Context, field graphql.CollectedField, obj *TaskExecution) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_TaskExecution_Error(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Error, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_TaskExecution_Error(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("TaskExecution", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _TaskExecution_CreateAt(ctx context.Context, field graphql.CollectedField, obj *TaskExecution) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_TaskExecution_CreateAt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.CreateAt, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v uint) graphql.Marshaler {
+			return ec.marshalNUInt2uint(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_TaskExecution_CreateAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("TaskExecution", field, false, false, errors.New("field of type UInt does not have child fields"))
+}
+
+func (ec *executionContext) _TaskExecutionCount_Status(ctx context.Context, field graphql.CollectedField, obj *TaskExecutionCount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_TaskExecutionCount_Status(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Status, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v uint8) graphql.Marshaler {
+			return ec.marshalNUInt82uint8(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_TaskExecutionCount_Status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("TaskExecutionCount", field, false, false, errors.New("field of type UInt8 does not have child fields"))
+}
+
+func (ec *executionContext) _TaskExecutionCount_Count(ctx context.Context, field graphql.CollectedField, obj *TaskExecutionCount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_TaskExecutionCount_Count(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Count, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v uint) graphql.Marshaler {
+			return ec.marshalNUInt2uint(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_TaskExecutionCount_Count(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("TaskExecutionCount", field, false, false, errors.New("field of type UInt does not have child fields"))
 }
 
 func (ec *executionContext) _Template_UUID(ctx context.Context, field graphql.CollectedField, obj *models.Template) (ret graphql.Marshaler) {
@@ -18615,7 +19238,7 @@ func (ec *executionContext) unmarshalInputCreateClusterInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"Host", "IP", "Port", "Alias", "User", "Password", "Status"}
+	fieldsInOrder := [...]string{"Host", "IP", "Port", "Alias", "User", "Password", "Status", "GroupUUID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -18816,6 +19439,13 @@ func (ec *executionContext) unmarshalInputCreateClusterInput(ctx context.Context
 				err := fmt.Errorf(`unexpected type %T from directive, should be uint8`, tmp)
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
+		case "GroupUUID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("GroupUUID"))
+			data, err := ec.unmarshalOID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.GroupUUID = data
 		}
 	}
 	return it, nil
@@ -20197,7 +20827,7 @@ func (ec *executionContext) unmarshalInputUpdateClusterInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"ClusterUUID", "Host", "IP", "Port", "Alias", "User", "Status", "Password"}
+	fieldsInOrder := [...]string{"ClusterUUID", "Host", "IP", "Port", "Alias", "User", "Status", "Password", "GroupUUID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -20405,6 +21035,13 @@ func (ec *executionContext) unmarshalInputUpdateClusterInput(ctx context.Context
 				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
+		case "GroupUUID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("GroupUUID"))
+			data, err := ec.unmarshalOID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.GroupUUID = data
 		}
 	}
 	return it, nil
@@ -24144,6 +24781,50 @@ func (ec *executionContext) _QueryRoot(ctx context.Context, sel ast.SelectionSet
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "taskExecutions":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._QueryRoot_taskExecutions(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "taskExecutionSummary":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._QueryRoot_taskExecutionSummary(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "messages":
 			field := field
 
@@ -25032,6 +25713,142 @@ func (ec *executionContext) _SubscriptionRoot(ctx context.Context, sel ast.Selec
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
+}
+
+var taskExecutionImplementors = []string{"TaskExecution"}
+
+func (ec *executionContext) _TaskExecution(ctx context.Context, sel ast.SelectionSet, obj *TaskExecution) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, taskExecutionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferredFieldSet := graphql.NewFieldSet(nil)
+	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TaskExecution")
+		case "UUID":
+			out.Values[i] = ec._TaskExecution_UUID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Name":
+			out.Values[i] = ec._TaskExecution_Name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Type":
+			out.Values[i] = ec._TaskExecution_Type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Payload":
+			out.Values[i] = ec._TaskExecution_Payload(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Status":
+			out.Values[i] = ec._TaskExecution_Status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Attempt":
+			out.Values[i] = ec._TaskExecution_Attempt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "CronID":
+			out.Values[i] = ec._TaskExecution_CronID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "ScheduledAt":
+			out.Values[i] = ec._TaskExecution_ScheduledAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "StartedAt":
+			out.Values[i] = ec._TaskExecution_StartedAt(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "FinishedAt":
+			out.Values[i] = ec._TaskExecution_FinishedAt(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "Error":
+			out.Values[i] = ec._TaskExecution_Error(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "CreateAt":
+			out.Values[i] = ec._TaskExecution_CreateAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
+
+	ec.ProcessDeferredGroup(graphql.DeferredGroup{
+		Defers:   deferLabelToView,
+		Path:     graphql.GetPath(ctx),
+		FieldSet: deferredFieldSet,
+		Context:  ctx,
+	})
+
+	return out
+}
+
+var taskExecutionCountImplementors = []string{"TaskExecutionCount"}
+
+func (ec *executionContext) _TaskExecutionCount(ctx context.Context, sel ast.SelectionSet, obj *TaskExecutionCount) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, taskExecutionCountImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferredFieldSet := graphql.NewFieldSet(nil)
+	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TaskExecutionCount")
+		case "Status":
+			out.Values[i] = ec._TaskExecutionCount_Status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Count":
+			out.Values[i] = ec._TaskExecutionCount_Count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
+
+	ec.ProcessDeferredGroup(graphql.DeferredGroup{
+		Defers:   deferLabelToView,
+		Path:     graphql.GetPath(ctx),
+		FieldSet: deferredFieldSet,
+		Context:  ctx,
+	})
+
+	return out
 }
 
 var templateImplementors = []string{"Template", "Node"}
@@ -27281,6 +28098,18 @@ func (ec *executionContext) marshalOGroup2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋint
 	return ec._Group(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalOID2string(ctx context.Context, v any) (string, error) {
+	res, err := graphql.UnmarshalID(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalID(v)
+	return res
+}
+
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v any) (*int, error) {
 	if v == nil {
 		return nil, nil
@@ -27630,6 +28459,46 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	_ = ctx
 	res := graphql.MarshalString(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOTaskExecution2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTaskExecution(ctx context.Context, sel ast.SelectionSet, v []*TaskExecution) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalOTaskExecution2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTaskExecution(ctx, sel, v[i])
+	})
+
+	return ret
+}
+
+func (ec *executionContext) marshalOTaskExecution2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTaskExecution(ctx context.Context, sel ast.SelectionSet, v *TaskExecution) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._TaskExecution(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOTaskExecutionCount2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTaskExecutionCount(ctx context.Context, sel ast.SelectionSet, v []*TaskExecutionCount) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalOTaskExecutionCount2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTaskExecutionCount(ctx, sel, v[i])
+	})
+
+	return ret
+}
+
+func (ec *executionContext) marshalOTaskExecutionCount2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTaskExecutionCount(ctx context.Context, sel ast.SelectionSet, v *TaskExecutionCount) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._TaskExecutionCount(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOTemplate2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐTemplate(ctx context.Context, sel ast.SelectionSet, v []*models.Template) graphql.Marshaler {

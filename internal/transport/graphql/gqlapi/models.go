@@ -209,6 +209,42 @@ type StatementEdge struct {
 type SubscriptionRoot struct {
 }
 
+// 任务执行记录
+type TaskExecution struct {
+	// 执行的UUID
+	UUID string `json:"UUID"`
+	// 任务名称
+	Name string `json:"Name"`
+	// 任务类型
+	Type string `json:"Type"`
+	// 任务参数（JSON）
+	Payload string `json:"Payload"`
+	// 状态：0 待执行 1 执行中 2 成功 3 失败 4 取消
+	Status uint8 `json:"Status"`
+	// 已尝试次数
+	Attempt uint8 `json:"Attempt"`
+	// 来源定时任务编号，0 表示无
+	CronID uint `json:"CronID"`
+	// 计划执行时间
+	ScheduledAt uint `json:"ScheduledAt"`
+	// 开始执行时间
+	StartedAt *uint `json:"StartedAt,omitempty"`
+	// 结束执行时间
+	FinishedAt *uint `json:"FinishedAt,omitempty"`
+	// 失败原因
+	Error string `json:"Error"`
+	// 记录创建时间
+	CreateAt uint `json:"CreateAt"`
+}
+
+// 任务执行计数
+type TaskExecutionCount struct {
+	// 状态
+	Status uint8 `json:"Status"`
+	// 数量
+	Count uint `json:"Count"`
+}
+
 type TicketConnection struct {
 	// 分页信息
 	PageInfo *PageInfo `json:"pageInfo"`

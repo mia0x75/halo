@@ -20,6 +20,9 @@ type Task struct {
 	Status    string
 	IsRunning bool
 	Params    []string
+	// Err keeps the failure reason of the last run so it can be persisted
+	// with the task execution.
+	Err error
 	sync.Mutex
 }
 
@@ -69,8 +72,10 @@ func (t *Task) Run() {
 	if _, err := tools.TimeoutedExec(math.MaxInt32*time.Second, t.Cmd, t.Params...); err != nil {
 		fmt.Println(err)
 		t.Status = "F"
+		t.Err = err
 	} else {
 		t.Status = "S"
+		t.Err = nil
 	}
 
 	t.LastRun = time.Now()

@@ -89,6 +89,35 @@ func (q *Queries) DeleteTaskByUUID(ctx context.Context, uuid string) error {
 	return err
 }
 
+const getLatestTaskByCron = `-- name: GetLatestTaskByCron :one
+SELECT task_id, uuid, name, type, payload, status, priority, attempt, max_attempt, cron_id, scheduled_at, started_at, finished_at, error, version, update_at, create_at FROM mm_tasks WHERE cron_id = ? ORDER BY task_id DESC LIMIT 1
+`
+
+func (q *Queries) GetLatestTaskByCron(ctx context.Context, cronID uint32) (MmTask, error) {
+	row := q.db.QueryRowContext(ctx, getLatestTaskByCron, cronID)
+	var i MmTask
+	err := row.Scan(
+		&i.TaskID,
+		&i.Uuid,
+		&i.Name,
+		&i.Type,
+		&i.Payload,
+		&i.Status,
+		&i.Priority,
+		&i.Attempt,
+		&i.MaxAttempt,
+		&i.CronID,
+		&i.ScheduledAt,
+		&i.StartedAt,
+		&i.FinishedAt,
+		&i.Error,
+		&i.Version,
+		&i.UpdateAt,
+		&i.CreateAt,
+	)
+	return i, err
+}
+
 const getTaskByUUID = `-- name: GetTaskByUUID :one
 SELECT task_id, uuid, name, type, payload, status, priority, attempt, max_attempt, cron_id, scheduled_at, started_at, finished_at, error, version, update_at, create_at FROM mm_tasks WHERE uuid = ? LIMIT 1
 `

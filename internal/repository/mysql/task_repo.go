@@ -114,6 +114,14 @@ func (r *TaskRepo) ListPending(ctx context.Context, limit int) ([]*domain.Task, 
 	return out, nil
 }
 
+func (r *TaskRepo) GetLatestByCron(ctx context.Context, cronID uint) (*domain.Task, error) {
+	row, err := r.q.GetLatestTaskByCron(ctx, uint32(cronID))
+	if err != nil {
+		return nil, wrap("task.GetLatestByCron", err)
+	}
+	return taskFromRow(row), nil
+}
+
 func (r *TaskRepo) CountByStatus(ctx context.Context) ([]domain.TaskStatusCount, error) {
 	rows, err := r.q.CountTasksByStatus(ctx)
 	if err != nil {

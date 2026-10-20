@@ -1198,6 +1198,86 @@ type Group {
 }
 
 """
+任务执行记录
+"""
+type TaskExecution {
+	"""
+	执行的UUID
+	"""
+	UUID:        ID!
+
+	"""
+	任务名称
+	"""
+	Name:        String! @length(max: 75)
+
+	"""
+	任务类型
+	"""
+	Type:        String! @length(max: 30)
+
+	"""
+	任务参数（JSON）
+	"""
+	Payload:     String!
+
+	"""
+	状态：0 待执行 1 执行中 2 成功 3 失败 4 取消
+	"""
+	Status:      UInt8!
+
+	"""
+	已尝试次数
+	"""
+	Attempt:     UInt8!
+
+	"""
+	来源定时任务编号，0 表示无
+	"""
+	CronID:      UInt!
+
+	"""
+	计划执行时间
+	"""
+	ScheduledAt: UInt!
+
+	"""
+	开始执行时间
+	"""
+	StartedAt:   UInt
+
+	"""
+	结束执行时间
+	"""
+	FinishedAt:  UInt
+
+	"""
+	失败原因
+	"""
+	Error:       String!
+
+	"""
+	记录创建时间
+	"""
+	CreateAt:    UInt!
+}
+
+"""
+任务执行计数
+"""
+type TaskExecutionCount {
+	"""
+	状态
+	"""
+	Status: UInt8!
+
+	"""
+	数量
+	"""
+	Count:  UInt!
+}
+
+"""
 站内消息
 """
 type Message {
@@ -2139,6 +2219,26 @@ type QueryRoot {
 	groups: [Group]
 
 	"""
+	获取任务执行记录
+	"""
+	taskExecutions(
+		"""
+		状态，缺省返回全部状态
+		"""
+		status: UInt8
+
+		"""
+		返回条数上限
+		"""
+		first: Int
+	): [TaskExecution]
+
+	"""
+	按状态统计任务执行记录
+	"""
+	taskExecutionSummary: [TaskExecutionCount]
+
+	"""
 	获取当前用户的站内消息
 	"""
 	messages(
@@ -2586,6 +2686,11 @@ input CreateClusterInput {
 	群集状态（禁用|正常）
 	"""
 	Status:   UInt8!  @matches(pattern: "^(1|2|3)$")
+
+	"""
+	所属分组UUID，不填表示未分组
+	"""
+	GroupUUID: ID
 }
 
 """
@@ -2631,6 +2736,11 @@ input UpdateClusterInput {
 	连接群集的密码
 	"""
 	Password:     String! @length(max: 40)
+
+	"""
+	所属分组UUID，不填表示未分组
+	"""
+	GroupUUID:    ID
 }
 
 """
