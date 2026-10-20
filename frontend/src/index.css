@@ -142,15 +142,24 @@
     transform: scale(0.8);
   }
 
-  /* 圆点与文字的间距：图例与提示框统一为 12px（圆点外框 12px，圆点直径 8px） */
-  .apexcharts-legend .apexcharts-legend-text {
-    margin-left: 10px;
+  /* 图例圆点：外框收成 8px，与曲线上的点、提示框里的点同样大小。
+     宽度是内联样式，只能用 !important 覆盖。 */
+  .apexcharts-legend .apexcharts-legend-marker {
+    width: 8px !important;
+    height: 8px !important;
   }
+  /* 图例文字：ApexCharts 用 padding-left:15px + margin-left:-15px 互相抵消，
+     这里改成不留白 + 8px 左边距，间距就是 8px，不受内部魔数影响。 */
+  .apexcharts-legend .apexcharts-legend-text {
+    padding-left: 0 !important;
+    margin-left: 8px !important;
+  }
+  /* 提示框：圆点缩到 8px，文字紧跟 8px */
   .apexcharts-tooltip .apexcharts-tooltip-marker {
-    margin-right: 10px;
+    margin-right: 6px !important;
   }
   .apexcharts-tooltip .apexcharts-tooltip-series-group {
-    gap: 0;
+    gap: 0 !important;
   }
 
   /* 刷选滑块：半透明填充 + 可见边框，选区一眼可辨 */
