@@ -148,20 +148,23 @@
     width: 8px !important;
     height: 8px !important;
   }
+  /* 去掉描边：暗色模式下描边是主题前景色（白色），圆点会带一圈白边，
+     去掉后与亮色一致，也与提示框里的实心圆点一致。 */
+  .apexcharts-legend .apexcharts-legend-marker path {
+    stroke-width: 0;
+  }
   /* 图例文字：与提示框一致，圆点到文字 6px */
   .apexcharts-legend .apexcharts-legend-text {
     padding-left: 0 !important;
     margin-left: 6px !important;
   }
-  /* 提示框：圆点外框同样收成 8px，内部 svg 放大 1.2 让圆点填满，
-     文字紧跟 6px，与图例完全一致 */
+  /* 提示框：12px 外框里放 8px 的圆点（内部 svg 缩放 0.8），
+     圆点到文字 6px，与图例一致 */
   .apexcharts-tooltip .apexcharts-tooltip-marker {
-    width: 8px !important;
-    height: 8px !important;
-    margin-right: 6px !important;
+    margin-right: 4px !important;
   }
   .apexcharts-tooltip .apexcharts-tooltip-marker svg {
-    transform: scale(1.2);
+    transform: scale(0.8);
   }
   .apexcharts-tooltip .apexcharts-tooltip-series-group {
     gap: 0 !important;
