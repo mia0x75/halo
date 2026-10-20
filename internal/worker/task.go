@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"os"
+	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -69,7 +72,7 @@ func (t *Task) Run() {
 		t.IsRunning = false
 	}()
 
-	if _, err := tools.TimeoutedExec(math.MaxInt32*time.Second, t.Cmd, t.Params...); err != nil {
+	if _, err := tools.TimeoutedExec(math.MaxInt32*time.Second, resolveCommand(t.Cmd), t.Params...); err != nil {
 		fmt.Println(err)
 		t.Status = "F"
 		t.Err = err
@@ -108,4 +111,22 @@ func (t *Task) ToCron() *models.Cron {
 	data, _ = json.Marshal(t.Params)
 	cron.Params = string(data)
 	return cron
+}
+
+// resolveCommand returns the command to run. The bare CLI name is looked up
+// next to the running binary first: a deployment keeps the server and the CLI
+// together, and relying on PATH alone would break the scheduled jobs.
+func resolveCommand(command string) string {
+	if command != cmd || strings.ContainsRune(command, os.PathSeparator) {
+		return command
+	}
+	executable, err := os.Executable()
+	if err != nil {
+		return command
+	}
+	candidate := filepath.Join(filepath.Dir(executable), cmd)
+	if info, err := os.Stat(candidate); err == nil && !info.IsDir() {
+		return candidate
+	}
+	return command
 }
