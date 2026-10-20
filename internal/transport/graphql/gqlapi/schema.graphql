@@ -2216,7 +2216,7 @@ type QueryRoot {
 	"""
 	获取群集分组
 	"""
-	groups: [Group]
+	groups: [Group] @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
 
 	"""
 	获取任务执行记录
@@ -2231,12 +2231,12 @@ type QueryRoot {
 		返回条数上限
 		"""
 		first: Int
-	): [TaskExecution]
+	): [TaskExecution] @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
 
 	"""
 	按状态统计任务执行记录
 	"""
-	taskExecutionSummary: [TaskExecutionCount]
+	taskExecutionSummary: [TaskExecutionCount] @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
 
 	"""
 	获取当前用户的站内消息
@@ -2251,12 +2251,12 @@ type QueryRoot {
 		返回条数上限
 		"""
 		first: Int
-	): [Message]
+	): [Message] @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
 
 	"""
 	当前用户的未读消息数
 	"""
-	unreadMessageCount: UInt!
+	unreadMessageCount: UInt! @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
 
 	"""
 	把一条消息标记为已读
@@ -2266,7 +2266,7 @@ type QueryRoot {
 		消息的UUID
 		"""
 		uuid: ID!
-	): Boolean
+	): Boolean @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
 
 	"""
 	获取规则命中明细
@@ -2291,7 +2291,7 @@ type QueryRoot {
 		返回条数上限
 		"""
 		first: Int
-	): [RuleHit]
+	): [RuleHit] @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
 
 	"""
 	按严重程度统计规则命中次数
@@ -2306,7 +2306,7 @@ type QueryRoot {
 		统计终点，UNIX 秒
 		"""
 		to: UInt
-	): [RuleHitCount]
+	): [RuleHitCount] @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
 
 	"""
 	按规则统计命中次数
@@ -2326,7 +2326,7 @@ type QueryRoot {
 		返回条数上限
 		"""
 		first: Int
-	): [RuleHitCount]
+	): [RuleHitCount] @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
 
 	"""
 	获取指标信息
@@ -2341,7 +2341,7 @@ type QueryRoot {
 		指标名称列表，缺省返回全部指标
 		"""
 		Names: [String!]
-	): [Metric]
+	): [Metric] @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
 
 	"""
 	服务器当前信息

@@ -14177,7 +14177,25 @@ func (ec *executionContext) _QueryRoot_groups(ctx context.Context, field graphql
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.QueryRoot().Groups(ctx)
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				if err != nil {
+					var zeroVal []*models.Group
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal []*models.Group
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
 		func(ctx context.Context, selections ast.SelectionSet, v []*models.Group) graphql.Marshaler {
 			return ec.marshalOGroup2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐGroup(ctx, selections, v)
 		},
@@ -14210,7 +14228,25 @@ func (ec *executionContext) _QueryRoot_taskExecutions(ctx context.Context, field
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.QueryRoot().TaskExecutions(ctx, fc.Args["status"].(*uint8), fc.Args["first"].(*int))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				if err != nil {
+					var zeroVal []*TaskExecution
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal []*TaskExecution
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
 		func(ctx context.Context, selections ast.SelectionSet, v []*TaskExecution) graphql.Marshaler {
 			return ec.marshalOTaskExecution2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTaskExecution(ctx, selections, v)
 		},
@@ -14253,7 +14289,25 @@ func (ec *executionContext) _QueryRoot_taskExecutionSummary(ctx context.Context,
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.QueryRoot().TaskExecutionSummary(ctx)
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				if err != nil {
+					var zeroVal []*TaskExecutionCount
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal []*TaskExecutionCount
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
 		func(ctx context.Context, selections ast.SelectionSet, v []*TaskExecutionCount) graphql.Marshaler {
 			return ec.marshalOTaskExecutionCount2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTaskExecutionCount(ctx, selections, v)
 		},
@@ -14286,7 +14340,25 @@ func (ec *executionContext) _QueryRoot_messages(ctx context.Context, field graph
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.QueryRoot().Messages(ctx, fc.Args["unreadOnly"].(*bool), fc.Args["first"].(*int))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				if err != nil {
+					var zeroVal []*Message
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal []*Message
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
 		func(ctx context.Context, selections ast.SelectionSet, v []*Message) graphql.Marshaler {
 			return ec.marshalOMessage2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐMessage(ctx, selections, v)
 		},
@@ -14329,7 +14401,25 @@ func (ec *executionContext) _QueryRoot_unreadMessageCount(ctx context.Context, f
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.QueryRoot().UnreadMessageCount(ctx)
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				if err != nil {
+					var zeroVal uint
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal uint
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
 		func(ctx context.Context, selections ast.SelectionSet, v uint) graphql.Marshaler {
 			return ec.marshalNUInt2uint(ctx, selections, v)
 		},
@@ -14353,7 +14443,25 @@ func (ec *executionContext) _QueryRoot_markMessageRead(ctx context.Context, fiel
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.QueryRoot().MarkMessageRead(ctx, fc.Args["uuid"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				if err != nil {
+					var zeroVal *bool
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal *bool
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
 		func(ctx context.Context, selections ast.SelectionSet, v *bool) graphql.Marshaler {
 			return ec.marshalOBoolean2ᚖbool(ctx, selections, v)
 		},
@@ -14397,7 +14505,25 @@ func (ec *executionContext) _QueryRoot_ruleHits(ctx context.Context, field graph
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.QueryRoot().RuleHits(ctx, fc.Args["TicketID"].(*uint), fc.Args["Rule"].(*string), fc.Args["Level"].(*uint8), fc.Args["first"].(*int))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				if err != nil {
+					var zeroVal []*models.RuleHit
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal []*models.RuleHit
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
 		func(ctx context.Context, selections ast.SelectionSet, v []*models.RuleHit) graphql.Marshaler {
 			return ec.marshalORuleHit2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRuleHit(ctx, selections, v)
 		},
@@ -14441,7 +14567,25 @@ func (ec *executionContext) _QueryRoot_ruleHitLevels(ctx context.Context, field 
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.QueryRoot().RuleHitLevels(ctx, fc.Args["from"].(*uint), fc.Args["to"].(*uint))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				if err != nil {
+					var zeroVal []*RuleHitCount
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal []*RuleHitCount
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
 		func(ctx context.Context, selections ast.SelectionSet, v []*RuleHitCount) graphql.Marshaler {
 			return ec.marshalORuleHitCount2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRuleHitCount(ctx, selections, v)
 		},
@@ -14485,7 +14629,25 @@ func (ec *executionContext) _QueryRoot_ruleHitRules(ctx context.Context, field g
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.QueryRoot().RuleHitRules(ctx, fc.Args["from"].(*uint), fc.Args["to"].(*uint), fc.Args["first"].(*int))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				if err != nil {
+					var zeroVal []*RuleHitCount
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal []*RuleHitCount
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
 		func(ctx context.Context, selections ast.SelectionSet, v []*RuleHitCount) graphql.Marshaler {
 			return ec.marshalORuleHitCount2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRuleHitCount(ctx, selections, v)
 		},
@@ -14529,7 +14691,25 @@ func (ec *executionContext) _QueryRoot_metrics(ctx context.Context, field graphq
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.QueryRoot().Metrics(ctx, fc.Args["Scope"].(*uint8), fc.Args["Names"].([]string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				if err != nil {
+					var zeroVal []*models.Metric
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal []*models.Metric
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
 		func(ctx context.Context, selections ast.SelectionSet, v []*models.Metric) graphql.Marshaler {
 			return ec.marshalOMetric2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐMetric(ctx, selections, v)
 		},
