@@ -5,7 +5,9 @@ import (
 	"errors"
 
 	"github.com/mia0x75/halo/internal/agent/meta"
+	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/domain"
+	"github.com/mia0x75/halo/internal/models"
 )
 
 // ErrNotImplemented marks the 2D-A adapter skeleton. The translation from the
@@ -37,9 +39,33 @@ func NewAdapter(r RuleSource, s SchemaSource) *Adapter {
 	return &Adapter{rules: r, schema: s}
 }
 
-// Validate is a 2D-A skeleton: the engine is not yet wired to domain types.
+// Validate runs the rule engine over one statement and returns the hits.
+//
+// The legacy engine still owns the IO (rule set from the cache, target
+// metadata from the agent); the adapter only translates the outcome into
+// domain.Violation. A request without a target cluster cannot be checked,
+// because the existence and charset rules read the target metadata.
 func (a *Adapter) Validate(ctx context.Context, req domain.ValidateRequest) ([]domain.Violation, error) {
-	_ = a.rules
-	_ = a.schema
-	return nil, ErrNotImplemented
+	if req.Cluster == nil {
+		return nil, nil
+	}
+
+	stmt := &models.Statement{
+		Content:    req.SQL,
+		Violations: &models.Violations{},
+	}
+	cluster := bridge.ClusterFromDomain(req.Cluster)
+	ticket := &models.Ticket{Database: req.Database}
+
+	Run([]*models.Statement{stmt}, cluster, ticket)
+
+	violations := make([]domain.Violation, 0)
+	for _, clause := range stmt.Violations.Clauses() {
+		violations = append(violations, domain.Violation{
+			Rule:    clause.Rule,
+			Message: clause.Description,
+			Level:   clause.Level,
+		})
+	}
+	return violations, nil
 }

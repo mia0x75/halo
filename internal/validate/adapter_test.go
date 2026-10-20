@@ -9,8 +9,12 @@ import (
 	"github.com/mia0x75/halo/internal/domain"
 )
 
-func TestAdapterNotImplemented(t *testing.T) {
+// TestAdapterWithoutCluster checks that a request without a target cluster
+// yields no hits instead of an error: the existence and charset rules cannot
+// be checked without the target metadata.
+func TestAdapterWithoutCluster(t *testing.T) {
 	a := NewAdapter(nil, nil)
-	_, err := a.Validate(context.Background(), domain.ValidateRequest{})
-	require.ErrorIs(t, err, ErrNotImplemented)
+	violations, err := a.Validate(context.Background(), domain.ValidateRequest{SQL: "SELECT 1"})
+	require.NoError(t, err)
+	require.Empty(t, violations)
 }

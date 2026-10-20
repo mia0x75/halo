@@ -14,4 +14,7 @@ type Validator interface {
 type ValidateRequest struct {
 	SQL     string
 	Cluster *Cluster
+	// Database is the target database on the cluster. The existence and
+	// charset rules are database scoped, so it must be set.
+	Database string
 }

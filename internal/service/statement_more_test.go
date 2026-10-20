@@ -94,7 +94,7 @@ func TestStatementServiceGetByUUID(t *testing.T) {
 	ctx := context.Background()
 	statements := newFakeStatementRepo()
 	require.NoError(t, statements.Create(ctx, &domain.Statement{TicketID: 1, Sequence: 1, UUID: "s1"}))
-	svc := NewStatementService(statements, nil, nil)
+	svc := NewStatementService(&fakeTx{repos: Repos{Statement: statements, RuleHit: newFakeRuleHitRepo()}}, statements, nil, nil, newFakeRuleHitRepo(), nil, nil)
 
 	got, err := svc.GetByUUID(ctx, "s1")
 	require.NoError(t, err)
@@ -105,7 +105,7 @@ func TestStatementServiceGetByUUID(t *testing.T) {
 }
 
 func TestStatementServiceUpdateResultMissing(t *testing.T) {
-	svc := NewStatementService(newFakeStatementRepo(), nil, nil)
+	svc := NewStatementService(&fakeTx{repos: Repos{Statement: newFakeStatementRepo(), RuleHit: newFakeRuleHitRepo()}}, newFakeStatementRepo(), nil, nil, newFakeRuleHitRepo(), nil, nil)
 	err := svc.UpdateResult(context.Background(), 1, 1, StatementResult{Results: "x"})
 	require.ErrorIs(t, err, domain.ErrNotFound)
 }

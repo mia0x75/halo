@@ -49,7 +49,7 @@ func TestReviewService(t *testing.T) {
 			require.NoError(t, err)
 
 			svc := NewReviewService(
-				&fakeTx{repos: Repos{Ticket: tickets, Log: &fakeLogRepo{}}},
+				&fakeTx{repos: Repos{Ticket: tickets, Log: &fakeLogRepo{}, Cluster: newFakeClusterRepo()}},
 				tickets,
 				&fakeValidator{violations: tc.violations},
 			)
@@ -72,7 +72,7 @@ func TestReviewServiceNilValidator(t *testing.T) {
 	_, err := tickets.Create(ctx, &domain.Ticket{UUID: "u", Status: domain.TicketStatusWaitingForVld, Version: 1})
 	require.NoError(t, err)
 
-	svc := NewReviewService(&fakeTx{repos: Repos{Ticket: tickets, Log: &fakeLogRepo{}}}, tickets, nil)
+	svc := NewReviewService(&fakeTx{repos: Repos{Ticket: tickets, Log: &fakeLogRepo{}, Cluster: newFakeClusterRepo()}}, tickets, nil)
 	res, err := svc.Review(ctx, 1, 1)
 	require.NoError(t, err)
 	require.True(t, res.CanApprove)

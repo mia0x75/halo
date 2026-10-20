@@ -16,7 +16,7 @@ func TestStatementServiceSubmit(t *testing.T) {
 	a, err := analyzer.New(domain.ClusterTypeMySQL, nil)
 	require.NoError(t, err)
 
-	svc := NewStatementService(statements, nil, a)
+	svc := NewStatementService(&fakeTx{repos: Repos{Statement: statements, RuleHit: newFakeRuleHitRepo()}}, statements, nil, nil, newFakeRuleHitRepo(), nil, a)
 
 	first, err := svc.Submit(ctx, 1, "select 1")
 	require.NoError(t, err)
@@ -39,7 +39,7 @@ func TestStatementServiceSubmit(t *testing.T) {
 func TestStatementServiceUpdateResult(t *testing.T) {
 	ctx := context.Background()
 	statements := newFakeStatementRepo()
-	svc := NewStatementService(statements, nil, nil)
+	svc := NewStatementService(&fakeTx{repos: Repos{Statement: statements, RuleHit: newFakeRuleHitRepo()}}, statements, nil, nil, newFakeRuleHitRepo(), nil, nil)
 
 	_, err := svc.Submit(ctx, 1, "select 1")
 	require.NoError(t, err)
@@ -58,7 +58,7 @@ func TestStatementServiceUpdateResult(t *testing.T) {
 func TestStatementServiceSubmitWithoutAnalyzer(t *testing.T) {
 	ctx := context.Background()
 	statements := newFakeStatementRepo()
-	svc := NewStatementService(statements, nil, nil)
+	svc := NewStatementService(&fakeTx{repos: Repos{Statement: statements, RuleHit: newFakeRuleHitRepo()}}, statements, nil, nil, newFakeRuleHitRepo(), nil, nil)
 
 	st, err := svc.Submit(ctx, 7, "whatever")
 	require.NoError(t, err)
@@ -72,7 +72,7 @@ func TestStatementServiceParseFailure(t *testing.T) {
 	a, err := analyzer.New(domain.ClusterTypeMySQL, nil)
 	require.NoError(t, err)
 
-	svc := NewStatementService(statements, nil, a)
+	svc := NewStatementService(&fakeTx{repos: Repos{Statement: statements, RuleHit: newFakeRuleHitRepo()}}, statements, nil, nil, newFakeRuleHitRepo(), nil, a)
 	_, err = svc.Submit(ctx, 1, "@@@ not sql @@@")
 	require.ErrorIs(t, err, domain.ErrInvalidInput)
 }

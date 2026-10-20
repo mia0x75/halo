@@ -139,7 +139,7 @@ func New(ctx context.Context, cfg db.Config) (*App, error) {
 	services := Services{
 		Log:       logSvc,
 		Ticket:    service.NewTicketService(tx, repos.Ticket),
-		Statement: service.NewStatementService(repos.Statement, logSvc, analyzerSvc),
+		Statement: service.NewStatementService(tx, repos.Statement, repos.Ticket, repos.Cluster, repos.RuleHit, logSvc, analyzerSvc),
 		Review:    service.NewReviewService(tx, repos.Ticket, validator),
 		Agent:     service.NewAgentService(tx, agent.LocalExecutor{}),
 		Avatar:    service.NewAvatarService(tx, repos.Avatar),

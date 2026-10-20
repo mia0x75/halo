@@ -262,3 +262,27 @@ func (s *stubTemplateRepo) List(context.Context, string, int) ([]*domain.Templat
 }
 func (s *stubTemplateRepo) Update(context.Context, *domain.Template) error { return s.updateErr }
 func (s *stubTemplateRepo) DeleteByUUID(context.Context, string) error     { return s.deleteErr }
+
+type stubRuleHitRepo struct {
+	domain.RuleHitRepository
+	created []*domain.RuleHit
+}
+
+func (s *stubRuleHitRepo) Create(_ context.Context, hit *domain.RuleHit) error {
+	s.created = append(s.created, hit)
+	return nil
+}
+
+func (s *stubRuleHitRepo) CreateBatch(ctx context.Context, hits []*domain.RuleHit) error {
+	for _, hit := range hits {
+		if err := s.Create(ctx, hit); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// newFakeRuleHitRepo returns a rule hit repository that only records the hits.
+func newFakeRuleHitRepo() *stubRuleHitRepo {
+	return &stubRuleHitRepo{}
+}

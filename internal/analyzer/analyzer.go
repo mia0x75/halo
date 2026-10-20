@@ -43,10 +43,11 @@ func (a *Analyzer) Parse(ctx context.Context, sql string) (*ir.Statement, error)
 	return a.parser.Parse(ctx, sql)
 }
 
-// Analyze parses sql then asks the validator to check it. cluster is forwarded
-// to the validator because the rules inspect target metadata; it may be nil
-// before the engine is wired.
-func (a *Analyzer) Analyze(ctx context.Context, sql string, cluster *domain.Cluster) (*ir.Result, error) {
+// Analyze parses sql then asks the validator to check it. cluster and database
+// are forwarded to the validator because the rules inspect the target
+// metadata, which is database scoped; they may be empty before the engine is
+// wired.
+func (a *Analyzer) Analyze(ctx context.Context, sql string, cluster *domain.Cluster, database string) (*ir.Result, error) {
 	st, err := a.Parse(ctx, sql)
 	if err != nil {
 		return nil, err
@@ -55,7 +56,7 @@ func (a *Analyzer) Analyze(ctx context.Context, sql string, cluster *domain.Clus
 	if a.validator == nil {
 		return res, nil
 	}
-	vs, err := a.validator.Validate(ctx, domain.ValidateRequest{SQL: sql, Cluster: cluster})
+	vs, err := a.validator.Validate(ctx, domain.ValidateRequest{SQL: sql, Cluster: cluster, Database: database})
 	if err != nil {
 		return nil, fmt.Errorf("analyzer: validate: %w", err)
 	}

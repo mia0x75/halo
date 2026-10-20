@@ -13,7 +13,7 @@ import (
 func TestReviewServiceValidatorError(t *testing.T) {
 	ctx := context.Background()
 	tickets, logs := ticketFixture(t, domain.TicketStatusWaitingForVld)
-	svc := NewReviewService(&fakeTx{repos: Repos{Ticket: tickets, Log: logs}}, tickets, &fakeValidator{err: errors.New("engine down")})
+	svc := NewReviewService(&fakeTx{repos: Repos{Ticket: tickets, Log: logs, Cluster: newFakeClusterRepo()}}, tickets, &fakeValidator{err: errors.New("engine down")})
 
 	_, err := svc.Review(ctx, 1, 5)
 	require.Error(t, err)
@@ -22,7 +22,7 @@ func TestReviewServiceValidatorError(t *testing.T) {
 func TestReviewServiceMissingTicket(t *testing.T) {
 	ctx := context.Background()
 	tickets := newFakeTicketRepo()
-	svc := NewReviewService(&fakeTx{repos: Repos{Ticket: tickets, Log: &fakeLogRepo{}}}, tickets, &fakeValidator{})
+	svc := NewReviewService(&fakeTx{repos: Repos{Ticket: tickets, Log: &fakeLogRepo{}, Cluster: newFakeClusterRepo()}}, tickets, &fakeValidator{})
 
 	_, err := svc.Review(ctx, 404, 5)
 	require.ErrorIs(t, err, domain.ErrNotFound)
@@ -33,7 +33,7 @@ func TestReviewServiceMissingTicket(t *testing.T) {
 func TestReviewServiceKeepsNonInitialStatus(t *testing.T) {
 	ctx := context.Background()
 	tickets, logs := ticketFixture(t, domain.TicketStatusWaitingForMrv)
-	svc := NewReviewService(&fakeTx{repos: Repos{Ticket: tickets, Log: logs}}, tickets, &fakeValidator{})
+	svc := NewReviewService(&fakeTx{repos: Repos{Ticket: tickets, Log: logs, Cluster: newFakeClusterRepo()}}, tickets, &fakeValidator{})
 
 	res, err := svc.Review(ctx, 1, 5)
 	require.NoError(t, err)

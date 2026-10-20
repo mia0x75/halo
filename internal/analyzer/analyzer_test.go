@@ -83,7 +83,7 @@ func TestAnalyzeDelegatesToValidator(t *testing.T) {
 		t.Fatalf("New: %v", err)
 	}
 
-	res, err := a.Analyze(context.Background(), sql, cluster)
+	res, err := a.Analyze(context.Background(), sql, cluster, "testdb")
 	if err != nil {
 		t.Fatalf("Analyze: %v", err)
 	}
@@ -103,7 +103,7 @@ func TestAnalyzeNilValidatorSkipsRules(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	res, err := a.Analyze(context.Background(), "DELETE FROM users", nil)
+	res, err := a.Analyze(context.Background(), "DELETE FROM users", nil, "testdb")
 	if err != nil {
 		t.Fatalf("Analyze: %v", err)
 	}
@@ -121,7 +121,7 @@ func TestAnalyzeValidatorErrorIsWrapped(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	if _, err := a.Analyze(context.Background(), "SELECT 1", nil); !errors.Is(err, sentinel) {
+	if _, err := a.Analyze(context.Background(), "SELECT 1", nil, "testdb"); !errors.Is(err, sentinel) {
 		t.Fatalf("err = %v, want wrapping %v", err, sentinel)
 	}
 }

@@ -37,7 +37,18 @@ func (s *ReviewService) Review(ctx context.Context, ticketID, reviewerID uint) (
 
 		var violations []domain.Violation
 		if s.validator != nil {
-			violations, err = s.validator.Validate(ctx, domain.ValidateRequest{SQL: tk.Content})
+			// 存在性与字符集规则要读目标库的元数据，因此带上群集与库名。
+			var cluster *domain.Cluster
+			if repos.Cluster != nil {
+				if c, cErr := repos.Cluster.GetByID(ctx, int64(tk.ClusterID)); cErr == nil {
+					cluster = c
+				}
+			}
+			violations, err = s.validator.Validate(ctx, domain.ValidateRequest{
+				SQL:      tk.Content,
+				Cluster:  cluster,
+				Database: tk.Database,
+			})
 			if err != nil {
 				return err
 			}

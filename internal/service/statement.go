@@ -16,13 +16,33 @@ import (
 // StatementService splits a ticket's SQL into statements, validates each one and
 // persists the result. It is the only service that touches the analyzer.
 type StatementService struct {
+	tx         TxManager
 	statements domain.StatementRepository
+	tickets    domain.TicketRepository
+	clusters   domain.ClusterRepository
+	hits       domain.RuleHitRepository
 	log        *LogService
 	analyzer   *analyzer.Analyzer
 }
 
-func NewStatementService(statements domain.StatementRepository, log *LogService, a *analyzer.Analyzer) *StatementService {
-	return &StatementService{statements: statements, log: log, analyzer: a}
+func NewStatementService(
+	tx TxManager,
+	statements domain.StatementRepository,
+	tickets domain.TicketRepository,
+	clusters domain.ClusterRepository,
+	hits domain.RuleHitRepository,
+	log *LogService,
+	a *analyzer.Analyzer,
+) *StatementService {
+	return &StatementService{
+		tx:         tx,
+		statements: statements,
+		tickets:    tickets,
+		clusters:   clusters,
+		hits:       hits,
+		log:        log,
+		analyzer:   a,
+	}
 }
 
 // Submit parses, validates and stores one statement for a ticket. The sequence
@@ -43,17 +63,42 @@ func (s *StatementService) Submit(ctx context.Context, ticketID uint, sql string
 		Version:  1,
 	}
 
+	// 校验需要目标群集与目标库，两者都来自工单。
+	// 校验需要目标群集与目标库，两者都来自工单；取不到时只做语句级校验。
+	var (
+		cluster  *domain.Cluster
+		database string
+	)
+	if s.tickets != nil {
+		if tk, err := s.tickets.GetByID(ctx, int64(ticketID)); err == nil {
+			database = tk.Database
+			if s.clusters != nil {
+				if c, err := s.clusters.GetByID(ctx, int64(tk.ClusterID)); err == nil {
+					cluster = c
+				}
+			}
+		}
+	}
+
+	var violations []domain.Violation
 	if s.analyzer != nil {
-		res, err := s.analyzer.Analyze(ctx, sql, nil)
+		res, err := s.analyzer.Analyze(ctx, sql, cluster, database)
 		if err != nil {
 			return nil, fmt.Errorf("%w: %v", domain.ErrInvalidInput, err)
 		}
 		st.Type = statementTypeFromIR(res.Statement)
 		st.Status = statementStatusFromViolations(res.Violations)
 		st.Report = joinViolations(res.Violations)
+		violations = res.Violations
 	}
 
-	if err := s.statements.Create(ctx, st); err != nil {
+	if err := s.tx.WithTx(ctx, func(ctx context.Context, repos Repos) error {
+		if err := repos.Statement.Create(ctx, st); err != nil {
+			return err
+		}
+		// 命中明细与语句一起落库，仪表盘才能按规则和级别聚合。
+		return repos.RuleHit.CreateBatch(ctx, ruleHitsOf(ticketID, st.Sequence, violations))
+	}); err != nil {
 		return nil, err
 	}
 	if s.log != nil {
@@ -207,4 +252,23 @@ func joinViolations(violations []domain.Violation) string {
 		msgs = append(msgs, v.Message)
 	}
 	return strings.Join(msgs, "; ")
+}
+
+// ruleHitsOf turns the validation hits of one statement into persistable rows.
+func ruleHitsOf(ticketID uint, sequence uint16, violations []domain.Violation) []*domain.RuleHit {
+	if len(violations) == 0 {
+		return nil
+	}
+	hits := make([]*domain.RuleHit, 0, len(violations))
+	for _, violation := range violations {
+		hits = append(hits, &domain.RuleHit{
+			UUID:     uuid.NewString(),
+			TicketID: ticketID,
+			Sequence: sequence,
+			RuleName: violation.Rule,
+			Level:    violation.Level,
+			Message:  violation.Message,
+		})
+	}
+	return hits
 }
