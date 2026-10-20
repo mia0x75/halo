@@ -17,8 +17,10 @@ import (
 	"github.com/mia0x75/parser/format"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/google/uuid"
 	"github.com/mia0x75/halo/internal/bridge"
 	"github.com/mia0x75/halo/internal/cache"
+
 	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/event"
 	"github.com/mia0x75/halo/internal/models"
@@ -954,6 +956,9 @@ func (r *mutationRootResolver) validation(stmts []*models.Statement, cluster *mo
 		}
 	}
 
+	// 命中明细落库：文本报告无法按级别或规则聚合，仪表盘需要明细。
+	hits := collectRuleHits(ticket, stmts)
+
 	// 更新到数据库
 	err := r.app.Tx.WithTx(context.Background(), func(ctx context.Context, repos service.Repos) error {
 		for _, stmt := range stmts {
@@ -961,11 +966,39 @@ func (r *mutationRootResolver) validation(stmts []*models.Statement, cluster *mo
 				return err
 			}
 		}
+		if err := repos.RuleHit.CreateBatch(ctx, hits); err != nil {
+			return err
+		}
 		return repos.Ticket.Update(ctx, bridge.TicketToDomain(ticket))
 	})
 	if err != nil {
 		log.Errorf("[E] An unexpected error occured during data updating, err: %s", err.Error())
 	}
+}
+
+// collectRuleHits turns the clause hits of every statement into persistable
+// rows. The rule name is filled in by the rule dispatcher.
+func collectRuleHits(ticket *models.Ticket, stmts []*models.Statement) []*domain.RuleHit {
+	if ticket == nil {
+		return nil
+	}
+	hits := make([]*domain.RuleHit, 0)
+	for _, stmt := range stmts {
+		if stmt == nil || stmt.Violations == nil {
+			continue
+		}
+		for _, clause := range stmt.Violations.Clauses() {
+			hits = append(hits, &domain.RuleHit{
+				UUID:     uuid.NewString(),
+				TicketID: ticket.TicketID,
+				Sequence: stmt.Sequence,
+				RuleName: clause.Rule,
+				Level:    clause.Level,
+				Message:  clause.Description,
+			})
+		}
+	}
+	return hits
 }
 
 // StatementType2Uint8 generates a label for a statement.

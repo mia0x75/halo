@@ -10,6 +10,8 @@ import (
 )
 
 type Querier interface {
+	CountRuleHitsByLevel(ctx context.Context, arg CountRuleHitsByLevelParams) ([]CountRuleHitsByLevelRow, error)
+	CountRuleHitsByRule(ctx context.Context, arg CountRuleHitsByRuleParams) ([]CountRuleHitsByRuleRow, error)
 	CreateAvatar(ctx context.Context, arg CreateAvatarParams) (int64, error)
 	CreateCluster(ctx context.Context, arg CreateClusterParams) (int64, error)
 	CreateComment(ctx context.Context, arg CreateCommentParams) (int64, error)
@@ -22,6 +24,7 @@ type Querier interface {
 	CreateQuery(ctx context.Context, arg CreateQueryParams) (int64, error)
 	CreateRole(ctx context.Context, arg CreateRoleParams) (int64, error)
 	CreateRule(ctx context.Context, arg CreateRuleParams) error
+	CreateRuleHit(ctx context.Context, arg CreateRuleHitParams) error
 	CreateStatement(ctx context.Context, arg CreateStatementParams) error
 	CreateTemplate(ctx context.Context, arg CreateTemplateParams) error
 	CreateTicket(ctx context.Context, arg CreateTicketParams) (int64, error)
@@ -104,6 +107,8 @@ type Querier interface {
 	ListQueries(ctx context.Context, arg ListQueriesParams) ([]MmQuery, error)
 	ListQueriesByUser(ctx context.Context, userID uint32) ([]MmQuery, error)
 	ListRoles(ctx context.Context, arg ListRolesParams) ([]MmRole, error)
+	ListRuleHits(ctx context.Context, limit int32) ([]MmViolation, error)
+	ListRuleHitsByTicket(ctx context.Context, ticketID uint32) ([]MmViolation, error)
 	ListRules(ctx context.Context, arg ListRulesParams) ([]MmRule, error)
 	ListSchedulableCrons(ctx context.Context) ([]MmCron, error)
 	ListStatements(ctx context.Context, arg ListStatementsParams) ([]MmStatement, error)

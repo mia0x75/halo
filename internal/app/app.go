@@ -50,6 +50,7 @@ type Services struct {
 	Role      *service.RoleService
 	Rule      *service.RuleService
 	Metric    *service.MetricService
+	RuleHit   *service.RuleHitService
 	Template  *service.TemplateService
 	User      *service.UserService
 }
@@ -85,6 +86,7 @@ func New(ctx context.Context, cfg db.Config) (*App, error) {
 			Rule:      postgresrepo.NewRuleRepo(q),
 			Statement: postgresrepo.NewStatementRepo(q),
 			Metric:    postgresrepo.NewMetricRepo(q),
+			RuleHit:   postgresrepo.NewRuleHitRepo(q),
 			Template:  postgresrepo.NewTemplateRepo(q),
 			Ticket:    postgresrepo.NewTicketRepo(q),
 			User:      postgresrepo.NewUserRepo(q),
@@ -108,6 +110,7 @@ func New(ctx context.Context, cfg db.Config) (*App, error) {
 			Rule:      mysqlrepo.NewRuleRepo(q),
 			Statement: mysqlrepo.NewStatementRepo(q),
 			Metric:    mysqlrepo.NewMetricRepo(q),
+			RuleHit:   mysqlrepo.NewRuleHitRepo(q),
 			Template:  mysqlrepo.NewTemplateRepo(q),
 			Ticket:    mysqlrepo.NewTicketRepo(q),
 			User:      mysqlrepo.NewUserRepo(q),
@@ -141,6 +144,7 @@ func New(ctx context.Context, cfg db.Config) (*App, error) {
 		Role:      service.NewRoleService(tx, repos.Role),
 		Rule:      service.NewRuleService(tx, repos.Rule),
 		Metric:    service.NewMetricService(tx, repos.Metric),
+		RuleHit:   service.NewRuleHitService(repos.RuleHit),
 		Template:  service.NewTemplateService(tx, repos.Template),
 		User:      service.NewUserService(tx, repos.User),
 	}

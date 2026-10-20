@@ -412,3 +412,23 @@ type MmUser struct {
 	// 创建时间
 	CreateAt time.Time
 }
+
+// 规则命中明细表
+type MmViolation struct {
+	// 自增主键
+	ViolationID uint32
+	// UUID
+	Uuid string
+	// 对应工单
+	TicketID uint32
+	// 语句序号
+	Sequence uint16
+	// 命中规则名
+	RuleName string
+	// 严重程度：0 提示 1 错误 2 警告
+	Level uint8
+	// 命中提示
+	Message string
+	// 创建时间
+	CreateAt time.Time
+}

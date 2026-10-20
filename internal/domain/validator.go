@@ -15,12 +15,3 @@ type ValidateRequest struct {
 	SQL     string
 	Cluster *Cluster
 }
-
-// Violation is a single rule hit. Level is the raw mm_rules.level value
-// (0=message, 1=error, 2=warning); the current engine does not expose the rule
-// name or vldr_group, so those fields are added only when the rule engine is
-// ported into this layer.
-type Violation struct {
-	Message string
-	Level   uint8
-}

@@ -245,7 +245,7 @@ func (s *stubMetricRepo) List(context.Context, string, int) ([]*domain.Metric, e
 	return nil, nil
 }
 func (s *stubMetricRepo) Update(context.Context, *domain.Metric) error { return s.updateErr }
-func (s *stubMetricRepo) DeleteByUUID(context.Context, string) error  { return s.deleteErr }
+func (s *stubMetricRepo) DeleteByUUID(context.Context, string) error   { return s.deleteErr }
 
 type stubTemplateRepo struct {
 	domain.TemplateRepository

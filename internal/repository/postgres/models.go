@@ -244,3 +244,15 @@ type MmUser struct {
 	UpdateAt sql.NullTime
 	CreateAt time.Time
 }
+
+// 规则命中明细表
+type MmViolation struct {
+	ViolationID int64
+	Uuid        string
+	TicketID    int64
+	Sequence    int32
+	RuleName    string
+	Level       int16
+	Message     string
+	CreateAt    time.Time
+}

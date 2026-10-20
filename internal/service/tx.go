@@ -28,7 +28,8 @@ type Repos struct {
 	Role      domain.RoleRepository
 	Rule      domain.RuleRepository
 	Statement domain.StatementRepository
-	Metric     domain.MetricRepository
+	Metric    domain.MetricRepository
+	RuleHit   domain.RuleHitRepository
 	Template  domain.TemplateRepository
 	Ticket    domain.TicketRepository
 	User      domain.UserRepository

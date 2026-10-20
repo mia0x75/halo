@@ -1153,6 +1153,71 @@ type StatementEdge {
 }
 
 """
+规则命中明细
+"""
+type RuleHit implements Node {
+	"""
+	命中的UUID
+	"""
+	UUID:     ID!
+
+	"""
+	对应工单
+	"""
+	TicketID: UInt!
+
+	"""
+	语句序号
+	"""
+	Sequence: UInt16!
+
+	"""
+	命中规则名
+	"""
+	RuleName: String! @length(max: 75)
+
+	"""
+	严重程度：0 提示 1 错误 2 警告
+	"""
+	Level:    UInt8!
+
+	"""
+	命中提示
+	"""
+	Message:  String! @length(max: 150)
+
+	"""
+	记录创建时间
+	"""
+	CreateAt: UInt!
+
+	"""
+	记录最近一次修改时间
+	"""
+	UpdateAt: UInt
+}
+
+"""
+命中计数
+"""
+type RuleHitCount {
+	"""
+	规则名，按级别统计时为空
+	"""
+	RuleName: String
+
+	"""
+	严重程度，按规则统计时为 0
+	"""
+	Level: UInt8!
+
+	"""
+	命中次数
+	"""
+	Count: UInt!
+}
+
+"""
 指标信息
 """
 type Metric implements Node {
@@ -1982,6 +2047,66 @@ type QueryRoot {
 		"""
 		ClusterUUID: String!
 	): [Database!] @auth(requires: [DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	获取规则命中明细
+	"""
+	ruleHits(
+		"""
+		工单编号，缺省返回全部工单
+		"""
+		TicketID: UInt
+
+		"""
+		规则名，缺省返回全部规则
+		"""
+		Rule: String
+
+		"""
+		严重程度，缺省返回全部级别
+		"""
+		Level: UInt8
+
+		"""
+		返回条数上限
+		"""
+		first: Int
+	): [RuleHit]
+
+	"""
+	按严重程度统计规则命中次数
+	"""
+	ruleHitLevels(
+		"""
+		统计起点，UNIX 秒
+		"""
+		from: UInt
+
+		"""
+		统计终点，UNIX 秒
+		"""
+		to: UInt
+	): [RuleHitCount]
+
+	"""
+	按规则统计命中次数
+	"""
+	ruleHitRules(
+		"""
+		统计起点，UNIX 秒
+		"""
+		from: UInt
+
+		"""
+		统计终点，UNIX 秒
+		"""
+		to: UInt
+
+		"""
+		返回条数上限
+		"""
+		first: Int
+	): [RuleHitCount]
 
 	"""
 	获取指标信息

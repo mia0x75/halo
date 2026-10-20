@@ -118,6 +118,28 @@ func (v *Violations) Clauses() []*Clause {
 
 // Clause 语句审核不通过的描述结构体
 type Clause struct {
-	Level       uint8
+	Level uint8
+	// Description 是命中提示
 	Description string
+	// Rule 是命中规则的名称，由规则分发处回填
+	Rule string `json:",omitempty"`
+}
+
+// Len 返回当前记录的命中条数
+func (v *Violations) Len() int {
+	v.Lock()
+	defer v.Unlock()
+	return len(v.clauses)
+}
+
+// TagRule 给 offset 之后新增的命中补上规则名。规则分发处知道当前规则的名称，
+// 而具体的规则处理器只负责产出描述，两者在此汇合。
+func (v *Violations) TagRule(rule string, offset int) {
+	v.Lock()
+	defer v.Unlock()
+	for i := offset; i < len(v.clauses); i++ {
+		if v.clauses[i].Rule == "" {
+			v.clauses[i].Rule = rule
+		}
+	}
 }

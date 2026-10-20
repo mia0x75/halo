@@ -72,6 +72,9 @@ models:
   Metric:
     model: github.com/mia0x75/halo/internal/models.Metric
 
+  RuleHit:
+    model: github.com/mia0x75/halo/internal/models.RuleHit
+
   CPUStats:
     model: github.com/mia0x75/halo/internal/models.CPUStats
 

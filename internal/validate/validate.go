@@ -769,7 +769,15 @@ func Call(v Validator, group uint16, name string, s *Subject, r *Rule) {
 		log.Errorf("validate: unknown rule func: group=%d func=%s", group, name)
 		return
 	}
+	if s == nil {
+		// 语句级规则组没有具体语句，处理器自行处理。
+		fn(v, s, r)
+		return
+	}
+	// 规则处理器只知道描述，规则名在这里补齐，便于按规则聚合命中明细。
+	offset := s.Violations.Len()
 	fn(v, s, r)
+	s.Violations.TagRule(r.Name, offset)
 }
 
 // Match 正则匹配

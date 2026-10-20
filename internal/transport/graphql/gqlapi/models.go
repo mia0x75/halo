@@ -153,6 +153,16 @@ type QueryEdge struct {
 type QueryRoot struct {
 }
 
+// 命中计数
+type RuleHitCount struct {
+	// 规则名，按级别统计时为空
+	RuleName *string `json:"RuleName,omitempty"`
+	// 严重程度，按规则统计时为 0
+	Level uint8 `json:"Level"`
+	// 命中次数
+	Count uint `json:"Count"`
+}
+
 type StatementConnection struct {
 	// 分页信息
 	PageInfo *PageInfo `json:"pageInfo"`

@@ -9,17 +9,17 @@ import (
 
 // Metric 指标模型
 type Metric struct {
-	MetricID uint    `db:"metric_id" valid:"-"                              json:"metric_id"   gqlgen:"-"`            //
-	UUID     string  `db:"uuid"      valid:"-"                              json:"uuid"        gqlgen:"UUID"`         //
-	Name     string  `db:"name"      valid:"required,length(1|75)"         json:"name"        gqlgen:"Name"`         //
-	Scope    uint8   `db:"scope"     valid:"required"                       json:"scope"       gqlgen:"Scope"`        //
-	ScopeID  string  `db:"scope_id"  valid:"-"                              json:"scope_id"    gqlgen:"ScopeID"`      //
-	Type     uint8   `db:"type"      valid:"required"                       json:"type"        gqlgen:"Type"`         //
-	Bucket   string  `db:"bucket"    valid:"-"                              json:"bucket"      gqlgen:"Bucket"`       //
-	Value    float64 `db:"value"     valid:"required"                       json:"value"       gqlgen:"Value"`        //
-	Version  int     `db:"version"   valid:"-"                              json:"version"     gqlgen:"-"`            //
-	UpdateAt uint    `db:"update_at" valid:"-"                              json:"update_at"   gqlgen:"UpdateAt"`     //
-	CreateAt uint    `db:"create_at" valid:"-"                              json:"create_at"   gqlgen:"CreateAt"`     //
+	MetricID uint    `db:"metric_id" valid:"-"                              json:"metric_id"   gqlgen:"-"`        //
+	UUID     string  `db:"uuid"      valid:"-"                              json:"uuid"        gqlgen:"UUID"`     //
+	Name     string  `db:"name"      valid:"required,length(1|75)"         json:"name"        gqlgen:"Name"`      //
+	Scope    uint8   `db:"scope"     valid:"required"                       json:"scope"       gqlgen:"Scope"`    //
+	ScopeID  string  `db:"scope_id"  valid:"-"                              json:"scope_id"    gqlgen:"ScopeID"`  //
+	Type     uint8   `db:"type"      valid:"required"                       json:"type"        gqlgen:"Type"`     //
+	Bucket   string  `db:"bucket"    valid:"-"                              json:"bucket"      gqlgen:"Bucket"`   //
+	Value    float64 `db:"value"     valid:"required"                       json:"value"       gqlgen:"Value"`    //
+	Version  int     `db:"version"   valid:"-"                              json:"version"     gqlgen:"-"`        //
+	UpdateAt uint    `db:"update_at" valid:"-"                              json:"update_at"   gqlgen:"UpdateAt"` //
+	CreateAt uint    `db:"create_at" valid:"-"                              json:"create_at"   gqlgen:"CreateAt"` //
 }
 
 // TableName 结构体到数据库表名称的映射

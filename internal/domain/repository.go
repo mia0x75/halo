@@ -139,6 +139,18 @@ type MetricRepository interface {
 	SetGauge(ctx context.Context, key MetricKey, value float64) error
 }
 
+type RuleHitRepository interface {
+	Create(ctx context.Context, hit *RuleHit) error
+	CreateBatch(ctx context.Context, hits []*RuleHit) error
+	ListByTicket(ctx context.Context, ticketID uint) ([]*RuleHit, error)
+	// List returns the most recent hits, optionally of one ticket.
+	List(ctx context.Context, ticketID uint, limit int) ([]*RuleHit, error)
+	// CountByLevel counts the hits per severity inside a time window.
+	CountByLevel(ctx context.Context, from, to uint) ([]RuleHitCount, error)
+	// CountByRule counts the hits per rule inside a time window.
+	CountByRule(ctx context.Context, from, to uint, limit int) ([]RuleHitCount, error)
+}
+
 type StatementRepository interface {
 	Create(ctx context.Context, s *Statement) error
 	GetByUUID(ctx context.Context, uuid string) (*Statement, error)

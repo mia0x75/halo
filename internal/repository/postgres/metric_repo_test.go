@@ -73,8 +73,8 @@ func TestMetricIncrement(t *testing.T) {
 	repo := NewMetricRepo(setupTestDB(t))
 	ctx := context.Background()
 	key := domain.MetricKey{
-		Name:    "counter-" + newSuffix(),
-		Scope:   domain.MetricScopeOverall,
+		Name:  "counter-" + newSuffix(),
+		Scope: domain.MetricScopeOverall,
 	}
 
 	require.NoError(t, repo.Increment(ctx, key, 5))

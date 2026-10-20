@@ -45,3 +45,20 @@ func MetricToDomain(m *models.Metric) *domain.Metric {
 		CreateAt: m.CreateAt,
 	}
 }
+
+// RuleHitFromDomain converts a domain rule hit to its model.
+func RuleHitFromDomain(hit *domain.RuleHit) *models.RuleHit {
+	if hit == nil {
+		return nil
+	}
+	return &models.RuleHit{
+		HitID:    hit.HitID,
+		UUID:     hit.UUID,
+		TicketID: hit.TicketID,
+		Sequence: hit.Sequence,
+		RuleName: hit.RuleName,
+		Level:    hit.Level,
+		Message:  hit.Message,
+		CreateAt: hit.CreateAt,
+	}
+}

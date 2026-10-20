@@ -341,6 +341,9 @@ type ComplexityRoot struct {
 		Role          func(childComplexity int, id string) int
 		Roles         func(childComplexity int) int
 		Rule          func(childComplexity int, id string) int
+		RuleHitLevels func(childComplexity int, from *uint, to *uint) int
+		RuleHitRules  func(childComplexity int, from *uint, to *uint, first *int) int
+		RuleHits      func(childComplexity int, ticketID *uint, rule *string, level *uint8, first *int) int
 		Rules         func(childComplexity int) int
 		Tasks         func(childComplexity int) int
 		Templates     func(childComplexity int) int
@@ -376,6 +379,23 @@ type ComplexityRoot struct {
 		UUID        func(childComplexity int) int
 		UpdateAt    func(childComplexity int) int
 		VldrGroup   func(childComplexity int) int
+	}
+
+	RuleHit struct {
+		CreateAt func(childComplexity int) int
+		Level    func(childComplexity int) int
+		Message  func(childComplexity int) int
+		RuleName func(childComplexity int) int
+		Sequence func(childComplexity int) int
+		TicketID func(childComplexity int) int
+		UUID     func(childComplexity int) int
+		UpdateAt func(childComplexity int) int
+	}
+
+	RuleHitCount struct {
+		Count    func(childComplexity int) int
+		Level    func(childComplexity int) int
+		RuleName func(childComplexity int) int
 	}
 
 	Statement struct {
@@ -561,6 +581,9 @@ type QueryRootResolver interface {
 	Crons(ctx context.Context, after *string, before *string, first *int, last *int) (*CronConnection, error)
 	Tasks(ctx context.Context) ([]*models.Cron, error)
 	Databases(ctx context.Context, clusterUUID string) ([]*Database, error)
+	RuleHits(ctx context.Context, ticketID *uint, rule *string, level *uint8, first *int) ([]*models.RuleHit, error)
+	RuleHitLevels(ctx context.Context, from *uint, to *uint) ([]*RuleHitCount, error)
+	RuleHitRules(ctx context.Context, from *uint, to *uint, first *int) ([]*RuleHitCount, error)
 	Metrics(ctx context.Context, scope *uint8, names []string) ([]*models.Metric, error)
 	Environments(ctx context.Context) (*Environments, error)
 	Metadata(ctx context.Context, clusterUUID string, database string) (string, error)
@@ -2086,6 +2109,39 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.QueryRoot.Rule(childComplexity, args["id"].(string)), true
+	case "QueryRoot.ruleHitLevels":
+		if e.ComplexityRoot.QueryRoot.RuleHitLevels == nil {
+			break
+		}
+
+		args, err := ec.field_QueryRoot_ruleHitLevels_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.QueryRoot.RuleHitLevels(childComplexity, args["from"].(*uint), args["to"].(*uint)), true
+	case "QueryRoot.ruleHitRules":
+		if e.ComplexityRoot.QueryRoot.RuleHitRules == nil {
+			break
+		}
+
+		args, err := ec.field_QueryRoot_ruleHitRules_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.QueryRoot.RuleHitRules(childComplexity, args["from"].(*uint), args["to"].(*uint), args["first"].(*int)), true
+	case "QueryRoot.ruleHits":
+		if e.ComplexityRoot.QueryRoot.RuleHits == nil {
+			break
+		}
+
+		args, err := ec.field_QueryRoot_ruleHits_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.QueryRoot.RuleHits(childComplexity, args["TicketID"].(*uint), args["Rule"].(*string), args["Level"].(*uint8), args["first"].(*int)), true
 	case "QueryRoot.rules":
 		if e.ComplexityRoot.QueryRoot.Rules == nil {
 			break
@@ -2307,6 +2363,74 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Rule.VldrGroup(childComplexity), true
+
+	case "RuleHit.CreateAt":
+		if e.ComplexityRoot.RuleHit.CreateAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RuleHit.CreateAt(childComplexity), true
+	case "RuleHit.Level":
+		if e.ComplexityRoot.RuleHit.Level == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RuleHit.Level(childComplexity), true
+	case "RuleHit.Message":
+		if e.ComplexityRoot.RuleHit.Message == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RuleHit.Message(childComplexity), true
+	case "RuleHit.RuleName":
+		if e.ComplexityRoot.RuleHit.RuleName == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RuleHit.RuleName(childComplexity), true
+	case "RuleHit.Sequence":
+		if e.ComplexityRoot.RuleHit.Sequence == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RuleHit.Sequence(childComplexity), true
+	case "RuleHit.TicketID":
+		if e.ComplexityRoot.RuleHit.TicketID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RuleHit.TicketID(childComplexity), true
+	case "RuleHit.UUID":
+		if e.ComplexityRoot.RuleHit.UUID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RuleHit.UUID(childComplexity), true
+	case "RuleHit.UpdateAt":
+		if e.ComplexityRoot.RuleHit.UpdateAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RuleHit.UpdateAt(childComplexity), true
+
+	case "RuleHitCount.Count":
+		if e.ComplexityRoot.RuleHitCount.Count == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RuleHitCount.Count(childComplexity), true
+	case "RuleHitCount.Level":
+		if e.ComplexityRoot.RuleHitCount.Level == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RuleHitCount.Level(childComplexity), true
+	case "RuleHitCount.RuleName":
+		if e.ComplexityRoot.RuleHitCount.RuleName == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RuleHitCount.RuleName(childComplexity), true
 
 	case "Statement.Content":
 		if e.ComplexityRoot.Statement.Content == nil {
@@ -3364,6 +3488,40 @@ func (ec *executionContext) childFields_Rule(ctx context.Context, field graphql.
 		return ec.fieldContext_Rule_UpdateAt(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Rule", field.Name)
+}
+
+func (ec *executionContext) childFields_RuleHit(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "UUID":
+		return ec.fieldContext_RuleHit_UUID(ctx, field)
+	case "TicketID":
+		return ec.fieldContext_RuleHit_TicketID(ctx, field)
+	case "Sequence":
+		return ec.fieldContext_RuleHit_Sequence(ctx, field)
+	case "RuleName":
+		return ec.fieldContext_RuleHit_RuleName(ctx, field)
+	case "Level":
+		return ec.fieldContext_RuleHit_Level(ctx, field)
+	case "Message":
+		return ec.fieldContext_RuleHit_Message(ctx, field)
+	case "CreateAt":
+		return ec.fieldContext_RuleHit_CreateAt(ctx, field)
+	case "UpdateAt":
+		return ec.fieldContext_RuleHit_UpdateAt(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type RuleHit", field.Name)
+}
+
+func (ec *executionContext) childFields_RuleHitCount(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "RuleName":
+		return ec.fieldContext_RuleHitCount_RuleName(ctx, field)
+	case "Level":
+		return ec.fieldContext_RuleHitCount_Level(ctx, field)
+	case "Count":
+		return ec.fieldContext_RuleHitCount_Count(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type RuleHitCount", field.Name)
 }
 
 func (ec *executionContext) childFields_Statement(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
@@ -4824,6 +4982,96 @@ func (ec *executionContext) field_QueryRoot_role_args(ctx context.Context, rawAr
 		return nil, err
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_QueryRoot_ruleHitLevels_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "from",
+		func(ctx context.Context, v any) (*uint, error) {
+			return ec.unmarshalOUInt2ᚖuint(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["from"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "to",
+		func(ctx context.Context, v any) (*uint, error) {
+			return ec.unmarshalOUInt2ᚖuint(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["to"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_QueryRoot_ruleHitRules_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "from",
+		func(ctx context.Context, v any) (*uint, error) {
+			return ec.unmarshalOUInt2ᚖuint(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["from"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "to",
+		func(ctx context.Context, v any) (*uint, error) {
+			return ec.unmarshalOUInt2ᚖuint(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["to"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_QueryRoot_ruleHits_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "TicketID",
+		func(ctx context.Context, v any) (*uint, error) {
+			return ec.unmarshalOUInt2ᚖuint(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["TicketID"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "Rule",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["Rule"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "Level",
+		func(ctx context.Context, v any) (*uint8, error) {
+			return ec.unmarshalOUInt82ᚖuint8(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["Level"] = arg2
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg3
 	return args, nil
 }
 
@@ -12968,6 +13216,138 @@ func (ec *executionContext) fieldContext_QueryRoot_databases(ctx context.Context
 	return fc, nil
 }
 
+func (ec *executionContext) _QueryRoot_ruleHits(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_QueryRoot_ruleHits(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.QueryRoot().RuleHits(ctx, fc.Args["TicketID"].(*uint), fc.Args["Rule"].(*string), fc.Args["Level"].(*uint8), fc.Args["first"].(*int))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*models.RuleHit) graphql.Marshaler {
+			return ec.marshalORuleHit2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRuleHit(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_QueryRoot_ruleHits(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QueryRoot",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_RuleHit(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_QueryRoot_ruleHits_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QueryRoot_ruleHitLevels(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_QueryRoot_ruleHitLevels(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.QueryRoot().RuleHitLevels(ctx, fc.Args["from"].(*uint), fc.Args["to"].(*uint))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*RuleHitCount) graphql.Marshaler {
+			return ec.marshalORuleHitCount2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRuleHitCount(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_QueryRoot_ruleHitLevels(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QueryRoot",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_RuleHitCount(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_QueryRoot_ruleHitLevels_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QueryRoot_ruleHitRules(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_QueryRoot_ruleHitRules(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.QueryRoot().RuleHitRules(ctx, fc.Args["from"].(*uint), fc.Args["to"].(*uint), fc.Args["first"].(*int))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*RuleHitCount) graphql.Marshaler {
+			return ec.marshalORuleHitCount2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRuleHitCount(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_QueryRoot_ruleHitRules(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QueryRoot",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_RuleHitCount(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_QueryRoot_ruleHitRules_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _QueryRoot_metrics(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -13976,6 +14356,295 @@ func (ec *executionContext) _Rule_UpdateAt(ctx context.Context, field graphql.Co
 }
 func (ec *executionContext) fieldContext_Rule_UpdateAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("Rule", field, false, false, errors.New("field of type UInt does not have child fields"))
+}
+
+func (ec *executionContext) _RuleHit_UUID(ctx context.Context, field graphql.CollectedField, obj *models.RuleHit) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RuleHit_UUID(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.UUID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RuleHit_UUID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RuleHit", field, false, false, errors.New("field of type ID does not have child fields"))
+}
+
+func (ec *executionContext) _RuleHit_TicketID(ctx context.Context, field graphql.CollectedField, obj *models.RuleHit) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RuleHit_TicketID(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.TicketID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v uint) graphql.Marshaler {
+			return ec.marshalNUInt2uint(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RuleHit_TicketID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RuleHit", field, false, false, errors.New("field of type UInt does not have child fields"))
+}
+
+func (ec *executionContext) _RuleHit_Sequence(ctx context.Context, field graphql.CollectedField, obj *models.RuleHit) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RuleHit_Sequence(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Sequence, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v uint16) graphql.Marshaler {
+			return ec.marshalNUInt162uint16(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RuleHit_Sequence(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RuleHit", field, false, false, errors.New("field of type UInt16 does not have child fields"))
+}
+
+func (ec *executionContext) _RuleHit_RuleName(ctx context.Context, field graphql.CollectedField, obj *models.RuleHit) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RuleHit_RuleName(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.RuleName, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				max, err := ec.unmarshalNInt2int(ctx, 75)
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.Length == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive length is not implemented")
+				}
+				return ec.Directives.Length(ctx, obj, directive0, max)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RuleHit_RuleName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RuleHit", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _RuleHit_Level(ctx context.Context, field graphql.CollectedField, obj *models.RuleHit) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RuleHit_Level(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Level, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v uint8) graphql.Marshaler {
+			return ec.marshalNUInt82uint8(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RuleHit_Level(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RuleHit", field, false, false, errors.New("field of type UInt8 does not have child fields"))
+}
+
+func (ec *executionContext) _RuleHit_Message(ctx context.Context, field graphql.CollectedField, obj *models.RuleHit) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RuleHit_Message(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Message, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				max, err := ec.unmarshalNInt2int(ctx, 150)
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.Length == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive length is not implemented")
+				}
+				return ec.Directives.Length(ctx, obj, directive0, max)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RuleHit_Message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RuleHit", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _RuleHit_CreateAt(ctx context.Context, field graphql.CollectedField, obj *models.RuleHit) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RuleHit_CreateAt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.CreateAt, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v uint) graphql.Marshaler {
+			return ec.marshalNUInt2uint(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RuleHit_CreateAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RuleHit", field, false, false, errors.New("field of type UInt does not have child fields"))
+}
+
+func (ec *executionContext) _RuleHit_UpdateAt(ctx context.Context, field graphql.CollectedField, obj *models.RuleHit) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RuleHit_UpdateAt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.UpdateAt, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v uint) graphql.Marshaler {
+			return ec.marshalOUInt2uint(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_RuleHit_UpdateAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RuleHit", field, false, false, errors.New("field of type UInt does not have child fields"))
+}
+
+func (ec *executionContext) _RuleHitCount_RuleName(ctx context.Context, field graphql.CollectedField, obj *RuleHitCount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RuleHitCount_RuleName(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.RuleName, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_RuleHitCount_RuleName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RuleHitCount", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _RuleHitCount_Level(ctx context.Context, field graphql.CollectedField, obj *RuleHitCount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RuleHitCount_Level(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Level, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v uint8) graphql.Marshaler {
+			return ec.marshalNUInt82uint8(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RuleHitCount_Level(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RuleHitCount", field, false, false, errors.New("field of type UInt8 does not have child fields"))
+}
+
+func (ec *executionContext) _RuleHitCount_Count(ctx context.Context, field graphql.CollectedField, obj *RuleHitCount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RuleHitCount_Count(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Count, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v uint) graphql.Marshaler {
+			return ec.marshalNUInt2uint(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RuleHitCount_Count(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RuleHitCount", field, false, false, errors.New("field of type UInt does not have child fields"))
 }
 
 func (ec *executionContext) _Statement_UUID(ctx context.Context, field graphql.CollectedField, obj *models.Statement) (ret graphql.Marshaler) {
@@ -19505,6 +20174,11 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._Statement(ctx, sel, obj)
+	case *models.RuleHit:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._RuleHit(ctx, sel, obj)
 	case *models.Rule:
 		if obj == nil {
 			return graphql.Null
@@ -22297,6 +22971,72 @@ func (ec *executionContext) _QueryRoot(ctx context.Context, sel ast.SelectionSet
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "ruleHits":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._QueryRoot_ruleHits(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "ruleHitLevels":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._QueryRoot_ruleHitLevels(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "ruleHitRules":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._QueryRoot_ruleHitRules(ctx, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "metrics":
 			field := field
 
@@ -22608,6 +23348,127 @@ func (ec *executionContext) _Rule(ctx context.Context, sel ast.SelectionSet, obj
 		case "UpdateAt":
 			out.Values[i] = ec._Rule_UpdateAt(ctx, field, obj)
 			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
+
+	ec.ProcessDeferredGroup(graphql.DeferredGroup{
+		Defers:   deferLabelToView,
+		Path:     graphql.GetPath(ctx),
+		FieldSet: deferredFieldSet,
+		Context:  ctx,
+	})
+
+	return out
+}
+
+var ruleHitImplementors = []string{"RuleHit", "Node"}
+
+func (ec *executionContext) _RuleHit(ctx context.Context, sel ast.SelectionSet, obj *models.RuleHit) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, ruleHitImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferredFieldSet := graphql.NewFieldSet(nil)
+	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RuleHit")
+		case "UUID":
+			out.Values[i] = ec._RuleHit_UUID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "TicketID":
+			out.Values[i] = ec._RuleHit_TicketID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Sequence":
+			out.Values[i] = ec._RuleHit_Sequence(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "RuleName":
+			out.Values[i] = ec._RuleHit_RuleName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Level":
+			out.Values[i] = ec._RuleHit_Level(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Message":
+			out.Values[i] = ec._RuleHit_Message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "CreateAt":
+			out.Values[i] = ec._RuleHit_CreateAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "UpdateAt":
+			out.Values[i] = ec._RuleHit_UpdateAt(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
+
+	ec.ProcessDeferredGroup(graphql.DeferredGroup{
+		Defers:   deferLabelToView,
+		Path:     graphql.GetPath(ctx),
+		FieldSet: deferredFieldSet,
+		Context:  ctx,
+	})
+
+	return out
+}
+
+var ruleHitCountImplementors = []string{"RuleHitCount"}
+
+func (ec *executionContext) _RuleHitCount(ctx context.Context, sel ast.SelectionSet, obj *RuleHitCount) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, ruleHitCountImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferredFieldSet := graphql.NewFieldSet(nil)
+	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RuleHitCount")
+		case "RuleName":
+			out.Values[i] = ec._RuleHitCount_RuleName(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "Level":
+			out.Values[i] = ec._RuleHitCount_Level(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Count":
+			out.Values[i] = ec._RuleHitCount_Count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		default:
@@ -25289,6 +26150,46 @@ func (ec *executionContext) marshalORule2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinte
 	return ec._Rule(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalORuleHit2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRuleHit(ctx context.Context, sel ast.SelectionSet, v []*models.RuleHit) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalORuleHit2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRuleHit(ctx, sel, v[i])
+	})
+
+	return ret
+}
+
+func (ec *executionContext) marshalORuleHit2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐRuleHit(ctx context.Context, sel ast.SelectionSet, v *models.RuleHit) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._RuleHit(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalORuleHitCount2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRuleHitCount(ctx context.Context, sel ast.SelectionSet, v []*RuleHitCount) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalORuleHitCount2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRuleHitCount(ctx, sel, v[i])
+	})
+
+	return ret
+}
+
+func (ec *executionContext) marshalORuleHitCount2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRuleHitCount(ctx context.Context, sel ast.SelectionSet, v *RuleHitCount) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._RuleHitCount(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalOStatement2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐStatement(ctx context.Context, sel ast.SelectionSet, v *models.Statement) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -25471,6 +26372,24 @@ func (ec *executionContext) marshalOUInt2uint(ctx context.Context, sel ast.Selec
 	_ = sel
 	_ = ctx
 	res := MarshalUInt(v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOUInt2ᚖuint(ctx context.Context, v any) (*uint, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := UnmarshalUInt(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOUInt2ᚖuint(ctx context.Context, sel ast.SelectionSet, v *uint) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := MarshalUInt(*v)
 	return res
 }
 
