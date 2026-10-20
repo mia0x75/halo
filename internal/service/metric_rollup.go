@@ -5,20 +5,29 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/mia0x75/halo/internal/domain"
 )
 
-// Metric names written by the daily rollup. The daily buckets hold a snapshot
-// of one day, so they are gauges: recomputing a day overwrites the value
-// instead of accumulating it.
+// Metric names of the daily buckets.
+//
+// 工单类的每日计数（tickets-*）由事件流实时累加：工单在当天创建、在当天执行，
+// 这些事实只在发生的瞬间可知，事后按「创建日 + 当前状态」统计会让历史数值
+// 随状态推进而回溯变化，趋势不可信。汇总作业不再写这些桶。
 const (
-	MetricTicketsCreated    = "tickets-created"
-	MetricTicketsApproved   = "tickets-approved"
-	MetricTicketsExecuted   = "tickets-executed"
-	MetricTicketsFailed     = "tickets-failed"
-	MetricViolationsError   = "violations-error"
+	// MetricTicketsCreated counts the tickets created on a day.
+	MetricTicketsCreated = "tickets-created"
+	// MetricTicketsExecuted counts the tickets executed on a day.
+	MetricTicketsExecuted = "tickets-executed"
+	// MetricTicketsFailed counts the tickets that failed to execute on a day.
+	MetricTicketsFailed = "tickets-failed"
+	// MetricViolationsError counts the error level rule hits of a day.
+	MetricViolationsError = "violations-error"
+	// MetricViolationsWarning counts the warning level rule hits of a day.
 	MetricViolationsWarning = "violations-warning"
-	MetricViolationsNotice  = "violations-notice"
+	// MetricViolationsNotice counts the notice level rule hits of a day.
+	MetricViolationsNotice = "violations-notice"
 	// MetricRollupDone marks a day whose rollup finished, so a retried job
 	// can tell whether the day is already aggregated.
 	MetricRollupDone = "rollup-done"
@@ -41,11 +50,6 @@ func (s *MetricService) RollupDay(ctx context.Context, date string) (RollupResul
 		return RollupResult{}, err
 	}
 
-	tickets, err := s.tickets.CountByStatus(ctx, from, to)
-	if err != nil {
-		return RollupResult{}, err
-	}
-
 	violations, err := s.hits.CountByLevel(ctx, from, to)
 	if err != nil {
 		return RollupResult{}, err
@@ -61,23 +65,6 @@ func (s *MetricService) RollupDay(ctx context.Context, date string) (RollupResul
 		return nil
 	}
 
-	counts := map[domain.TicketStatus]float64{}
-	for _, item := range tickets {
-		counts[item.Status] = float64(item.Count)
-	}
-	if err := write(MetricTicketsCreated, counts[domain.TicketStatusWaitingForVld]); err != nil {
-		return RollupResult{}, err
-	}
-	if err := write(MetricTicketsApproved, counts[domain.TicketStatusLgtm]); err != nil {
-		return RollupResult{}, err
-	}
-	if err := write(MetricTicketsExecuted, counts[domain.TicketStatusDone]); err != nil {
-		return RollupResult{}, err
-	}
-	if err := write(MetricTicketsFailed, counts[domain.TicketStatusVldFailure]+counts[domain.TicketStatusExecFailure]); err != nil {
-		return RollupResult{}, err
-	}
-
 	levels := map[uint8]float64{}
 	for _, item := range violations {
 		levels[item.Level] = float64(item.Count)
@@ -90,6 +77,30 @@ func (s *MetricService) RollupDay(ctx context.Context, date string) (RollupResul
 	}
 	if err := write(MetricViolationsNotice, levels[uint8(domain.RuleLevelMessage)]); err != nil {
 		return RollupResult{}, err
+	}
+
+	// 工单类的每日计数由事件流写入，这里只补齐缺失的日子，
+	// 让趋势图不会出现断点；已有计数的日子保持不动。
+	for _, name := range []string{MetricTicketsCreated, MetricTicketsExecuted, MetricTicketsFailed} {
+		key := domain.MetricKey{Name: name, Scope: domain.MetricScopeDaily, Bucket: date}
+		if _, err := s.metric.GetByKey(ctx, key); err == nil {
+			continue
+		} else if !isNotFound(err) {
+			return RollupResult{}, err
+		}
+		if err := s.metric.Create(ctx, &domain.Metric{
+			UUID:     uuid.NewString(),
+			Name:     name,
+			Scope:    domain.MetricScopeDaily,
+			Bucket:   date,
+			Type:     domain.MetricTypeCounter,
+			Value:    0,
+			Version:  1,
+			CreateAt: uint(time.Now().Unix()),
+		}); err != nil {
+			return RollupResult{}, err
+		}
+		written++
 	}
 
 	// 完成标记放在最后：中途失败时它不会出现，重跑时会重新覆盖当天。

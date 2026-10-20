@@ -10,6 +10,7 @@ import (
 
 	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/models"
+	"github.com/mia0x75/halo/internal/service"
 )
 
 // GlobalAuditLogWriter returns an audit handler that persists the event's
@@ -103,8 +104,15 @@ func GlobalMetricsUpdater(repo domain.MetricRepository) Handler {
 	return func(ctx context.Context, ev Event) error {
 		switch e := ev.(type) {
 		case *TicketCreated:
+			// 每日计数在事件发生的当下累加，历史数值才不会随状态推进而回溯变化。
+			if err := bumpDaily(ctx, repo, service.MetricTicketsCreated); err != nil {
+				return err
+			}
 			return ticketStats(ctx, repo, e.User.UUID, 1)
 		case *TicketRemoved:
+			if err := bumpDaily(ctx, repo, service.MetricTicketsCreated, -1); err != nil {
+				return err
+			}
 			return ticketStats(ctx, repo, e.User.UUID, -1)
 		case *QueryCreated:
 			return queryStats(ctx, repo, e.User.UUID, "total-queries")
@@ -128,6 +136,16 @@ func GlobalMetricsUpdater(repo domain.MetricRepository) Handler {
 				return err
 			}
 			return bump(ctx, repo, userKey(e.User.UUID, "total-comments"), 1)
+		case *TicketExecuted:
+			if err := bumpDaily(ctx, repo, service.MetricTicketsExecuted); err != nil {
+				return err
+			}
+			return ticketStats(ctx, repo, "", 1)
+		case *TicketFailed:
+			if err := bumpDaily(ctx, repo, service.MetricTicketsFailed); err != nil {
+				return err
+			}
+			return ticketStats(ctx, repo, "", 1)
 		case *ClusterCreated:
 			return bump(ctx, repo, overallKey("total-clusters"), 1)
 		case *ClusterRemoved:
@@ -139,13 +157,14 @@ func GlobalMetricsUpdater(repo domain.MetricRepository) Handler {
 	}
 }
 
-// ticketStats updates the overall, daily and per-user ticket counters.
+// ticketStats updates the overall and per-user ticket counters. The daily
+// counters are written by the event handler, where the day of the fact is known.
 func ticketStats(ctx context.Context, repo domain.MetricRepository, userUUID string, delta float64) error {
 	if err := bump(ctx, repo, overallKey("total-tickets"), delta); err != nil {
 		return err
 	}
-	if err := bump(ctx, repo, dailyKey("total-tickets", time.Now().Format("2006-01-02")), delta); err != nil {
-		return err
+	if userUUID == "" {
+		return nil
 	}
 	return bump(ctx, repo, userKey(userUUID, "total-tickets"), delta)
 }
@@ -190,6 +209,25 @@ func bump(ctx context.Context, repo domain.MetricRepository, key domain.MetricKe
 func setGauge(ctx context.Context, repo domain.MetricRepository, key domain.MetricKey, value float64) error {
 	if err := repo.SetGauge(ctx, key, value); err != nil {
 		log.Warnf("[W] metric gauge write failed, name=%s scope=%d: %s", key.Name, key.Scope, err.Error())
+	}
+	return nil
+}
+
+// bumpDaily accumulates a daily counter for the current day. The metric name
+// lives in the service package, where the rollup job writes the other daily
+// buckets.
+func bumpDaily(ctx context.Context, repo domain.MetricRepository, name string, delta ...float64) error {
+	value := 1.0
+	if len(delta) > 0 {
+		value = delta[0]
+	}
+	key := domain.MetricKey{
+		Name:   name,
+		Scope:  domain.MetricScopeDaily,
+		Bucket: time.Now().Format("2006-01-02"),
+	}
+	if err := repo.Increment(ctx, key, value); err != nil {
+		log.Warnf("[W] daily metric increment failed, name=%s: %s", name, err.Error())
 	}
 	return nil
 }
