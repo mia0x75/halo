@@ -9,6 +9,9 @@ export default defineConfig({
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
   },
   server: {
+    // Vite 默认只监听 localhost 的 IPv6 回环，浏览器用 127.0.0.1 访问会连不上；
+    // 监听所有网卡后 IPv4、IPv6 与容器外访问都可用。
+    host: true,
     proxy: {
       // The Go backend serves GraphQL under /api; it listens on :443 with the
       // self-signed certificate from certs/, hence secure:false for dev only.
