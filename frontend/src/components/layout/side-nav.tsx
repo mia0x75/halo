@@ -18,7 +18,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useGraphQL } from "@/hooks/use-graphql"
-import { ME_QUERY, type MeUser } from "@/lib/api/queries"
+import {
+  ME_QUERY,
+  MY_TICKETS_QUERY,
+  PENDING_REVIEWS_QUERY,
+  type MeUser,
+  type TicketConnectionNode,
+} from "@/lib/api/queries"
 import { cn } from "@/lib/utils"
 
 export interface SideNavProps {
@@ -35,6 +41,20 @@ export function SideNav({ active, onSelect, collapsed, onToggle }: SideNavProps)
   })
   const userName = me.data?.me.Name || "张三"
   const roleName = me.data?.me.Roles?.[0]?.Name || "管理员"
+
+  // 侧栏徽标用接口里的真实数量，取不到时保留假数据里的数字。
+  const myTickets = useGraphQL<
+    { me: { MyTickets?: TicketConnectionNode | null } | null },
+    { first: number }
+  >(MY_TICKETS_QUERY, { first: 1 }, { me: null })
+  const pendingReviews = useGraphQL<
+    { me: { PendingReviews?: TicketConnectionNode | null } | null },
+    { first: number }
+  >(PENDING_REVIEWS_QUERY, { first: 1 }, { me: null })
+  const badgeCounts: Record<string, number | undefined> = {
+    "my-tickets": myTickets.data?.me?.MyTickets?.totalCount,
+    "pending-review": pendingReviews.data?.me?.PendingReviews?.totalCount,
+  }
 
   return (
     <aside
@@ -141,7 +161,7 @@ export function SideNav({ active, onSelect, collapsed, onToggle }: SideNavProps)
                     >
                       <IconComponent size={20} stroke={1.5} className="shrink-0" />
                       {collapsed ? null : <span className="truncate">{item.label}</span>}
-                      {item.badge !== undefined && !collapsed ? (
+                      {(badgeCounts[item.key] ?? item.badge) !== undefined && !collapsed ? (
                         <span
                           className={cn(
                             "ml-auto rounded-md px-1 py-0.5 text-[0.625rem] font-medium",

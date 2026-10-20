@@ -3,9 +3,7 @@ import {
   IconCalendarTime,
   IconChartBar,
   IconDatabase,
-  IconListCheck,
   IconSettings,
-  IconTicket,
   IconUsers,
 } from "@tabler/icons-react"
 
@@ -16,6 +14,7 @@ import { DashboardPage } from "@/pages/dashboard-page"
 import { LogsPage } from "@/pages/logs-page"
 import { PlaceholderPage } from "@/pages/placeholder-page"
 import { RulesPage } from "@/pages/rules-page"
+import { TicketQueuePage } from "@/pages/ticket-queue-page"
 import { TicketsPage } from "@/pages/tickets-page"
 import { ViolationsPage } from "@/pages/violations-page"
 
@@ -33,20 +32,8 @@ export default function App() {
       {page === "rules" ? <RulesPage /> : null}
       {page === "violations" ? <ViolationsPage /> : null}
       {page === "logs" ? <LogsPage /> : null}
-      {page === "my-tickets" ? (
-        <PlaceholderPage
-          title="我的工单"
-          description="我提交与参与审核的工单"
-          icon={IconTicket}
-        />
-      ) : null}
-      {page === "pending-review" ? (
-        <PlaceholderPage
-          title="待我审核"
-          description="等待我处理审核的工单"
-          icon={IconListCheck}
-        />
-      ) : null}
+      {page === "my-tickets" ? <TicketQueuePage mode="mine" /> : null}
+      {page === "pending-review" ? <TicketQueuePage mode="review" /> : null}
       {page === "statements" ? (
         <PlaceholderPage
           title="语句管理"

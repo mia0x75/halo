@@ -185,3 +185,61 @@ export const LOGIN_MUTATION = `
     }
   }
 `
+
+export const MY_TICKETS_QUERY = `
+  query MyTickets($first: Int, $after: String) {
+    me {
+      MyTickets(first: $first, after: $after) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          hasPreviousPage
+          startCursor
+          endCursor
+        }
+        edges {
+          cursor
+          node {
+            UUID
+            Database
+            Subject
+            Status
+            CreateAt
+            User { UUID Name }
+            Reviewer { UUID Name }
+            Cluster { UUID Alias Host IP Port }
+          }
+        }
+      }
+    }
+  }
+`
+
+export const PENDING_REVIEWS_QUERY = `
+  query PendingReviews($first: Int, $after: String) {
+    me {
+      PendingReviews(first: $first, after: $after) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          hasPreviousPage
+          startCursor
+          endCursor
+        }
+        edges {
+          cursor
+          node {
+            UUID
+            Database
+            Subject
+            Status
+            CreateAt
+            User { UUID Name }
+            Reviewer { UUID Name }
+            Cluster { UUID Alias Host IP Port }
+          }
+        }
+      }
+    }
+  }
+`
