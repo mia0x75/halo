@@ -1,11 +1,11 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* 寒蝉团圆体（Chill Reunion Sans）：界面默认字体。
-   字体文件按界面实际用到的字符做了子集化，其余字符回落到系统字体。 */
+/* 寒蝉团圆体 Round（ChillReunion_Round）：界面默认字体。
+   全量字形，不做子集化——审核意见、SQL 注释等都是用户临时输入的字符。 */
 @font-face {
-  font-family: "Chill Reunion Sans";
-  src: url("./assets/fonts/ChillReunionSans.woff2") format("woff2");
+  font-family: "寒蝉团圆体 Round";
+  src: url("./assets/fonts/ChillReunionRound.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -14,7 +14,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: "Chill Reunion Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "寒蝉团圆体 Round", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-heading: var(--font-sans);
 
   --color-background: var(--halo-canvas);

@@ -36,7 +36,7 @@ export function ApexChart({ type, series, options, height = 240, className, id }
       // 放在这里统一设置，各图表无需重复声明。
       chart: {
         fontFamily:
-          '"Chill Reunion Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+          '"寒蝉团圆体 Round", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
         ...options?.chart,
         type,
         height,
