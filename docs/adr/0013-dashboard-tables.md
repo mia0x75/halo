@@ -52,8 +52,21 @@
 - `internal/worker` 目前仍是内存调度，本轮只落了表与仓储，接入 worker 持久化
   留作后续（表结构已就位）。
 
-## 后续
+## 后续（已补齐的链路）
 
-- worker 改为从 `mm_tasks` 取待执行任务、执行后回写状态与错误；
+四张表最初只通到服务层，随后补齐了写入路径与查询面：
+
+- 群集创建/更新接受 `GroupUUID`，写入 `mm_clusters.group_id`；
+- 定时任务记录创建人与目标群集（`mm_crons.user_id/cluster_id`）；
+- worker 调度即建 `mm_tasks` 行、执行后回写状态与失败原因，
+  GraphQL 暴露 `taskExecutions` / `taskExecutionSummary`；
+- 规则引擎适配器（`validate.Adapter`）接通，语句与审核两条链路都能拿到
+  目标元数据，命中明细与语句在同一事务落库；
+- 新增查询统一标注 `@auth`，避免未登录访问时解析器取凭证 panic。
+
+## 遗留
+
 - `mm_metrics` 的时序桶需要保留期与清理策略，用 `mm_tasks` 定期清；
-- 站内消息与邮件通知的分工需要再定：当前两者并存，事件侧同时触发。
+- 站内消息与邮件通知的分工需要再定：当前两者并存，事件侧同时触发；
+- 新旧两条校验链路并存：工单审核走 legacy `validate.Run`，语句服务走
+  analyzer + adapter，切换时要注意命中明细不会重复写入。
