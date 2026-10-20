@@ -125,6 +125,8 @@ export const GROUPS_QUERY = `
 
 export interface TicketNode {
   UUID: string
+  /** 自增 ID，命中记录按它关联工单 */
+  TicketID: number
   Database: string
   Subject: string
   Status: number
@@ -159,6 +161,7 @@ export const TICKETS_QUERY = `
         cursor
         node {
           UUID
+          TicketID
           Database
           Subject
           Status
@@ -434,4 +437,91 @@ export interface ClusterTestResult {
   Version: string
   LatencyMs: number
   Databases: string[]
+}
+
+export const RULES_QUERY = `
+  query Rules {
+    rules {
+      UUID
+      Name
+      Group
+      Level
+      Description
+      Parameters
+      Bitwise
+      Func
+      Message
+    }
+  }
+`
+
+export const RULE_HITS_QUERY = `
+  query RuleHits($first: Int) {
+    ruleHits(first: $first) {
+      UUID
+      TicketID
+      Sequence
+      RuleName
+      Level
+      Message
+      CreateAt
+    }
+  }
+`
+
+export const LOGS_QUERY = `
+  query Logs($first: Int, $after: String) {
+    logs(first: $first, after: $after) {
+      totalCount
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      edges {
+        cursor
+        node {
+          UUID
+          LogID
+          User { Name Email }
+          Operation
+          CreateAt
+        }
+      }
+    }
+  }
+`
+
+export interface RuleNode {
+  UUID: string
+  Name: string
+  Group: number
+  /** 严重级别：0 提示 1 错误 2 警告 */
+  Level: number
+  Description: string
+  Parameters: string
+  Bitwise: number
+  Func: string
+  Message: string
+}
+
+export interface RuleHitNode {
+  UUID: string
+  TicketID: number
+  Sequence: number
+  RuleName: string
+  /** 严重级别：0 提示 1 错误 2 警告 */
+  Level: number
+  Message: string
+  CreateAt: number
+}
+
+export interface LogNode {
+  UUID: string
+  LogID: number
+  User: { Name: string | null; Email: string }
+  /** 形如 "ticket.update|ticket:<uuid>|" 的结构化日志 */
+  Operation: string
+  CreateAt: number
 }
