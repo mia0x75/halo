@@ -132,6 +132,19 @@ func (r *TicketRepo) ListByUser(ctx context.Context, userID uint) ([]*domain.Tic
 	return out, nil
 }
 
+// ListByReviewer returns every ticket the user reviews, oldest first.
+func (r *TicketRepo) ListByReviewer(ctx context.Context, userID uint) ([]*domain.Ticket, error) {
+	rows, err := r.q.ListTicketsByReviewer(ctx, int64(userID))
+	if err != nil {
+		return nil, wrap("ticket.ListByReviewer", err)
+	}
+	out := make([]*domain.Ticket, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, ticketFromRow(row))
+	}
+	return out, nil
+}
+
 // CountByStatus counts the tickets per status inside a time window.
 func (r *TicketRepo) CountByStatus(ctx context.Context, from, to uint) ([]domain.TicketStatusCount, error) {
 	rows, err := r.q.CountTicketsByStatus(ctx, CountTicketsByStatusParams{

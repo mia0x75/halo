@@ -114,6 +114,23 @@ func (s *TicketService) ListByUser(ctx context.Context, userID uint) ([]*domain.
 	return s.tickets.ListByUser(ctx, userID)
 }
 
+// ListPendingReviews returns the tickets waiting for the user's manual
+// review. Only the tickets that already passed the automated review are in
+// the queue.
+func (s *TicketService) ListPendingReviews(ctx context.Context, userID uint) ([]*domain.Ticket, error) {
+	tickets, err := s.tickets.ListByReviewer(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	pending := make([]*domain.Ticket, 0, len(tickets))
+	for _, ticket := range tickets {
+		if ticket.Status == domain.TicketStatusWaitingForMrv {
+			pending = append(pending, ticket)
+		}
+	}
+	return pending, nil
+}
+
 // SubmitRequest is the input for submitting a new ticket.
 type SubmitRequest struct {
 	ClusterID uint

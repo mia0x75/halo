@@ -20,6 +20,8 @@ func (f *fakeTx) WithTx(ctx context.Context, fn func(ctx context.Context, repos 
 type fakeTicketRepo struct {
 	byID   map[uint]*domain.Ticket
 	nextID uint
+	// reviewer 记录按审核人查询时返回的工单
+	reviewer []*domain.Ticket
 }
 
 func newFakeTicketRepo() *fakeTicketRepo {
@@ -88,6 +90,10 @@ func (f *fakeTicketRepo) List(_ context.Context, _ int64, _ int) ([]*domain.Tick
 
 func (f *fakeTicketRepo) ListByUser(_ context.Context, _ uint) ([]*domain.Ticket, error) {
 	return nil, nil
+}
+
+func (f *fakeTicketRepo) ListByReviewer(_ context.Context, _ uint) ([]*domain.Ticket, error) {
+	return f.reviewer, nil
 }
 
 func (f *fakeTicketRepo) GetByCronID(_ context.Context, _ uint) (*domain.Ticket, error) {

@@ -523,20 +523,22 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		Avatar    func(childComplexity int) int
-		Clusters  func(childComplexity int, after *string, before *string, first *int, last *int) int
-		CreateAt  func(childComplexity int) int
-		Email     func(childComplexity int) int
-		Metrics   func(childComplexity int) int
-		Name      func(childComplexity int) int
-		Phone     func(childComplexity int) int
-		Queries   func(childComplexity int, after *string, before *string, first *int, last *int) int
-		Reviewers func(childComplexity int) int
-		Roles     func(childComplexity int) int
-		Status    func(childComplexity int) int
-		Tickets   func(childComplexity int, after *string, before *string, first *int, last *int) int
-		UUID      func(childComplexity int) int
-		UpdateAt  func(childComplexity int) int
+		Avatar         func(childComplexity int) int
+		Clusters       func(childComplexity int, after *string, before *string, first *int, last *int) int
+		CreateAt       func(childComplexity int) int
+		Email          func(childComplexity int) int
+		Metrics        func(childComplexity int) int
+		MyTickets      func(childComplexity int, after *string, before *string, first *int, last *int) int
+		Name           func(childComplexity int) int
+		PendingReviews func(childComplexity int, after *string, before *string, first *int, last *int) int
+		Phone          func(childComplexity int) int
+		Queries        func(childComplexity int, after *string, before *string, first *int, last *int) int
+		Reviewers      func(childComplexity int) int
+		Roles          func(childComplexity int) int
+		Status         func(childComplexity int) int
+		Tickets        func(childComplexity int, after *string, before *string, first *int, last *int) int
+		UUID           func(childComplexity int) int
+		UpdateAt       func(childComplexity int) int
 	}
 
 	UserConnection struct {
@@ -685,6 +687,8 @@ type UserResolver interface {
 	Avatar(ctx context.Context, obj *models.User) (*models.Avatar, error)
 	Roles(ctx context.Context, obj *models.User) ([]*models.Role, error)
 	Reviewers(ctx context.Context, obj *models.User) ([]*models.User, error)
+	MyTickets(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*TicketConnection, error)
+	PendingReviews(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*TicketConnection, error)
 	Metrics(ctx context.Context, obj *models.User) ([]*models.Metric, error)
 	Clusters(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*ClusterConnection, error)
 	Tickets(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*TicketConnection, error)
@@ -3115,12 +3119,34 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.Metrics(childComplexity), true
+	case "User.MyTickets":
+		if e.ComplexityRoot.User.MyTickets == nil {
+			break
+		}
+
+		args, err := ec.field_User_MyTickets_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.User.MyTickets(childComplexity, args["after"].(*string), args["before"].(*string), args["first"].(*int), args["last"].(*int)), true
 	case "User.Name":
 		if e.ComplexityRoot.User.Name == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.Name(childComplexity), true
+	case "User.PendingReviews":
+		if e.ComplexityRoot.User.PendingReviews == nil {
+			break
+		}
+
+		args, err := ec.field_User_PendingReviews_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.User.PendingReviews(childComplexity, args["after"].(*string), args["before"].(*string), args["first"].(*int), args["last"].(*int)), true
 	case "User.Phone":
 		if e.ComplexityRoot.User.Phone == nil {
 			break
@@ -4131,6 +4157,10 @@ func (ec *executionContext) childFields_User(ctx context.Context, field graphql.
 		return ec.fieldContext_User_Roles(ctx, field)
 	case "Reviewers":
 		return ec.fieldContext_User_Reviewers(ctx, field)
+	case "MyTickets":
+		return ec.fieldContext_User_MyTickets(ctx, field)
+	case "PendingReviews":
+		return ec.fieldContext_User_PendingReviews(ctx, field)
 	case "Metrics":
 		return ec.fieldContext_User_Metrics(ctx, field)
 	case "Clusters":
@@ -6041,6 +6071,82 @@ func (ec *executionContext) field_Ticket_Statements_args(ctx context.Context, ra
 }
 
 func (ec *executionContext) field_User_Clusters_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["after"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "before",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["before"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg2
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "last",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["last"] = arg3
+	return args, nil
+}
+
+func (ec *executionContext) field_User_MyTickets_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["after"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "before",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["before"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg2
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "last",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["last"] = arg3
+	return args, nil
+}
+
+func (ec *executionContext) field_User_PendingReviews_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "after",
@@ -18416,6 +18522,94 @@ func (ec *executionContext) fieldContext_User_Reviewers(_ context.Context, field
 	return fc, nil
 }
 
+func (ec *executionContext) _User_MyTickets(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_User_MyTickets(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.User().MyTickets(ctx, obj, fc.Args["after"].(*string), fc.Args["before"].(*string), fc.Args["first"].(*int), fc.Args["last"].(*int))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *TicketConnection) graphql.Marshaler {
+			return ec.marshalOTicketConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTicketConnection(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_User_MyTickets(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_TicketConnection(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_User_MyTickets_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_PendingReviews(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_User_PendingReviews(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.User().PendingReviews(ctx, obj, fc.Args["after"].(*string), fc.Args["before"].(*string), fc.Args["first"].(*int), fc.Args["last"].(*int))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *TicketConnection) graphql.Marshaler {
+			return ec.marshalOTicketConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTicketConnection(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_User_PendingReviews(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_TicketConnection(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_User_PendingReviews_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _User_Metrics(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -26434,6 +26628,18 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 				true, false,
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._User_Reviewers(ctx, field, obj)
+				})
+		case "MyTickets":
+			out.ResolveConcurrently(ec.OperationContext, &deferred, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._User_MyTickets(ctx, field, obj)
+				})
+		case "PendingReviews":
+			out.ResolveConcurrently(ec.OperationContext, &deferred, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._User_PendingReviews(ctx, field, obj)
 				})
 		case "Metrics":
 			out.ResolveConcurrently(ec.OperationContext, &deferred, i,

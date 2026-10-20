@@ -1463,6 +1463,24 @@ func (r *userResolver) Tickets(ctx context.Context, obj *models.User, after *str
 	}, nil
 }
 
+// MyTickets 我提交的工单
+func (r *userResolver) MyTickets(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*gqlapi.TicketConnection, error) {
+	tickets, err := r.app.Services.Ticket.ListByUser(ctx, obj.UserID)
+	if err != nil {
+		return nil, err
+	}
+	return ticketConnection(tickets, after, before, first, last)
+}
+
+// PendingReviews 等待我审核的工单
+func (r *userResolver) PendingReviews(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*gqlapi.TicketConnection, error) {
+	tickets, err := r.app.Services.Ticket.ListPendingReviews(ctx, obj.UserID)
+	if err != nil {
+		return nil, err
+	}
+	return ticketConnection(tickets, after, before, first, last)
+}
+
 // Queries 用户发起的查询，TODO: 分页未完成
 func (r *userResolver) Queries(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*gqlapi.QueryConnection, error) {
 	rc := gqlapi.ReturnCodeOK

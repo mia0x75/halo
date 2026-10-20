@@ -136,6 +136,7 @@ type Querier interface {
 	ListTasks(ctx context.Context, arg ListTasksParams) ([]MmTask, error)
 	ListTemplates(ctx context.Context, arg ListTemplatesParams) ([]MmTemplate, error)
 	ListTickets(ctx context.Context, arg ListTicketsParams) ([]MmTicket, error)
+	ListTicketsByReviewer(ctx context.Context, reviewerID uint32) ([]MmTicket, error)
 	ListTicketsByUser(ctx context.Context, userID uint32) ([]MmTicket, error)
 	ListUnreadMessagesByUser(ctx context.Context, arg ListUnreadMessagesByUserParams) ([]MmMessage, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]MmUser, error)

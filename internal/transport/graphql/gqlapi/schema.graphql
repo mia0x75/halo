@@ -1665,6 +1665,56 @@ type User implements Node {
 	Reviewers:  [User]
 
 	"""
+	我提交的工单
+	"""
+	MyTickets(
+		"""
+		Returns the elements in the list that come after the specified cursor.
+		"""
+		after: String
+
+		"""
+		Returns the elements in the list that come before the specified cursor.
+		"""
+		before: String
+
+		"""
+		Returns the first _n_ elements in the list.
+		"""
+		first: Int
+
+		"""
+		Returns the last _n_ elements in the list.
+		"""
+		last: Int
+	): TicketConnection
+
+	"""
+	等待我审核的工单
+	"""
+	PendingReviews(
+		"""
+		Returns the elements in the list that come after the specified cursor.
+		"""
+		after: String
+
+		"""
+		Returns the elements in the list that come before the specified cursor.
+		"""
+		before: String
+
+		"""
+		Returns the first _n_ elements in the list.
+		"""
+		first: Int
+
+		"""
+		Returns the last _n_ elements in the list.
+		"""
+		last: Int
+	): TicketConnection
+
+	"""
 	用户维度的指标信息
 	"""
 	Metrics: [Metric]
