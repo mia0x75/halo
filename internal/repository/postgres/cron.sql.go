@@ -11,7 +11,7 @@ import (
 )
 
 const createCron = `-- name: CreateCron :one
-INSERT INTO mm_crons (uuid, status, name, cmd, params, last_run, next_run, "interval", duration, recurrent, hash, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING cron_id
+INSERT INTO mm_crons (uuid, status, name, cmd, params, last_run, next_run, "interval", duration, recurrent, hash, version, user_id, cluster_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING cron_id
 `
 
 type CreateCronParams struct {
@@ -27,6 +27,8 @@ type CreateCronParams struct {
 	Recurrent sql.NullInt16
 	Hash      sql.NullString
 	Version   int64
+	UserID    int64
+	ClusterID int64
 }
 
 func (q *Queries) CreateCron(ctx context.Context, arg CreateCronParams) (int64, error) {
@@ -43,6 +45,8 @@ func (q *Queries) CreateCron(ctx context.Context, arg CreateCronParams) (int64, 
 		arg.Recurrent,
 		arg.Hash,
 		arg.Version,
+		arg.UserID,
+		arg.ClusterID,
 	)
 	var cron_id int64
 	err := row.Scan(&cron_id)
@@ -68,7 +72,7 @@ func (q *Queries) DeleteCronByUUID(ctx context.Context, uuid string) error {
 }
 
 const getCronByID = `-- name: GetCronByID :one
-SELECT cron_id, uuid, status, name, cmd, params, last_run, next_run, "interval", duration, recurrent, hash, version, update_at, create_at FROM mm_crons WHERE cron_id = $1 LIMIT 1
+SELECT cron_id, uuid, status, name, cmd, params, last_run, next_run, "interval", duration, user_id, cluster_id, recurrent, hash, version, update_at, create_at FROM mm_crons WHERE cron_id = $1 LIMIT 1
 `
 
 func (q *Queries) GetCronByID(ctx context.Context, cronID int64) (MmCron, error) {
@@ -85,6 +89,8 @@ func (q *Queries) GetCronByID(ctx context.Context, cronID int64) (MmCron, error)
 		&i.NextRun,
 		&i.Interval,
 		&i.Duration,
+		&i.UserID,
+		&i.ClusterID,
 		&i.Recurrent,
 		&i.Hash,
 		&i.Version,
@@ -95,7 +101,7 @@ func (q *Queries) GetCronByID(ctx context.Context, cronID int64) (MmCron, error)
 }
 
 const getCronByUUID = `-- name: GetCronByUUID :one
-SELECT cron_id, uuid, status, name, cmd, params, last_run, next_run, "interval", duration, recurrent, hash, version, update_at, create_at FROM mm_crons WHERE uuid = $1 LIMIT 1
+SELECT cron_id, uuid, status, name, cmd, params, last_run, next_run, "interval", duration, user_id, cluster_id, recurrent, hash, version, update_at, create_at FROM mm_crons WHERE uuid = $1 LIMIT 1
 `
 
 func (q *Queries) GetCronByUUID(ctx context.Context, uuid string) (MmCron, error) {
@@ -112,6 +118,8 @@ func (q *Queries) GetCronByUUID(ctx context.Context, uuid string) (MmCron, error
 		&i.NextRun,
 		&i.Interval,
 		&i.Duration,
+		&i.UserID,
+		&i.ClusterID,
 		&i.Recurrent,
 		&i.Hash,
 		&i.Version,
@@ -122,7 +130,7 @@ func (q *Queries) GetCronByUUID(ctx context.Context, uuid string) (MmCron, error
 }
 
 const listCrons = `-- name: ListCrons :many
-SELECT cron_id, uuid, status, name, cmd, params, last_run, next_run, "interval", duration, recurrent, hash, version, update_at, create_at FROM mm_crons WHERE cron_id < $1 ORDER BY cron_id DESC LIMIT $2
+SELECT cron_id, uuid, status, name, cmd, params, last_run, next_run, "interval", duration, user_id, cluster_id, recurrent, hash, version, update_at, create_at FROM mm_crons WHERE cron_id < $1 ORDER BY cron_id DESC LIMIT $2
 `
 
 type ListCronsParams struct {
@@ -150,6 +158,8 @@ func (q *Queries) ListCrons(ctx context.Context, arg ListCronsParams) ([]MmCron,
 			&i.NextRun,
 			&i.Interval,
 			&i.Duration,
+			&i.UserID,
+			&i.ClusterID,
 			&i.Recurrent,
 			&i.Hash,
 			&i.Version,
@@ -170,7 +180,7 @@ func (q *Queries) ListCrons(ctx context.Context, arg ListCronsParams) ([]MmCron,
 }
 
 const listSchedulableCrons = `-- name: ListSchedulableCrons :many
-SELECT cron_id, uuid, status, name, cmd, params, last_run, next_run, "interval", duration, recurrent, hash, version, update_at, create_at FROM mm_crons WHERE recurrent = 1 OR (recurrent <> 1 AND status IN ('P', 'H'))
+SELECT cron_id, uuid, status, name, cmd, params, last_run, next_run, "interval", duration, user_id, cluster_id, recurrent, hash, version, update_at, create_at FROM mm_crons WHERE recurrent = 1 OR (recurrent <> 1 AND status IN ('P', 'H'))
 `
 
 func (q *Queries) ListSchedulableCrons(ctx context.Context) ([]MmCron, error) {
@@ -193,6 +203,8 @@ func (q *Queries) ListSchedulableCrons(ctx context.Context) ([]MmCron, error) {
 			&i.NextRun,
 			&i.Interval,
 			&i.Duration,
+			&i.UserID,
+			&i.ClusterID,
 			&i.Recurrent,
 			&i.Hash,
 			&i.Version,
@@ -213,7 +225,7 @@ func (q *Queries) ListSchedulableCrons(ctx context.Context) ([]MmCron, error) {
 }
 
 const updateCron = `-- name: UpdateCron :exec
-UPDATE mm_crons SET uuid = $1, status = $2, name = $3, cmd = $4, params = $5, last_run = $6, next_run = $7, "interval" = $8, duration = $9, recurrent = $10, hash = $11, version = $12, update_at = NOW() WHERE cron_id = $13
+UPDATE mm_crons SET uuid = $1, status = $2, name = $3, cmd = $4, params = $5, last_run = $6, next_run = $7, "interval" = $8, duration = $9, recurrent = $10, hash = $11, version = $12, user_id = $13, cluster_id = $14, update_at = NOW() WHERE cron_id = $15
 `
 
 type UpdateCronParams struct {
@@ -229,6 +241,8 @@ type UpdateCronParams struct {
 	Recurrent sql.NullInt16
 	Hash      sql.NullString
 	Version   int64
+	UserID    int64
+	ClusterID int64
 	CronID    int64
 }
 
@@ -246,6 +260,8 @@ func (q *Queries) UpdateCron(ctx context.Context, arg UpdateCronParams) error {
 		arg.Recurrent,
 		arg.Hash,
 		arg.Version,
+		arg.UserID,
+		arg.ClusterID,
 		arg.CronID,
 	)
 	return err

@@ -20,6 +20,8 @@ type Cron struct {
 	LastRun   string `db:"last_run"           valid:"-"                                   json:"last_run"  gqlgen:"LastRun"`               //
 	NextRun   string `db:"next_run"           valid:"-"                                   json:"next_run"  gqlgen:"NextRun"`               //
 	Recurrent uint8  `db:"recurrent"              valid:"-"                                   json:"recurrent" gqlgen:"-"`                 //
+	UserID    uint   `db:"user_id"                               valid:"-"                                   json:"user_id"  gqlgen:"-"`                         //
+	ClusterID uint   `db:"cluster_id"                            valid:"-"                                   json:"cluster_id" gqlgen:"-"`                        //
 	Version   int    `db:"version"                                valid:"-"                                   json:"version"   gqlgen:"-"` //
 	UpdateAt  uint   `db:"update_at"                  valid:"-"                                   json:"update_at" gqlgen:"UpdateAt"`      //
 	CreateAt  uint   `db:"create_at"                  valid:"-"                                   json:"create_at" gqlgen:"CreateAt"`      //

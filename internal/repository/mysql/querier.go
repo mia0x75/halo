@@ -12,6 +12,7 @@ import (
 type Querier interface {
 	CountRuleHitsByLevel(ctx context.Context, arg CountRuleHitsByLevelParams) ([]CountRuleHitsByLevelRow, error)
 	CountRuleHitsByRule(ctx context.Context, arg CountRuleHitsByRuleParams) ([]CountRuleHitsByRuleRow, error)
+	CountTasksByStatus(ctx context.Context) ([]CountTasksByStatusRow, error)
 	CountUnreadMessages(ctx context.Context, userID uint32) (int64, error)
 	CreateAvatar(ctx context.Context, arg CreateAvatarParams) (int64, error)
 	CreateCluster(ctx context.Context, arg CreateClusterParams) (int64, error)
@@ -29,6 +30,7 @@ type Querier interface {
 	CreateRule(ctx context.Context, arg CreateRuleParams) error
 	CreateRuleHit(ctx context.Context, arg CreateRuleHitParams) error
 	CreateStatement(ctx context.Context, arg CreateStatementParams) error
+	CreateTask(ctx context.Context, arg CreateTaskParams) error
 	CreateTemplate(ctx context.Context, arg CreateTemplateParams) error
 	CreateTicket(ctx context.Context, arg CreateTicketParams) (int64, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (int64, error)
@@ -58,6 +60,7 @@ type Querier interface {
 	DeleteStatementByTicketSequence(ctx context.Context, arg DeleteStatementByTicketSequenceParams) error
 	DeleteStatementByUUID(ctx context.Context, uuid string) error
 	DeleteStatementsByTicket(ctx context.Context, ticketID uint32) error
+	DeleteTaskByUUID(ctx context.Context, uuid string) error
 	DeleteTemplateByUUID(ctx context.Context, uuid string) error
 	DeleteTicketByID(ctx context.Context, ticketID uint32) error
 	DeleteTicketByUUID(ctx context.Context, uuid string) error
@@ -92,6 +95,7 @@ type Querier interface {
 	GetRuleByUUID(ctx context.Context, uuid string) (MmRule, error)
 	GetStatementByTicketSequence(ctx context.Context, arg GetStatementByTicketSequenceParams) (MmStatement, error)
 	GetStatementByUUID(ctx context.Context, uuid string) (MmStatement, error)
+	GetTaskByUUID(ctx context.Context, uuid string) (MmTask, error)
 	GetTemplateByUUID(ctx context.Context, uuid string) (MmTemplate, error)
 	GetTicketByCronID(ctx context.Context, cronID sql.NullInt32) (MmTicket, error)
 	GetTicketByID(ctx context.Context, ticketID uint32) (MmTicket, error)
@@ -113,6 +117,7 @@ type Querier interface {
 	ListMessagesByUser(ctx context.Context, arg ListMessagesByUserParams) ([]MmMessage, error)
 	ListMetrics(ctx context.Context, arg ListMetricsParams) ([]MmMetric, error)
 	ListOptions(ctx context.Context, arg ListOptionsParams) ([]MmOption, error)
+	ListPendingTasks(ctx context.Context, limit int32) ([]MmTask, error)
 	ListQueries(ctx context.Context, arg ListQueriesParams) ([]MmQuery, error)
 	ListQueriesByUser(ctx context.Context, userID uint32) ([]MmQuery, error)
 	ListRoles(ctx context.Context, arg ListRolesParams) ([]MmRole, error)
@@ -121,6 +126,7 @@ type Querier interface {
 	ListRules(ctx context.Context, arg ListRulesParams) ([]MmRule, error)
 	ListSchedulableCrons(ctx context.Context) ([]MmCron, error)
 	ListStatements(ctx context.Context, arg ListStatementsParams) ([]MmStatement, error)
+	ListTasks(ctx context.Context, arg ListTasksParams) ([]MmTask, error)
 	ListTemplates(ctx context.Context, arg ListTemplatesParams) ([]MmTemplate, error)
 	ListTickets(ctx context.Context, arg ListTicketsParams) ([]MmTicket, error)
 	ListTicketsByUser(ctx context.Context, userID uint32) ([]MmTicket, error)
@@ -143,6 +149,7 @@ type Querier interface {
 	UpdateRole(ctx context.Context, arg UpdateRoleParams) error
 	UpdateRule(ctx context.Context, arg UpdateRuleParams) error
 	UpdateStatement(ctx context.Context, arg UpdateStatementParams) error
+	UpdateTask(ctx context.Context, arg UpdateTaskParams) error
 	UpdateTemplate(ctx context.Context, arg UpdateTemplateParams) error
 	UpdateTicket(ctx context.Context, arg UpdateTicketParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error

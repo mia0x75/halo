@@ -122,3 +122,11 @@ func parsePhone(s string) (uint64, error) {
 func formatPhone(n uint64) string {
 	return strconv.FormatUint(n, 10)
 }
+
+// nullFromTime converts a unix second pointer into a nullable timestamp.
+func nullFromTime(v *uint) sql.NullTime {
+	if v == nil {
+		return sql.NullTime{}
+	}
+	return sql.NullTime{Time: time.Unix(int64(*v), 0).UTC(), Valid: true}
+}

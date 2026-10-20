@@ -62,6 +62,8 @@ type MmCron struct {
 	NextRun   sql.NullString
 	Interval  sql.NullString
 	Duration  sql.NullString
+	UserID    int64
+	ClusterID int64
 	Recurrent sql.NullInt16
 	Hash      sql.NullString
 	Version   int64
@@ -226,6 +228,27 @@ type MmStatement struct {
 	Version      int64
 	UpdateAt     sql.NullTime
 	CreateAt     time.Time
+}
+
+// 异步任务执行表
+type MmTask struct {
+	TaskID      int64
+	Uuid        string
+	Name        string
+	Type        string
+	Payload     string
+	Status      int16
+	Priority    int16
+	Attempt     int16
+	MaxAttempt  int16
+	CronID      int64
+	ScheduledAt time.Time
+	StartedAt   sql.NullTime
+	FinishedAt  sql.NullTime
+	Error       string
+	Version     int64
+	UpdateAt    sql.NullTime
+	CreateAt    time.Time
 }
 
 // 邮件模板表

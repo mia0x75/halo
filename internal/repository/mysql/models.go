@@ -101,6 +101,10 @@ type MmCron struct {
 	Interval sql.NullString
 	// 执行耗时
 	Duration sql.NullString
+	// 创建人
+	UserID uint32
+	// 目标群集，0 表示不限定
+	ClusterID uint32
 	// 是否周期运行
 	Recurrent sql.NullInt16
 	// 哈希值
@@ -375,6 +379,44 @@ type MmStatement struct {
 	Results sql.NullString
 	// 在服务器正确执行后影响的行数
 	RowsAffected sql.NullInt32
+	// 版本
+	Version uint32
+	// 修改时间
+	UpdateAt sql.NullTime
+	// 创建时间
+	CreateAt time.Time
+}
+
+// 异步任务执行表
+type MmTask struct {
+	// 自增主键
+	TaskID uint32
+	// UUID
+	Uuid string
+	// 任务名称
+	Name string
+	// 任务类型
+	Type string
+	// 任务参数（JSON）
+	Payload string
+	// 状态：0 待执行 1 执行中 2 成功 3 失败 4 取消
+	Status uint8
+	// 优先级，数值越小越优先
+	Priority uint8
+	// 已尝试次数
+	Attempt uint8
+	// 最大尝试次数
+	MaxAttempt uint8
+	// 来源定时任务，0 表示无
+	CronID uint32
+	// 计划执行时间
+	ScheduledAt time.Time
+	// 开始执行时间
+	StartedAt sql.NullTime
+	// 结束执行时间
+	FinishedAt sql.NullTime
+	// 失败原因
+	Error string
 	// 版本
 	Version uint32
 	// 修改时间

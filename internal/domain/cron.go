@@ -25,6 +25,8 @@ type Cron struct {
 	Duration  *string    `db:"duration"`
 	Recurrent *uint8     `db:"recurrent"`
 	Hash      *string    `db:"hash"`
+	UserID    uint       `db:"user_id"`
+	ClusterID uint       `db:"cluster_id"`
 	Version   int        `db:"version"`
 	UpdateAt  *uint      `db:"update_at"`
 	CreateAt  uint       `db:"create_at"`

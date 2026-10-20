@@ -129,3 +129,11 @@ func nullFromString(v *string) sql.NullString {
 	}
 	return sql.NullString{String: *v, Valid: true}
 }
+
+// nullFromTime converts a unix second pointer into a nullable timestamp.
+func nullFromTime(v *uint) sql.NullTime {
+	if v == nil {
+		return sql.NullTime{}
+	}
+	return sql.NullTime{Time: time.Unix(int64(*v), 0).UTC(), Valid: true}
+}

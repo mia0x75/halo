@@ -32,6 +32,7 @@ type Repos struct {
 	RuleHit   domain.RuleHitRepository
 	Message   domain.MessageRepository
 	Group     domain.GroupRepository
+	Task      domain.TaskRepository
 	Template  domain.TemplateRepository
 	Ticket    domain.TicketRepository
 	User      domain.UserRepository
