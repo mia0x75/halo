@@ -31,7 +31,7 @@ export function SectionCard({
         <div className="flex flex-col">
           <h3 className="text-base font-medium text-strong">{title}</h3>
           {description ? (
-            <p className="text-xs text-muted-foreground">{description}</p>
+            <p className="text-sm text-muted-foreground">{description}</p>
           ) : null}
         </div>
         {action}

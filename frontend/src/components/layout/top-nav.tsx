@@ -35,7 +35,7 @@ export function TopNav() {
           stroke={1.5}
           className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
         />
-        <Input placeholder="搜索工单、群集、规则…" className="h-9 pl-9" />
+        <Input placeholder="搜索工单、群集、规则…" className="pl-9" />
       </div>
 
       <div className="ml-auto flex items-center gap-1">

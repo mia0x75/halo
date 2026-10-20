@@ -43,9 +43,6 @@
   --color-info-foreground: var(--halo-primary-foreground);
   --color-strong: var(--halo-text-strong);
 
-  /* 卡片阴影：1px 描边下的一层极淡投影 */
-  --shadow-xs: var(--halo-shadow);
-
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
@@ -82,7 +79,7 @@
   --halo-radius: 6px;
   --halo-radius-lg: 8px;
   --halo-radius-xl: 16px;
-  --halo-shadow: 0 1px 3px 0 rgb(18 18 23 / 0.1), 0 1px 2px 0 rgb(18 18 23 / 0.06);
+  --halo-shadow: 0 1px 2px 0 rgb(18 18 23 / 0.05);
 
   color-scheme: light;
 }
@@ -97,7 +94,7 @@
   --halo-text-strong: #ffffff;
   --halo-border: oklch(34.86% 0 0);
   --halo-border-muted: color-mix(in oklab, oklch(92.19% 0 0) 11.9%, transparent);
-  --halo-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px 0 rgb(0 0 0 / 0.2);
+  --halo-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.2);
 
   color-scheme: dark;
 }
