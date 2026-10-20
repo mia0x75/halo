@@ -1118,6 +1118,11 @@ type Statement implements Node {
 	UUID:         ID!
 
 	"""
+	语句所属工单的自增ID
+	"""
+	TicketID:     UInt!
+
+	"""
 	语句的顺序ID
 	"""
 	Sequence:     UInt16!  @range(begin: 1, end: 65535)
@@ -2253,6 +2258,21 @@ type QueryRoot {
 	返回所有的角色信息
 	"""
 	roles: [Role] @auth(requires: [GUEST, USER, DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	语句列表，按创建时间倒序
+	"""
+	statements (
+		"""
+		Returns the elements in the list that come after the specified cursor.
+		"""
+		after: String
+
+		"""
+		Returns the first _n_ elements from the list.
+		"""
+		first: Int
+	): StatementConnection! @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
 
 	"""
 	根据类别返回全部的字典信息

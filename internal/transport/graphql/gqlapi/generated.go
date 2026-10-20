@@ -385,6 +385,7 @@ type ComplexityRoot struct {
 		RuleHitRules         func(childComplexity int, from *uint, to *uint, first *int) int
 		RuleHits             func(childComplexity int, ticketID *uint, rule *string, level *uint8, first *int) int
 		Rules                func(childComplexity int) int
+		Statements           func(childComplexity int, after *string, first *int) int
 		TaskExecutionSummary func(childComplexity int) int
 		TaskExecutions       func(childComplexity int, status *uint8, first *int) int
 		Tasks                func(childComplexity int) int
@@ -452,6 +453,7 @@ type ComplexityRoot struct {
 		Sequence     func(childComplexity int) int
 		Status       func(childComplexity int) int
 		Ticket       func(childComplexity int) int
+		TicketID     func(childComplexity int) int
 		TypeDesc     func(childComplexity int) int
 		UUID         func(childComplexity int) int
 		UpdateAt     func(childComplexity int) int
@@ -655,6 +657,7 @@ type QueryRootResolver interface {
 	Rules(ctx context.Context) ([]*models.Rule, error)
 	Role(ctx context.Context, id string) (*models.Role, error)
 	Roles(ctx context.Context) ([]*models.Role, error)
+	Statements(ctx context.Context, after *string, first *int) (*StatementConnection, error)
 	Glossaries(ctx context.Context, groups []string) ([]*models.Glossary, error)
 	Cron(ctx context.Context, id string) (*models.Cron, error)
 	Crons(ctx context.Context, after *string, before *string, first *int, last *int) (*CronConnection, error)
@@ -2464,6 +2467,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.QueryRoot.Rules(childComplexity), true
+	case "QueryRoot.statements":
+		if e.ComplexityRoot.QueryRoot.Statements == nil {
+			break
+		}
+
+		args, err := ec.field_QueryRoot_statements_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.QueryRoot.Statements(childComplexity, args["after"].(*string), args["first"].(*int)), true
 	case "QueryRoot.taskExecutionSummary":
 		if e.ComplexityRoot.QueryRoot.TaskExecutionSummary == nil {
 			break
@@ -2831,6 +2845,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Statement.Ticket(childComplexity), true
+	case "Statement.TicketID":
+		if e.ComplexityRoot.Statement.TicketID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Statement.TicketID(childComplexity), true
 	case "Statement.TypeDesc":
 		if e.ComplexityRoot.Statement.TypeDesc == nil {
 			break
@@ -4061,6 +4081,8 @@ func (ec *executionContext) childFields_Statement(ctx context.Context, field gra
 	switch field.Name {
 	case "UUID":
 		return ec.fieldContext_Statement_UUID(ctx, field)
+	case "TicketID":
+		return ec.fieldContext_Statement_TicketID(ctx, field)
 	case "Sequence":
 		return ec.fieldContext_Statement_Sequence(ctx, field)
 	case "Content":
@@ -5799,6 +5821,28 @@ func (ec *executionContext) field_QueryRoot_rule_args(ctx context.Context, rawAr
 		return nil, err
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_QueryRoot_statements_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["after"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg1
 	return args, nil
 }
 
@@ -14711,6 +14755,68 @@ func (ec *executionContext) fieldContext_QueryRoot_roles(_ context.Context, fiel
 	return fc, nil
 }
 
+func (ec *executionContext) _QueryRoot_statements(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_QueryRoot_statements(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.QueryRoot().Statements(ctx, fc.Args["after"].(*string), fc.Args["first"].(*int))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				if err != nil {
+					var zeroVal *StatementConnection
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal *StatementConnection
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *StatementConnection) graphql.Marshaler {
+			return ec.marshalNStatementConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐStatementConnection(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_QueryRoot_statements(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QueryRoot",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_StatementConnection(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_QueryRoot_statements_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _QueryRoot_glossaries(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -16938,6 +17044,29 @@ func (ec *executionContext) _Statement_UUID(ctx context.Context, field graphql.C
 }
 func (ec *executionContext) fieldContext_Statement_UUID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("Statement", field, false, false, "ID")
+}
+
+func (ec *executionContext) _Statement_TicketID(ctx context.Context, field graphql.CollectedField, obj *models.Statement) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Statement_TicketID(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.TicketID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v uint) graphql.Marshaler {
+			return ec.marshalNUInt2uint(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Statement_TicketID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Statement", field, false, false, "UInt")
 }
 
 func (ec *executionContext) _Statement_Sequence(ctx context.Context, field graphql.CollectedField, obj *models.Statement) (ret graphql.Marshaler) {
@@ -26086,6 +26215,12 @@ func (ec *executionContext) _QueryRoot(ctx context.Context, sel ast.SelectionSet
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._QueryRoot_roles(ctx, field)
 				})
+		case "statements":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._QueryRoot_statements(ctx, field)
+				})
 		case "glossaries":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
 				true, false,
@@ -26513,6 +26648,11 @@ func (ec *executionContext) _Statement(ctx context.Context, sel ast.SelectionSet
 			out.Values[i] = graphql.MarshalString("Statement")
 		case "UUID":
 			out.Values[i] = ec._Statement_UUID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "TicketID":
+			out.Values[i] = ec._Statement_TicketID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}

@@ -119,6 +119,15 @@ func (s *StatementService) ListByTicket(ctx context.Context, ticketID uint) ([]*
 	return listStatementsByTicket(ctx, s.statements, ticketID)
 }
 
+// List returns a page of statements, newest first. The cursor is the uuid of
+// the last statement of the previous page.
+func (s *StatementService) List(ctx context.Context, cursor string, limit int) ([]*domain.Statement, error) {
+	if limit <= 0 {
+		limit = 20
+	}
+	return s.statements.List(ctx, cursor, limit)
+}
+
 // GetByUUID returns one statement by its stable uuid.
 func (s *StatementService) GetByUUID(ctx context.Context, uuid string) (*domain.Statement, error) {
 	return s.statements.GetByUUID(ctx, uuid)

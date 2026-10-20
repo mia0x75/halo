@@ -13,7 +13,7 @@ import (
 
 // Statement 工单分解出来的单个SQL语句
 type Statement struct {
-	TicketID     uint         `db:"ticket_id"               valid:"required,int,range(0|4294967295)"  json:"ticket_id"     gqlgen:"-"`                 //
+	TicketID     uint         `db:"ticket_id"               valid:"required,int,range(0|4294967295)"  json:"ticket_id"     gqlgen:"TicketID"`          //
 	Sequence     uint16       `db:"sequence"           valid:"required,int,range(0|65535)"       json:"sequence"      gqlgen:"Sequence"`               //
 	UUID         string       `db:"uuid" valid:"-"                                 json:"uuid"          gqlgen:"UUID"`                                 //
 	Content      string       `db:"content"                   valid:"required,length(1|65535),ascii"    json:"content"       gqlgen:"Content"`         //
