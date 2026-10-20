@@ -13,6 +13,8 @@ export interface ApexChartProps {
   options?: ApexOptions
   height?: number
   className?: string
+  /** DOM id，刷选图通过它指向主图 */
+  id?: string
 }
 
 /**
@@ -20,7 +22,7 @@ export interface ApexChartProps {
  * Grid, axis and tooltip colors follow the theme through CSS overrides in
  * index.css, therefore re-rendering on theme change is unnecessary.
  */
-export function ApexChart({ type, series, options, height = 240, className }: ApexChartProps) {
+export function ApexChart({ type, series, options, height = 240, className, id }: ApexChartProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -48,5 +50,5 @@ export function ApexChart({ type, series, options, height = 240, className }: Ap
     }
   }, [options, series, type, height])
 
-  return <div ref={containerRef} className={cn("w-full", className)} />
+  return <div id={id} ref={containerRef} className={cn("w-full", className)} />
 }

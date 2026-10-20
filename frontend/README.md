@@ -88,6 +88,12 @@ src/
 只做前后翻页、不算偏移。工具在 `src/lib/mock/cursor.ts`，状态封装在
 `hooks/use-cursor-pagination.ts`（过滤条件变化时 `reset()` 回到第一页）。
 
+## 趋势图与刷选
+
+「工单趋势」采用设计稿 charts-advanced 的 *Brush and zoom* 形态：上方主图，
+下方一个范围刷选图，拖拽下方即缩放主图（`chart.brush.target` 指向主图 id）。
+数据优先取接口的日桶（`metrics(Scope: 1)`），接口不可用时回落假数据。
+
 ## 深色模式
 
 class 方案（`<html class="dark">`），选择持久化在 `localStorage` 的 `halo-theme`

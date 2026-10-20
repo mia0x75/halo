@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react"
 import { IconChecks } from "@tabler/icons-react"
 
+import { BrushChart } from "@/components/charts/brush-chart"
 import { TrendChart } from "@/components/charts/trend-chart"
 import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
@@ -27,12 +28,15 @@ import {
   type Period,
 } from "@/lib/mock/data"
 
+/** 趋势主图的 DOM id，刷选图按它驱动缩放。 */
+const TREND_CHART_ID = "chart-ticket-trend"
+
 /** 后端的命中级别：0 提示 / 1 错误 / 2 警告。 */
 const levelLabels: Record<number, string> = { 0: "提示", 1: "错误", 2: "警告" }
 
 export function DashboardPage() {
   const [period, setPeriod] = useState<Period>(7)
-  const points = trendFor(period)
+  const mockPoints = trendFor(period)
 
   // 接口未登录或不可用时回落到假数据，演示与联调都能看。
   const metrics = useGraphQL<{ metrics: MetricNode[] }, { scope: number }>(
@@ -44,6 +48,34 @@ export function DashboardPage() {
     const found = metrics.data?.metrics.find((item) => item.Name === name)
     return found ? found.Value : fallback
   }
+
+  // 趋势优先用接口的日桶：按天取回后补齐缺失的日子，曲线不断点。
+  const points = useMemo(() => {
+    const buckets = metrics.data?.metrics ?? []
+    if (buckets.length === 0) return mockPoints
+
+    const byDay = new Map<string, { created: number; executed: number; failed: number }>()
+    for (const item of buckets) {
+      const day = byDay.get(item.Bucket) ?? { created: 0, executed: 0, failed: 0 }
+      if (item.Name === "tickets-created") day.created = item.Value
+      if (item.Name === "tickets-executed") day.executed = item.Value
+      if (item.Name === "tickets-failed") day.failed = item.Value
+      byDay.set(item.Bucket, day)
+    }
+
+    const days = Array.from(byDay.keys()).sort()
+    if (days.length === 0) return mockPoints
+
+    // 只保留所选时段内的日子
+    const limit = period
+    const used = days.slice(-limit)
+    return used.map((day) => ({
+      date: day.slice(5),
+      submitted: byDay.get(day)?.created ?? 0,
+      executed: byDay.get(day)?.executed ?? 0,
+      failed: byDay.get(day)?.failed ?? 0,
+    }))
+  }, [metrics.data, mockPoints, period])
 
   const levels = useGraphQL<{ ruleHitLevels: RuleHitCountNode[] }, { from: number; to: number }>(
     RULE_HIT_LEVELS_QUERY,
@@ -132,12 +164,19 @@ export function DashboardPage() {
           action={<PeriodSelect value={period} onChange={setPeriod} />}
         >
           <TrendChart
+            id={TREND_CHART_ID}
+            selectable
             categories={points.map((point) => point.date)}
             series={[
               { name: "提交", data: points.map((point) => point.submitted) },
               { name: "执行", data: points.map((point) => point.executed) },
               { name: "失败", data: points.map((point) => point.failed) },
             ]}
+          />
+          <BrushChart
+            target={TREND_CHART_ID}
+            categories={points.map((point) => point.date)}
+            series={[{ name: "提交", data: points.map((point) => point.submitted) }]}
           />
         </SectionCard>
 
