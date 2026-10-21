@@ -25,6 +25,10 @@ var LoginData struct {
 	Login *gqlapi.LoginPayload
 }
 
+// serverReady 表示联调服务器可达，不可达时集成用例自行跳过，
+// 纯函数用例照常执行。
+var serverReady bool
+
 var cfg = flag.String("c", "../../../cfg.json", "configuration file")
 
 // TestMain wires the integration suite: it needs a config file and a live
@@ -34,7 +38,7 @@ func TestMain(m *testing.M) {
 	flag.Parse()
 	if _, err := os.Stat(*cfg); err != nil {
 		fmt.Printf("skipping resolvers integration tests: config %s not found\n", *cfg)
-		os.Exit(0)
+		os.Exit(m.Run())
 	}
 	config.ParseConfig(*cfg)
 
@@ -46,9 +50,18 @@ func TestMain(m *testing.M) {
 	Login()
 	if LoginData.Login == nil {
 		fmt.Println("skipping resolvers integration tests: server not reachable")
-		os.Exit(0)
+		os.Exit(m.Run())
 	}
+	serverReady = true
 	os.Exit(m.Run())
+}
+
+// skipUnlessServer 让依赖联调服务器的用例在服务器不可达时跳过。
+func skipUnlessServer(t *testing.T) {
+	t.Helper()
+	if !serverReady {
+		t.Skip("server not reachable")
+	}
 }
 
 func Do(req *graphql.Request, resp interface{}) (err error) {
@@ -70,6 +83,8 @@ func Do(req *graphql.Request, resp interface{}) (err error) {
 }
 
 func TestTicketResolverTicket(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
     query ($ticketUUID: ID!) {
 		ticket (
@@ -95,6 +110,8 @@ func TestTicketResolverTicket(t *testing.T) {
 }
 
 func TestTicketResolverTickets(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
     query ($first: Int!) {
 		tickets (
@@ -122,6 +139,8 @@ func TestTicketResolverTickets(t *testing.T) {
 }
 
 func TestCreateTicket(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
     mutation ($clusterid: String!,$subject:String!,$db:String!,$content:String!,$reviewerid:String!){
 		createTicket(
@@ -254,6 +273,8 @@ func TestCreateTicket(t *testing.T) {
 }
 
 func TestUpdateTicket(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
     mutation ($id:ID!,$clusterid: String!,$subject:String!,$db:String!,$content:String!,$reviewerid:String!){
 		updateTicket(
@@ -425,6 +446,8 @@ func TestUpdateTicket(t *testing.T) {
 }
 
 func TestPatchTicket(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
     mutation ($id: ID!,$status: Int!) {
 		patchTicketStatus(
@@ -471,6 +494,8 @@ func TestPatchTicket(t *testing.T) {
 }
 
 func TestRemoveTickets(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
     mutation ($id: ID!) {
 		removeTicket (
@@ -506,6 +531,8 @@ func TestRemoveTickets(t *testing.T) {
 
 // user
 func TestRegister(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
     mutation ($email: String!,$password: String!) {
 		register (
@@ -546,6 +573,8 @@ func TestRegister(t *testing.T) {
 }
 
 func TestCreateUser(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
     mutation createUser($email:String!,$password:String!,$name:String!,$roleid:[String!]!,$clusterid:[String!]!,
 		$reviewerid:[String!]!,$avatarid:String!,$status:Int!){
@@ -681,6 +710,8 @@ func TestCreateUser(t *testing.T) {
 }
 
 func TestUpdateUser(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
 	mutation updateUser($id:ID!,$email:String!,$password:String!,$name:String!,$status:Int!,$avatarid:String!){
 		updateUser(
@@ -766,6 +797,8 @@ func TestUpdateUser(t *testing.T) {
 }
 
 func TestPatchUserStatus(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
 	mutation patchUserStatus($id:ID!,$status:Int!){
 		patchUserStatus(
@@ -821,6 +854,8 @@ func TestPatchUserStatus(t *testing.T) {
 
 // UpdateProfile
 func TestUpdateProfile(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
     mutation ($id: String!,$name: String!) {
 		updateProfile(
@@ -862,6 +897,8 @@ func TestUpdateProfile(t *testing.T) {
 }
 
 func TestUpdateEmail(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
     mutation ($email:String!) {
 		updateEmail(
@@ -896,6 +933,8 @@ func TestUpdateEmail(t *testing.T) {
 //GrantReviewers
 
 func TestGrantReviewers(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
     mutation ($id:ID!,$reviewerid: [String!]!) {
 		grantReviewers(
@@ -964,6 +1003,8 @@ func TestGrantReviewers(t *testing.T) {
 }
 
 func TestRevokeReviewers(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
     mutation ($id:ID!,$reviewerid: [String!]!) {
 		revokeReviewers(
@@ -1029,6 +1070,8 @@ func TestRevokeReviewers(t *testing.T) {
 }
 
 func TestGrantClusters(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
     mutation ($id:ID!,$clusterid: [String!]!) {
 		grantClusters(
@@ -1094,6 +1137,8 @@ func TestGrantClusters(t *testing.T) {
 }
 
 func TestRevokeClusters(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
     mutation ($id:ID!,$clusterid: [String!]!) {
 		revokeClusters(
@@ -1159,6 +1204,8 @@ func TestRevokeClusters(t *testing.T) {
 }
 
 func TestGrantRoles(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
     mutation ($id:ID!,$roleids: [String!]!) {
 		grantRoles(
@@ -1216,6 +1263,8 @@ func TestGrantRoles(t *testing.T) {
 }
 
 func TestRevokeRoles(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
     mutation ($id:ID!,$roleid:[String!]!) {
 		revokeRoles(
@@ -1304,6 +1353,8 @@ func Login() {
 //clusters
 
 func TestCreateCluster(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
     mutation createCluster($host:String!,$alias:String!,$ip:String!,$port:Int!,$user:String!,$password:String!,$status:Int!){
 		createCluster(
@@ -1395,6 +1446,8 @@ func TestCreateCluster(t *testing.T) {
 }
 
 func TestUpdateCluster(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
     mutation updateCluster($id:ID!,$host:String!,$alias:String!,$ip:String!,$port:Int!,$user:String!,$password:String!,$status:Int!){
 		updateCluster(
@@ -1493,6 +1546,8 @@ func TestUpdateCluster(t *testing.T) {
 }
 
 func TestPatchClusterStatus(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
     mutation patchClusterStatus($id:ID!,$status:Int!){
 		patchClusterStatus(
@@ -1550,6 +1605,8 @@ func TestPatchClusterStatus(t *testing.T) {
 //rule
 
 func TestPatchRuleParameters(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
     mutation patchRuleParameters($id:ID!,$values:String!){
 		patchRuleValues(
@@ -1603,6 +1660,8 @@ func TestPatchRuleParameters(t *testing.T) {
 }
 
 func TestPatchRuleBitwise(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
     mutation patchRuleBitwise($id:ID!,$enabled:String!){
 		patchRuleBitwise(
@@ -1674,6 +1733,8 @@ func TestPatchRuleBitwise(t *testing.T) {
 // }
 
 func TestUpdatePassword(t *testing.T) {
+	skipUnlessServer(t)
+
 	req := graphql.NewRequest(`
     mutation ($new:String!,$old:String!) {
 		updatePassword(
@@ -1717,5 +1778,6 @@ func TestUpdatePassword(t *testing.T) {
 }
 
 func TestUnautherized(t *testing.T) {
+	skipUnlessServer(t)
 
 }
