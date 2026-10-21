@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useGraphQL } from "@/hooks/use-graphql"
+import { isAdmin } from "@/lib/api/roles"
 import { subscribeMessagesChanged } from "@/lib/api/message-events"
 import {
   MY_TICKETS_QUERY,
@@ -47,6 +48,8 @@ export function SideNav({ active, onSelect, collapsed, onToggle, user, onSignOut
   >(PENDING_REVIEWS_QUERY, { first: 1 }, { me: null })
   const unread = useGraphQL<{ unreadMessageCount: number }>(UNREAD_MESSAGE_COUNT_QUERY)
   const refetchUnread = unread.refetch
+  const admin = isAdmin(user.Roles)
+
   const badgeCounts: Record<string, number | undefined> = {
     messages: unread.data?.unreadMessageCount,
     "my-tickets": myTickets.data?.me?.MyTickets?.totalCount,
@@ -140,42 +143,44 @@ export function SideNav({ active, onSelect, collapsed, onToggle, user, onSignOut
               </p>
             )}
             <ul className="flex flex-col gap-0.5">
-              {section.items.map((item) => {
-                const isActive = item.key === active
-                const IconComponent = item.icon
-                return (
-                  <li key={item.key}>
-                    <button
-                      type="button"
-                      title={item.label}
-                      aria-current={isActive ? "page" : undefined}
-                      onClick={() => onSelect(item.key)}
-                      className={cn(
-                        "flex w-full items-center gap-2 rounded-md px-4 py-2 text-sm transition-colors",
-                        collapsed && "justify-center px-0",
-                        isActive
-                          ? "bg-primary font-medium text-primary-foreground"
-                          : "text-foreground hover:bg-surface-secondary",
-                      )}
-                    >
-                      <IconComponent size={20} stroke={1.5} className="shrink-0" />
-                      {collapsed ? null : <span className="truncate">{item.label}</span>}
-                      {badgeCounts[item.key] !== undefined && !collapsed ? (
-                        <span
-                          className={cn(
-                            "ml-auto rounded-md px-1 py-0.5 text-[0.625rem] font-medium",
-                            isActive
-                              ? "bg-primary-foreground/20 text-primary-foreground"
-                              : "bg-surface-secondary text-muted-foreground",
-                          )}
-                        >
-                          {badgeCounts[item.key]}
-                        </span>
-                      ) : null}
-                    </button>
-                  </li>
-                )
-              })}
+              {section.items
+                .filter((item) => !item.adminOnly || admin)
+                .map((item) => {
+                  const isActive = item.key === active
+                  const IconComponent = item.icon
+                  return (
+                    <li key={item.key}>
+                      <button
+                        type="button"
+                        title={item.label}
+                        aria-current={isActive ? "page" : undefined}
+                        onClick={() => onSelect(item.key)}
+                        className={cn(
+                          "flex w-full items-center gap-2 rounded-md px-4 py-2 text-sm transition-colors",
+                          collapsed && "justify-center px-0",
+                          isActive
+                            ? "bg-primary font-medium text-primary-foreground"
+                            : "text-foreground hover:bg-surface-secondary",
+                        )}
+                      >
+                        <IconComponent size={20} stroke={1.5} className="shrink-0" />
+                        {collapsed ? null : <span className="truncate">{item.label}</span>}
+                        {badgeCounts[item.key] !== undefined && !collapsed ? (
+                          <span
+                            className={cn(
+                              "ml-auto rounded-md px-1 py-0.5 text-[0.625rem] font-medium",
+                              isActive
+                                ? "bg-primary-foreground/20 text-primary-foreground"
+                                : "bg-surface-secondary text-muted-foreground",
+                            )}
+                          >
+                            {badgeCounts[item.key]}
+                          </span>
+                        ) : null}
+                      </button>
+                    </li>
+                  )
+                })}
             </ul>
           </div>
         ))}

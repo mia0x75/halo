@@ -9,7 +9,7 @@ import {
   IconLayoutDashboard,
   IconListCheck,
   IconServer,
-  IconSettings,
+  IconShieldLock,
   IconShieldCheck,
   IconTicket,
   IconUsers,
@@ -30,13 +30,15 @@ export type NavKey =
   | "rules"
   | "violations"
   | "logs"
-  | "options"
+  | "settings"
   | "stats"
 
 export interface NavEntry {
   key: NavKey
   label: string
   icon: Icon
+  /** 仅管理员可见的入口 */
+  adminOnly?: boolean
 }
 
 export interface NavSection {
@@ -82,7 +84,7 @@ export const navSections: NavSection[] = [
   {
     title: "系统",
     items: [
-      { key: "options", label: "系统选项", icon: IconSettings },
+      { key: "settings", label: "系统设置", icon: IconShieldLock, adminOnly: true },
       { key: "stats", label: "统计报表", icon: IconChartBar },
     ],
   },

@@ -538,22 +538,23 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		Avatar         func(childComplexity int) int
-		Clusters       func(childComplexity int, after *string, before *string, first *int, last *int) int
-		CreateAt       func(childComplexity int) int
-		Email          func(childComplexity int) int
-		Metrics        func(childComplexity int) int
-		MyTickets      func(childComplexity int, after *string, before *string, first *int, last *int) int
-		Name           func(childComplexity int) int
-		PendingReviews func(childComplexity int, after *string, before *string, first *int, last *int) int
-		Phone          func(childComplexity int) int
-		Queries        func(childComplexity int, after *string, before *string, first *int, last *int) int
-		Reviewers      func(childComplexity int) int
-		Roles          func(childComplexity int) int
-		Status         func(childComplexity int) int
-		Tickets        func(childComplexity int, after *string, before *string, first *int, last *int) int
-		UUID           func(childComplexity int) int
-		UpdateAt       func(childComplexity int) int
+		Avatar          func(childComplexity int) int
+		Clusters        func(childComplexity int, after *string, before *string, first *int, last *int) int
+		CreateAt        func(childComplexity int) int
+		Email           func(childComplexity int) int
+		GrantedClusters func(childComplexity int) int
+		Metrics         func(childComplexity int) int
+		MyTickets       func(childComplexity int, after *string, before *string, first *int, last *int) int
+		Name            func(childComplexity int) int
+		PendingReviews  func(childComplexity int, after *string, before *string, first *int, last *int) int
+		Phone           func(childComplexity int) int
+		Queries         func(childComplexity int, after *string, before *string, first *int, last *int) int
+		Reviewers       func(childComplexity int) int
+		Roles           func(childComplexity int) int
+		Status          func(childComplexity int) int
+		Tickets         func(childComplexity int, after *string, before *string, first *int, last *int) int
+		UUID            func(childComplexity int) int
+		UpdateAt        func(childComplexity int) int
 	}
 
 	UserConnection struct {
@@ -705,6 +706,7 @@ type UserResolver interface {
 	Avatar(ctx context.Context, obj *models.User) (*models.Avatar, error)
 	Roles(ctx context.Context, obj *models.User) ([]*models.Role, error)
 	Reviewers(ctx context.Context, obj *models.User) ([]*models.User, error)
+	GrantedClusters(ctx context.Context, obj *models.User) ([]*models.Cluster, error)
 	MyTickets(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*TicketConnection, error)
 	PendingReviews(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*TicketConnection, error)
 	Metrics(ctx context.Context, obj *models.User) ([]*models.Metric, error)
@@ -3209,6 +3211,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.Email(childComplexity), true
+	case "User.GrantedClusters":
+		if e.ComplexityRoot.User.GrantedClusters == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.GrantedClusters(childComplexity), true
 	case "User.Metrics":
 		if e.ComplexityRoot.User.Metrics == nil {
 			break
@@ -4279,6 +4287,8 @@ func (ec *executionContext) childFields_User(ctx context.Context, field graphql.
 		return ec.fieldContext_User_Roles(ctx, field)
 	case "Reviewers":
 		return ec.fieldContext_User_Reviewers(ctx, field)
+	case "GrantedClusters":
+		return ec.fieldContext_User_GrantedClusters(ctx, field)
 	case "MyTickets":
 		return ec.fieldContext_User_MyTickets(ctx, field)
 	case "PendingReviews":
@@ -19074,6 +19084,38 @@ func (ec *executionContext) fieldContext_User_Reviewers(_ context.Context, field
 	return fc, nil
 }
 
+func (ec *executionContext) _User_GrantedClusters(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_User_GrantedClusters(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.User().GrantedClusters(ctx, obj)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*models.Cluster) graphql.Marshaler {
+			return ec.marshalOCluster2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCluster(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_User_GrantedClusters(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Cluster(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _User_MyTickets(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -27362,6 +27404,12 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._User_Reviewers(ctx, field, obj)
 				})
+		case "GrantedClusters":
+			out.ResolveConcurrently(ec.OperationContext, &deferred, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._User_GrantedClusters(ctx, field, obj)
+				})
 		case "MyTickets":
 			out.ResolveConcurrently(ec.OperationContext, &deferred, i,
 				true, false,
@@ -28599,6 +28647,19 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	_ = ctx
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOCluster2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCluster(ctx context.Context, sel ast.SelectionSet, v []*models.Cluster) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalOCluster2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCluster(ctx, sel, v[i])
+	})
+
+	return ret
 }
 
 func (ec *executionContext) marshalOCluster2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCluster(ctx context.Context, sel ast.SelectionSet, v *models.Cluster) graphql.Marshaler {

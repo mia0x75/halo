@@ -3,7 +3,7 @@
  * 返回与真实接口同形的结果，因此页面代码无需区分真假接口。
  */
 
-import type { ClusterNode, StatementNode, TicketNode } from "@/lib/api/queries"
+import type { ClusterNode, GroupNode, StatementNode, TicketNode } from "@/lib/api/queries"
 import { buildDemoState, demoUser, demoUUID, metricSeeds, today, type DemoState, type DemoTicket } from "@/lib/demo/data"
 
 const HOUR = 3600
@@ -211,6 +211,21 @@ function clusterInput(input: Variables, existing?: ClusterNode): ClusterNode {
   }
 }
 
+/** 当前用户可见的群集：直接授权，加上角色被授予的分组里的群集。 */
+function demoUserClusters(): ClusterNode[] {
+  const user = state.users.find((item) => item.UUID === demoUser.UUID)
+  const granted = new Set((user?.GrantedClusters ?? []).map((cluster) => cluster.UUID))
+  const roleGroups = new Set<string>()
+  for (const role of state.roles) {
+    const owned = (user?.Roles ?? []).some((item) => item.UUID === role.UUID)
+    if (!owned) continue
+    for (const group of role.Groups ?? []) roleGroups.add(group.UUID)
+  }
+  return state.clusters.filter(
+    (cluster) => granted.has(cluster.UUID) || (cluster.GroupUUID !== null && roleGroups.has(cluster.GroupUUID)),
+  )
+}
+
 export function demoExecute(query: string, variables?: Variables): Record<string, unknown> {
   const source = variables ?? {}
   const matched = /(?:query|mutation)\s+(\w+)/.exec(query)
@@ -218,7 +233,8 @@ export function demoExecute(query: string, variables?: Variables): Record<string
 
   switch (operation) {
     case "Me": {
-      return { me: demoUser }
+      const user = state.users.find((item) => item.UUID === demoUser.UUID)
+      return { me: { ...demoUser, GrantedClusters: user?.GrantedClusters ?? [] } }
     }
     case "Metrics":
     case "MetricSummary": {
@@ -273,6 +289,60 @@ export function demoExecute(query: string, variables?: Variables): Record<string
     }
     case "Groups": {
       return { groups: state.groups }
+    }
+    case "CreateGroup": {
+      const input = record(source.input)
+      const group: GroupNode = {
+        UUID: `group-${state.groups.length + 1}`,
+        Name: text(input.Name) ?? "新分组",
+        Description: text(input.Description) ?? "",
+        Status: num(input.Status, 1),
+        CreateAt: Math.floor(Date.now() / 1000),
+      }
+      state.groups.push(group)
+      return { createGroup: group }
+    }
+    case "UpdateGroup": {
+      const input = record(source.input)
+      const existing = state.groups.find((item) => item.UUID === text(input.GroupUUID))
+      if (existing) {
+        existing.Name = text(input.Name) ?? existing.Name
+        existing.Description = text(input.Description) ?? existing.Description
+        existing.Status = num(input.Status, existing.Status)
+      }
+      return { updateGroup: existing ?? null }
+    }
+    case "RemoveGroup": {
+      const uuid = text(source.id)
+      state.groups = state.groups.filter((item) => item.UUID !== uuid)
+      for (const role of state.roles) {
+        role.Groups = (role.Groups ?? []).filter((group) => group.UUID !== uuid)
+      }
+      return { removeGroup: true }
+    }
+    case "GrantGroups": {
+      const input = record(source.input)
+      const role = state.roles.find((item) => item.UUID === text(input.RoleUUID))
+      const uuids = Array.isArray(input.GroupUUIDs)
+        ? input.GroupUUIDs.filter((item): item is string => typeof item === "string")
+        : []
+      if (role) {
+        role.Groups = state.groups.filter((group) => uuids.includes(group.UUID))
+      }
+      return { grantGroups: true }
+    }
+    case "GrantClusters": {
+      const input = record(source.input)
+      const user = state.users.find((item) => item.UUID === text(input.UserUUID))
+      const uuids = Array.isArray(input.ClusterUUIDs)
+        ? input.ClusterUUIDs.filter((item): item is string => typeof item === "string")
+        : []
+      if (user) {
+        user.GrantedClusters = state.clusters
+          .filter((cluster) => uuids.includes(cluster.UUID))
+          .map((cluster) => ({ UUID: cluster.UUID, Alias: cluster.Alias }))
+      }
+      return { grantClusters: true }
     }
     case "Tickets": {
       // 0 表示「全部状态」，和后端过滤语义一致。
@@ -341,7 +411,13 @@ export function demoExecute(query: string, variables?: Variables): Record<string
       }
     }
     case "MeClusters": {
-      return { me: { ...demoUser, Clusters: paginate(state.clusters, { ...source, after: undefined }) } }
+      return {
+        me: {
+          ...demoUser,
+          GrantedClusters: demoUserClusters(),
+          Clusters: paginate(demoUserClusters(), { ...source, after: undefined }),
+        },
+      }
     }
     case "MeReviewers": {
       return { me: { ...demoUser, Reviewers: demoUser.Reviewers ?? [] } }

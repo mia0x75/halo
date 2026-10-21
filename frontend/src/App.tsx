@@ -9,7 +9,8 @@ import { ClustersPage } from "@/pages/clusters-page"
 import { DashboardPage } from "@/pages/dashboard-page"
 import { LogsPage } from "@/pages/logs-page"
 import { MessagesPage } from "@/pages/messages-page"
-import { OptionsPage } from "@/pages/options-page"
+import { SettingsPage, type SettingsTab } from "@/pages/settings-page"
+import { GroupFormPage } from "@/pages/group-form-page"
 import { StatementsPage } from "@/pages/statements-page"
 import { StatsPage } from "@/pages/stats-page"
 import { RulesPage } from "@/pages/rules-page"
@@ -31,11 +32,13 @@ type View =
   | { kind: "ticket-edit"; uuid: string }
   | { kind: "cron-create" }
   | { kind: "cluster-form"; mode: "create" | "edit"; uuid?: string }
+  | { kind: "group-form"; mode: "create" | "edit"; uuid?: string }
 
 export default function App() {
   const session = useSession()
   const [view, setView] = useState<View>({ kind: "nav", key: "dashboard" })
   const [searchKeyword, setSearchKeyword] = useState("")
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>("options")
 
   const signOut = useCallback(() => {
     clearToken()
@@ -55,6 +58,14 @@ export default function App() {
   }, [])
   const viewTickets = useCallback(() => setView({ kind: "nav", key: "tickets" }), [])
   const viewMessages = useCallback(() => setView({ kind: "nav", key: "messages" }), [])
+  const createGroup = useCallback(() => {
+    setSettingsTab("groups")
+    setView({ kind: "group-form", mode: "create" })
+  }, [])
+  const editGroup = useCallback((uuid: string) => {
+    setSettingsTab("groups")
+    setView({ kind: "group-form", mode: "edit", uuid })
+  }, [])
 
   const page = view.kind === "nav" ? view.key : "tickets"
 
@@ -143,6 +154,27 @@ export default function App() {
     )
   }
 
+  if (view.kind === "group-form") {
+    return (
+      <AppShell
+        active="settings"
+        onSelect={(key) => setView({ kind: "nav", key })}
+        user={session.user}
+        onSignOut={signOut}
+        onSearch={searchTickets}
+        onViewMessages={viewMessages}
+        onOpenTicket={openTicket}
+      >
+        <GroupFormPage
+          mode={view.mode}
+          uuid={view.uuid}
+          onBack={() => setView({ kind: "nav", key: "settings" })}
+          onSaved={() => setView({ kind: "nav", key: "settings" })}
+        />
+      </AppShell>
+    )
+  }
+
   if (view.kind === "ticket") {
     return (
       <AppShell
@@ -207,7 +239,14 @@ export default function App() {
       ) : null}
       {page === "databases" ? <DatabasesPage /> : null}
       {page === "users" ? <UsersPage /> : null}
-      {page === "options" ? <OptionsPage /> : null}
+      {page === "settings" ? (
+        <SettingsPage
+          tab={settingsTab}
+          onTabChange={setSettingsTab}
+          onCreateGroup={createGroup}
+          onEditGroup={editGroup}
+        />
+      ) : null}
       {page === "stats" ? <StatsPage /> : null}
     </AppShell>
   )

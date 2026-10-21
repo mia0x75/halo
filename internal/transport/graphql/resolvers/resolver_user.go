@@ -789,6 +789,12 @@ L:
 			break L
 		}
 
+		// 已授权的群集允许是停用状态，保留既有授权不算新增。
+		granted := cache.EdgesMap.Filter(func(elem *models.Edge) bool {
+			return elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToCluster] &&
+				elem.AncestorID == user.UserID
+		})
+
 		for _, clusterUUID := range input.ClusterUUIDs {
 			cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 				return elem.UUID == clusterUUID
@@ -799,7 +805,15 @@ L:
 				break L
 			}
 
-			if cluster.Status != gqlapi.ClusterStatusEnumMap["NORMAL"] {
+			alreadyGranted := false
+			for _, edge := range granted {
+				if edge.DescendantID == cluster.ClusterID {
+					alreadyGranted = true
+					break
+				}
+			}
+
+			if !alreadyGranted && cluster.Status != gqlapi.ClusterStatusEnumMap["NORMAL"] {
 				rc = gqlapi.ReturnCodeClusterNotAvailable
 				err = fmt.Errorf("错误代码: %s, 错误信息: 群集(uuid=%s)不可用。", rc, clusterUUID)
 				break L
@@ -1420,6 +1434,25 @@ func (r *userResolver) Reviewers(ctx context.Context, obj *models.User) (L []*mo
 		return false
 	})
 	return
+}
+
+// GrantedClusters 直接授权给用户的群集，不含角色继承的分组权限
+func (r *userResolver) GrantedClusters(ctx context.Context, obj *models.User) (L []*models.Cluster, err error) {
+	edges := cache.EdgesMap.Filter(func(elem *models.Edge) bool {
+		return elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToCluster] &&
+			elem.AncestorID == obj.UserID
+	})
+	if edges == nil {
+		return
+	}
+	return cache.ClustersMap.Filter(func(elem *models.Cluster) bool {
+		for _, edge := range edges {
+			if elem.ClusterID == edge.DescendantID {
+				return true
+			}
+		}
+		return false
+	}), nil
 }
 
 // Clusters 用户可以访问的群集，TODO: 分页未完成

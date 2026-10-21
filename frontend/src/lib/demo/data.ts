@@ -568,18 +568,6 @@ export function buildDemoState(): DemoState {
     Groups: index <= 2 ? groups.map((group) => ({ UUID: group.UUID, Name: group.Name })) : null,
   }))
 
-  const users: UserNode[] = userSeeds.map(([name, email, status, roleIndexes], index) => ({
-    UUID: demoUUID(0x30000000, index + 1),
-    Email: email,
-    Name: name,
-    Status: status,
-    Roles: roleIndexes.map((roleIndex) => ({
-      UUID: roles[roleIndex]!.UUID,
-      Name: roles[roleIndex]!.Name,
-    })),
-    Reviewers: index === 0 ? [{ UUID: demoUUID(0x30000000, 3), Name: "李四", Email: "lisi@example.com" }] : [],
-  }))
-
   const clusters: ClusterNode[] = clusterSeeds.map(([alias, host, ip, port, type, group], index) => ({
     UUID: demoUUID(0x20000000, index + 1),
     Alias: alias,
@@ -592,6 +580,22 @@ export function buildDemoState(): DemoState {
     Group: groups[group]!.Name,
     GroupUUID: groups[group]!.UUID,
     CreateAt: today - (60 - index) * DAY,
+  }))
+
+  const users: UserNode[] = userSeeds.map(([name, email, status, roleIndexes], index) => ({
+    UUID: demoUUID(0x30000000, index + 1),
+    Email: email,
+    Name: name,
+    Status: status,
+    Roles: roleIndexes.map((roleIndex) => ({
+      UUID: roles[roleIndex]!.UUID,
+      Name: roles[roleIndex]!.Name,
+    })),
+    Reviewers: index === 0 ? [{ UUID: demoUUID(0x30000000, 3), Name: "李四", Email: "lisi@example.com" }] : [],
+    // 演示账号持有全部群集，其余账号按序号分到两三个。
+    GrantedClusters: clusters
+      .filter((_, clusterIndex) => index === 0 || (clusterIndex + index) % 3 !== 0)
+      .map((cluster) => ({ UUID: cluster.UUID, Alias: cluster.Alias })),
   }))
 
   const databases: DemoState["databases"] = Object.fromEntries(
@@ -642,4 +646,5 @@ export const demoUser: UserNode = {
     { UUID: demoUUID(0x50000000, 4), Name: "Reviewer" },
   ],
   Reviewers: [{ UUID: demoUUID(0x30000000, 3), Name: "李四", Email: "lisi@example.com" }],
+  GrantedClusters: [],
 }

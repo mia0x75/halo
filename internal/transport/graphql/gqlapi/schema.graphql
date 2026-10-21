@@ -1690,6 +1690,11 @@ type User implements Node {
 	Reviewers:  [User]
 
 	"""
+	直接授权给用户的群集，不含角色继承的分组权限
+	"""
+	GrantedClusters: [Cluster]
+
+	"""
 	我提交的工单
 	"""
 	MyTickets(

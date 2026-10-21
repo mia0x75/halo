@@ -123,6 +123,48 @@ export interface GroupNode {
   CreateAt: number
 }
 
+export const CREATE_GROUP_MUTATION = `
+  mutation CreateGroup($input: CreateGroupInput!) {
+    createGroup(input: $input) {
+      UUID
+      Name
+      Description
+      Status
+      CreateAt
+    }
+  }
+`
+
+export const UPDATE_GROUP_MUTATION = `
+  mutation UpdateGroup($input: UpdateGroupInput!) {
+    updateGroup(input: $input) {
+      UUID
+      Name
+      Description
+      Status
+      CreateAt
+    }
+  }
+`
+
+export const REMOVE_GROUP_MUTATION = `
+  mutation RemoveGroup($id: ID!) {
+    removeGroup(id: $id)
+  }
+`
+
+export const GRANT_GROUPS_MUTATION = `
+  mutation GrantGroups($input: GrantGroupsInput!) {
+    grantGroups(input: $input)
+  }
+`
+
+export const GRANT_CLUSTERS_MUTATION = `
+  mutation GrantClusters($input: GrantClustersInput!) {
+    grantClusters(input: $input)
+  }
+`
+
 export const GROUPS_QUERY = `
   query Groups {
     groups {
@@ -677,6 +719,7 @@ export const USERS_QUERY = `
           Status
           Roles { UUID Name }
           Reviewers { UUID Name Email }
+          GrantedClusters { UUID Alias }
         }
       }
     }
@@ -763,6 +806,8 @@ export interface UserNode {
   Status: number
   Roles: { UUID: string; Name: string }[] | null
   Reviewers: { UUID: string; Name: string | null; Email: string }[] | null
+  /** 直接授权给该用户的群集，不含角色继承的分组权限 */
+  GrantedClusters: { UUID: string; Alias: string }[] | null
 }
 
 export interface RoleNode {

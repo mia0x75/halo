@@ -2,7 +2,9 @@ package resolvers
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -182,7 +184,7 @@ func (r *mutationRootResolver) CreateGroup(ctx context.Context, input gqlapi.Cre
 
 	credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 	if err := r.app.Services.Group.Create(ctx, bridge.GroupToDomain(group), credential.User.UserID); err != nil {
-		return nil, err
+		return nil, groupError(err)
 	}
 
 	cache.GroupsMap.Reload()
@@ -205,7 +207,7 @@ func (r *mutationRootResolver) UpdateGroup(ctx context.Context, input gqlapi.Upd
 
 	credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 	if err := r.app.Services.Group.Update(ctx, bridge.GroupToDomain(group), credential.User.UserID); err != nil {
-		return nil, err
+		return nil, groupError(err)
 	}
 
 	cache.GroupsMap.Reload()
@@ -216,12 +218,40 @@ func (r *mutationRootResolver) UpdateGroup(ctx context.Context, input gqlapi.Upd
 func (r *mutationRootResolver) RemoveGroup(ctx context.Context, id string) (*bool, error) {
 	credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 	if err := r.app.Services.Group.DeleteByUUID(ctx, id, credential.User.UserID); err != nil {
-		return nil, err
+		return nil, groupError(err)
 	}
 
 	cache.GroupsMap.Reload()
 	ok := true
 	return &ok, nil
+}
+
+// groupError maps a group service failure to the platform error format.
+func groupError(err error) error {
+	message := trimDomainPrefix(err.Error())
+	switch {
+	case errors.Is(err, domain.ErrNotFound):
+		return fmt.Errorf("错误代码: %s, 错误信息: %s", gqlapi.ReturnCodeNotFound, message)
+	case errors.Is(err, domain.ErrConflict), errors.Is(err, domain.ErrInvalidInput):
+		return fmt.Errorf("错误代码: %s, 错误信息: %s", gqlapi.ReturnCodeInvalidParams, message)
+	default:
+		return fmt.Errorf("错误代码: %s, 错误信息: %s", gqlapi.ReturnCodeUnknowError, message)
+	}
+}
+
+// trimDomainPrefix drops the sentinel prefix so the message reads as prose.
+func trimDomainPrefix(message string) string {
+	for _, prefix := range []string{
+		domain.ErrNotFound.Error() + ": ",
+		domain.ErrConflict.Error() + ": ",
+		domain.ErrInvalidInput.Error() + ": ",
+		domain.ErrForbidden.Error() + ": ",
+	} {
+		if trimmed, ok := strings.CutPrefix(message, prefix); ok {
+			return trimmed
+		}
+	}
+	return message
 }
 
 // valueOrEmpty unwraps an optional GraphQL string.
