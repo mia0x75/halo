@@ -44,7 +44,7 @@ func DecryptAES(ciphertext []byte, key string) ([]byte, error) {
 		ciphertext = ciphertext[aes.BlockSize:]
 		plaintext = append(plaintext, text...)
 	}
-	return pkcs7UPad(plaintext), nil
+	return pkcs7UPad(plaintext)
 }
 
 func pkcs7Pad(data []byte) []byte {
@@ -53,7 +53,21 @@ func pkcs7Pad(data []byte) []byte {
 	return append(data, padtext...)
 }
 
-func pkcs7UPad(data []byte) []byte {
+// pkcs7UPad removes the PKCS7 padding. A wrong key produces garbage padding,
+// so the length is validated instead of trusted: an invalid pad byte means the
+// ciphertext was not produced by this key, and slicing on it would panic.
+func pkcs7UPad(data []byte) ([]byte, error) {
+	if len(data) == 0 {
+		return nil, fmt.Errorf("ciphertext is empty")
+	}
 	padLength := int(data[len(data)-1])
-	return data[:len(data)-padLength]
+	if padLength == 0 || padLength > aes.BlockSize || padLength > len(data) {
+		return nil, fmt.Errorf("invalid padding length %d", padLength)
+	}
+	for _, b := range data[len(data)-padLength:] {
+		if int(b) != padLength {
+			return nil, fmt.Errorf("invalid padding bytes")
+		}
+	}
+	return data[:len(data)-padLength], nil
 }

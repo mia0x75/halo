@@ -70,3 +70,17 @@ func TestKeyUsesFirstBlock(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, a, b)
 }
+
+func TestDecryptAESRejectsForeignCiphertext(t *testing.T) {
+	// 用另一把密钥加密的数据，解密后 padding 是垃圾，不能越界切片。
+	enc, err := EncryptAES([]byte("口令"), testKey)
+	require.NoError(t, err)
+
+	_, err = DecryptAES(enc, "fedcba9876543210fedcba9876543210")
+	require.Error(t, err)
+}
+
+func TestDecryptAESRejectsGarbage(t *testing.T) {
+	_, err := DecryptAES([]byte("0123456789abcdef"), testKey)
+	require.Error(t, err)
+}

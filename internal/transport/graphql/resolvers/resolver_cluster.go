@@ -73,7 +73,12 @@ L:
 			break
 		}
 
-		password, _ := crypto.DecryptAES(cluster.Password, config.Config().Secret.Crypto)
+		password, decErr := crypto.DecryptAES(cluster.Password, config.Config().Secret.Crypto)
+		if decErr != nil {
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: 群集(uuid=%s)的密码无法解密，请重新接入该群集。", rc, cluster.UUID)
+			break
+		}
 
 		var databases []*meta.Database
 		if databases, err = r.app.Agent.Databases(ctx, bridge.ClusterToDomain(cluster), string(password)); err != nil {
@@ -241,7 +246,12 @@ L:
 			break
 		}
 
-		password, _ := crypto.DecryptAES(cluster.Password, config.Config().Secret.Crypto)
+		password, decErr := crypto.DecryptAES(cluster.Password, config.Config().Secret.Crypto)
+		if decErr != nil {
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: 群集(uuid=%s)的密码无法解密，请重新接入该群集。", rc, cluster.UUID)
+			break
+		}
 		target := bridge.ClusterToDomain(cluster)
 
 		if err = statDatabase(ctx, r.app.Agent, target, string(password), database); err != nil {

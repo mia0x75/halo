@@ -172,7 +172,12 @@ L:
 			break
 		}
 
-		password, _ := crypto.DecryptAES(cluster.Password, config.Config().Secret.Crypto)
+		password, decErr := crypto.DecryptAES(cluster.Password, config.Config().Secret.Crypto)
+		if decErr != nil {
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: 群集(uuid=%s)的密码无法解密，请重新接入该群集。", rc, cluster.UUID)
+			break
+		}
 		target := bridge.ClusterToDomain(cluster)
 		target.Database = input.Database
 
@@ -294,15 +299,17 @@ L:
 			break L
 		}
 
-		passwd := func(c *models.Cluster) []byte {
-			bs, _ := crypto.DecryptAES(c.Password, config.Config().Secret.Crypto)
-			return bs
+		passwd, decErr := crypto.DecryptAES(cluster.Password, config.Config().Secret.Crypto)
+		if decErr != nil {
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: 群集(uuid=%s)的密码无法解密，请重新接入该群集。", rc, cluster.UUID)
+			break L
 		}
 
 		target := bridge.ClusterToDomain(cluster)
 		target.Database = input.Database
 
-		if err = statDatabase(ctx, r.app.Agent, target, string(passwd(cluster)), input.Database); err != nil {
+		if err = statDatabase(ctx, r.app.Agent, target, string(passwd), input.Database); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break L
@@ -330,8 +337,8 @@ L:
 			// TODO: 如果input.Content中有特殊字符，会不会存在服务器安全问题
 			//       密码中如果有特殊字符会不会有服务器安全问题
 			fmt.Sprintf("-query=%s", input.Content),
-			fmt.Sprintf("-online-dsn=%s:%s@%s:%d/%s", cluster.User, passwd(cluster), cluster.IP, cluster.Port, input.Database),
-			fmt.Sprintf("-test-dsn=%s:%s@%s:%d/%s", cluster.User, passwd(cluster), cluster.IP, cluster.Port, input.Database),
+			fmt.Sprintf("-online-dsn=%s:%s@%s:%d/%s", cluster.User, passwd, cluster.IP, cluster.Port, input.Database),
+			fmt.Sprintf("-test-dsn=%s:%s@%s:%d/%s", cluster.User, passwd, cluster.IP, cluster.Port, input.Database),
 			"-explain-format=json",
 			"-report-type=json",
 			"-log-output=/tmp/soar.log",
@@ -387,15 +394,17 @@ L:
 			break L
 		}
 
-		passwd := func(c *models.Cluster) []byte {
-			bs, _ := crypto.DecryptAES(c.Password, config.Config().Secret.Crypto)
-			return bs
+		passwd, decErr := crypto.DecryptAES(cluster.Password, config.Config().Secret.Crypto)
+		if decErr != nil {
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: 群集(uuid=%s)的密码无法解密，请重新接入该群集。", rc, cluster.UUID)
+			break L
 		}
 
 		target := bridge.ClusterToDomain(cluster)
 		target.Database = input.Database
 
-		if err = statDatabase(ctx, r.app.Agent, target, string(passwd(cluster)), input.Database); err != nil {
+		if err = statDatabase(ctx, r.app.Agent, target, string(passwd), input.Database); err != nil {
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
 			break L
@@ -423,8 +432,8 @@ L:
 			// TODO: 如果input.Content中有特殊字符，会不会存在服务器安全问题
 			//       密码中如果有特殊字符会不会有服务器安全问题
 			fmt.Sprintf("-query=%s", input.Content),
-			fmt.Sprintf("-online-dsn=%s:%s@%s:%d/%s", cluster.User, passwd(cluster), cluster.IP, cluster.Port, input.Database),
-			fmt.Sprintf("-test-dsn=%s:%s@%s:%d/%s", cluster.User, passwd(cluster), cluster.IP, cluster.Port, input.Database),
+			fmt.Sprintf("-online-dsn=%s:%s@%s:%d/%s", cluster.User, passwd, cluster.IP, cluster.Port, input.Database),
+			fmt.Sprintf("-test-dsn=%s:%s@%s:%d/%s", cluster.User, passwd, cluster.IP, cluster.Port, input.Database),
 			// TODO: 为什么这个rules是硬编码
 			fmt.Sprintf("-rewrite-rules=%s", "star2columns,delimiter"),
 			"-report-type=rewrite",
