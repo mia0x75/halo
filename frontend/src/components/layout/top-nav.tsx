@@ -11,25 +11,50 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
+import { graphqlRequest } from "@/lib/api/client"
 import { useGraphQL } from "@/hooks/use-graphql"
 import { useTheme } from "@/hooks/use-theme"
-import { UNREAD_MESSAGE_COUNT_QUERY } from "@/lib/api/queries"
+import { formatUnix } from "@/lib/api/mappers"
+import type { MeUser } from "@/lib/api/queries"
+import {
+  MARK_MESSAGE_READ_MUTATION,
+  MESSAGES_QUERY,
+  UNREAD_MESSAGE_COUNT_QUERY,
+  type MessageNode,
+} from "@/lib/api/queries"
+import { getToken } from "@/lib/api/session"
 
 export interface TopNavProps {
-  onConnectionChange: () => void
+  user: MeUser
+  onSignOut: () => void
 }
 
 /** 顶栏：品牌、搜索、消息与主题切换。 */
-export function TopNav({ onConnectionChange }: TopNavProps) {
+export function TopNav({ user, onSignOut }: TopNavProps) {
   const { theme, toggleTheme } = useTheme()
   const isDark = theme === "dark"
 
-  const unread = useGraphQL<{ unreadMessageCount: number }>(
-    UNREAD_MESSAGE_COUNT_QUERY,
-    undefined,
-    { unreadMessageCount: 3 },
+  const unread = useGraphQL<{ unreadMessageCount: number }>(UNREAD_MESSAGE_COUNT_QUERY)
+  const unreadCount = unread.data?.unreadMessageCount ?? 0
+
+  const messages = useGraphQL<{ messages: MessageNode[] }, { unreadOnly: boolean; first: number }>(
+    MESSAGES_QUERY,
+    { unreadOnly: true, first: 5 },
   )
-  const unreadCount = unread.data?.unreadMessageCount ?? 3
+  const items = messages.data?.messages ?? []
+
+  const openMessage = async (message: MessageNode) => {
+    try {
+      await graphqlRequest<{ markMessageRead: boolean }, { uuid: string }>(
+        MARK_MESSAGE_READ_MUTATION,
+        { uuid: message.UUID },
+        getToken(),
+      )
+    } finally {
+      messages.refetch()
+      unread.refetch()
+    }
+  }
 
   return (
     <header className="flex h-14 items-center gap-4 border-b border-border bg-card px-4">
@@ -50,7 +75,7 @@ export function TopNav({ onConnectionChange }: TopNavProps) {
       </div>
 
       <div className="ml-auto flex items-center gap-1">
-        <ConnectionMenu onChanged={onConnectionChange} />
+        <ConnectionMenu user={user} onSignOut={onSignOut} />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -63,30 +88,26 @@ export function TopNav({ onConnectionChange }: TopNavProps) {
               ) : null}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-72">
-            <DropdownMenuLabel>消息</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-80">
+            <DropdownMenuLabel>未读消息</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <IconBell size={16} stroke={1.5} />
-              <span className="flex flex-col">
-                <span>工单「订单归档字段」审核通过</span>
-                <span className="text-sm text-muted-foreground">2 分钟前</span>
-              </span>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <IconBell size={16} stroke={1.5} />
-              <span className="flex flex-col">
-                <span>工单「报表视图重建」待审核</span>
-                <span className="text-sm text-muted-foreground">1 小时前</span>
-              </span>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <IconBell size={16} stroke={1.5} />
-              <span className="flex flex-col">
-                <span>工单「清理历史数据」执行失败</span>
-                <span className="text-sm text-muted-foreground">昨天</span>
-              </span>
-            </DropdownMenuItem>
+            {items.length === 0 ? (
+              <div className="px-2 py-3 text-sm text-muted-foreground">暂无未读消息</div>
+            ) : (
+              items.map((message) => (
+                <DropdownMenuItem
+                  key={message.UUID}
+                  onSelect={() => void openMessage(message)}
+                  className="items-start"
+                >
+                  <IconBell size={16} stroke={1.5} className="mt-0.5" />
+                  <span className="flex flex-col">
+                    <span>{message.Title}</span>
+                    <span className="text-sm text-muted-foreground">{formatUnix(message.CreateAt)}</span>
+                  </span>
+                </DropdownMenuItem>
+              ))
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
 

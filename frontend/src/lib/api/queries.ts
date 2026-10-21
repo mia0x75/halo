@@ -103,6 +103,12 @@ export const UNREAD_MESSAGE_COUNT_QUERY = `
   }
 `
 
+export const MARK_MESSAGE_READ_MUTATION = `
+  mutation MarkMessageRead($uuid: ID!) {
+    markMessageRead(uuid: $uuid)
+  }
+`
+
 export interface GroupNode {
   UUID: string
   Name: string

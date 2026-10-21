@@ -1,0 +1,33 @@
+import { IconDatabase } from "@tabler/icons-react"
+
+import { LoginForm } from "@/features/auth/login-form"
+
+/** 登录页：未登录时唯一的入口，登录成功由会话闸门切到主界面。 */
+export function LoginPage() {
+  return (
+    <div className="flex min-h-svh flex-col bg-background text-foreground">
+      <main className="flex flex-1 items-center justify-center px-4 py-12">
+        <div className="flex w-full max-w-sm flex-col gap-6">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-2">
+              <span className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                <IconDatabase size={20} stroke={1.5} />
+              </span>
+              <span className="text-2xl font-semibold tracking-tight text-strong">Halo</span>
+            </div>
+            <div className="flex flex-col gap-1">
+              <h1 className="text-xl font-medium text-strong">登录</h1>
+              <p className="text-sm text-muted-foreground">SQL 变更工单与审计平台</p>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-border bg-card p-6 shadow-xs">
+            <LoginForm />
+          </div>
+
+          <p className="text-xs text-muted-foreground">请使用平台账号登录，未登录无法访问任何页面。</p>
+        </div>
+      </main>
+    </div>
+  )
+}

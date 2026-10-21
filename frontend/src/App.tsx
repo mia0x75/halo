@@ -19,6 +19,9 @@ import { TicketEditPage } from "@/pages/ticket-edit-page"
 import { TicketQueuePage } from "@/pages/ticket-queue-page"
 import { TicketsPage } from "@/pages/tickets-page"
 import { ViolationsPage } from "@/pages/violations-page"
+import { LoginPage } from "@/pages/login-page"
+import { useSession } from "@/hooks/use-session"
+import { clearToken } from "@/lib/api/session"
 
 type View =
   | { kind: "nav"; key: NavKey }
@@ -29,10 +32,14 @@ type View =
   | { kind: "cluster-form"; mode: "create" | "edit"; uuid?: string }
 
 export default function App() {
+  const session = useSession()
   const [view, setView] = useState<View>({ kind: "nav", key: "dashboard" })
-  const [nonce, setNonce] = useState(0)
 
-  const refresh = useCallback(() => setNonce((value) => value + 1), [])
+  const signOut = useCallback(() => {
+    clearToken()
+    setView({ kind: "nav", key: "dashboard" })
+  }, [])
+
   const openTicket = useCallback((uuid: string) => setView({ kind: "ticket", uuid }), [])
   const createTicket = useCallback(() => setView({ kind: "ticket-create" }), [])
   const createCluster = useCallback(() => setView({ kind: "cluster-form", mode: "create" }), [])
@@ -43,13 +50,17 @@ export default function App() {
 
   const page = view.kind === "nav" ? view.key : "tickets"
 
+  if (session.status !== "authenticated") {
+    return <LoginPage />
+  }
+
   if (view.kind === "cron-create") {
     return (
       <AppShell
-        key={nonce}
         active="crons"
         onSelect={(key) => setView({ kind: "nav", key })}
-        onConnectionChange={refresh}
+        user={session.user}
+        onSignOut={signOut}
       >
         <CronCreatePage
           onBack={() => setView({ kind: "nav", key: "crons" })}
@@ -62,10 +73,10 @@ export default function App() {
   if (view.kind === "ticket-edit") {
     return (
       <AppShell
-        key={nonce}
         active="tickets"
         onSelect={(key) => setView({ kind: "nav", key })}
-        onConnectionChange={refresh}
+        user={session.user}
+        onSignOut={signOut}
       >
         <TicketEditPage
           uuid={view.uuid}
@@ -79,10 +90,10 @@ export default function App() {
   if (view.kind === "ticket-create") {
     return (
       <AppShell
-        key={nonce}
         active="tickets"
         onSelect={(key) => setView({ kind: "nav", key })}
-        onConnectionChange={refresh}
+        user={session.user}
+        onSignOut={signOut}
       >
         <TicketCreatePage
           onBack={() => setView({ kind: "nav", key: "tickets" })}
@@ -97,19 +108,16 @@ export default function App() {
   if (view.kind === "cluster-form") {
     return (
       <AppShell
-        key={nonce}
         active="clusters"
         onSelect={(key) => setView({ kind: "nav", key })}
-        onConnectionChange={refresh}
+        user={session.user}
+        onSignOut={signOut}
       >
         <ClusterFormPage
           mode={view.mode}
           uuid={view.uuid}
           onBack={() => setView({ kind: "nav", key: "clusters" })}
-          onSaved={() => {
-            setView({ kind: "nav", key: "clusters" })
-            refresh()
-          }}
+          onSaved={() => setView({ kind: "nav", key: "clusters" })}
         />
       </AppShell>
     )
@@ -118,10 +126,10 @@ export default function App() {
   if (view.kind === "ticket") {
     return (
       <AppShell
-        key={nonce}
         active="tickets"
         onSelect={(key) => setView({ kind: "nav", key })}
-        onConnectionChange={refresh}
+        user={session.user}
+        onSignOut={signOut}
       >
         <TicketDetailPage
           uuid={view.uuid}
@@ -134,10 +142,10 @@ export default function App() {
 
   return (
     <AppShell
-      key={nonce}
       active={page}
       onSelect={(key) => setView({ kind: "nav", key })}
-      onConnectionChange={refresh}
+      user={session.user}
+      onSignOut={signOut}
     >
       {page === "dashboard" ? (
         <DashboardPage onOpenTicket={openTicket} onCreateTicket={createTicket} />

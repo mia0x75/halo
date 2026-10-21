@@ -3,16 +3,18 @@ import { useState, type ReactNode } from "react"
 import { SideNav } from "@/components/layout/side-nav"
 import { TopNav } from "@/components/layout/top-nav"
 import type { NavKey } from "@/components/layout/nav-items"
+import type { MeUser } from "@/lib/api/queries"
 
 export interface AppShellProps {
   active: NavKey
   onSelect: (key: NavKey) => void
-  onConnectionChange: () => void
+  user: MeUser
+  onSignOut: () => void
   children: ReactNode
 }
 
 /** 应用外壳：左侧可收起导航 + 顶栏 + 内容区，页脚通栏。 */
-export function AppShell({ active, onSelect, onConnectionChange, children }: AppShellProps) {
+export function AppShell({ active, onSelect, user, onSignOut, children }: AppShellProps) {
   const [collapsed, setCollapsed] = useState(false)
 
   return (
@@ -25,7 +27,7 @@ export function AppShell({ active, onSelect, onConnectionChange, children }: App
           onToggle={() => setCollapsed((value) => !value)}
         />
         <div className="flex min-w-0 flex-1 flex-col">
-          <TopNav onConnectionChange={onConnectionChange} />
+          <TopNav user={user} onSignOut={onSignOut} />
           <main className="flex-1">
             <div className="mx-auto w-full max-w-[1320px] px-4 py-6">
               <div className="flex flex-col gap-4">{children}</div>
@@ -41,7 +43,7 @@ export function AppShell({ active, onSelect, onConnectionChange, children }: App
           style={{ paddingLeft: (collapsed ? 64 : 240) + 16 }}
         >
           <span>Halo · SQL 变更工单与审计平台</span>
-          <span>v0.1 · 演示数据</span>
+          <span>v0.1</span>
         </div>
       </footer>
     </div>

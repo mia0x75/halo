@@ -1,15 +1,6 @@
-import { useState } from "react"
-import { IconLogin, IconLogout, IconPlugConnected } from "@tabler/icons-react"
+import { IconLogout, IconUserCircle } from "@tabler/icons-react"
 
-import { LoginForm } from "@/features/auth/login-form"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,80 +9,42 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useGraphQL } from "@/hooks/use-graphql"
-import { ME_QUERY, type MeUser } from "@/lib/api/queries"
-import { clearToken, getToken } from "@/lib/api/session"
+import { clearToken } from "@/lib/api/session"
+import type { MeUser } from "@/lib/api/queries"
 
 export interface ConnectionMenuProps {
-  onChanged: () => void
+  user: MeUser
+  onSignOut: () => void
 }
 
-/**
- * 连接状态：未登录时展示「演示数据」，点击打开登录框；
- * 登录后展示「已连接」，菜单里可以退出登录。
- */
-export function ConnectionMenu({ onChanged }: ConnectionMenuProps) {
-  const [open, setOpen] = useState(false)
-  const [signedIn, setSignedIn] = useState(() => getToken() !== null)
-
-  // 令牌存在不代表还有效：服务端重启后旧令牌会被作废，
-  // 这里用 me 查询确认一次，连不上就按演示数据处理。
-  const me = useGraphQL<{ me: MeUser | null }>(ME_QUERY, undefined, { me: null })
-  const connected = signedIn && me.data?.me != null && !me.error
-
-  if (!connected) {
-    return (
-      <Dialog
-        open={open}
-        onOpenChange={(next) => {
-          setOpen(next)
-          if (!next) {
-            setSignedIn(getToken() !== null)
-            onChanged()
-          }
-        }}
-      >
-        <DialogTrigger asChild>
-          <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground">
-            <IconLogin size={16} stroke={1.5} />
-            {signedIn ? "重新登录" : "演示数据"}
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogTitle className="text-base font-medium text-strong">连接后端</DialogTitle>
-          <DialogDescription className="mt-1 text-sm text-muted-foreground">
-            登录后概览与消息会读取真实接口；未登录或接口不可用时继续使用演示数据。
-          </DialogDescription>
-          <div className="mt-4 flex justify-center">
-            <LoginForm
-              onLoggedIn={() => {
-                setSignedIn(true)
-                setOpen(false)
-                onChanged()
-              }}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
-    )
-  }
+/** 当前账号：展示邮箱与角色，只提供退出登录。 */
+export function ConnectionMenu({ user, onSignOut }: ConnectionMenuProps) {
+  const name = user.Name?.trim() || user.Email
+  const roles = user.Roles ?? []
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-1.5 text-success">
-          <IconPlugConnected size={16} stroke={1.5} />
-          已连接
+        <Button variant="ghost" size="sm" className="gap-1.5">
+          <IconUserCircle size={16} stroke={1.5} />
+          <span className="max-w-40 truncate">{name}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44">
-        <DropdownMenuLabel>已连接后端</DropdownMenuLabel>
+      <DropdownMenuContent align="end" className="w-52">
+        <DropdownMenuLabel className="flex flex-col gap-0.5">
+          <span className="truncate text-sm font-medium text-strong">{name}</span>
+          <span className="truncate text-xs font-normal text-muted-foreground">{user.Email}</span>
+        </DropdownMenuLabel>
+        {roles.length > 0 ? (
+          <div className="px-2 pb-1 text-xs text-muted-foreground">
+            {roles.map((role) => role.Name).join(" · ")}
+          </div>
+        ) : null}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onSelect={() => {
             clearToken()
-            setSignedIn(false)
-            onChanged()
+            onSignOut()
           }}
         >
           <IconLogout size={16} stroke={1.5} />
