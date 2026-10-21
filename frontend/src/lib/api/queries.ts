@@ -537,6 +537,17 @@ export interface LogNode {
   CreateAt: number
 }
 
+export interface LogConnectionNode {
+  totalCount: number
+  edges: { cursor: string; node: LogNode }[]
+  pageInfo: {
+    hasNextPage: boolean
+    hasPreviousPage: boolean
+    startCursor: string
+    endCursor: string
+  }
+}
+
 export const CRONS_QUERY = `
   query Crons($first: Int, $after: String) {
     crons(first: $first, after: $after) {

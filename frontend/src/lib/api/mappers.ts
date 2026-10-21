@@ -1,5 +1,5 @@
 import type { TicketNode } from "@/lib/api/queries"
-import type { Ticket, TicketStatus } from "@/lib/mock/data"
+import type { Ticket, TicketStatus } from "@/lib/model"
 
 /** 后端的工单状态枚举（与 mm_tickets.status 一致）。 */
 const statusByCode: Record<number, TicketStatus> = {

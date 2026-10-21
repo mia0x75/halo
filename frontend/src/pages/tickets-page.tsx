@@ -21,22 +21,20 @@ import { useGraphQL } from "@/hooks/use-graphql"
 
 import { mapTicket } from "@/lib/api/mappers"
 import { TICKETS_QUERY, type TicketConnectionNode } from "@/lib/api/queries"
-import {
-  ticketStatusMeta,
-  tickets as mockTickets,
-  type Ticket,
-  type TicketStatus,
-} from "@/lib/mock/data"
+import { ticketStatusMeta } from "@/lib/labels"
+import type { Ticket, TicketStatus } from "@/lib/model"
 
 const pageSize = 8
 
 export interface TicketsPageProps {
   onOpenTicket: (uuid: string) => void
   onCreateTicket: () => void
+  /** 顶栏搜索带进来的关键词 */
+  initialKeyword?: string
 }
 
-export function TicketsPage({ onOpenTicket, onCreateTicket }: TicketsPageProps) {
-  const [keyword, setKeyword] = useState("")
+export function TicketsPage({ onOpenTicket, onCreateTicket, initialKeyword }: TicketsPageProps) {
+  const [keyword, setKeyword] = useState(initialKeyword ?? "")
   const [status, setStatus] = useState<TicketStatus | "all">("all")
   const [after, setAfter] = useState<string | null>(null)
   const [stack, setStack] = useState<(string | null)[]>([])
@@ -57,24 +55,10 @@ export function TicketsPage({ onOpenTicket, onCreateTicket }: TicketsPageProps) 
 
   const connection = remote.data?.tickets ?? null
 
-  const rows = useMemo<Ticket[]>(() => {
-    if (connection) {
-      return connection.edges.map((edge) => mapTicket(edge.node))
-    }
-    // 接口不可用时回落假数据，并在本地做同样的过滤
-    const needle = keyword.trim().toLowerCase()
-    return mockTickets
-      .filter((ticket) => {
-        if (status !== "all" && ticket.status !== status) return false
-        if (!needle) return true
-        return (
-          ticket.subject.toLowerCase().includes(needle) ||
-          ticket.database.toLowerCase().includes(needle) ||
-          ticket.cluster.toLowerCase().includes(needle)
-        )
-      })
-      .slice(0, pageSize)
-  }, [connection, keyword, status])
+  const rows = useMemo<Ticket[]>(
+    () => connection?.edges.map((edge) => mapTicket(edge.node)) ?? [],
+    [connection],
+  )
 
   const total = connection?.totalCount ?? rows.length
   const hasNext = connection?.pageInfo.hasNextPage ?? false
@@ -176,8 +160,6 @@ export function TicketsPage({ onOpenTicket, onCreateTicket }: TicketsPageProps) 
           total={total}
           hasPreviousPage={hasPrevious}
           hasNextPage={hasNext}
-          startCursor={connection?.pageInfo.startCursor}
-          endCursor={endCursor}
           onPrevious={() => {
             const previousCursor = stack[stack.length - 1] ?? null
             setStack((items) => items.slice(0, -1))

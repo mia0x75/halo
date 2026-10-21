@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { periodLabels, periods, type Period } from "@/lib/mock/data"
+import { periodLabels, periods, type Period } from "@/features/dashboard/periods"
 
 export interface PeriodSelectProps {
   value: Period

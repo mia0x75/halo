@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { IconBell, IconDatabase, IconMoon, IconSearch, IconSun } from "@tabler/icons-react"
 
 import { ConnectionMenu } from "@/components/layout/connection-menu"
@@ -27,12 +28,15 @@ import { getToken } from "@/lib/api/session"
 export interface TopNavProps {
   user: MeUser
   onSignOut: () => void
+  /** 提交搜索：跳到工单列表并按关键词过滤 */
+  onSearch: (keyword: string) => void
 }
 
 /** 顶栏：品牌、搜索、消息与主题切换。 */
-export function TopNav({ user, onSignOut }: TopNavProps) {
+export function TopNav({ user, onSignOut, onSearch }: TopNavProps) {
   const { theme, toggleTheme } = useTheme()
   const isDark = theme === "dark"
+  const [keyword, setKeyword] = useState("")
 
   const unread = useGraphQL<{ unreadMessageCount: number }>(UNREAD_MESSAGE_COUNT_QUERY)
   const unreadCount = unread.data?.unreadMessageCount ?? 0
@@ -65,14 +69,26 @@ export function TopNav({ user, onSignOut }: TopNavProps) {
         <span className="text-xl font-semibold tracking-tight text-strong">Halo</span>
       </div>
 
-      <div className="relative w-full max-w-md">
+      <form
+        className="relative w-full max-w-md"
+        onSubmit={(event) => {
+          event.preventDefault()
+          onSearch(keyword.trim())
+        }}
+      >
         <IconSearch
           size={16}
           stroke={1.5}
           className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
         />
-        <Input placeholder="搜索工单、群集、规则…" className="pl-9" />
-      </div>
+        <Input
+          value={keyword}
+          onChange={(event) => setKeyword(event.target.value)}
+          placeholder="搜索工单主题或目标库，回车确认"
+          aria-label="搜索工单"
+          className="pl-9"
+        />
+      </form>
 
       <div className="ml-auto flex items-center gap-1">
         <ConnectionMenu user={user} onSignOut={onSignOut} />

@@ -3,6 +3,24 @@
  * 后端改动不会牵动界面文案。
  */
 
+import type { TicketStatus } from "@/lib/model"
+
+/** 工单状态的中文名与配色。 */
+export const ticketStatusMeta: Record<
+  TicketStatus,
+  { label: string; tone: "default" | "success" | "warning" | "danger" | "info" | "muted" }
+> = {
+  "waiting-vld": { label: "待系统审核", tone: "info" },
+  "vld-failure": { label: "系统审核不通过", tone: "danger" },
+  "vld-warning": { label: "系统审核告警", tone: "warning" },
+  "waiting-mrv": { label: "待人工审核", tone: "info" },
+  "mrv-failure": { label: "人工审核不通过", tone: "danger" },
+  ltgm: { label: "待上线执行", tone: "default" },
+  done: { label: "执行完成", tone: "success" },
+  "exec-failure": { label: "执行失败", tone: "danger" },
+  closed: { label: "已关闭", tone: "muted" },
+}
+
 /** 规则严重级别：0 提示 1 错误 2 警告。 */
 export const ruleLevelLabels: Record<number, string> = {
   0: "提示",

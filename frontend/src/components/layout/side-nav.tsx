@@ -1,11 +1,4 @@
-import {
-  IconChevronsLeft,
-  IconChevronsRight,
-  IconDatabase,
-  IconLogout,
-  IconSettings,
-  IconUserCircle,
-} from "@tabler/icons-react"
+import { IconChevronsLeft, IconChevronsRight, IconLogout } from "@tabler/icons-react"
 
 import { navSections, type NavKey } from "@/components/layout/nav-items"
 import { Avatar } from "@/components/ui/avatar"
@@ -19,7 +12,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useGraphQL } from "@/hooks/use-graphql"
 import {
-  ME_QUERY,
   MY_TICKETS_QUERY,
   PENDING_REVIEWS_QUERY,
   type MeUser,
@@ -32,17 +24,16 @@ export interface SideNavProps {
   onSelect: (key: NavKey) => void
   collapsed: boolean
   onToggle: () => void
+  user: MeUser
+  onSignOut: () => void
 }
 
 /** 侧边栏：15rem 宽（收起后 4rem 只留图标），顶部是当前用户，底部是帮助入口。 */
-export function SideNav({ active, onSelect, collapsed, onToggle }: SideNavProps) {
-  const me = useGraphQL<{ me: MeUser }>(ME_QUERY, undefined, {
-    me: { UUID: "u-1", Name: "张三", Email: "zhangsan@example.com", Status: 1, Roles: null },
-  })
-  const userName = me.data?.me.Name || "张三"
-  const roleName = me.data?.me.Roles?.[0]?.Name || "管理员"
+export function SideNav({ active, onSelect, collapsed, onToggle, user, onSignOut }: SideNavProps) {
+  const userName = user.Name?.trim() || user.Email
+  const roleName = user.Roles?.[0]?.Name ?? ""
 
-  // 侧栏徽标用接口里的真实数量，取不到时保留假数据里的数字。
+  // 侧栏徽标用接口里的真实数量。
   const myTickets = useGraphQL<
     { me: { MyTickets?: TicketConnectionNode | null } | null },
     { first: number }
@@ -89,20 +80,14 @@ export function SideNav({ active, onSelect, collapsed, onToggle }: SideNavProps)
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-48">
-            <DropdownMenuLabel>
-              {userName} · {roleName}
+            <DropdownMenuLabel className="flex flex-col gap-0.5">
+              <span className="truncate text-sm font-medium">{userName}</span>
+              <span className="truncate text-xs font-normal text-muted-foreground">
+                {user.Email}
+              </span>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <IconUserCircle size={16} stroke={1.5} />
-              个人资料
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <IconSettings size={16} stroke={1.5} />
-              账号设置
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onSelect={onSignOut}>
               <IconLogout size={16} stroke={1.5} />
               退出登录
             </DropdownMenuItem>
@@ -161,7 +146,7 @@ export function SideNav({ active, onSelect, collapsed, onToggle }: SideNavProps)
                     >
                       <IconComponent size={20} stroke={1.5} className="shrink-0" />
                       {collapsed ? null : <span className="truncate">{item.label}</span>}
-                      {(badgeCounts[item.key] ?? item.badge) !== undefined && !collapsed ? (
+                      {badgeCounts[item.key] !== undefined && !collapsed ? (
                         <span
                           className={cn(
                             "ml-auto rounded-md px-1 py-0.5 text-[0.625rem] font-medium",
@@ -170,7 +155,7 @@ export function SideNav({ active, onSelect, collapsed, onToggle }: SideNavProps)
                               : "bg-surface-secondary text-muted-foreground",
                           )}
                         >
-                          {item.badge}
+                          {badgeCounts[item.key]}
                         </span>
                       ) : null}
                     </button>
@@ -182,17 +167,6 @@ export function SideNav({ active, onSelect, collapsed, onToggle }: SideNavProps)
         ))}
       </nav>
 
-      {collapsed ? null : (
-        <div className="border-t border-border p-2">
-          <button
-            type="button"
-            className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm text-muted-foreground transition-colors hover:bg-surface-secondary hover:text-foreground"
-          >
-            <IconDatabase size={20} stroke={1.5} />
-            帮助 / 文档
-          </button>
-        </div>
-      )}
     </aside>
   )
 }

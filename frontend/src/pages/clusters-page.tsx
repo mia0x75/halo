@@ -284,8 +284,6 @@ export function ClustersPage({ onCreate, onEdit }: ClustersPageProps) {
           total={page.total}
           hasPreviousPage={page.hasPrevious}
           hasNextPage={page.hasNext}
-          startCursor={page.startCursor}
-          endCursor={page.endCursor}
           onPrevious={page.previous}
           onNext={page.next}
         />

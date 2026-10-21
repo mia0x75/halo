@@ -182,8 +182,6 @@ export function UsersPage() {
               total={connection?.totalCount ?? 0}
               hasPreviousPage={connection?.pageInfo.hasPreviousPage ?? false}
               hasNextPage={connection?.pageInfo.hasNextPage ?? false}
-              startCursor={connection?.pageInfo.startCursor}
-              endCursor={connection?.pageInfo.endCursor}
               onPrevious={previousPage}
               onNext={nextPage}
             />

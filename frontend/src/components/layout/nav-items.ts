@@ -35,7 +35,6 @@ export interface NavEntry {
   key: NavKey
   label: string
   icon: Icon
-  badge?: number
 }
 
 export interface NavSection {
@@ -43,14 +42,14 @@ export interface NavSection {
   items: NavEntry[]
 }
 
-/** 侧边栏分组：与后端能力一一对应，徽标数字来自假数据。 */
+/** 侧边栏分组：与后端能力一一对应，徽标由页面按接口总数实时提供。 */
 export const navSections: NavSection[] = [
   {
     title: "工作台",
     items: [
       { key: "dashboard", label: "概览", icon: IconLayoutDashboard },
-      { key: "my-tickets", label: "我的工单", icon: IconTicket, badge: 7 },
-      { key: "pending-review", label: "待我审核", icon: IconListCheck, badge: 12 },
+      { key: "my-tickets", label: "我的工单", icon: IconTicket },
+      { key: "pending-review", label: "待我审核", icon: IconListCheck },
     ],
   },
   {
@@ -64,7 +63,7 @@ export const navSections: NavSection[] = [
   {
     title: "资源",
     items: [
-      { key: "clusters", label: "群集", icon: IconServer, badge: 8 },
+      { key: "clusters", label: "群集", icon: IconServer },
       { key: "databases", label: "数据库", icon: IconDatabase },
       { key: "users", label: "用户与角色", icon: IconUsers },
     ],
@@ -72,7 +71,7 @@ export const navSections: NavSection[] = [
   {
     title: "规则与审计",
     items: [
-      { key: "rules", label: "规则库", icon: IconShieldCheck, badge: 248 },
+      { key: "rules", label: "规则库", icon: IconShieldCheck },
       { key: "violations", label: "命中记录", icon: IconAlertTriangle },
       { key: "logs", label: "操作日志", icon: IconHistory },
     ],

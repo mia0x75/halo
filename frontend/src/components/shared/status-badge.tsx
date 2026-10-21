@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge"
-import { ticketStatusMeta, type TicketStatus } from "@/lib/mock/data"
+import { ticketStatusMeta } from "@/lib/labels"
+import type { TicketStatus } from "@/lib/model"
 
 export interface StatusBadgeProps {
   status: TicketStatus

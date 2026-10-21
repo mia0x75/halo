@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react"
 
-import { paginate, type CursorPage } from "@/lib/mock/cursor"
+import { paginate, type CursorPage } from "@/lib/cursor"
 
 /**
  * 游标分页状态：只保留当前位置的游标与回退栈，翻页不重算偏移。

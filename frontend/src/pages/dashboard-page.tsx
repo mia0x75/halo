@@ -17,17 +17,14 @@ import {
   type RuleHitCountNode,
 } from "@/lib/api/queries"
 import { PeriodSelect } from "@/features/dashboard/period-select"
+import { periodLabels, type Period } from "@/features/dashboard/periods"
 import { StatCard } from "@/features/dashboard/stat-card"
 
 import { TopRules } from "@/features/dashboard/top-rules"
-import {
-  auditLogs,
-  clusterTrend,
-  periodLabels,
-  tickets,
-  trendFor,
-  type Period,
-} from "@/lib/mock/data"
+import { mapTicket, formatUnix } from "@/lib/api/mappers"
+import { LOGS_QUERY, TICKETS_QUERY, type LogConnectionNode, type TicketConnectionNode } from "@/lib/api/queries"
+import { parseLogOperation } from "@/lib/labels"
+import type { SeverityPoint, TopRulePoint } from "@/lib/model"
 
 /** 趋势主图的 DOM id，刷选图按它驱动缩放。 */
 const TREND_CHART_ID = "chart-ticket-trend"
@@ -38,29 +35,24 @@ const levelLabels: Record<number, string> = { 0: "提示", 1: "错误", 2: "警�
 export interface DashboardPageProps {
   onOpenTicket: (uuid: string) => void
   onCreateTicket: () => void
+  onViewTickets: () => void
 }
 
-export function DashboardPage({ onOpenTicket, onCreateTicket }: DashboardPageProps) {
+export function DashboardPage({ onOpenTicket, onCreateTicket, onViewTickets }: DashboardPageProps) {
   const [period, setPeriod] = useState<Period>(7)
-  const mockPoints = trendFor(period)
   const clusterPage = useClusters(50)
 
-  // 接口未登录或不可用时回落到假数据，演示与联调都能看。
   const metrics = useGraphQL<{ metrics: MetricNode[] }, { scope: number }>(
     METRICS_QUERY,
     { scope: 1 },
     { metrics: [] },
   )
-  const metricValue = (name: string, fallback: number) => {
-    const found = metrics.data?.metrics.find((item) => item.Name === name)
-    return found ? found.Value : fallback
-  }
+  const metricValue = (name: string) => metrics.data?.metrics.find((item) => item.Name === name)?.Value ?? 0
 
   // 刷选图固定展示较长区间（最多一年），主图跟随选中的窗口。
-  // 数据优先取接口的日桶；接口不可用时用假数据补齐。
   const fullPoints = useMemo(() => {
     const buckets = metrics.data?.metrics ?? []
-    if (buckets.length === 0) return trendFor(365)
+    if (buckets.length === 0) return []
 
     const byDay = new Map<string, { created: number; executed: number; failed: number }>()
     for (const item of buckets) {
@@ -72,7 +64,7 @@ export function DashboardPage({ onOpenTicket, onCreateTicket }: DashboardPagePro
     }
 
     const days = Array.from(byDay.keys()).sort()
-    if (days.length === 0) return trendFor(365)
+    if (days.length === 0) return []
 
     const points = days.map((day) => ({
       date: day.slice(5),
@@ -105,26 +97,42 @@ export function DashboardPage({ onOpenTicket, onCreateTicket }: DashboardPagePro
     { ruleHitRules: [] },
   )
 
-  const levelRows = useMemo(() => {
-    const source = levels.data?.ruleHitLevels ?? []
-    if (source.length === 0) return undefined
-    return source.map((item) => ({
-      severity: levelLabels[item.Level] ?? "提示",
-      count: item.Count,
-    }))
-  }, [levels.data])
+  const levelRows = useMemo<SeverityPoint[]>(
+    () =>
+      (levels.data?.ruleHitLevels ?? []).map((item) => ({
+        severity: levelLabels[item.Level] ?? "提示",
+        count: item.Count,
+      })),
+    [levels.data],
+  )
 
-  const ruleRows = useMemo(() => {
-    const source = rules.data?.ruleHitRules ?? []
-    if (source.length === 0) return undefined
-    return source.map((item) => ({ rule: item.RuleName ?? "-", count: item.Count }))
-  }, [rules.data])
+  const ruleRows = useMemo<TopRulePoint[]>(
+    () => (rules.data?.ruleHitRules ?? []).map((item) => ({ rule: item.RuleName || "-", count: item.Count })),
+    [rules.data],
+  )
 
-  const pending = tickets.filter((ticket) =>
-    ["waiting-vld", "waiting-mrv"].includes(ticket.status),
-  ).length
-  const executed = mockPoints[mockPoints.length - 1]!.executed
-  const failed = mockPoints[mockPoints.length - 1]!.failed
+  // 待审核 = 待系统审核 + 待人工审核，两次计数查询合成一个数。
+  const waitingVld = useGraphQL<{ tickets: TicketConnectionNode | null }, { first: number; status: number }>(
+    TICKETS_QUERY,
+    { first: 1, status: 1 },
+  )
+  const waitingMrv = useGraphQL<{ tickets: TicketConnectionNode | null }, { first: number; status: number }>(
+    TICKETS_QUERY,
+    { first: 1, status: 4 },
+  )
+  const pending =
+    (waitingVld.data?.tickets?.totalCount ?? 0) + (waitingMrv.data?.tickets?.totalCount ?? 0)
+
+  const recent = useGraphQL<{ tickets: TicketConnectionNode | null }, { first: number }>(TICKETS_QUERY, {
+    first: 5,
+  })
+  const recentTickets = useMemo(
+    () => (recent.data?.tickets?.edges ?? []).map((edge) => mapTicket(edge.node)),
+    [recent.data],
+  )
+
+  const logs = useGraphQL<{ logs: LogConnectionNode | null }, { first: number }>(LOGS_QUERY, { first: 6 })
+  const recentLogs = logs.data?.logs?.edges ?? []
 
   return (
     <>
@@ -143,30 +151,19 @@ export function DashboardPage({ onOpenTicket, onCreateTicket }: DashboardPagePro
         <StatCard
           label="待审核工单"
           value={String(pending)}
-          delta={12}
-          hint="较昨日"
           trend={visiblePoints.map((point) => point.submitted)}
         />
         <StatCard
           label="今日已执行"
-          value={String(metricValue("tickets-executed", executed))}
-          delta={8}
-          hint="较昨日"
+          value={String(metricValue("tickets-executed"))}
           trend={visiblePoints.map((point) => point.executed)}
         />
         <StatCard
           label="失败工单"
-          value={String(metricValue("tickets-failed", failed))}
-          delta={-4}
-          hint="较昨日"
+          value={String(metricValue("tickets-failed"))}
           trend={visiblePoints.map((point) => point.failed)}
         />
-        <StatCard
-          label="接入群集"
-          value={String(clusterPage.total)}
-          hint={`${clusterPage.clusters.filter((c) => c.status === "normal").length} 个正常`}
-          trend={clusterTrend}
-        />
+        <StatCard label="接入群集" value={String(clusterPage.total)} />
       </div>
 
       <div className="grid gap-4 xl:grid-cols-3">
@@ -210,10 +207,17 @@ export function DashboardPage({ onOpenTicket, onCreateTicket }: DashboardPagePro
           title="最近工单"
           className="xl:col-span-2"
           bodyClassName="p-0"
-          action={<Button variant="ghost" size="sm">查看全部</Button>}
+          action={
+            <Button variant="ghost" size="sm" onClick={onViewTickets}>
+              查看全部
+            </Button>
+          }
         >
           <ul className="divide-y divide-border">
-            {tickets.slice(0, 5).map((ticket) => (
+            {recentTickets.length === 0 ? (
+              <li className="px-5 py-6 text-center text-sm text-muted-foreground">暂无工单</li>
+            ) : null}
+            {recentTickets.map((ticket) => (
               <li
                 key={ticket.uuid}
                 className="flex cursor-pointer items-center gap-3 px-5 py-3"
@@ -236,14 +240,24 @@ export function DashboardPage({ onOpenTicket, onCreateTicket }: DashboardPagePro
 
         <SectionCard title="操作日志" description="最近审计记录" bodyClassName="p-0">
           <ul className="divide-y divide-border">
-            {auditLogs.slice(0, 6).map((log) => (
-              <li key={log.id} className="px-5 py-3">
-                <p className="text-sm">{log.operation}</p>
-                <p className="mt-0.5 text-sm text-muted-foreground">
-                  {log.actor} · {log.ip} · {log.createdAt}
-                </p>
-              </li>
-            ))}
+            {recentLogs.length === 0 ? (
+              <li className="px-5 py-6 text-center text-sm text-muted-foreground">暂无审计记录</li>
+            ) : null}
+            {recentLogs.map((edge) => {
+              const display = parseLogOperation(edge.node.Operation)
+              return (
+                <li key={edge.node.UUID} className="px-5 py-3">
+                  <p className="text-sm">
+                    {display.label}
+                    {display.target ? ` · ${display.target}` : ""}
+                  </p>
+                  <p className="mt-0.5 text-sm text-muted-foreground">
+                    {edge.node.User?.Name || edge.node.User?.Email || "-"} ·{" "}
+                    {formatUnix(edge.node.CreateAt)}
+                  </p>
+                </li>
+              )
+            })}
           </ul>
         </SectionCard>
       </div>

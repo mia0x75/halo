@@ -34,6 +34,7 @@ type View =
 export default function App() {
   const session = useSession()
   const [view, setView] = useState<View>({ kind: "nav", key: "dashboard" })
+  const [searchKeyword, setSearchKeyword] = useState("")
 
   const signOut = useCallback(() => {
     clearToken()
@@ -47,6 +48,11 @@ export default function App() {
     (uuid: string) => setView({ kind: "cluster-form", mode: "edit", uuid }),
     [],
   )
+  const searchTickets = useCallback((keyword: string) => {
+    setSearchKeyword(keyword)
+    setView({ kind: "nav", key: "tickets" })
+  }, [])
+  const viewTickets = useCallback(() => setView({ kind: "nav", key: "tickets" }), [])
 
   const page = view.kind === "nav" ? view.key : "tickets"
 
@@ -61,6 +67,7 @@ export default function App() {
         onSelect={(key) => setView({ kind: "nav", key })}
         user={session.user}
         onSignOut={signOut}
+        onSearch={searchTickets}
       >
         <CronCreatePage
           onBack={() => setView({ kind: "nav", key: "crons" })}
@@ -77,6 +84,7 @@ export default function App() {
         onSelect={(key) => setView({ kind: "nav", key })}
         user={session.user}
         onSignOut={signOut}
+        onSearch={searchTickets}
       >
         <TicketEditPage
           uuid={view.uuid}
@@ -94,6 +102,7 @@ export default function App() {
         onSelect={(key) => setView({ kind: "nav", key })}
         user={session.user}
         onSignOut={signOut}
+        onSearch={searchTickets}
       >
         <TicketCreatePage
           onBack={() => setView({ kind: "nav", key: "tickets" })}
@@ -112,6 +121,7 @@ export default function App() {
         onSelect={(key) => setView({ kind: "nav", key })}
         user={session.user}
         onSignOut={signOut}
+        onSearch={searchTickets}
       >
         <ClusterFormPage
           mode={view.mode}
@@ -130,6 +140,7 @@ export default function App() {
         onSelect={(key) => setView({ kind: "nav", key })}
         user={session.user}
         onSignOut={signOut}
+        onSearch={searchTickets}
       >
         <TicketDetailPage
           uuid={view.uuid}
@@ -146,12 +157,22 @@ export default function App() {
       onSelect={(key) => setView({ kind: "nav", key })}
       user={session.user}
       onSignOut={signOut}
+      onSearch={searchTickets}
     >
       {page === "dashboard" ? (
-        <DashboardPage onOpenTicket={openTicket} onCreateTicket={createTicket} />
+        <DashboardPage
+          onOpenTicket={openTicket}
+          onCreateTicket={createTicket}
+          onViewTickets={viewTickets}
+        />
       ) : null}
       {page === "tickets" ? (
-        <TicketsPage onOpenTicket={openTicket} onCreateTicket={createTicket} />
+        <TicketsPage
+          key={searchKeyword}
+          initialKeyword={searchKeyword}
+          onOpenTicket={openTicket}
+          onCreateTicket={createTicket}
+        />
       ) : null}
       {page === "clusters" ? (
         <ClustersPage onCreate={createCluster} onEdit={editCluster} />
@@ -159,8 +180,12 @@ export default function App() {
       {page === "rules" ? <RulesPage /> : null}
       {page === "violations" ? <ViolationsPage /> : null}
       {page === "logs" ? <LogsPage /> : null}
-      {page === "my-tickets" ? <TicketQueuePage mode="mine" onOpenTicket={openTicket} /> : null}
-      {page === "pending-review" ? <TicketQueuePage mode="review" onOpenTicket={openTicket} /> : null}
+      {page === "my-tickets" ? (
+        <TicketQueuePage mode="mine" onOpenTicket={openTicket} onCreateTicket={createTicket} />
+      ) : null}
+      {page === "pending-review" ? (
+        <TicketQueuePage mode="review" onOpenTicket={openTicket} />
+      ) : null}
       {page === "statements" ? <StatementsPage /> : null}
       {page === "crons" ? (
         <CronsPage onCreate={() => setView({ kind: "cron-create" })} />

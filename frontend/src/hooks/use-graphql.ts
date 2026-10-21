@@ -12,7 +12,7 @@ export interface QueryState<TData> {
 
 /**
  * 轻量查询 hook：请求一次、失败时把 fallback 交给页面。
- * 没有查询缓存，也不做自动重试——演示阶段够用。
+ * 没有查询缓存，也不做自动重试。
  */
 export function useGraphQL<TData, TVariables extends Record<string, unknown> = Record<string, never>>(
   query: string,
@@ -31,7 +31,7 @@ export function useGraphQL<TData, TVariables extends Record<string, unknown> = R
     let cancelled = false
     const token = getToken()
     if (!token) {
-      // 没有令牌就不请求，页面继续用假数据。
+      // 会话闸门会挡住未登录访问，这里只是防御性兜底。
       setData(fallback ?? null)
       return
     }

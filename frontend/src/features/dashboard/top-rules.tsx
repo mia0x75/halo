@@ -2,7 +2,7 @@ import { useMemo } from "react"
 
 import { BarChart } from "@/components/charts/bar-chart"
 import { chartPalette } from "@/components/charts/palette"
-import { severity, topRules, type TopRulePoint } from "@/lib/mock/data"
+import type { SeverityPoint, TopRulePoint } from "@/lib/model"
 
 const severityColors: Record<string, string> = {
   错误: chartPalette.danger,
@@ -12,13 +12,13 @@ const severityColors: Record<string, string> = {
 
 export interface TopRulesProps {
   /** 按级别统计的命中数 */
-  levels?: { severity: string; count: number }[]
+  levels: SeverityPoint[]
   /** 命中最多的规则 */
-  rules?: TopRulePoint[]
+  rules: TopRulePoint[]
 }
 
 /** 风险分级：级别分布 + 命中最多的规则。 */
-export function TopRules({ levels = severity, rules = topRules }: TopRulesProps) {
+export function TopRules({ levels, rules }: TopRulesProps) {
   const categories = useMemo(() => levels.map((item) => item.severity), [levels])
   const series = useMemo(
     () => [{ name: "命中数", data: levels.map((item) => item.count) }],
@@ -31,11 +31,20 @@ export function TopRules({ levels = severity, rules = topRules }: TopRulesProps)
 
   return (
     <div className="flex flex-col gap-4 px-2 py-4">
-      <BarChart categories={categories} series={series} colors={colors} height={160} />
+      {categories.length > 0 ? (
+        <BarChart categories={categories} series={series} colors={colors} height={160} />
+      ) : (
+        <p className="px-3 py-6 text-center text-sm text-muted-foreground">该时段没有规则命中</p>
+      )}
 
       <div>
         <p className="px-3 pb-1.5 text-sm font-medium text-muted-foreground">命中最多的规则</p>
         <ul className="flex flex-col">
+          {rules.length === 0 ? (
+            <li className="border-t border-border px-3 py-2 text-sm text-muted-foreground">
+              暂无命中记录
+            </li>
+          ) : null}
           {rules.map((item) => (
             <li
               key={item.rule}

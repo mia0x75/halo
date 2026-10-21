@@ -7,14 +7,7 @@ import { useGraphQL } from "@/hooks/use-graphql"
 import { formatUnix } from "@/lib/api/mappers"
 import { TICKET_DETAIL_QUERY, type CommentNode, type StatementNode } from "@/lib/api/queries"
 import { parseReport, reportLevelLabel } from "@/features/tickets/ticket-report"
-import {
-  ticketComments,
-  ticketStatements,
-  tickets,
-  type MockComment,
-  type MockStatement,
-  type TicketStatus,
-} from "@/lib/mock/data"
+import type { TicketStatus } from "@/lib/model"
 
 export interface TicketDetailViewProps {
   uuid: string | null
@@ -79,24 +72,16 @@ export function TicketDetailView({ uuid, onEdit }: TicketDetailViewProps) {
   )
 
   const ticket = detail.data?.ticket ?? null
-  // 接口没有数据时（未登录或接口不可用）回落到假数据，详情仍然可看。
-  const mock = ticket ? null : mockTicket(uuid)
   const statements: StatementView[] = useMemo(
-    () =>
-      ticket
-        ? (ticket.Statements?.edges?.map((edge) => toStatementView(edge.node)) ?? [])
-        : (mock?.statements ?? []),
-    [ticket, mock],
+    () => ticket?.Statements?.edges?.map((edge) => toStatementView(edge.node)) ?? [],
+    [ticket],
   )
   const comments: CommentView[] = useMemo(
-    () =>
-      ticket
-        ? (ticket.Comments?.edges?.map((edge) => toCommentView(edge.node)) ?? [])
-        : (mock?.comments ?? []),
-    [ticket, mock],
+    () => ticket?.Comments?.edges?.map((edge) => toCommentView(edge.node)) ?? [],
+    [ticket],
   )
 
-  if (!ticket && !mock) {
+  if (!ticket) {
     return (
       <div className="rounded-lg border border-border bg-card p-5 text-sm text-muted-foreground shadow-xs">
         {detail.loading ? "加载中…" : "未获取到工单信息"}
@@ -107,16 +92,14 @@ export function TicketDetailView({ uuid, onEdit }: TicketDetailViewProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="rounded-lg border border-border bg-card p-5 shadow-xs">
-        <h2 className="text-lg font-medium text-strong">{ticket?.Subject ?? mock?.subject}</h2>
+        <h2 className="text-lg font-medium text-strong">{ticket.Subject}</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          {ticket
-            ? `${ticket.Database} · ${ticket.Cluster.Alias} · 提交人 ${ticket.User.Name ?? ticket.User.Email} · 审核人 ${ticket.Reviewer.Name ?? "-"} · ${formatUnix(ticket.CreateAt)}`
-            : `${mock?.database} · ${mock?.cluster} · 提交人 ${mock?.submitter} · 审核人 ${mock?.reviewer} · ${mock?.createdAt}`}
+          {`${ticket.Database} · ${ticket.Cluster.Alias} · 提交人 ${ticket.User.Name ?? ticket.User.Email} · 审核人 ${ticket.Reviewer.Name ?? "-"} · ${formatUnix(ticket.CreateAt)}`}
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <StatusBadge status={statusByCode[ticket?.Status ?? 0] ?? "waiting-vld"} />
-          <Badge variant="muted">工单 {(ticket?.UUID ?? mock?.uuid ?? "").slice(0, 8)}</Badge>
-          {ticket?.Cluster ? (
+          <StatusBadge status={statusByCode[ticket.Status] ?? "waiting-vld"} />
+          <Badge variant="muted">工单 {ticket.UUID.slice(0, 8)}</Badge>
+          {ticket.Cluster ? (
             <>
               <Badge variant="outline">
                 {ticket.Cluster.IP}:{ticket.Cluster.Port}
@@ -127,7 +110,7 @@ export function TicketDetailView({ uuid, onEdit }: TicketDetailViewProps) {
               ) : null}
             </>
           ) : null}
-          {onEdit && ticket && editableStatuses.has(ticket.Status) ? (
+          {onEdit && editableStatuses.has(ticket.Status) ? (
             <Button variant="outline" size="sm" onClick={onEdit}>
               编辑
             </Button>
@@ -231,35 +214,5 @@ function toCommentView(node: CommentNode): CommentView {
     content: node.Content,
     createAt: formatUnix(node.CreateAt),
     user: node.User?.Name ?? "-",
-  }
-}
-
-interface MockTicketView {
-  uuid: string
-  subject: string
-  database: string
-  cluster: string
-  submitter: string
-  reviewer: string
-  createdAt: string
-  statements: MockStatement[]
-  comments: MockComment[]
-}
-
-/** 假数据里的工单详情。 */
-function mockTicket(uuid: string | null): MockTicketView | null {
-  if (!uuid) return null
-  const ticket = tickets.find((item) => item.uuid === uuid)
-  if (!ticket) return null
-  return {
-    uuid: ticket.uuid,
-    subject: ticket.subject,
-    database: ticket.database,
-    cluster: ticket.cluster,
-    submitter: ticket.submitter,
-    reviewer: ticket.reviewer,
-    createdAt: ticket.createdAt,
-    statements: ticketStatements[ticket.uuid] ?? [],
-    comments: ticketComments[ticket.uuid] ?? [],
   }
 }

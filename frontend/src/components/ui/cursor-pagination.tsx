@@ -9,9 +9,6 @@ export interface CursorPaginationProps {
   hasNextPage: boolean
   onPrevious: () => void
   onNext: () => void
-  /** 当前页第一条之前的游标，翻页时回退用 */
-  startCursor?: string
-  endCursor?: string
   /** 独立展示时（不在卡片内）去掉上边框 */
   divided?: boolean
 }
@@ -23,8 +20,6 @@ export function CursorPagination({
   hasNextPage,
   onPrevious,
   onNext,
-  startCursor,
-  endCursor,
   divided = true,
 }: CursorPaginationProps) {
   return (
@@ -36,11 +31,6 @@ export function CursorPagination({
     >
       <span className="text-sm text-muted-foreground">共 {total} 条</span>
       <div className="flex items-center gap-2">
-        {startCursor ? (
-          <span className="hidden font-mono text-[0.625rem] text-muted-foreground sm:inline">
-            {startCursor}
-          </span>
-        ) : null}
         <Button
           variant="outline"
           size="sm"
@@ -62,11 +52,6 @@ export function CursorPagination({
           <IconChevronRight size={16} stroke={1.5} />
         </Button>
       </div>
-      {endCursor ? (
-        <span className="hidden font-mono text-[0.625rem] text-muted-foreground sm:inline">
-          {endCursor}
-        </span>
-      ) : null}
     </div>
   )
 }

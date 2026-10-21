@@ -15,7 +15,6 @@ import {
   UPDATE_TICKET_MUTATION,
 } from "@/lib/api/queries"
 import { getToken } from "@/lib/api/session"
-import { clusters as mockClusters, users as mockUsers } from "@/lib/mock/data"
 
 export interface TicketFormValues {
   clusterUUID: string
@@ -77,13 +76,7 @@ export function TicketForm({
   >(ME_REVIEWERS_QUERY, undefined, { me: null })
 
   const clusterOptions = useMemo(() => {
-    const edges = remoteClusters.data?.me?.Clusters?.edges
-    if (!edges || edges.length === 0) {
-      return mockClusters.map((cluster) => ({
-        uuid: cluster.uuid,
-        label: `${cluster.alias} · ${cluster.type} (${cluster.ip}:${cluster.port})`,
-      }))
-    }
+    const edges = remoteClusters.data?.me?.Clusters?.edges ?? []
     const options = edges.map((edge) => ({
       uuid: edge.node.UUID,
       label: `${edge.node.Alias} · ${edge.node.Type} (${edge.node.IP}:${edge.node.Port})`,
@@ -96,10 +89,7 @@ export function TicketForm({
   }, [remoteClusters.data, initial])
 
   const reviewerOptions = useMemo(() => {
-    const reviewers = remoteReviewers.data?.me?.Reviewers
-    if (!reviewers || reviewers.length === 0) {
-      return mockUsers.map((user) => ({ uuid: user.email, label: user.name }))
-    }
+    const reviewers = remoteReviewers.data?.me?.Reviewers ?? []
     const options = reviewers.map((user) => ({
       uuid: user.UUID,
       label: user.Name || user.Email,
@@ -117,7 +107,7 @@ export function TicketForm({
   const submit = async () => {
     // 没登录时接口会拒绝，这里先给出明确提示，避免只看到 1401 错误码。
     if (!getToken()) {
-      setError("尚未登录，无法提交工单。请先在右上角登录后重试。")
+      setError("登录状态已失效，请重新登录后再提交。")
       return
     }
 
@@ -172,7 +162,9 @@ export function TicketForm({
             id="ticket-cluster"
             value={selectedCluster}
             onChange={(event) => setClusterUUID(event.target.value)}
+            disabled={clusterOptions.length === 0}
           >
+            {clusterOptions.length === 0 ? <option value="">没有可用群集</option> : null}
             {clusterOptions.map((option) => (
               <option key={option.uuid} value={option.uuid}>
                 {option.label}

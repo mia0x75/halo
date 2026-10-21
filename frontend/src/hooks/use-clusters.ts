@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react"
 
 import { useGraphQL } from "@/hooks/use-graphql"
 import { CLUSTERS_QUERY, type ClusterNode } from "@/lib/api/queries"
-import { clusters as mockClusters, type Cluster } from "@/lib/mock/data"
+import type { Cluster } from "@/lib/model"
 
 /** 接口返回的群集节点转成页面模型。 */
 export function toCluster(node: ClusterNode): Cluster {
@@ -36,8 +36,7 @@ export interface ClusterPage {
 }
 
 /**
- * 群集列表。接口不可用时（未登录或非管理员）回落到假数据，
- * 群集管理、新建工单的群集下拉共用这份数据。
+ * 群集列表。群集管理、数据库页与新建工单的群集下拉共用同一份分页数据。
  */
 export function useClusters(pageSize = 8): ClusterPage {
   const [after, setAfter] = useState<string | null>(null)
@@ -57,8 +56,8 @@ export function useClusters(pageSize = 8): ClusterPage {
   const connection = remote.data?.clusters ?? null
 
   const clusters = useMemo<Cluster[]>(
-    () => (connection ? connection.edges.map((edge) => toCluster(edge.node)) : mockClusters.slice(0, pageSize)),
-    [connection, pageSize],
+    () => connection?.edges.map((edge) => toCluster(edge.node)) ?? [],
+    [connection],
   )
 
   const next = useCallback(() => {
@@ -79,7 +78,7 @@ export function useClusters(pageSize = 8): ClusterPage {
 
   return {
     clusters,
-    total: connection?.totalCount ?? mockClusters.length,
+    total: connection?.totalCount ?? 0,
     hasNext: connection?.pageInfo.hasNextPage ?? false,
     hasPrevious: connection?.pageInfo.hasPreviousPage ?? false,
     startCursor: connection?.pageInfo.startCursor ?? "",

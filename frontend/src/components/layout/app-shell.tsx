@@ -10,11 +10,12 @@ export interface AppShellProps {
   onSelect: (key: NavKey) => void
   user: MeUser
   onSignOut: () => void
+  onSearch: (keyword: string) => void
   children: ReactNode
 }
 
 /** 应用外壳：左侧可收起导航 + 顶栏 + 内容区，页脚通栏。 */
-export function AppShell({ active, onSelect, user, onSignOut, children }: AppShellProps) {
+export function AppShell({ active, onSelect, user, onSignOut, onSearch, children }: AppShellProps) {
   const [collapsed, setCollapsed] = useState(false)
 
   return (
@@ -25,9 +26,11 @@ export function AppShell({ active, onSelect, user, onSignOut, children }: AppShe
           onSelect={onSelect}
           collapsed={collapsed}
           onToggle={() => setCollapsed((value) => !value)}
+          user={user}
+          onSignOut={onSignOut}
         />
         <div className="flex min-w-0 flex-1 flex-col">
-          <TopNav user={user} onSignOut={onSignOut} />
+          <TopNav user={user} onSignOut={onSignOut} onSearch={onSearch} />
           <main className="flex-1">
             <div className="mx-auto w-full max-w-[1320px] px-4 py-6">
               <div className="flex flex-col gap-4">{children}</div>
