@@ -1,12 +1,28 @@
-import { IconDatabase } from "@tabler/icons-react"
+import { IconDatabase, IconMoon, IconSun } from "@tabler/icons-react"
 
 import { LoginForm } from "@/features/auth/login-form"
+import { Button } from "@/components/ui/button"
+import { useTheme } from "@/hooks/use-theme"
 
 /** 登录页：未登录时唯一的入口，登录成功由会话闸门切到主界面。 */
 export function LoginPage() {
+  const { theme, toggleTheme } = useTheme()
+  const isDark = theme === "dark"
+
   return (
     <div className="flex min-h-svh flex-col bg-background text-foreground">
-      <main className="flex flex-1 items-center justify-center px-4 py-12">
+      <div className="flex justify-end px-4 py-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleTheme}
+          aria-label={isDark ? "切换到浅色主题" : "切换到深色主题"}
+          title={isDark ? "切换到浅色主题" : "切换到深色主题"}
+        >
+          {isDark ? <IconSun size={18} stroke={1.5} /> : <IconMoon size={18} stroke={1.5} />}
+        </Button>
+      </div>
+      <main className="flex flex-1 items-center justify-center px-4 pb-12">
         <div className="flex w-full max-w-sm flex-col gap-6">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2">
