@@ -209,7 +209,11 @@ func notifyTicketStatusChange(userUUID string, ticketUUID string, message string
 // configured token name and the conventional Authorization header are accepted,
 // because clients differ in what they send.
 func subscriptionToken(payload map[string]any) string {
-	names := []string{config.Config().Secret.Jwt.TokenName, "Authorization"}
+	names := []string{"Authentication", "Authorization"}
+	// 配置没加载时也要能用，否则握手会直接空指针。
+	if cfg := config.Config(); cfg != nil && cfg.Secret != nil && cfg.Secret.Jwt != nil && cfg.Secret.Jwt.TokenName != "" {
+		names = append([]string{cfg.Secret.Jwt.TokenName}, names...)
+	}
 	for _, name := range names {
 		value, ok := payload[name]
 		if !ok {
