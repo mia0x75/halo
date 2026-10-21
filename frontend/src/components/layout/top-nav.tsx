@@ -2,6 +2,7 @@ import { useState } from "react"
 import { IconBell, IconDatabase, IconMoon, IconSearch, IconSun } from "@tabler/icons-react"
 
 import { ConnectionMenu } from "@/components/layout/connection-menu"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -23,7 +24,7 @@ import {
   UNREAD_MESSAGE_COUNT_QUERY,
   type MessageNode,
 } from "@/lib/api/queries"
-import { getToken } from "@/lib/api/session"
+import { getToken, isDemoSession } from "@/lib/api/session"
 
 export interface TopNavProps {
   user: MeUser
@@ -67,6 +68,7 @@ export function TopNav({ user, onSignOut, onSearch }: TopNavProps) {
           <IconDatabase size={18} stroke={1.5} />
         </span>
         <span className="text-xl font-semibold tracking-tight text-strong">Halo</span>
+        {isDemoSession() ? <Badge variant="warning">演示</Badge> : null}
       </div>
 
       <form

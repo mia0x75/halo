@@ -1,8 +1,9 @@
-import { IconDatabase, IconMoon, IconSun } from "@tabler/icons-react"
+import { IconDatabase, IconMoon, IconPlayerPlay, IconSun } from "@tabler/icons-react"
 
 import { LoginForm } from "@/features/auth/login-form"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "@/hooks/use-theme"
+import { startDemoSession } from "@/lib/api/session"
 
 /** 登录页：未登录时唯一的入口，登录成功由会话闸门切到主界面。 */
 export function LoginPage() {
@@ -39,6 +40,21 @@ export function LoginPage() {
 
           <div className="rounded-lg border border-border bg-card p-6 shadow-xs">
             <LoginForm />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              <span className="h-px flex-1 bg-border" />
+              或者
+              <span className="h-px flex-1 bg-border" />
+            </div>
+            <Button variant="outline" size="lg" className="w-full" onClick={startDemoSession}>
+              <IconPlayerPlay size={16} stroke={1.5} />
+              进入演示系统
+            </Button>
+            <p className="text-center text-xs text-muted-foreground">
+              演示数据保存在浏览器内，每天重置一次，不连接真实数据库。
+            </p>
           </div>
 
           <p className="text-xs text-muted-foreground">请使用平台账号登录，未登录无法访问任何页面。</p>

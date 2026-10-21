@@ -1,4 +1,4 @@
-import { IconLogout, IconUserCircle } from "@tabler/icons-react"
+import { IconLogout, IconRefresh, IconUserCircle } from "@tabler/icons-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -9,7 +9,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { clearToken } from "@/lib/api/session"
+import { clearToken, isDemoSession } from "@/lib/api/session"
+import { resetDemoData } from "@/lib/demo/execute"
 import type { MeUser } from "@/lib/api/queries"
 
 export interface ConnectionMenuProps {
@@ -17,10 +18,11 @@ export interface ConnectionMenuProps {
   onSignOut: () => void
 }
 
-/** 当前账号：展示邮箱与角色，只提供退出登录。 */
+/** 当前账号：展示邮箱与角色；演示模式额外提供数据重置。 */
 export function ConnectionMenu({ user, onSignOut }: ConnectionMenuProps) {
   const name = user.Name?.trim() || user.Email
   const roles = user.Roles ?? []
+  const demo = isDemoSession()
 
   return (
     <DropdownMenu>
@@ -41,6 +43,17 @@ export function ConnectionMenu({ user, onSignOut }: ConnectionMenuProps) {
           </div>
         ) : null}
         <DropdownMenuSeparator />
+        {demo ? (
+          <DropdownMenuItem
+            onSelect={() => {
+              resetDemoData()
+              window.location.reload()
+            }}
+          >
+            <IconRefresh size={16} stroke={1.5} />
+            重置演示数据
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuItem
           onSelect={() => {
             clearToken()

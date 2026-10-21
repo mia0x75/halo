@@ -3,7 +3,8 @@
  * 令牌失效（后端 1401）时顺手清掉本地令牌，外层随即回到登录页。
  */
 
-import { clearToken } from "@/lib/api/session"
+import { clearToken, DEMO_TOKEN } from "@/lib/api/session"
+import { demoExecute } from "@/lib/demo/execute"
 
 const ENDPOINT = "/api/query"
 
@@ -40,6 +41,11 @@ export async function graphqlRequest<TData, TVariables extends Record<string, un
   variables?: TVariables,
   token?: string | null,
 ): Promise<TData> {
+  // 演示令牌不联网，直接由本地执行器应答。
+  if (token === DEMO_TOKEN) {
+    return demoExecute(query, variables) as unknown as TData
+  }
+
   const headers: Record<string, string> = { "Content-Type": "application/json" }
   // 后端从配置里的 token 名读取（config.json 的 secret.jwt.token_name，默认 Authentication）
   if (token) {

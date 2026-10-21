@@ -5,6 +5,12 @@
 
 const TOKEN_KEY = "halo-token"
 
+/**
+ * 演示模式的伪令牌。它不会发给后端：传输层看到它就转到本地演示执行器，
+ * 因此演示环境可以脱离服务端独立运行。
+ */
+export const DEMO_TOKEN = "demo"
+
 type Listener = (token: string | null) => void
 
 const listeners = new Set<Listener>()
@@ -48,4 +54,13 @@ export function clearToken(): void {
     // 忽略：读不到令牌时外层同样按未登录处理。
   }
   notify(null)
+}
+
+export function isDemoSession(): boolean {
+  return getToken() === DEMO_TOKEN
+}
+
+/** 进入演示：不需要后端，数据由前端内置的演示执行器提供。 */
+export function startDemoSession(): void {
+  setToken(DEMO_TOKEN)
 }

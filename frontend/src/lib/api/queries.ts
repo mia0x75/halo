@@ -139,7 +139,15 @@ export interface TicketNode {
   CreateAt: number
   User: { UUID: string; Name: string | null } | null
   Reviewer: { UUID: string; Name: string | null } | null
-  Cluster: { UUID: string; Alias: string; Host: string; IP: string; Port: number } | null
+  Cluster: {
+    UUID: string
+    Alias: string
+    Host: string
+    IP: string
+    Port: number
+    Type: string
+    Group: string | null
+  } | null
 }
 
 export interface TicketConnectionNode {
