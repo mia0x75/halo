@@ -60,10 +60,14 @@ export function StatsPage() {
       row[metric.Name] = metric.Value
       map.set(metric.Bucket, row)
     }
-    return [...map.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1))
+    // 图表从左到右是时间顺序，升序排列后再截取最近的一段。
+    return [...map.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1))
   }, [metrics])
 
-  const limited = useMemo(() => buckets.slice(0, Number(range) || buckets.length), [buckets, range])
+  const limited = useMemo(() => {
+    const size = Number(range) || buckets.length
+    return buckets.slice(Math.max(0, buckets.length - size))
+  }, [buckets, range])
   const categories = limited.map(([bucket]) => bucket)
 
   const series = useMemo(
@@ -135,7 +139,11 @@ export function StatsPage() {
               selectable
               range={7}
             />
-            <BrushChart categories={categories} series={series} target={TREND_CHART_ID} />
+            <BrushChart
+              categories={categories}
+              series={series.slice(0, 1)}
+              target={TREND_CHART_ID}
+            />
           </>
         )}
       </SectionCard>
@@ -153,7 +161,7 @@ export function StatsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {limited.length === 0 ? (
+            {[...limited].reverse().length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={metricNames.length + 1}
@@ -163,7 +171,7 @@ export function StatsPage() {
                 </TableCell>
               </TableRow>
             ) : null}
-            {limited.map(([bucket, row]) => (
+            {[...limited].reverse().map(([bucket, row]) => (
               <TableRow key={bucket}>
                 <TableCell className="font-mono text-xs">{bucket}</TableCell>
                 {metricNames.map((name) => (

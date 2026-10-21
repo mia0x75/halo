@@ -29,6 +29,8 @@ export function BrushChart({ categories, series, target, height = 96, className 
       },
       colors: [chartPalette.primary],
       dataLabels: { enabled: false },
+      // 刷选图只负责拖区间，多系列图例会压在滑块上，一律不显示。
+      legend: { show: false },
       stroke: { width: 1.5, curve: "smooth" },
       fill: { type: "gradient", gradient: { opacityFrom: 0.3, opacityTo: 0.04 } },
       markers: { size: 0, hover: { size: 4 } },

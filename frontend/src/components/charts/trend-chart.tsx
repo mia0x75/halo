@@ -40,7 +40,14 @@ export function TrendChart({
       // 常态不画点，鼠标悬停时在曲线上标出该点；
       // ApexCharts 的 size 是半径，4 即直径 8px，与图例、提示框一致。
       markers: { size: 0, hover: { size: 4 } },
-      colors: [chartPalette.primary, chartPalette.success, chartPalette.danger],
+      colors: [
+        chartPalette.primary,
+        chartPalette.success,
+        chartPalette.danger,
+        chartPalette.warning,
+        chartPalette.info,
+        chartPalette.secondary,
+      ],
       dataLabels: { enabled: false },
       stroke: { width: 1.5, curve: "smooth" },
       fill: { type: "gradient", gradient: { opacityFrom: 0.2, opacityTo: 0.02 } },
