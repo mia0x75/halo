@@ -25,7 +25,8 @@ export function BrushChart({ categories, series, target, height = 96, className 
         toolbar: { show: false },
         zoom: { enabled: false },
         // v8 的 brush 配置在 chart 之下；主图要先渲染出来。
-        brush: { enabled: true, target, autoScaleYaxis: false },
+        // 长区间下关闭 autoScaleYaxis 会让刷选遮罩算出负高度，交给 Apex 自适应。
+        brush: { enabled: true, target, autoScaleYaxis: true },
       },
       colors: [chartPalette.primary],
       dataLabels: { enabled: false },
@@ -38,6 +39,8 @@ export function BrushChart({ categories, series, target, height = 96, className 
       grid: { borderColor: "transparent", padding: { left: 4, right: 4 } },
       xaxis: {
         categories,
+        // 一年 365 个分类时 Apex 会把标签全部画出来，压成一片黑边。
+        tickAmount: Math.min(8, Math.max(2, Math.floor(categories.length / 12))),
         labels: { style: { colors: chartPalette.textMuted, fontSize: "10px" } },
         tooltip: { enabled: false },
       },

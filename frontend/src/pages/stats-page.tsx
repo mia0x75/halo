@@ -117,7 +117,7 @@ export function StatsPage() {
               id="stats-range"
               value={range}
               onChange={(event) => setRange(event.target.value)}
-              className="h-8 w-28"
+              className="h-8 w-32"
             >
               <option value="7">近 7 天</option>
               <option value="30">近 30 天</option>
@@ -140,7 +140,8 @@ export function StatsPage() {
               range={7}
             />
             <BrushChart
-              categories={categories}
+              // 刷选图只有 96px 高，完整的年月日会把 x 轴挤成负高度。
+              categories={categories.map((item) => item.slice(5))}
               series={series.slice(0, 1)}
               target={TREND_CHART_ID}
             />
