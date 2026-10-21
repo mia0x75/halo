@@ -1053,13 +1053,6 @@ L:
 			err = fmt.Errorf("错误代码: %s, 错误信息: 输入参数状态(status=%d)无效。", rc, input.Status)
 			break L
 		}
-		if input.Status != gqlapi.UserStatusEnumMap[gqlapi.UserStatusEnumNormal] &&
-			userHasRole(user.UserID, "Root") {
-			rc = gqlapi.ReturnCodeForbidden
-			err = fmt.Errorf("错误代码: %s, 错误信息: Root 账号不能被停用或设为待验证。", rc)
-			break L
-		}
-
 		edges := []*models.Edge{}
 
 		for _, roleUUID := range input.RoleUUIDs {
@@ -1242,12 +1235,15 @@ L:
 			break L
 		}
 
-		bs, _ := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 		avatar := cache.AvatarsMap.Any(func(elem *models.Avatar) bool {
 			return elem.UUID == input.AvatarUUID
 		})
 		user.Email = input.Email
-		user.Password = string(bs)
+		// 留空表示不改密码，管理员改资料时不必重置口令。
+		if input.Password != "" {
+			bs, _ := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+			user.Password = string(bs)
+		}
 		user.Status = input.Status
 		user.Name = input.Name
 		if avatar == nil {

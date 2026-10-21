@@ -726,6 +726,46 @@ export const USERS_QUERY = `
   }
 `
 
+export const CREATE_USER_MUTATION = `
+  mutation CreateUser($input: CreateUserInput!) {
+    createUser(input: $input) {
+      UUID
+      Email
+      Name
+      Status
+    }
+  }
+`
+
+export const UPDATE_USER_MUTATION = `
+  mutation UpdateUser($input: UpdateUserInput!) {
+    updateUser(input: $input) {
+      UUID
+      Email
+      Name
+      Status
+    }
+  }
+`
+
+export const PATCH_USER_STATUS_MUTATION = `
+  mutation PatchUserStatus($input: PatchUserStatusInput!) {
+    patchUserStatus(input: $input)
+  }
+`
+
+export const GRANT_ROLES_MUTATION = `
+  mutation GrantRoles($input: GrantRolesInput!) {
+    grantRoles(input: $input)
+  }
+`
+
+export const GRANT_REVIEWERS_MUTATION = `
+  mutation GrantReviewers($input: GrantReviewersInput!) {
+    grantReviewers(input: $input)
+  }
+`
+
 export const ROLES_QUERY = `
   query Roles {
     roles {

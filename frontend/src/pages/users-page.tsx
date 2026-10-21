@@ -1,9 +1,10 @@
 import { useCallback, useMemo, useState } from "react"
-import { IconSearch, IconUsers } from "@tabler/icons-react"
+import { IconPencil, IconPlus, IconSearch, IconUsers } from "@tabler/icons-react"
 
 import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { CursorPagination } from "@/components/ui/cursor-pagination"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -16,7 +17,15 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useGraphQL } from "@/hooks/use-graphql"
-import { ROLES_QUERY, USERS_QUERY, type RoleNode, type UserNode } from "@/lib/api/queries"
+import { graphqlRequest } from "@/lib/api/client"
+import {
+  PATCH_USER_STATUS_MUTATION,
+  ROLES_QUERY,
+  USERS_QUERY,
+  type RoleNode,
+  type UserNode,
+} from "@/lib/api/queries"
+import { getToken } from "@/lib/api/session"
 
 type Tab = "users" | "roles"
 
@@ -27,12 +36,19 @@ const userStatusLabels: Record<number, string> = {
   3: "未激活",
 }
 
+export interface UsersPageProps {
+  onCreateUser: () => void
+  onEditUser: (uuid: string) => void
+}
+
 /** 用户与角色页：账号清单与角色定义。 */
-export function UsersPage() {
+export function UsersPage({ onCreateUser, onEditUser }: UsersPageProps) {
   const [tab, setTab] = useState<Tab>("users")
   const [keyword, setKeyword] = useState("")
   const [after, setAfter] = useState<string | null>(null)
   const [stack, setStack] = useState<(string | null)[]>([])
+  const [actionError, setActionError] = useState<string | null>(null)
+  const [busyUser, setBusyUser] = useState<string | null>(null)
 
   const users = useGraphQL<
     {
@@ -60,6 +76,24 @@ export function UsersPage() {
   }, [connection, keyword])
   const roleList = roles.data?.roles ?? []
 
+  const toggleStatus = async (user: UserNode) => {
+    const next = user.Status === 1 ? 2 : 1
+    setBusyUser(user.UUID)
+    setActionError(null)
+    try {
+      await graphqlRequest(
+        PATCH_USER_STATUS_MUTATION,
+        { input: { UserUUID: user.UUID, Status: next } },
+        getToken(),
+      )
+      users.refetch()
+    } catch (cause) {
+      setActionError(cause instanceof Error ? cause.message : String(cause))
+    } finally {
+      setBusyUser(null)
+    }
+  }
+
   const nextPage = useCallback(() => {
     setStack((items) => [...items, after])
     setAfter(connection?.pageInfo.endCursor || null)
@@ -77,12 +111,22 @@ export function UsersPage() {
         title="用户与角色"
         description="账号、角色与审核关系"
         action={
-          <Badge variant="default" className="px-2 py-1">
-            <IconUsers size={14} stroke={1.5} className="mr-1" />
-            {userList.length} 个账号 / {roleList.length} 个角色
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="default" className="px-2 py-1">
+              <IconUsers size={14} stroke={1.5} className="mr-1" />
+              {userList.length} 个账号 / {roleList.length} 个角色
+            </Badge>
+            <Button onClick={onCreateUser}>
+              <IconPlus size={16} stroke={1.5} />
+              新建账号
+            </Button>
+          </div>
         }
       />
+
+      {actionError ? (
+        <p className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{actionError}</p>
+      ) : null}
 
       <SectionCard title="账号与角色" description="角色决定能做什么，审核关系决定能审谁的工单" bodyClassName="p-0">
         <div className="flex gap-4 border-b border-border px-5 pt-3">
@@ -141,12 +185,13 @@ export function UsersPage() {
                   <TableHead>角色</TableHead>
                   <TableHead>可审核人</TableHead>
                   <TableHead>状态</TableHead>
+                  <TableHead className="w-32">操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {userList.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="py-8 text-center text-sm text-muted-foreground">
+                    <TableCell colSpan={6} className="py-8 text-center text-sm text-muted-foreground">
                       没有匹配的账号。
                     </TableCell>
                   </TableRow>
@@ -172,6 +217,26 @@ export function UsersPage() {
                       <Badge variant={user.Status === 1 ? "success" : "muted"}>
                         {userStatusLabels[user.Status] ?? user.Status}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={`编辑 ${user.Email}`}
+                          onClick={() => onEditUser(user.UUID)}
+                        >
+                          <IconPencil size={16} stroke={1.5} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={busyUser === user.UUID}
+                          onClick={() => void toggleStatus(user)}
+                        >
+                          {user.Status === 1 ? "禁用" : "启用"}
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

@@ -16,6 +16,7 @@ import { StatsPage } from "@/pages/stats-page"
 import { RulesPage } from "@/pages/rules-page"
 import { TicketCreatePage } from "@/pages/ticket-create-page"
 import { UsersPage } from "@/pages/users-page"
+import { UserFormPage } from "@/pages/user-form-page"
 import { TicketDetailPage } from "@/pages/ticket-detail-page"
 import { TicketEditPage } from "@/pages/ticket-edit-page"
 import { TicketQueuePage } from "@/pages/ticket-queue-page"
@@ -33,6 +34,7 @@ type View =
   | { kind: "cron-create" }
   | { kind: "cluster-form"; mode: "create" | "edit"; uuid?: string }
   | { kind: "group-form"; mode: "create" | "edit"; uuid?: string }
+  | { kind: "user-form"; mode: "create" | "edit"; uuid?: string }
 
 export default function App() {
   const session = useSession()
@@ -58,6 +60,11 @@ export default function App() {
   }, [])
   const viewTickets = useCallback(() => setView({ kind: "nav", key: "tickets" }), [])
   const viewMessages = useCallback(() => setView({ kind: "nav", key: "messages" }), [])
+  const createUser = useCallback(() => setView({ kind: "user-form", mode: "create" }), [])
+  const editUser = useCallback(
+    (uuid: string) => setView({ kind: "user-form", mode: "edit", uuid }),
+    [],
+  )
   const createGroup = useCallback(() => {
     setSettingsTab("groups")
     setView({ kind: "group-form", mode: "create" })
@@ -154,6 +161,27 @@ export default function App() {
     )
   }
 
+  if (view.kind === "user-form") {
+    return (
+      <AppShell
+        active="users"
+        onSelect={(key) => setView({ kind: "nav", key })}
+        user={session.user}
+        onSignOut={signOut}
+        onSearch={searchTickets}
+        onViewMessages={viewMessages}
+        onOpenTicket={openTicket}
+      >
+        <UserFormPage
+          mode={view.mode}
+          uuid={view.uuid}
+          onBack={() => setView({ kind: "nav", key: "users" })}
+          onSaved={() => setView({ kind: "nav", key: "users" })}
+        />
+      </AppShell>
+    )
+  }
+
   if (view.kind === "group-form") {
     return (
       <AppShell
@@ -238,7 +266,9 @@ export default function App() {
         <CronsPage onCreate={() => setView({ kind: "cron-create" })} />
       ) : null}
       {page === "databases" ? <DatabasesPage /> : null}
-      {page === "users" ? <UsersPage /> : null}
+      {page === "users" ? (
+        <UsersPage onCreateUser={createUser} onEditUser={editUser} />
+      ) : null}
       {page === "settings" ? (
         <SettingsPage
           tab={settingsTab}

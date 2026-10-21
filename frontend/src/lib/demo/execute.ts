@@ -3,7 +3,13 @@
  * 返回与真实接口同形的结果，因此页面代码无需区分真假接口。
  */
 
-import type { ClusterNode, GroupNode, StatementNode, TicketNode } from "@/lib/api/queries"
+import type {
+  ClusterNode,
+  GroupNode,
+  StatementNode,
+  TicketNode,
+  UserNode,
+} from "@/lib/api/queries"
 import { buildDemoState, demoUser, demoUUID, metricSeeds, today, type DemoState, type DemoTicket } from "@/lib/demo/data"
 
 const HOUR = 3600
@@ -502,6 +508,77 @@ export function demoExecute(query: string, variables?: Variables): Record<string
     }
     case "Users": {
       return { users: paginate(state.users, source) }
+    }
+    case "CreateUser": {
+      const input = record(source.input)
+      const roleUUIDs = Array.isArray(input.RoleUUIDs)
+        ? input.RoleUUIDs.filter((item): item is string => typeof item === "string")
+        : []
+      const clusterUUIDs = Array.isArray(input.ClusterUUIDs)
+        ? input.ClusterUUIDs.filter((item): item is string => typeof item === "string")
+        : []
+      const reviewerUUIDs = Array.isArray(input.ReviewerUUIDs)
+        ? input.ReviewerUUIDs.filter((item): item is string => typeof item === "string")
+        : []
+      const user: UserNode = {
+        UUID: `user-${state.users.length + 1}`,
+        Email: text(input.Email) ?? "user@example.com",
+        Name: text(input.Name) ?? "",
+        Status: num(input.Status, 1),
+        Roles: state.roles
+          .filter((role) => roleUUIDs.includes(role.UUID))
+          .map((role) => ({ UUID: role.UUID, Name: role.Name })),
+        Reviewers: state.users
+          .filter((item) => reviewerUUIDs.includes(item.UUID))
+          .map((item) => ({ UUID: item.UUID, Name: item.Name, Email: item.Email })),
+        GrantedClusters: state.clusters
+          .filter((cluster) => clusterUUIDs.includes(cluster.UUID))
+          .map((cluster) => ({ UUID: cluster.UUID, Alias: cluster.Alias })),
+      }
+      state.users.push(user)
+      return { createUser: user }
+    }
+    case "UpdateUser": {
+      const input = record(source.input)
+      const existing = state.users.find((item) => item.UUID === text(input.UserUUID))
+      if (existing) {
+        existing.Email = text(input.Email) ?? existing.Email
+        existing.Name = text(input.Name) ?? existing.Name
+        existing.Status = num(input.Status, existing.Status)
+      }
+      return { updateUser: existing ?? null }
+    }
+    case "PatchUserStatus": {
+      const input = record(source.input)
+      const existing = state.users.find((item) => item.UUID === text(input.UserUUID))
+      if (existing) existing.Status = num(input.Status, existing.Status)
+      return { patchUserStatus: true }
+    }
+    case "GrantRoles": {
+      const input = record(source.input)
+      const user = state.users.find((item) => item.UUID === text(input.UserUUID))
+      const roleUUIDs = Array.isArray(input.RoleUUIDs)
+        ? input.RoleUUIDs.filter((item): item is string => typeof item === "string")
+        : []
+      if (user) {
+        user.Roles = state.roles
+          .filter((role) => roleUUIDs.includes(role.UUID))
+          .map((role) => ({ UUID: role.UUID, Name: role.Name }))
+      }
+      return { grantRoles: true }
+    }
+    case "GrantReviewers": {
+      const input = record(source.input)
+      const user = state.users.find((item) => item.UUID === text(input.UserUUID))
+      const reviewerUUIDs = Array.isArray(input.ReviewerUUIDs)
+        ? input.ReviewerUUIDs.filter((item): item is string => typeof item === "string")
+        : []
+      if (user) {
+        user.Reviewers = state.users
+          .filter((item) => reviewerUUIDs.includes(item.UUID))
+          .map((item) => ({ UUID: item.UUID, Name: item.Name, Email: item.Email }))
+      }
+      return { grantReviewers: true }
     }
     case "Roles": {
       return { roles: state.roles }
