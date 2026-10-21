@@ -720,6 +720,12 @@ export const USERS_QUERY = `
           Roles { UUID Name }
           Reviewers { UUID Name Email }
           GrantedClusters { UUID Alias }
+          ClusterGrants {
+            Cluster { UUID Alias Group }
+            Direct
+            Inherited
+            Sources
+          }
         }
       }
     }
@@ -874,6 +880,18 @@ export interface UserNode {
   Reviewers: { UUID: string; Name: string | null; Email: string }[] | null
   /** 直接授权给该用户的群集，不含角色继承的分组权限 */
   GrantedClusters: { UUID: string; Alias: string }[] | null
+  /** 对每个群集的生效权限与来源 */
+  ClusterGrants?: ClusterGrantNode[] | null
+}
+
+export interface ClusterGrantNode {
+  Cluster: { UUID: string; Alias: string; Group: string | null }
+  /** 是否有直接授权 */
+  Direct: boolean
+  /** 是否通过角色继承的分组获得权限 */
+  Inherited: boolean
+  /** 继承来源，形如「角色 / 分组」 */
+  Sources: string[]
 }
 
 export interface RoleNode {

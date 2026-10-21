@@ -217,19 +217,43 @@ function clusterInput(input: Variables, existing?: ClusterNode): ClusterNode {
   }
 }
 
-/** 当前用户可见的群集：直接授权，加上角色被授予的分组里的群集。 */
-function demoUserClusters(): ClusterNode[] {
-  const user = state.users.find((item) => item.UUID === demoUser.UUID)
+/**
+ * 某个用户的群集权限：直接授权，加上角色被授予的分组里的群集。
+ * 返回每个群集的生效状态与来源，供管理面区分两层权限。
+ */
+function demoClusterGrants(userUUID: string) {
+  const user = state.users.find((item) => item.UUID === userUUID)
   const granted = new Set((user?.GrantedClusters ?? []).map((cluster) => cluster.UUID))
-  const roleGroups = new Set<string>()
+
+  const sourcesByGroup = new Map<string, string[]>()
   for (const role of state.roles) {
     const owned = (user?.Roles ?? []).some((item) => item.UUID === role.UUID)
     if (!owned) continue
-    for (const group of role.Groups ?? []) roleGroups.add(group.UUID)
+    for (const group of role.Groups ?? []) {
+      const list = sourcesByGroup.get(group.UUID) ?? []
+      list.push(`${role.Name} / ${group.Name}`)
+      sourcesByGroup.set(group.UUID, list)
+    }
   }
-  return state.clusters.filter(
-    (cluster) => granted.has(cluster.UUID) || (cluster.GroupUUID !== null && roleGroups.has(cluster.GroupUUID)),
-  )
+
+  return state.clusters.map((cluster) => {
+    const sources = cluster.GroupUUID ? (sourcesByGroup.get(cluster.GroupUUID) ?? []) : []
+    return {
+      Cluster: { UUID: cluster.UUID, Alias: cluster.Alias, Group: cluster.Group },
+      Direct: granted.has(cluster.UUID),
+      Inherited: sources.length > 0,
+      Sources: sources,
+    }
+  })
+}
+
+/** 当前用户可见的群集：直接授权，加上角色被授予的分组里的群集。 */
+function demoUserClusters(): ClusterNode[] {
+  const grants = demoClusterGrants(demoUser.UUID)
+  return state.clusters.filter((cluster) => {
+    const grant = grants.find((item) => item.Cluster.UUID === cluster.UUID)
+    return Boolean(grant && (grant.Direct || grant.Inherited))
+  })
 }
 
 export function demoExecute(query: string, variables?: Variables): Record<string, unknown> {
@@ -240,7 +264,13 @@ export function demoExecute(query: string, variables?: Variables): Record<string
   switch (operation) {
     case "Me": {
       const user = state.users.find((item) => item.UUID === demoUser.UUID)
-      return { me: { ...demoUser, GrantedClusters: user?.GrantedClusters ?? [] } }
+      return {
+        me: {
+          ...demoUser,
+          GrantedClusters: user?.GrantedClusters ?? [],
+          ClusterGrants: demoClusterGrants(demoUser.UUID),
+        },
+      }
     }
     case "Metrics":
     case "MetricSummary": {
@@ -507,7 +537,11 @@ export function demoExecute(query: string, variables?: Variables): Record<string
       return { databases: state.databases[clusterUUID] ?? [] }
     }
     case "Users": {
-      return { users: paginate(state.users, source) }
+      const rows = state.users.map((user) => ({
+        ...user,
+        ClusterGrants: demoClusterGrants(user.UUID),
+      }))
+      return { users: paginate(rows, source) }
     }
     case "CreateUser": {
       const input = record(source.input)

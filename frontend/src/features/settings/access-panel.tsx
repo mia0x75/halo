@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react"
-import { IconCheck, IconUsers } from "@tabler/icons-react"
+import { IconCheck, IconInfoCircle, IconUsers } from "@tabler/icons-react"
 
 import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
@@ -16,6 +17,7 @@ import {
   GROUPS_QUERY,
   ROLES_QUERY,
   USERS_QUERY,
+  type ClusterGrantNode,
   type ClusterNode,
   type GroupNode,
   type RoleNode,
@@ -72,6 +74,16 @@ export function AccessPanel({ scope }: AccessPanelProps) {
   const selectedRole = roleList.find((role) => role.UUID === targetUUID)
   const selectedUser = userList.find((user) => user.UUID === targetUUID)
 
+  // 生效权限 = 直接授权 ∪ 角色继承。管理面必须分开呈现两层，
+  // 否则「取消直接授权」会被误读成「断访问」。
+  const grantsByCluster = useMemo(() => {
+    const map = new Map<string, ClusterGrantNode>()
+    for (const grant of selectedUser?.ClusterGrants ?? []) {
+      map.set(grant.Cluster.UUID, grant)
+    }
+    return map
+  }, [selectedUser])
+
   const optionItems = useMemo(
     () =>
       scope === "role"
@@ -79,13 +91,20 @@ export function AccessPanel({ scope }: AccessPanelProps) {
             uuid: group.UUID,
             name: group.Name,
             extra: group.Description || "-",
+            effective: false,
+            sources: [] as string[],
           }))
-        : clusterList.map((cluster) => ({
-            uuid: cluster.UUID,
-            name: cluster.Alias,
-            extra: cluster.Group ?? "未分组",
-          })),
-    [clusterList, groupList, scope],
+        : clusterList.map((cluster) => {
+            const grant = grantsByCluster.get(cluster.UUID)
+            return {
+              uuid: cluster.UUID,
+              name: cluster.Alias,
+              extra: cluster.Group ?? "未分组",
+              effective: Boolean(grant?.Direct || grant?.Inherited),
+              sources: grant?.Sources ?? [],
+            }
+          }),
+    [clusterList, grantsByCluster, groupList, scope],
   )
   const current =
     scope === "role"
@@ -153,7 +172,7 @@ export function AccessPanel({ scope }: AccessPanelProps) {
         description={
           scope === "role"
             ? "角色获得分组授权后，持有该角色的成员才能在这些分组的群集上提交工单"
-            : "直接授权给用户的群集，与角色继承的分组权限叠加"
+            : "生效权限 = 直接授权 + 角色继承的分组权限，两者取并集"
         }
       />
 
@@ -169,7 +188,7 @@ export function AccessPanel({ scope }: AccessPanelProps) {
         description={
           scope === "role"
             ? "先选角色，再勾选它能管理的分组"
-            : "先选用户，再勾选直接授权给他的群集"
+            : "勾选的是「直接授权」；继承自角色分组的权限由「角色授权」决定"
         }
       >
         <div className="flex flex-col gap-4">
@@ -215,10 +234,22 @@ export function AccessPanel({ scope }: AccessPanelProps) {
                     />
                     <label
                       htmlFor={`grant-${option.uuid}`}
-                      className="flex min-w-0 cursor-pointer flex-col"
+                      className="flex min-w-0 cursor-pointer flex-col gap-1"
                     >
-                      <span className="truncate font-medium text-strong">{option.name}</span>
+                      <span className="flex items-center gap-2">
+                        <span className="truncate font-medium text-strong">{option.name}</span>
+                        {option.effective ? (
+                          <Badge variant="success">生效中</Badge>
+                        ) : (
+                          <Badge variant="muted">无权限</Badge>
+                        )}
+                      </span>
                       <span className="truncate text-xs text-muted-foreground">{option.extra}</span>
+                      {option.sources.length > 0 ? (
+                        <span className="truncate text-xs text-info">
+                          经由 {option.sources.join("、")} 继承
+                        </span>
+                      ) : null}
                     </label>
                   </div>
                 ))}
@@ -232,6 +263,15 @@ export function AccessPanel({ scope }: AccessPanelProps) {
                   <span className="text-sm text-muted-foreground">有未保存的改动</span>
                 ) : null}
               </div>
+              {scope === "user" ? (
+                <p className="flex items-start gap-2 rounded-md bg-surface-secondary px-3 py-2 text-xs text-muted-foreground">
+                  <IconInfoCircle size={14} stroke={1.5} className="mt-0.5 shrink-0" />
+                  <span>
+                    取消「直接授权」只会撤掉这一层。若该账号的角色仍被授予了群集所属分组，
+                    权限依然生效——要真正收回，需要到「角色授权」里调整。
+                  </span>
+                </p>
+              ) : null}
             </div>
           ) : (
             <p className="flex items-center gap-2 text-sm text-muted-foreground">
