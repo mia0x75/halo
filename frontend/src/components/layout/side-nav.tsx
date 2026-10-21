@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { IconChevronsLeft, IconChevronsRight, IconLogout } from "@tabler/icons-react"
 
 import { navSections, type NavKey } from "@/components/layout/nav-items"
@@ -11,9 +12,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useGraphQL } from "@/hooks/use-graphql"
+import { subscribeMessagesChanged } from "@/lib/api/message-events"
 import {
   MY_TICKETS_QUERY,
   PENDING_REVIEWS_QUERY,
+  UNREAD_MESSAGE_COUNT_QUERY,
   type MeUser,
   type TicketConnectionNode,
 } from "@/lib/api/queries"
@@ -42,10 +45,21 @@ export function SideNav({ active, onSelect, collapsed, onToggle, user, onSignOut
     { me: { PendingReviews?: TicketConnectionNode | null } | null },
     { first: number }
   >(PENDING_REVIEWS_QUERY, { first: 1 }, { me: null })
+  const unread = useGraphQL<{ unreadMessageCount: number }>(UNREAD_MESSAGE_COUNT_QUERY)
+  const refetchUnread = unread.refetch
   const badgeCounts: Record<string, number | undefined> = {
+    messages: unread.data?.unreadMessageCount,
     "my-tickets": myTickets.data?.me?.MyTickets?.totalCount,
     "pending-review": pendingReviews.data?.me?.PendingReviews?.totalCount,
   }
+
+  useEffect(
+    () =>
+      subscribeMessagesChanged(() => {
+        refetchUnread()
+      }),
+    [refetchUnread],
+  )
 
   return (
     <aside

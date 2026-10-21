@@ -526,7 +526,9 @@ function buildMetrics(): { Name: string; Bucket: string; Value: number }[] {
   return rows
 }
 
-function buildMessages(): MessageNode[] {
+function buildMessages(tickets: TicketNode[]): MessageNode[] {
+  const approved = tickets.find((ticket) => ticket.Status === 5) ?? tickets[0]
+  const pending = tickets.find((ticket) => ticket.Status === 4) ?? tickets[0]
   const seeds: [string, string, string, boolean][] = [
     ["ticket", "工单「订单表新增归档字段」审核通过", "可以执行，执行窗口为今晚 22:00。", false],
     ["review", "有一条工单待你审核", "「报表视图重建」等待人工审核。", false],
@@ -539,7 +541,12 @@ function buildMessages(): MessageNode[] {
     Category: category,
     Title: title,
     Content: content,
-    Link: index < 2 ? `/tickets` : "",
+    Link:
+      index === 0 && approved
+        ? `/tickets/${approved.UUID}`
+        : index === 1 && pending
+          ? `/tickets/${pending.UUID}`
+          : "",
     ReadAt: read ? today - HOUR * (index + 1) : null,
     CreateAt: today - HOUR * (index + 1),
   }))
@@ -618,7 +625,7 @@ export function buildDemoState(): DemoState {
     tasks,
     executions,
     options: buildOptions(),
-    messages: buildMessages(),
+    messages: buildMessages(tickets),
   }
 }
 

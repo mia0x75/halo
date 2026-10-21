@@ -109,6 +109,12 @@ export const MARK_MESSAGE_READ_MUTATION = `
   }
 `
 
+export const MARK_ALL_MESSAGES_READ_MUTATION = `
+  mutation MarkAllMessagesRead {
+    markAllMessagesRead
+  }
+`
+
 export interface GroupNode {
   UUID: string
   Name: string

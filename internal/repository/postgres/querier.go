@@ -142,6 +142,7 @@ type Querier interface {
 	ListTicketsFiltered(ctx context.Context, arg ListTicketsFilteredParams) ([]MmTicket, error)
 	ListUnreadMessagesByUser(ctx context.Context, arg ListUnreadMessagesByUserParams) ([]MmMessage, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]MmUser, error)
+	MarkAllMessagesRead(ctx context.Context, userID int64) (int64, error)
 	MarkMessageRead(ctx context.Context, arg MarkMessageReadParams) error
 	// Gauge semantics: the value is the new value, not an increment.
 	SetGaugeMetric(ctx context.Context, arg SetGaugeMetricParams) error

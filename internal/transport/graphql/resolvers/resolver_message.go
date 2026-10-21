@@ -42,11 +42,21 @@ func (r *queryRootResolver) UnreadMessageCount(ctx context.Context) (uint, error
 }
 
 // MarkMessageRead 把一条消息标记为已读
-func (r *queryRootResolver) MarkMessageRead(ctx context.Context, uuid string) (*bool, error) {
+func (r *mutationRootResolver) MarkMessageRead(ctx context.Context, uuid string) (*bool, error) {
 	credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 	if err := r.app.Services.Message.MarkRead(ctx, uuid, credential.User.UserID); err != nil {
 		return nil, err
 	}
 	ok := true
 	return &ok, nil
+}
+
+// MarkAllMessagesRead 把当前用户的全部未读消息标记为已读，返回更新条数
+func (r *mutationRootResolver) MarkAllMessagesRead(ctx context.Context) (int, error) {
+	credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
+	rows, err := r.app.Services.Message.MarkAllRead(ctx, credential.User.UserID)
+	if err != nil {
+		return 0, err
+	}
+	return int(rows), nil
 }

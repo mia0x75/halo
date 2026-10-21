@@ -8,6 +8,7 @@ import { CronsPage } from "@/pages/crons-page"
 import { ClustersPage } from "@/pages/clusters-page"
 import { DashboardPage } from "@/pages/dashboard-page"
 import { LogsPage } from "@/pages/logs-page"
+import { MessagesPage } from "@/pages/messages-page"
 import { OptionsPage } from "@/pages/options-page"
 import { StatementsPage } from "@/pages/statements-page"
 import { StatsPage } from "@/pages/stats-page"
@@ -53,6 +54,7 @@ export default function App() {
     setView({ kind: "nav", key: "tickets" })
   }, [])
   const viewTickets = useCallback(() => setView({ kind: "nav", key: "tickets" }), [])
+  const viewMessages = useCallback(() => setView({ kind: "nav", key: "messages" }), [])
 
   const page = view.kind === "nav" ? view.key : "tickets"
 
@@ -68,6 +70,8 @@ export default function App() {
         user={session.user}
         onSignOut={signOut}
         onSearch={searchTickets}
+        onViewMessages={viewMessages}
+        onOpenTicket={openTicket}
       >
         <CronCreatePage
           onBack={() => setView({ kind: "nav", key: "crons" })}
@@ -85,6 +89,8 @@ export default function App() {
         user={session.user}
         onSignOut={signOut}
         onSearch={searchTickets}
+        onViewMessages={viewMessages}
+        onOpenTicket={openTicket}
       >
         <TicketEditPage
           uuid={view.uuid}
@@ -103,6 +109,8 @@ export default function App() {
         user={session.user}
         onSignOut={signOut}
         onSearch={searchTickets}
+        onViewMessages={viewMessages}
+        onOpenTicket={openTicket}
       >
         <TicketCreatePage
           onBack={() => setView({ kind: "nav", key: "tickets" })}
@@ -122,6 +130,8 @@ export default function App() {
         user={session.user}
         onSignOut={signOut}
         onSearch={searchTickets}
+        onViewMessages={viewMessages}
+        onOpenTicket={openTicket}
       >
         <ClusterFormPage
           mode={view.mode}
@@ -141,6 +151,8 @@ export default function App() {
         user={session.user}
         onSignOut={signOut}
         onSearch={searchTickets}
+        onViewMessages={viewMessages}
+        onOpenTicket={openTicket}
       >
         <TicketDetailPage
           uuid={view.uuid}
@@ -158,6 +170,8 @@ export default function App() {
       user={session.user}
       onSignOut={signOut}
       onSearch={searchTickets}
+      onViewMessages={viewMessages}
+      onOpenTicket={openTicket}
     >
       {page === "dashboard" ? (
         <DashboardPage
@@ -166,6 +180,7 @@ export default function App() {
           onViewTickets={viewTickets}
         />
       ) : null}
+      {page === "messages" ? <MessagesPage onOpenTicket={openTicket} /> : null}
       {page === "tickets" ? (
         <TicketsPage
           key={searchKeyword}

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/mia0x75/halo/internal/domain"
 )
@@ -36,4 +37,12 @@ func (s *MessageService) CountUnread(ctx context.Context, userID uint) (uint, er
 // MarkRead marks one message of the given user as read.
 func (s *MessageService) MarkRead(ctx context.Context, uuid string, userID uint) error {
 	return s.messages.MarkRead(ctx, uuid, userID)
+}
+
+// MarkAllRead marks every unread message of the user as read.
+func (s *MessageService) MarkAllRead(ctx context.Context, userID uint) (int64, error) {
+	if userID == 0 {
+		return 0, fmt.Errorf("mark all messages read: missing user")
+	}
+	return s.messages.MarkAllRead(ctx, userID)
 }

@@ -2374,16 +2374,6 @@ type QueryRoot {
 	unreadMessageCount: UInt! @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
 
 	"""
-	把一条消息标记为已读
-	"""
-	markMessageRead(
-		"""
-		消息的UUID
-		"""
-		uuid: ID!
-	): Boolean @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
-
-	"""
 	获取规则命中明细
 	"""
 	ruleHits(
@@ -3299,6 +3289,21 @@ type MutationRoot {
 	用户登出
 	"""
 	logout: Boolean! @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	把一条消息标记为已读
+	"""
+	markMessageRead(
+		"""
+		消息的UUID
+		"""
+		uuid: ID!
+	): Boolean @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	把当前用户的全部未读消息标记为已读
+	"""
+	markAllMessagesRead: Int! @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
 
 	"""
 	用户获取个人信息

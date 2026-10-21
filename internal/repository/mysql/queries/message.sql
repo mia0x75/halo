@@ -15,3 +15,6 @@ SELECT COUNT(*) FROM mm_messages WHERE user_id = ? AND read_at IS NULL;
 
 -- name: MarkMessageRead :exec
 UPDATE mm_messages SET read_at = CURRENT_TIMESTAMP WHERE uuid = ? AND user_id = ? AND read_at IS NULL;
+
+-- name: MarkAllMessagesRead :execrows
+UPDATE mm_messages SET read_at = CURRENT_TIMESTAMP WHERE user_id = ? AND read_at IS NULL;

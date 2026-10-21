@@ -1,5 +1,13 @@
 import { useState } from "react"
-import { IconBell, IconDatabase, IconMoon, IconSearch, IconSun } from "@tabler/icons-react"
+import { useEffect } from "react"
+import {
+  IconBell,
+  IconDatabase,
+  IconInbox,
+  IconMoon,
+  IconSearch,
+  IconSun,
+} from "@tabler/icons-react"
 
 import { ConnectionMenu } from "@/components/layout/connection-menu"
 import { Badge } from "@/components/ui/badge"
@@ -17,6 +25,7 @@ import { graphqlRequest } from "@/lib/api/client"
 import { useGraphQL } from "@/hooks/use-graphql"
 import { useTheme } from "@/hooks/use-theme"
 import { formatUnix } from "@/lib/api/mappers"
+import { notifyMessagesChanged, subscribeMessagesChanged } from "@/lib/api/message-events"
 import type { MeUser } from "@/lib/api/queries"
 import {
   MARK_MESSAGE_READ_MUTATION,
@@ -31,10 +40,18 @@ export interface TopNavProps {
   onSignOut: () => void
   /** 提交搜索：跳到工单列表并按关键词过滤 */
   onSearch: (keyword: string) => void
+  onViewMessages: () => void
+  onOpenTicket: (uuid: string) => void
 }
 
 /** 顶栏：品牌、搜索、消息与主题切换。 */
-export function TopNav({ user, onSignOut, onSearch }: TopNavProps) {
+export function TopNav({
+  user,
+  onSignOut,
+  onSearch,
+  onViewMessages,
+  onOpenTicket,
+}: TopNavProps) {
   const { theme, toggleTheme } = useTheme()
   const isDark = theme === "dark"
   const [keyword, setKeyword] = useState("")
@@ -47,8 +64,20 @@ export function TopNav({ user, onSignOut, onSearch }: TopNavProps) {
     { unreadOnly: true, first: 5 },
   )
   const items = messages.data?.messages ?? []
+  const refetchMessages = messages.refetch
+  const refetchUnread = unread.refetch
+
+  useEffect(
+    () =>
+      subscribeMessagesChanged(() => {
+        refetchMessages()
+        refetchUnread()
+      }),
+    [refetchMessages, refetchUnread],
+  )
 
   const openMessage = async (message: MessageNode) => {
+    const linked = /^\/tickets\/([^/?#]+)/.exec(message.Link)?.[1] ?? null
     try {
       await graphqlRequest<{ markMessageRead: boolean }, { uuid: string }>(
         MARK_MESSAGE_READ_MUTATION,
@@ -56,8 +85,9 @@ export function TopNav({ user, onSignOut, onSearch }: TopNavProps) {
         getToken(),
       )
     } finally {
-      messages.refetch()
-      unread.refetch()
+      notifyMessagesChanged()
+      if (linked) onOpenTicket(linked)
+      else onViewMessages()
     }
   }
 
@@ -126,6 +156,11 @@ export function TopNav({ user, onSignOut, onSearch }: TopNavProps) {
                 </DropdownMenuItem>
               ))
             )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={onViewMessages}>
+              <IconInbox size={16} stroke={1.5} />
+              查看全部消息
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 

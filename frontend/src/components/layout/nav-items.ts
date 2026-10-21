@@ -5,6 +5,7 @@ import {
   IconDatabase,
   IconFileText,
   IconHistory,
+  IconInbox,
   IconLayoutDashboard,
   IconListCheck,
   IconServer,
@@ -17,6 +18,7 @@ import {
 
 export type NavKey =
   | "dashboard"
+  | "messages"
   | "my-tickets"
   | "pending-review"
   | "tickets"
@@ -48,6 +50,7 @@ export const navSections: NavSection[] = [
     title: "工作台",
     items: [
       { key: "dashboard", label: "概览", icon: IconLayoutDashboard },
+      { key: "messages", label: "我的消息", icon: IconInbox },
       { key: "my-tickets", label: "我的工单", icon: IconTicket },
       { key: "pending-review", label: "待我审核", icon: IconListCheck },
     ],

@@ -26,4 +26,7 @@ type MessageRepository interface {
 	CountUnread(ctx context.Context, userID uint) (uint, error)
 	// MarkRead marks one message of the given user as read.
 	MarkRead(ctx context.Context, uuid string, userID uint) error
+	// MarkAllRead marks every unread message of the user as read and returns
+	// how many rows were updated.
+	MarkAllRead(ctx context.Context, userID uint) (int64, error)
 }

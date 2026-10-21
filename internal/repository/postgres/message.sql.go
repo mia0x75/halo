@@ -150,6 +150,18 @@ func (q *Queries) ListUnreadMessagesByUser(ctx context.Context, arg ListUnreadMe
 	return items, nil
 }
 
+const markAllMessagesRead = `-- name: MarkAllMessagesRead :execrows
+UPDATE mm_messages SET read_at = NOW() WHERE user_id = $1 AND read_at IS NULL
+`
+
+func (q *Queries) MarkAllMessagesRead(ctx context.Context, userID int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, markAllMessagesRead, userID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 const markMessageRead = `-- name: MarkMessageRead :exec
 UPDATE mm_messages SET read_at = NOW() WHERE uuid = $1 AND user_id = $2 AND read_at IS NULL
 `

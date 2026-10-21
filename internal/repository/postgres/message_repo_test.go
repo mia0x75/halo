@@ -46,4 +46,24 @@ func TestMessageRepo(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, all, 1)
 	require.NotNil(t, all[0].ReadAt)
+
+	second := &domain.Message{
+		UUID:     newUUID(),
+		UserID:   userID,
+		Category: "ticket",
+		Title:    "第二条消息",
+		Content:  "内容",
+	}
+	require.NoError(t, repo.Create(ctx, second))
+	rows, err := repo.MarkAllRead(ctx, userID)
+	require.NoError(t, err)
+	require.Equal(t, int64(1), rows)
+
+	count, err = repo.CountUnread(ctx, userID)
+	require.NoError(t, err)
+	require.Equal(t, uint(0), count)
+
+	again, err := repo.MarkAllRead(ctx, userID)
+	require.NoError(t, err)
+	require.Equal(t, int64(0), again)
 }

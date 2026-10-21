@@ -81,6 +81,14 @@ func (r *MessageRepo) CountUnread(ctx context.Context, userID uint) (uint, error
 	return uint(count), nil
 }
 
+func (r *MessageRepo) MarkAllRead(ctx context.Context, userID uint) (int64, error) {
+	rows, err := r.q.MarkAllMessagesRead(ctx, uint32(userID))
+	if err != nil {
+		return 0, wrap("message.MarkAllRead", err)
+	}
+	return rows, nil
+}
+
 func (r *MessageRepo) MarkRead(ctx context.Context, uuid string, userID uint) error {
 	return wrap("message.MarkRead", r.q.MarkMessageRead(ctx, MarkMessageReadParams{
 		Uuid:   uuid,

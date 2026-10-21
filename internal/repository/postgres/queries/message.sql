@@ -15,3 +15,6 @@ SELECT COUNT(*) FROM mm_messages WHERE user_id = $1 AND read_at IS NULL;
 
 -- name: MarkMessageRead :exec
 UPDATE mm_messages SET read_at = NOW() WHERE uuid = $1 AND user_id = $2 AND read_at IS NULL;
+
+-- name: MarkAllMessagesRead :execrows
+UPDATE mm_messages SET read_at = NOW() WHERE user_id = $1 AND read_at IS NULL;

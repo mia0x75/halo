@@ -260,6 +260,17 @@ export function demoExecute(query: string, variables?: Variables): Record<string
       if (target && target.ReadAt === null) target.ReadAt = Math.floor(Date.now() / 1000)
       return { markMessageRead: true }
     }
+    case "MarkAllMessagesRead": {
+      const now = Math.floor(Date.now() / 1000)
+      let rows = 0
+      for (const item of state.messages) {
+        if (item.ReadAt === null) {
+          item.ReadAt = now
+          rows++
+        }
+      }
+      return { markAllMessagesRead: rows }
+    }
     case "Groups": {
       return { groups: state.groups }
     }

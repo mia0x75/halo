@@ -278,6 +278,8 @@ type ComplexityRoot struct {
 		Login                 func(childComplexity int, input models.UserLoginInput) int
 		Logout                func(childComplexity int) int
 		LostPasswd            func(childComplexity int, input models.LostPasswdInput) int
+		MarkAllMessagesRead   func(childComplexity int) int
+		MarkMessageRead       func(childComplexity int, uuid string) int
 		PatchClusterStatus    func(childComplexity int, input models.PatchClusterStatusInput) int
 		PatchOptionParameters func(childComplexity int, input models.PatchOptionParameterInput) int
 		PatchRuleBitwise      func(childComplexity int, input models.PatchRuleBitwiseInput) int
@@ -368,7 +370,6 @@ type ComplexityRoot struct {
 		Glossaries           func(childComplexity int, groups []string) int
 		Groups               func(childComplexity int) int
 		Logs                 func(childComplexity int, after *string, before *string, first *int, last *int) int
-		MarkMessageRead      func(childComplexity int, uuid string) int
 		Me                   func(childComplexity int) int
 		Messages             func(childComplexity int, unreadOnly *bool, first *int) int
 		Metadata             func(childComplexity int, clusterUUID string, database string) int
@@ -586,6 +587,8 @@ type MutationRootResolver interface {
 	Register(ctx context.Context, input models.UserRegisterInput) (*models.User, error)
 	Login(ctx context.Context, input models.UserLoginInput) (*LoginPayload, error)
 	Logout(ctx context.Context) (bool, error)
+	MarkMessageRead(ctx context.Context, uuid string) (*bool, error)
+	MarkAllMessagesRead(ctx context.Context) (int, error)
 	UpdateProfile(ctx context.Context, input models.UpdateProfileInput) (*models.User, error)
 	UpdatePassword(ctx context.Context, input models.PatchPasswordInput) (bool, error)
 	UpdateEmail(ctx context.Context, input models.PatchEmailInput) (bool, error)
@@ -668,7 +671,6 @@ type QueryRootResolver interface {
 	TaskExecutionSummary(ctx context.Context) ([]*TaskExecutionCount, error)
 	Messages(ctx context.Context, unreadOnly *bool, first *int) ([]*Message, error)
 	UnreadMessageCount(ctx context.Context) (uint, error)
-	MarkMessageRead(ctx context.Context, uuid string) (*bool, error)
 	RuleHits(ctx context.Context, ticketID *uint, rule *string, level *uint8, first *int) ([]*models.RuleHit, error)
 	RuleHitLevels(ctx context.Context, from *uint, to *uint) ([]*RuleHitCount, error)
 	RuleHitRules(ctx context.Context, from *uint, to *uint, first *int) ([]*RuleHitCount, error)
@@ -1703,6 +1705,23 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MutationRoot.LostPasswd(childComplexity, args["input"].(models.LostPasswdInput)), true
+	case "MutationRoot.markAllMessagesRead":
+		if e.ComplexityRoot.MutationRoot.MarkAllMessagesRead == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MutationRoot.MarkAllMessagesRead(childComplexity), true
+	case "MutationRoot.markMessageRead":
+		if e.ComplexityRoot.MutationRoot.MarkMessageRead == nil {
+			break
+		}
+
+		args, err := ec.field_MutationRoot_markMessageRead_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.MutationRoot.MarkMessageRead(childComplexity, args["uuid"].(string)), true
 	case "MutationRoot.patchClusterStatus":
 		if e.ComplexityRoot.MutationRoot.PatchClusterStatus == nil {
 			break
@@ -2300,17 +2319,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.QueryRoot.Logs(childComplexity, args["after"].(*string), args["before"].(*string), args["first"].(*int), args["last"].(*int)), true
-	case "QueryRoot.markMessageRead":
-		if e.ComplexityRoot.QueryRoot.MarkMessageRead == nil {
-			break
-		}
-
-		args, err := ec.field_QueryRoot_markMessageRead_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.QueryRoot.MarkMessageRead(childComplexity, args["uuid"].(string)), true
 	case "QueryRoot.me":
 		if e.ComplexityRoot.QueryRoot.Me == nil {
 			break
@@ -4906,6 +4914,20 @@ func (ec *executionContext) field_MutationRoot_lostPasswd_args(ctx context.Conte
 	return args, nil
 }
 
+func (ec *executionContext) field_MutationRoot_markMessageRead_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "uuid",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["uuid"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_MutationRoot_patchClusterStatus_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -5511,20 +5533,6 @@ func (ec *executionContext) field_QueryRoot_logs_args(ctx context.Context, rawAr
 		return nil, err
 	}
 	args["last"] = arg3
-	return args, nil
-}
-
-func (ec *executionContext) field_QueryRoot_markMessageRead_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "uuid",
-		func(ctx context.Context, v any) (string, error) {
-			return ec.unmarshalNID2string(ctx, v)
-		})
-	if err != nil {
-		return nil, err
-	}
-	args["uuid"] = arg0
 	return args, nil
 }
 
@@ -10028,6 +10036,109 @@ func (ec *executionContext) _MutationRoot_logout(ctx context.Context, field grap
 }
 func (ec *executionContext) fieldContext_MutationRoot_logout(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("MutationRoot", field, true, true, "Boolean")
+}
+
+func (ec *executionContext) _MutationRoot_markMessageRead(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MutationRoot_markMessageRead(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.MutationRoot().MarkMessageRead(ctx, fc.Args["uuid"].(string))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				if err != nil {
+					var zeroVal *bool
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal *bool
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *bool) graphql.Marshaler {
+			return ec.marshalOBoolean2ᚖbool(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_MutationRoot_markMessageRead(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MutationRoot",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_MutationRoot_markMessageRead_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MutationRoot_markAllMessagesRead(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MutationRoot_markAllMessagesRead(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.MutationRoot().MarkAllMessagesRead(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				if err != nil {
+					var zeroVal int
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal int
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_MutationRoot_markAllMessagesRead(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("MutationRoot", field, true, true, "Int")
 }
 
 func (ec *executionContext) _MutationRoot_updateProfile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -15378,68 +15489,6 @@ func (ec *executionContext) _QueryRoot_unreadMessageCount(ctx context.Context, f
 }
 func (ec *executionContext) fieldContext_QueryRoot_unreadMessageCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("QueryRoot", field, true, true, "UInt")
-}
-
-func (ec *executionContext) _QueryRoot_markMessageRead(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_QueryRoot_markMessageRead(ctx, field)
-		},
-		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.QueryRoot().MarkMessageRead(ctx, fc.Args["uuid"].(string))
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
-				if err != nil {
-					var zeroVal *bool
-					return zeroVal, err
-				}
-				if ec.Directives.Auth == nil {
-					var zeroVal *bool
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0, requires)
-			}
-
-			next = directive1
-			return next
-		},
-		func(ctx context.Context, selections ast.SelectionSet, v *bool) graphql.Marshaler {
-			return ec.marshalOBoolean2ᚖbool(ctx, selections, v)
-		},
-		true,
-		false,
-	)
-}
-func (ec *executionContext) fieldContext_QueryRoot_markMessageRead(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "QueryRoot",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_QueryRoot_markMessageRead_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
 }
 
 func (ec *executionContext) _QueryRoot_ruleHits(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -25428,6 +25477,20 @@ func (ec *executionContext) _MutationRoot(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "markMessageRead":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MutationRoot_markMessageRead(ctx, field)
+			})
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "markAllMessagesRead":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MutationRoot_markAllMessagesRead(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "updateProfile":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._MutationRoot_updateProfile(ctx, field)
@@ -26280,12 +26343,6 @@ func (ec *executionContext) _QueryRoot(ctx context.Context, sel ast.SelectionSet
 				true, true,
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._QueryRoot_unreadMessageCount(ctx, field)
-				})
-		case "markMessageRead":
-			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
-				true, false,
-				func(ctx context.Context) graphql.Marshaler {
-					return ec._QueryRoot_markMessageRead(ctx, field)
 				})
 		case "ruleHits":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
