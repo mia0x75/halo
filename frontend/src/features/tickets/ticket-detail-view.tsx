@@ -1,11 +1,30 @@
 import { useMemo, useState } from "react"
+import { IconCheck, IconMessagePlus, IconX } from "@tabler/icons-react"
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { StatusBadge } from "@/components/shared/status-badge"
 import { useGraphQL } from "@/hooks/use-graphql"
+import { graphqlRequest } from "@/lib/api/client"
 import { formatUnix } from "@/lib/api/mappers"
-import { TICKET_DETAIL_QUERY, type CommentNode, type StatementNode } from "@/lib/api/queries"
+import {
+  CREATE_COMMENT_MUTATION,
+  REVIEW_TICKET_MUTATION,
+  TICKET_DETAIL_QUERY,
+  type CommentNode,
+  type StatementNode,
+} from "@/lib/api/queries"
+import { getToken } from "@/lib/api/session"
 import { parseReport, reportLevelLabel } from "@/features/tickets/ticket-report"
 import type { TicketStatus } from "@/lib/model"
 
@@ -13,6 +32,10 @@ export interface TicketDetailViewProps {
   uuid: string | null
   /** 进入编辑页 */
   onEdit?: () => void
+  /** 当前登录用户，用于判断能否审核 */
+  viewerUUID?: string
+  /** 驳回工单：需要填写原因，走独立页面 */
+  onReject?: (uuid: string) => void
 }
 
 interface StatementView {
@@ -61,9 +84,23 @@ const statusByCode: Record<number, TicketStatus> = {
 /** 已关闭、已执行成功、执行失败的工单不可再改。 */
 const editableStatuses = new Set([1, 2, 3, 4, 5, 6])
 
+/** 只有存在审核意见的阶段才允许补充意见，与后端一致。 */
+const commentableStatuses = new Set([3, 4, 5])
+
 /** 工单详情内容：基本信息、语句列表与审核意见。 */
-export function TicketDetailView({ uuid, onEdit }: TicketDetailViewProps) {
+export function TicketDetailView({
+  uuid,
+  onEdit,
+  viewerUUID,
+  onReject,
+}: TicketDetailViewProps) {
   const [tab, setTab] = useState<"statements" | "comments">("statements")
+  const [approving, setApproving] = useState(false)
+  const [reviewBusy, setReviewBusy] = useState(false)
+  const [reviewError, setReviewError] = useState<string | null>(null)
+  const [comment, setComment] = useState("")
+  const [commentBusy, setCommentBusy] = useState(false)
+  const [commentError, setCommentError] = useState<string | null>(null)
 
   const detail = useGraphQL<{ ticket: TicketDetail | null }, { id: string }>(
     TICKET_DETAIL_QUERY,
@@ -80,6 +117,47 @@ export function TicketDetailView({ uuid, onEdit }: TicketDetailViewProps) {
     () => ticket?.Comments?.edges?.map((edge) => toCommentView(edge.node)) ?? [],
     [ticket],
   )
+
+  const isReviewer = Boolean(viewerUUID && ticket && ticket.Reviewer?.UUID === viewerUUID)
+  const canReview = ticket?.Status === 4 && isReviewer
+
+  const approve = async () => {
+    if (!ticket) return
+    setReviewBusy(true)
+    setReviewError(null)
+    try {
+      await graphqlRequest(
+        REVIEW_TICKET_MUTATION,
+        { input: { TicketUUID: ticket.UUID, Outcome: "APPROVED", Reason: "" } },
+        getToken(),
+      )
+      setApproving(false)
+      detail.refetch()
+    } catch (cause) {
+      setReviewError(cause instanceof Error ? cause.message : String(cause))
+    } finally {
+      setReviewBusy(false)
+    }
+  }
+
+  const submitComment = async () => {
+    if (!ticket || !comment.trim()) return
+    setCommentBusy(true)
+    setCommentError(null)
+    try {
+      await graphqlRequest(
+        CREATE_COMMENT_MUTATION,
+        { input: { TicketUUID: ticket.UUID, Content: comment.trim() } },
+        getToken(),
+      )
+      setComment("")
+      detail.refetch()
+    } catch (cause) {
+      setCommentError(cause instanceof Error ? cause.message : String(cause))
+    } finally {
+      setCommentBusy(false)
+    }
+  }
 
   if (!ticket) {
     return (
@@ -115,7 +193,30 @@ export function TicketDetailView({ uuid, onEdit }: TicketDetailViewProps) {
               编辑
             </Button>
           ) : null}
+          {canReview ? (
+            <>
+              <Button size="sm" onClick={() => setApproving(true)}>
+                <IconCheck size={16} stroke={1.5} />
+                审核通过
+              </Button>
+              {onReject ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onReject(ticket.UUID)}
+                >
+                  <IconX size={16} stroke={1.5} />
+                  驳回
+                </Button>
+              ) : null}
+            </>
+          ) : null}
         </div>
+        {reviewError ? (
+          <p role="alert" className="mt-3 rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">
+            {reviewError}
+          </p>
+        ) : null}
       </div>
 
       <div className="rounded-lg border border-border bg-card shadow-xs">
@@ -176,21 +277,70 @@ export function TicketDetailView({ uuid, onEdit }: TicketDetailViewProps) {
             ))}
           </div>
         ) : (
-          <ul className="flex flex-col gap-3 p-5">
+          <div className="flex flex-col gap-3 p-5">
             {comments.length === 0 ? (
-              <li className="py-6 text-center text-sm text-muted-foreground">暂无审核意见</li>
+              <p className="py-2 text-center text-sm text-muted-foreground">暂无审核意见</p>
             ) : null}
-            {comments.map((comment) => (
-              <li key={comment.uuid} className="rounded-md border border-border px-3 py-2">
-                <p className="text-sm">{comment.content}</p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {comment.user} · {comment.createAt}
-                </p>
-              </li>
-            ))}
-          </ul>
+            <ul className="flex flex-col gap-3">
+              {comments.map((item) => (
+                <li key={item.uuid} className="rounded-md border border-border px-3 py-2">
+                  <p className="text-sm">{item.content}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {item.user} · {item.createAt}
+                  </p>
+                </li>
+              ))}
+            </ul>
+            {commentableStatuses.has(ticket.Status) ? (
+              <div className="flex flex-col gap-2 border-t border-border pt-4">
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={comment}
+                    onChange={(event) => setComment(event.target.value)}
+                    placeholder="写下审核意见"
+                    aria-label="审核意见内容"
+                  />
+                  <Button
+                    onClick={() => void submitComment()}
+                    disabled={commentBusy || !comment.trim()}
+                  >
+                    <IconMessagePlus size={16} stroke={1.5} />
+                    提交意见
+                  </Button>
+                </div>
+                {commentError ? (
+                  <p role="alert" className="text-sm text-danger">
+                    {commentError}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
         )}
       </div>
+
+      <AlertDialog open={approving} onOpenChange={setApproving}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-base font-medium text-strong">
+              审核通过
+            </AlertDialogTitle>
+            <AlertDialogDescription className="mt-1 text-sm text-muted-foreground">
+              通过后工单进入待执行状态，可以立即执行或预约执行。确认通过？
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="mt-5 flex justify-end gap-2">
+            <AlertDialogCancel asChild>
+              <Button variant="outline">取消</Button>
+            </AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button disabled={reviewBusy} onClick={() => void approve()}>
+                确认通过
+              </Button>
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

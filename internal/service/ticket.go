@@ -212,6 +212,66 @@ func (s *TicketService) Reject(ctx context.Context, ticketID, reviewerID uint, r
 	})
 }
 
+// ReviewOutcome is the decision of a manual review.
+type ReviewOutcome string
+
+const (
+	// ReviewApproved passes the ticket to the execution stage.
+	ReviewApproved ReviewOutcome = "APPROVED"
+	// ReviewRejected sends the ticket back to the submitter.
+	ReviewRejected ReviewOutcome = "REJECTED"
+)
+
+// ManualReviewResult carries the reviewed ticket back to the caller.
+type ManualReviewResult struct {
+	Ticket *domain.Ticket
+	// Outcome tells the caller which decision was applied.
+	Outcome ReviewOutcome
+}
+
+// Review applies a manual review decision to a ticket.
+//
+// Only the ticket's own reviewer may decide, and only while the ticket waits
+// for manual review. Both rules live here so the GraphQL layer and any future
+// caller share the same guard.
+func (s *TicketService) Review(
+	ctx context.Context,
+	ticketUUID string,
+	reviewerID uint,
+	outcome ReviewOutcome,
+	reason string,
+) (*ManualReviewResult, error) {
+	ticket, err := s.tickets.GetByUUID(ctx, ticketUUID)
+	if err != nil {
+		return nil, err
+	}
+	if ticket.Status != domain.TicketStatusWaitingForMrv {
+		return nil, fmt.Errorf("%w: 工单当前状态不在人工审核阶段", domain.ErrInvalidInput)
+	}
+	if ticket.ReviewerID != reviewerID {
+		return nil, fmt.Errorf("%w: 只有该工单的审核人可以审核", domain.ErrForbidden)
+	}
+
+	target := domain.TicketStatusLgtm
+	operation := "ticket.approve"
+	if outcome == ReviewRejected {
+		target = domain.TicketStatusMrvFailure
+		operation = "ticket.reject"
+	}
+
+	if err := s.transition(ctx, ticket.TicketID, target, reviewerID, operation, reason, func(tk *domain.Ticket) {
+		tk.ReviewerID = reviewerID
+	}); err != nil {
+		return nil, err
+	}
+
+	updated, err := s.tickets.GetByUUID(ctx, ticketUUID)
+	if err != nil {
+		return nil, err
+	}
+	return &ManualReviewResult{Ticket: updated, Outcome: outcome}, nil
+}
+
 // Close moves a ticket to the terminal state.
 func (s *TicketService) Close(ctx context.Context, ticketID, userID uint) error {
 	return s.transition(ctx, ticketID, domain.TicketStatusClosed, userID, "ticket.close", "", nil)

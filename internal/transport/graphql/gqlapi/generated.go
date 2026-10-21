@@ -300,6 +300,7 @@ type ComplexityRoot struct {
 		RemoveTicket          func(childComplexity int, id string) int
 		ResendActivationMail  func(childComplexity int, input models.ActivateInput) int
 		ResetPasswd           func(childComplexity int, input models.ResetPasswdInput) int
+		ReviewTicket          func(childComplexity int, input ReviewTicketInput) int
 		RevokeClusters        func(childComplexity int, input models.RevokeClustersInput) int
 		RevokeGroups          func(childComplexity int, input GrantGroupsInput) int
 		RevokeReviewers       func(childComplexity int, input models.RevokeReviewersInput) int
@@ -638,6 +639,7 @@ type MutationRootResolver interface {
 	UpdateTicket(ctx context.Context, input models.UpdateTicketInput) (*models.Ticket, error)
 	RemoveTicket(ctx context.Context, id string) (bool, error)
 	PatchTicketStatus(ctx context.Context, input models.PatchTicketStatusInput) (bool, error)
+	ReviewTicket(ctx context.Context, input ReviewTicketInput) (*models.Ticket, error)
 	ExecuteTicket(ctx context.Context, id string) (bool, error)
 	ScheduleTicket(ctx context.Context, input models.ScheduleTicketInput) (*models.Cron, error)
 	CancelCron(ctx context.Context, id string) (bool, error)
@@ -1914,6 +1916,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MutationRoot.ResetPasswd(childComplexity, args["input"].(models.ResetPasswdInput)), true
+	case "MutationRoot.reviewTicket":
+		if e.ComplexityRoot.MutationRoot.ReviewTicket == nil {
+			break
+		}
+
+		args, err := ec.field_MutationRoot_reviewTicket_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.MutationRoot.ReviewTicket(childComplexity, args["input"].(ReviewTicketInput)), true
 	case "MutationRoot.revokeClusters":
 		if e.ComplexityRoot.MutationRoot.RevokeClusters == nil {
 			break
@@ -3482,6 +3495,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			graphql.NewInputUnmarshaler("PatchUserStatusInput", ec.unmarshalInputPatchUserStatusInput),
 			graphql.NewInputUnmarshaler("ResendActivationMailInput", ec.unmarshalInputResendActivationMailInput),
 			graphql.NewInputUnmarshaler("ResetPasswdInput", ec.unmarshalInputResetPasswdInput),
+			graphql.NewInputUnmarshaler("ReviewTicketInput", ec.unmarshalInputReviewTicketInput),
 			graphql.NewInputUnmarshaler("RevokeClustersInput", ec.unmarshalInputRevokeClustersInput),
 			graphql.NewInputUnmarshaler("RevokeReviewersInput", ec.unmarshalInputRevokeReviewersInput),
 			graphql.NewInputUnmarshaler("RevokeRolesInput", ec.unmarshalInputRevokeRolesInput),
@@ -5258,6 +5272,20 @@ func (ec *executionContext) field_MutationRoot_resetPasswd_args(ctx context.Cont
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (models.ResetPasswdInput, error) {
 			return ec.unmarshalNResetPasswdInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐResetPasswdInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_MutationRoot_reviewTicket_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (ReviewTicketInput, error) {
+			return ec.unmarshalNReviewTicketInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐReviewTicketInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -12088,7 +12116,7 @@ func (ec *executionContext) _MutationRoot_patchTicketStatus(ctx context.Context,
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"REVIEWER", "DEVELOPER", "ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -12128,6 +12156,68 @@ func (ec *executionContext) fieldContext_MutationRoot_patchTicketStatus(ctx cont
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_MutationRoot_patchTicketStatus_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MutationRoot_reviewTicket(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MutationRoot_reviewTicket(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.MutationRoot().ReviewTicket(ctx, fc.Args["input"].(ReviewTicketInput))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"REVIEWER", "ADMIN"})
+				if err != nil {
+					var zeroVal *models.Ticket
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal *models.Ticket
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *models.Ticket) graphql.Marshaler {
+			return ec.marshalOTicket2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐTicket(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_MutationRoot_reviewTicket(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MutationRoot",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Ticket(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_MutationRoot_reviewTicket_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -23017,6 +23107,62 @@ func UnmarshalResetPasswdInput(ctx context.Context, raw any) (models.ResetPasswd
 	return out, err
 }
 
+func (ec *executionContext) unmarshalInputReviewTicketInput(ctx context.Context, obj any) (ReviewTicketInput, error) {
+	var it ReviewTicketInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"TicketUUID", "Outcome", "Reason"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "TicketUUID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("TicketUUID"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TicketUUID = data
+		case "Outcome":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Outcome"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Outcome = data
+		case "Reason":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Reason"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Reason = data
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalReviewTicketInput unmarshals raw into the ReviewTicketInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalReviewTicketInput(ctx context.Context, raw any) (ReviewTicketInput, error) {
+	var out ReviewTicketInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "ReviewTicketInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputRevokeClustersInput(ctx context.Context, obj any) (models.RevokeClustersInput, error) {
 	var it models.RevokeClustersInput
 	if obj == nil {
@@ -26308,6 +26454,13 @@ func (ec *executionContext) _MutationRoot(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "reviewTicket":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MutationRoot_reviewTicket(ctx, field)
+			})
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "executeTicket":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._MutationRoot_executeTicket(ctx, field)
@@ -28866,6 +29019,11 @@ func (ec *executionContext) marshalNQueryEdge2ᚖgithubᚗcomᚋmia0x75ᚋhalo�
 
 func (ec *executionContext) unmarshalNResetPasswdInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐResetPasswdInput(ctx context.Context, v any) (models.ResetPasswdInput, error) {
 	res, err := ec.unmarshalInputResetPasswdInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNReviewTicketInput2githubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐReviewTicketInput(ctx context.Context, v any) (ReviewTicketInput, error) {
+	res, err := ec.unmarshalInputReviewTicketInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

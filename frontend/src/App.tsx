@@ -18,6 +18,7 @@ import { TicketCreatePage } from "@/pages/ticket-create-page"
 import { UsersPage } from "@/pages/users-page"
 import { UserFormPage } from "@/pages/user-form-page"
 import { TicketDetailPage } from "@/pages/ticket-detail-page"
+import { TicketRejectPage } from "@/pages/ticket-reject-page"
 import { TicketEditPage } from "@/pages/ticket-edit-page"
 import { TicketQueuePage } from "@/pages/ticket-queue-page"
 import { TicketsPage } from "@/pages/tickets-page"
@@ -35,6 +36,7 @@ type View =
   | { kind: "cluster-form"; mode: "create" | "edit"; uuid?: string }
   | { kind: "group-form"; mode: "create" | "edit"; uuid?: string }
   | { kind: "user-form"; mode: "create" | "edit"; uuid?: string }
+  | { kind: "ticket-reject"; uuid: string }
 
 export default function App() {
   const session = useSession()
@@ -161,6 +163,26 @@ export default function App() {
     )
   }
 
+  if (view.kind === "ticket-reject") {
+    return (
+      <AppShell
+        active="tickets"
+        onSelect={(key) => setView({ kind: "nav", key })}
+        user={session.user}
+        onSignOut={signOut}
+        onSearch={searchTickets}
+        onViewMessages={viewMessages}
+        onOpenTicket={openTicket}
+      >
+        <TicketRejectPage
+          uuid={view.uuid}
+          onBack={() => setView({ kind: "ticket", uuid: view.uuid })}
+          onDone={() => setView({ kind: "ticket", uuid: view.uuid })}
+        />
+      </AppShell>
+    )
+  }
+
   if (view.kind === "user-form") {
     return (
       <AppShell
@@ -218,6 +240,8 @@ export default function App() {
           uuid={view.uuid}
           onBack={() => setView({ kind: "nav", key: "tickets" })}
           onEdit={() => setView({ kind: "ticket-edit", uuid: view.uuid })}
+          viewerUUID={session.user.UUID}
+          onReject={(uuid) => setView({ kind: "ticket-reject", uuid })}
         />
       </AppShell>
     )

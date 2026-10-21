@@ -5,6 +5,7 @@
 
 import type {
   ClusterNode,
+  CommentNode,
   GroupNode,
   StatementNode,
   TicketNode,
@@ -430,6 +431,32 @@ export function demoExecute(query: string, variables?: Variables): Record<string
     case "CreateTicket": {
       const ticket = createTicket(record(source.input))
       return { createTicket: ticketNode(ticket) }
+    }
+    case "ReviewTicket": {
+      const input = record(source.input)
+      const ticket = ticketById(text(input.TicketUUID))
+      if (!ticket) throw new Error("演示环境：工单不存在")
+      if (ticket.Status !== 4) throw new Error("演示环境：工单不在人工审核阶段")
+      const outcome = text(input.Outcome)
+      if (outcome === "APPROVED") ticket.Status = 6
+      else if (outcome === "REJECTED") ticket.Status = 5
+      else throw new Error("演示环境：审核结论无效")
+      ticket.UpdateAt = Math.floor(Date.now() / 1000)
+      return { reviewTicket: { UUID: ticket.UUID, Status: ticket.Status } }
+    }
+    case "CreateComment": {
+      const input = record(source.input)
+      const ticket = ticketById(text(input.TicketUUID))
+      if (!ticket) throw new Error("演示环境：工单不存在")
+      const content = text(input.Content) ?? ""
+      const comment: CommentNode = {
+        UUID: `comment-${ticket.TicketID}-${ticket.Comments.length + 1}`,
+        Content: content,
+        CreateAt: Math.floor(Date.now() / 1000),
+        User: { UUID: demoUser.UUID, Name: demoUser.Name },
+      }
+      ticket.Comments.push(comment)
+      return { createComment: comment }
     }
     case "UpdateTicket": {
       const ticket = updateTicket(record(source.input))

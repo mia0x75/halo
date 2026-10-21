@@ -3109,6 +3109,24 @@ input UpdateTicketInput {
 """
 修改工单状态
 """
+# 人工审核工单
+input ReviewTicketInput {
+	"""
+	工单UUID
+	"""
+	TicketUUID: ID!
+
+	"""
+	审核结论：APPROVED 通过，REJECTED 驳回
+	"""
+	Outcome: String!
+
+	"""
+	驳回原因，通过时可留空
+	"""
+	Reason: String
+}
+
 input PatchTicketStatusInput {
 	"""
 	工单UUID
@@ -3665,7 +3683,17 @@ type MutationRoot {
 		工单唯一标识符、状态
 		"""
 		input:PatchTicketStatusInput!
-	): Boolean! @auth(requires: [DEVELOPER, ADMIN])
+	): Boolean! @auth(requires: [REVIEWER, DEVELOPER, ADMIN])
+
+	"""
+	人工审核工单：通过或驳回
+	"""
+	reviewTicket(
+		"""
+		审核信息
+		"""
+		input: ReviewTicketInput!
+	): Ticket @auth(requires: [REVIEWER, ADMIN])
 
 	"""
 	立刻执行一个工单

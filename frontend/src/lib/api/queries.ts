@@ -431,6 +431,26 @@ export const UPDATE_TICKET_MUTATION = `
   }
 `
 
+export const REVIEW_TICKET_MUTATION = `
+  mutation ReviewTicket($input: ReviewTicketInput!) {
+    reviewTicket(input: $input) {
+      UUID
+      Status
+    }
+  }
+`
+
+export const CREATE_COMMENT_MUTATION = `
+  mutation CreateComment($input: CreateCommentInput!) {
+    createComment(input: $input) {
+      UUID
+      Content
+      CreateAt
+      User { UUID Name }
+    }
+  }
+`
+
 export const TICKET_DETAIL_QUERY = `
   query Ticket($id: ID!) {
     ticket(id: $id) {

@@ -225,6 +225,16 @@ type QueryEdge struct {
 type QueryRoot struct {
 }
 
+// 修改工单状态
+type ReviewTicketInput struct {
+	// 工单UUID
+	TicketUUID string `json:"TicketUUID"`
+	// 审核结论：APPROVED 通过，REJECTED 驳回
+	Outcome string `json:"Outcome"`
+	// 驳回原因，通过时可留空
+	Reason *string `json:"Reason,omitempty"`
+}
+
 // 命中计数
 type RuleHitCount struct {
 	// 规则名，按级别统计时为空

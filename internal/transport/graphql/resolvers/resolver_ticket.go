@@ -76,7 +76,12 @@ L:
 			break
 		}
 
-		password, _ := crypto.DecryptAES(cluster.Password, config.Config().Secret.Crypto)
+		password, decErr := crypto.DecryptAES(cluster.Password, config.Config().Secret.Crypto)
+		if decErr != nil {
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: 群集(uuid=%s)的密码无法解密，请重新接入该群集。", rc, cluster.UUID)
+			break
+		}
 		target := bridge.ClusterToDomain(cluster)
 		target.Database = input.Database
 
@@ -242,7 +247,12 @@ L:
 			break
 		}
 
-		password, _ := crypto.DecryptAES(cluster.Password, config.Config().Secret.Crypto)
+		password, decErr := crypto.DecryptAES(cluster.Password, config.Config().Secret.Crypto)
+		if decErr != nil {
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: 群集(uuid=%s)的密码无法解密，请重新接入该群集。", rc, cluster.UUID)
+			break
+		}
 		target := bridge.ClusterToDomain(cluster)
 		target.Database = input.Database
 
@@ -499,6 +509,58 @@ func (r *mutationRootResolver) PatchTicketStatus(ctx context.Context, input mode
 		break
 	}
 
+	return
+}
+
+// ReviewTicket 人工审核工单：通过或驳回。
+// 审核人身份与工单状态由 service 层把关，这里只做参数转换与事件触发。
+func (r *mutationRootResolver) ReviewTicket(ctx context.Context, input gqlapi.ReviewTicketInput) (ticket *models.Ticket, err error) {
+	rc := gqlapi.ReturnCodeOK
+	credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
+
+	outcome := service.ReviewOutcome(input.Outcome)
+	if outcome != service.ReviewApproved && outcome != service.ReviewRejected {
+		err = fmt.Errorf("错误代码: %s, 错误信息: 审核结论(outcome=%s)无效。", rc, input.Outcome)
+		return
+	}
+	reason := ""
+	if input.Reason != nil {
+		reason = strings.TrimSpace(*input.Reason)
+	}
+	if outcome == service.ReviewRejected && reason == "" {
+		err = fmt.Errorf("错误代码: %s, 错误信息: 驳回工单必须填写原因。", rc)
+		return
+	}
+
+	result, reviewErr := r.app.Services.Ticket.Review(
+		ctx, input.TicketUUID, credential.User.UserID, outcome, reason)
+	if reviewErr != nil {
+		switch {
+		case errors.Is(reviewErr, domain.ErrNotFound):
+			rc = gqlapi.ReturnCodeNotFound
+			err = fmt.Errorf("错误代码: %s, 错误信息: 工单(uuid=%s)不存在。", rc, input.TicketUUID)
+		case errors.Is(reviewErr, domain.ErrForbidden):
+			rc = gqlapi.ReturnCodeForbidden
+			err = fmt.Errorf("错误代码: %s, 错误信息: 只有该工单的审核人可以审核。", rc)
+		case errors.Is(reviewErr, domain.ErrInvalidInput):
+			rc = gqlapi.ReturnCodeInvalidParams
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, trimDomainPrefix(reviewErr.Error()))
+		default:
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, reviewErr.Error())
+		}
+		return
+	}
+
+	ticket = bridge.TicketFromDomain(result.Ticket)
+	cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
+		return elem.ClusterID == ticket.ClusterID
+	})
+	event.Fire(event.EventTicketStatusPatched, &event.TicketStatusPatched{
+		User:    *credential.User,
+		Ticket:  *ticket,
+		Cluster: *cluster,
+	})
 	return
 }
 
