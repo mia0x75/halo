@@ -243,6 +243,26 @@ type StatementEdge struct {
 type SubscriptionRoot struct {
 }
 
+// 系统选项
+type SystemInfo struct {
+	// 平台版本
+	Version string `json:"Version"`
+	// 构建时的 Git 提交
+	Git string `json:"Git"`
+	// 构建时间
+	Compile string `json:"Compile"`
+	// 构建分支
+	Branch string `json:"Branch"`
+	// 元数据库类型：mysql 或 postgres
+	Database string `json:"Database"`
+	// 邮件通道是否启用
+	MailEnabled bool `json:"MailEnabled"`
+	// 已登记的群集数量
+	ClusterCount int `json:"ClusterCount"`
+	// 已登记的账号数量
+	UserCount int `json:"UserCount"`
+}
+
 // 任务执行记录
 type TaskExecution struct {
 	// 执行的UUID

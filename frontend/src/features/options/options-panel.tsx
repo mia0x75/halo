@@ -4,6 +4,7 @@ import { IconCheck, IconPencil, IconX } from "@tabler/icons-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Select } from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -90,12 +91,25 @@ export function OptionsPanel({ showHeader = true }: OptionsPanelProps) {
               <TableCell>
                 {editing === option.UUID ? (
                   <div className="flex items-center gap-2">
-                    <Input
-                      value={draft}
-                      onChange={(event) => setDraft(event.target.value)}
-                      className="h-8 max-w-64"
-                      aria-label={`${option.Name} 的值`}
-                    />
+                    {option.Element === "switch" ? (
+                      <Select
+                        value={draft}
+                        onChange={(event) => setDraft(event.target.value)}
+                        aria-label={`${option.Name} 的值`}
+                        className="h-8 max-w-32"
+                      >
+                        <option value="true">开启</option>
+                        <option value="false">关闭</option>
+                      </Select>
+                    ) : (
+                      <Input
+                        value={draft}
+                        onChange={(event) => setDraft(event.target.value)}
+                        type={option.Element === "password" ? "password" : "text"}
+                        className="h-8 max-w-64"
+                        aria-label={`${option.Name} 的值`}
+                      />
+                    )}
                     <Button
                       size="icon-sm"
                       aria-label="保存"

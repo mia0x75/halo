@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/mia0x75/halo/internal/domain"
 )
@@ -36,12 +37,30 @@ func (s *OptionService) Create(ctx context.Context, o *domain.Option, operatorID
 	})
 }
 
+// Update stores a new value for an option and records the old and new value in
+// the audit log.
 func (s *OptionService) Update(ctx context.Context, o *domain.Option, operatorID uint) error {
+	if err := domain.ValidateOptionValue(o.Name, o.Parameter); err != nil {
+		return err
+	}
+	current, err := s.options.GetByUUID(ctx, o.UUID)
+	if err != nil {
+		return err
+	}
+
 	return s.tx.WithTx(ctx, func(ctx context.Context, repos Repos) error {
 		if err := repos.Option.Update(ctx, o); err != nil {
 			return err
 		}
-		return NewLogService(repos.Log).Log(ctx, LogEntry{UserID: operatorID, Operation: "option.update", Target: "option:" + o.UUID})
+		detail := fmt.Sprintf("%s->%s",
+			domain.MaskOptionValue(current.Name, current.Parameter),
+			domain.MaskOptionValue(o.Name, o.Parameter))
+		return NewLogService(repos.Log).Log(ctx, LogEntry{
+			UserID:    operatorID,
+			Operation: "option.update",
+			Target:    "option:" + o.UUID,
+			Detail:    detail,
+		})
 	})
 }
 

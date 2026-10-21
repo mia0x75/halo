@@ -759,6 +759,48 @@ type LogEdge {
 """
 系统选项
 """
+type SystemInfo {
+	"""
+	平台版本
+	"""
+	Version: String!
+
+	"""
+	构建时的 Git 提交
+	"""
+	Git: String!
+
+	"""
+	构建时间
+	"""
+	Compile: String!
+
+	"""
+	构建分支
+	"""
+	Branch: String!
+
+	"""
+	元数据库类型：mysql 或 postgres
+	"""
+	Database: String!
+
+	"""
+	邮件通道是否启用
+	"""
+	MailEnabled: Boolean!
+
+	"""
+	已登记的群集数量
+	"""
+	ClusterCount: Int!
+
+	"""
+	已登记的账号数量
+	"""
+	UserCount: Int!
+}
+
 type Option implements Node {
 	"""
 	系统选项的UUID
@@ -2008,6 +2050,11 @@ type QueryRoot {
 	浏览所有系统选项
 	"""
 	options: [Option] @auth(requires: [ADMIN])
+
+	"""
+	平台运行信息
+	"""
+	systemInfo: SystemInfo! @auth(requires: [ADMIN])
 
 	"""
 	查看某一个系统选项

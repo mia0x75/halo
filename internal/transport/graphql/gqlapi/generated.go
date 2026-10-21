@@ -387,6 +387,7 @@ type ComplexityRoot struct {
 		RuleHits             func(childComplexity int, ticketID *uint, rule *string, level *uint8, first *int) int
 		Rules                func(childComplexity int) int
 		Statements           func(childComplexity int, after *string, first *int) int
+		SystemInfo           func(childComplexity int) int
 		TaskExecutionSummary func(childComplexity int) int
 		TaskExecutions       func(childComplexity int, status *uint8, first *int) int
 		Tasks                func(childComplexity int) int
@@ -473,6 +474,17 @@ type ComplexityRoot struct {
 
 	SubscriptionRoot struct {
 		TicketStatusChanged func(childComplexity int) int
+	}
+
+	SystemInfo struct {
+		Branch       func(childComplexity int) int
+		ClusterCount func(childComplexity int) int
+		Compile      func(childComplexity int) int
+		Database     func(childComplexity int) int
+		Git          func(childComplexity int) int
+		MailEnabled  func(childComplexity int) int
+		UserCount    func(childComplexity int) int
+		Version      func(childComplexity int) int
 	}
 
 	TaskExecution struct {
@@ -645,6 +657,7 @@ type QueryRootResolver interface {
 	Logs(ctx context.Context, after *string, before *string, first *int, last *int) (*LogConnection, error)
 	Me(ctx context.Context) (*models.User, error)
 	Options(ctx context.Context) ([]*models.Option, error)
+	SystemInfo(ctx context.Context) (*SystemInfo, error)
 	Option(ctx context.Context, id string) (*models.Option, error)
 	Query(ctx context.Context, id string) (*models.Query, error)
 	Queries(ctx context.Context, after *string, before *string, first *int, last *int) (*QueryConnection, error)
@@ -2488,6 +2501,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.QueryRoot.Statements(childComplexity, args["after"].(*string), args["first"].(*int)), true
+	case "QueryRoot.systemInfo":
+		if e.ComplexityRoot.QueryRoot.SystemInfo == nil {
+			break
+		}
+
+		return e.ComplexityRoot.QueryRoot.SystemInfo(childComplexity), true
 	case "QueryRoot.taskExecutionSummary":
 		if e.ComplexityRoot.QueryRoot.TaskExecutionSummary == nil {
 			break
@@ -2918,6 +2937,55 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.SubscriptionRoot.TicketStatusChanged(childComplexity), true
+
+	case "SystemInfo.Branch":
+		if e.ComplexityRoot.SystemInfo.Branch == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SystemInfo.Branch(childComplexity), true
+	case "SystemInfo.ClusterCount":
+		if e.ComplexityRoot.SystemInfo.ClusterCount == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SystemInfo.ClusterCount(childComplexity), true
+	case "SystemInfo.Compile":
+		if e.ComplexityRoot.SystemInfo.Compile == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SystemInfo.Compile(childComplexity), true
+	case "SystemInfo.Database":
+		if e.ComplexityRoot.SystemInfo.Database == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SystemInfo.Database(childComplexity), true
+	case "SystemInfo.Git":
+		if e.ComplexityRoot.SystemInfo.Git == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SystemInfo.Git(childComplexity), true
+	case "SystemInfo.MailEnabled":
+		if e.ComplexityRoot.SystemInfo.MailEnabled == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SystemInfo.MailEnabled(childComplexity), true
+	case "SystemInfo.UserCount":
+		if e.ComplexityRoot.SystemInfo.UserCount == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SystemInfo.UserCount(childComplexity), true
+	case "SystemInfo.Version":
+		if e.ComplexityRoot.SystemInfo.Version == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SystemInfo.Version(childComplexity), true
 
 	case "TaskExecution.Attempt":
 		if e.ComplexityRoot.TaskExecution.Attempt == nil {
@@ -4143,6 +4211,28 @@ func (ec *executionContext) childFields_StatementEdge(ctx context.Context, field
 		return ec.fieldContext_StatementEdge_cursor(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type StatementEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_SystemInfo(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "Version":
+		return ec.fieldContext_SystemInfo_Version(ctx, field)
+	case "Git":
+		return ec.fieldContext_SystemInfo_Git(ctx, field)
+	case "Compile":
+		return ec.fieldContext_SystemInfo_Compile(ctx, field)
+	case "Branch":
+		return ec.fieldContext_SystemInfo_Branch(ctx, field)
+	case "Database":
+		return ec.fieldContext_SystemInfo_Database(ctx, field)
+	case "MailEnabled":
+		return ec.fieldContext_SystemInfo_MailEnabled(ctx, field)
+	case "ClusterCount":
+		return ec.fieldContext_SystemInfo_ClusterCount(ctx, field)
+	case "UserCount":
+		return ec.fieldContext_SystemInfo_UserCount(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type SystemInfo", field.Name)
 }
 
 func (ec *executionContext) childFields_TaskExecution(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
@@ -13950,6 +14040,56 @@ func (ec *executionContext) fieldContext_QueryRoot_options(_ context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _QueryRoot_systemInfo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_QueryRoot_systemInfo(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.QueryRoot().SystemInfo(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				if err != nil {
+					var zeroVal *SystemInfo
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal *SystemInfo
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *SystemInfo) graphql.Marshaler {
+			return ec.marshalNSystemInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐSystemInfo(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_QueryRoot_systemInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QueryRoot",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_SystemInfo(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _QueryRoot_option(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -17639,6 +17779,190 @@ func (ec *executionContext) fieldContext_SubscriptionRoot_ticketStatusChanged(_ 
 		},
 	}
 	return fc, nil
+}
+
+func (ec *executionContext) _SystemInfo_Version(ctx context.Context, field graphql.CollectedField, obj *SystemInfo) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_SystemInfo_Version(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Version, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_SystemInfo_Version(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("SystemInfo", field, false, false, "String")
+}
+
+func (ec *executionContext) _SystemInfo_Git(ctx context.Context, field graphql.CollectedField, obj *SystemInfo) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_SystemInfo_Git(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Git, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_SystemInfo_Git(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("SystemInfo", field, false, false, "String")
+}
+
+func (ec *executionContext) _SystemInfo_Compile(ctx context.Context, field graphql.CollectedField, obj *SystemInfo) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_SystemInfo_Compile(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Compile, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_SystemInfo_Compile(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("SystemInfo", field, false, false, "String")
+}
+
+func (ec *executionContext) _SystemInfo_Branch(ctx context.Context, field graphql.CollectedField, obj *SystemInfo) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_SystemInfo_Branch(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Branch, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_SystemInfo_Branch(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("SystemInfo", field, false, false, "String")
+}
+
+func (ec *executionContext) _SystemInfo_Database(ctx context.Context, field graphql.CollectedField, obj *SystemInfo) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_SystemInfo_Database(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Database, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_SystemInfo_Database(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("SystemInfo", field, false, false, "String")
+}
+
+func (ec *executionContext) _SystemInfo_MailEnabled(ctx context.Context, field graphql.CollectedField, obj *SystemInfo) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_SystemInfo_MailEnabled(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.MailEnabled, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_SystemInfo_MailEnabled(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("SystemInfo", field, false, false, "Boolean")
+}
+
+func (ec *executionContext) _SystemInfo_ClusterCount(ctx context.Context, field graphql.CollectedField, obj *SystemInfo) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_SystemInfo_ClusterCount(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ClusterCount, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_SystemInfo_ClusterCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("SystemInfo", field, false, false, "Int")
+}
+
+func (ec *executionContext) _SystemInfo_UserCount(ctx context.Context, field graphql.CollectedField, obj *SystemInfo) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_SystemInfo_UserCount(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.UserCount, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_SystemInfo_UserCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("SystemInfo", field, false, false, "Int")
 }
 
 func (ec *executionContext) _TaskExecution_UUID(ctx context.Context, field graphql.CollectedField, obj *TaskExecution) (ret graphql.Marshaler) {
@@ -26242,6 +26566,12 @@ func (ec *executionContext) _QueryRoot(ctx context.Context, sel ast.SelectionSet
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._QueryRoot_options(ctx, field)
 				})
+		case "systemInfo":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._QueryRoot_systemInfo(ctx, field)
+				})
 		case "option":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
 				true, false,
@@ -26941,6 +27271,74 @@ func (ec *executionContext) _SubscriptionRoot(ctx context.Context, sel ast.Selec
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
+}
+
+var systemInfoImplementors = []string{"SystemInfo"}
+
+func (ec *executionContext) _SystemInfo(ctx context.Context, sel ast.SelectionSet, obj *SystemInfo) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, systemInfoImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SystemInfo")
+		case "Version":
+			out.Values[i] = ec._SystemInfo_Version(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Git":
+			out.Values[i] = ec._SystemInfo_Git(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Compile":
+			out.Values[i] = ec._SystemInfo_Compile(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Branch":
+			out.Values[i] = ec._SystemInfo_Branch(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Database":
+			out.Values[i] = ec._SystemInfo_Database(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "MailEnabled":
+			out.Values[i] = ec._SystemInfo_MailEnabled(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "ClusterCount":
+			out.Values[i] = ec._SystemInfo_ClusterCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "UserCount":
+			out.Values[i] = ec._SystemInfo_UserCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
 }
 
 var taskExecutionImplementors = []string{"TaskExecution"}
@@ -28326,6 +28724,14 @@ func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel
 	}
 
 	return ret
+}
+
+func (ec *executionContext) marshalNSystemInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐSystemInfo(ctx context.Context, sel ast.SelectionSet, v *SystemInfo) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "SystemInfo!")
+		return graphql.Null
+	}
+	return ec._SystemInfo(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNTemplate2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐTemplate(ctx context.Context, sel ast.SelectionSet, v *models.Template) graphql.Marshaler {

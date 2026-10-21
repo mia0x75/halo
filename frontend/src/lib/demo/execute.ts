@@ -586,6 +586,20 @@ export function demoExecute(query: string, variables?: Variables): Record<string
     case "Options": {
       return { options: state.options }
     }
+    case "SystemInfo": {
+      return {
+        systemInfo: {
+          Version: "0.1.0",
+          Git: "demo",
+          Compile: "2026-10-21",
+          Branch: "main",
+          Database: "mysql",
+          MailEnabled: false,
+          ClusterCount: state.clusters.length,
+          UserCount: state.users.length,
+        },
+      }
+    }
     case "PatchOption": {
       const input = record(source.input)
       const option = state.options.find((item) => item.UUID === text(input.OptionUUID))

@@ -6,8 +6,14 @@ import { Tabs } from "@/components/ui/tabs"
 import { AccessPanel } from "@/features/settings/access-panel"
 import { GroupsPanel } from "@/features/settings/groups-panel"
 import { OptionsPanel } from "@/features/options/options-panel"
+import { SystemInfoPanel } from "@/features/settings/system-info-panel"
 
-export type SettingsTab = "options" | "groups" | "role-access" | "user-access"
+export type SettingsTab =
+  | "options"
+  | "groups"
+  | "role-access"
+  | "user-access"
+  | "info"
 
 export interface SettingsPageProps {
   tab: SettingsTab
@@ -41,6 +47,7 @@ export function SettingsPage({ tab, onTabChange, onCreateGroup, onEditGroup }: S
           { key: "groups", label: "群集分组" },
           { key: "role-access", label: "角色授权" },
           { key: "user-access", label: "用户授权" },
+          { key: "info", label: "运行信息" },
         ]}
       />
 
@@ -60,6 +67,8 @@ export function SettingsPage({ tab, onTabChange, onCreateGroup, onEditGroup }: S
 
       {tab === "role-access" ? <AccessPanel scope="role" /> : null}
       {tab === "user-access" ? <AccessPanel scope="user" /> : null}
+
+      {tab === "info" ? <SystemInfoPanel /> : null}
     </>
   )
 }

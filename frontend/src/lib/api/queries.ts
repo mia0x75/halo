@@ -777,6 +777,32 @@ export const ROLES_QUERY = `
   }
 `
 
+export interface SystemInfoNode {
+  Version: string
+  Git: string
+  Compile: string
+  Branch: string
+  Database: string
+  MailEnabled: boolean
+  ClusterCount: number
+  UserCount: number
+}
+
+export const SYSTEM_INFO_QUERY = `
+  query SystemInfo {
+    systemInfo {
+      Version
+      Git
+      Compile
+      Branch
+      Database
+      MailEnabled
+      ClusterCount
+      UserCount
+    }
+  }
+`
+
 export const OPTIONS_QUERY = `
   query Options {
     options {

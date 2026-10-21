@@ -196,10 +196,14 @@ type stubOptionRepo struct {
 	domain.OptionRepository
 	createErr, updateErr, deleteErr error
 	got                             *domain.Option
+	existing                        *domain.Option
 }
 
 func (s *stubOptionRepo) Create(context.Context, *domain.Option) error { return s.createErr }
 func (s *stubOptionRepo) GetByUUID(context.Context, string) (*domain.Option, error) {
+	if s.existing != nil {
+		return s.existing, nil
+	}
 	return s.got, nil
 }
 func (s *stubOptionRepo) GetByName(context.Context, string) (*domain.Option, error) {
