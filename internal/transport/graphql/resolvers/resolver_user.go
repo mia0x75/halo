@@ -1452,6 +1452,32 @@ func (r *userResolver) GrantedClusters(ctx context.Context, obj *models.User) (L
 	}), nil
 }
 
+// ClusterGrants 用户对每个群集的生效权限与来源
+func (r *userResolver) ClusterGrants(ctx context.Context, obj *models.User) ([]*gqlapi.ClusterGrant, error) {
+	roles := userRoles(obj.UserID)
+	grants := transportauth.ClusterGrants(obj, roles, cache.ClustersMap.All(), cache.EdgesMap.All(),
+		func(groupID uint) string {
+			group := cache.GroupsMap.Any(func(elem *models.Group) bool {
+				return elem.GroupID == groupID
+			})
+			if group == nil {
+				return ""
+			}
+			return group.Name
+		})
+
+	out := make([]*gqlapi.ClusterGrant, 0, len(grants))
+	for _, grant := range grants {
+		out = append(out, &gqlapi.ClusterGrant{
+			Cluster:   grant.Cluster,
+			Direct:    grant.Direct,
+			Inherited: grant.Inherited,
+			Sources:   grant.Sources,
+		})
+	}
+	return out, nil
+}
+
 // Clusters 用户可以访问的群集，TODO: 分页未完成
 func (r *userResolver) Clusters(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*gqlapi.ClusterConnection, error) {
 	rc := gqlapi.ReturnCodeOK

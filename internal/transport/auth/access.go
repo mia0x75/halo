@@ -47,3 +47,75 @@ func ClusterAccessible(user *models.User, roles []*models.Role, cluster *models.
 func CanAccessCluster(user *models.User, roles []*models.Role, cluster *models.Cluster) bool {
 	return ClusterAccessible(user, roles, cluster, cache.EdgesMap.All())
 }
+
+// ClusterGrant explains why a user may use a cluster.
+//
+// Permissions are the union of a direct grant and the groups granted to the
+// user's roles. The management page has to show both layers, otherwise
+// "unchecking a cluster" looks like it revokes access when it only drops one
+// of the two sources.
+type ClusterGrant struct {
+	Cluster *models.Cluster
+	// Direct reports a user-to-cluster grant.
+	Direct bool
+	// Inherited reports access through a group granted to one of the roles.
+	Inherited bool
+	// Sources names the roles and groups that grant inherited access.
+	Sources []string
+}
+
+// ClusterGrants computes the effective access of one user over every cluster.
+func ClusterGrants(
+	user *models.User,
+	roles []*models.Role,
+	clusters []*models.Cluster,
+	edges []*models.Edge,
+	groupName func(groupID uint) string,
+) []ClusterGrant {
+	grants := make([]ClusterGrant, 0, len(clusters))
+	if user == nil {
+		return grants
+	}
+
+	roleIDs := make(map[uint]bool, len(roles))
+	roleNames := make(map[uint]string, len(roles))
+	for _, role := range roles {
+		roleIDs[role.RoleID] = true
+		roleNames[role.RoleID] = role.Name
+	}
+
+	direct := make(map[uint]bool)
+	for _, edge := range edges {
+		if edge.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToCluster] && edge.AncestorID == user.UserID {
+			direct[edge.DescendantID] = true
+		}
+	}
+
+	// groupID -> 角色名列表，先按分组聚合继承来源。
+	inherited := make(map[uint][]string)
+	for _, edge := range edges {
+		if edge.Type != gqlapi.EdgeEnumMap[gqlapi.EdgeEnumRoleToGroup] {
+			continue
+		}
+		name, ok := roleNames[edge.AncestorID]
+		if !ok {
+			continue
+		}
+		source := name
+		if group := groupName(edge.DescendantID); group != "" {
+			source = name + " / " + group
+		}
+		inherited[edge.DescendantID] = append(inherited[edge.DescendantID], source)
+	}
+
+	for _, cluster := range clusters {
+		sources := inherited[cluster.GroupID]
+		grants = append(grants, ClusterGrant{
+			Cluster:   cluster,
+			Direct:    direct[cluster.ClusterID],
+			Inherited: len(sources) > 0,
+			Sources:   sources,
+		})
+	}
+	return grants
+}

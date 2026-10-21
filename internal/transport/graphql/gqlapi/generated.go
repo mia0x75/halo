@@ -107,6 +107,13 @@ type ComplexityRoot struct {
 		Node   func(childComplexity int) int
 	}
 
+	ClusterGrant struct {
+		Cluster   func(childComplexity int) int
+		Direct    func(childComplexity int) int
+		Inherited func(childComplexity int) int
+		Sources   func(childComplexity int) int
+	}
+
 	ClusterTestResult struct {
 		Databases func(childComplexity int) int
 		LatencyMs func(childComplexity int) int
@@ -551,6 +558,7 @@ type ComplexityRoot struct {
 
 	User struct {
 		Avatar          func(childComplexity int) int
+		ClusterGrants   func(childComplexity int) int
 		Clusters        func(childComplexity int, after *string, before *string, first *int, last *int) int
 		CreateAt        func(childComplexity int) int
 		Email           func(childComplexity int) int
@@ -720,6 +728,7 @@ type UserResolver interface {
 	Roles(ctx context.Context, obj *models.User) ([]*models.Role, error)
 	Reviewers(ctx context.Context, obj *models.User) ([]*models.User, error)
 	GrantedClusters(ctx context.Context, obj *models.User) ([]*models.Cluster, error)
+	ClusterGrants(ctx context.Context, obj *models.User) ([]*ClusterGrant, error)
 	MyTickets(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*TicketConnection, error)
 	PendingReviews(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*TicketConnection, error)
 	Metrics(ctx context.Context, obj *models.User) ([]*models.Metric, error)
@@ -937,6 +946,31 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.ClusterEdge.Node(childComplexity), true
+
+	case "ClusterGrant.Cluster":
+		if e.ComplexityRoot.ClusterGrant.Cluster == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ClusterGrant.Cluster(childComplexity), true
+	case "ClusterGrant.Direct":
+		if e.ComplexityRoot.ClusterGrant.Direct == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ClusterGrant.Direct(childComplexity), true
+	case "ClusterGrant.Inherited":
+		if e.ComplexityRoot.ClusterGrant.Inherited == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ClusterGrant.Inherited(childComplexity), true
+	case "ClusterGrant.Sources":
+		if e.ComplexityRoot.ClusterGrant.Sources == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ClusterGrant.Sources(childComplexity), true
 
 	case "ClusterTestResult.Databases":
 		if e.ComplexityRoot.ClusterTestResult.Databases == nil {
@@ -3256,6 +3290,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.Avatar(childComplexity), true
+	case "User.ClusterGrants":
+		if e.ComplexityRoot.User.ClusterGrants == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.ClusterGrants(childComplexity), true
 	case "User.Clusters":
 		if e.ComplexityRoot.User.Clusters == nil {
 			break
@@ -3671,6 +3711,20 @@ func (ec *executionContext) childFields_ClusterEdge(ctx context.Context, field g
 		return ec.fieldContext_ClusterEdge_cursor(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type ClusterEdge", field.Name)
+}
+
+func (ec *executionContext) childFields_ClusterGrant(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "Cluster":
+		return ec.fieldContext_ClusterGrant_Cluster(ctx, field)
+	case "Direct":
+		return ec.fieldContext_ClusterGrant_Direct(ctx, field)
+	case "Inherited":
+		return ec.fieldContext_ClusterGrant_Inherited(ctx, field)
+	case "Sources":
+		return ec.fieldContext_ClusterGrant_Sources(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type ClusterGrant", field.Name)
 }
 
 func (ec *executionContext) childFields_ClusterTestResult(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
@@ -4379,6 +4433,8 @@ func (ec *executionContext) childFields_User(ctx context.Context, field graphql.
 		return ec.fieldContext_User_Reviewers(ctx, field)
 	case "GrantedClusters":
 		return ec.fieldContext_User_GrantedClusters(ctx, field)
+	case "ClusterGrants":
+		return ec.fieldContext_User_ClusterGrants(ctx, field)
 	case "MyTickets":
 		return ec.fieldContext_User_MyTickets(ctx, field)
 	case "PendingReviews":
@@ -7484,6 +7540,107 @@ func (ec *executionContext) _ClusterEdge_cursor(ctx context.Context, field graph
 }
 func (ec *executionContext) fieldContext_ClusterEdge_cursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("ClusterEdge", field, false, false, "ID")
+}
+
+func (ec *executionContext) _ClusterGrant_Cluster(ctx context.Context, field graphql.CollectedField, obj *ClusterGrant) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ClusterGrant_Cluster(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Cluster, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *models.Cluster) graphql.Marshaler {
+			return ec.marshalNCluster2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐCluster(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_ClusterGrant_Cluster(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ClusterGrant",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Cluster(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ClusterGrant_Direct(ctx context.Context, field graphql.CollectedField, obj *ClusterGrant) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ClusterGrant_Direct(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Direct, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_ClusterGrant_Direct(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("ClusterGrant", field, false, false, "Boolean")
+}
+
+func (ec *executionContext) _ClusterGrant_Inherited(ctx context.Context, field graphql.CollectedField, obj *ClusterGrant) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ClusterGrant_Inherited(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Inherited, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_ClusterGrant_Inherited(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("ClusterGrant", field, false, false, "Boolean")
+}
+
+func (ec *executionContext) _ClusterGrant_Sources(ctx context.Context, field graphql.CollectedField, obj *ClusterGrant) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ClusterGrant_Sources(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Sources, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNString2ᚕstringᚄ(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_ClusterGrant_Sources(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("ClusterGrant", field, false, false, "String")
 }
 
 func (ec *executionContext) _ClusterTestResult_Success(ctx context.Context, field graphql.CollectedField, obj *ClusterTestResult) (ret graphql.Marshaler) {
@@ -19440,6 +19597,38 @@ func (ec *executionContext) fieldContext_User_GrantedClusters(_ context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _User_ClusterGrants(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_User_ClusterGrants(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.User().ClusterGrants(ctx, obj)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*ClusterGrant) graphql.Marshaler {
+			return ec.marshalNClusterGrant2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐClusterGrantᚄ(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_User_ClusterGrants(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_ClusterGrant(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _User_MyTickets(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -24811,6 +25000,54 @@ func (ec *executionContext) _ClusterEdge(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
+var clusterGrantImplementors = []string{"ClusterGrant"}
+
+func (ec *executionContext) _ClusterGrant(ctx context.Context, sel ast.SelectionSet, obj *ClusterGrant) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, clusterGrantImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ClusterGrant")
+		case "Cluster":
+			out.Values[i] = ec._ClusterGrant_Cluster(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Direct":
+			out.Values[i] = ec._ClusterGrant_Direct(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Inherited":
+			out.Values[i] = ec._ClusterGrant_Inherited(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Sources":
+			out.Values[i] = ec._ClusterGrant_Sources(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
 var clusterTestResultImplementors = []string{"ClusterTestResult"}
 
 func (ec *executionContext) _ClusterTestResult(ctx context.Context, sel ast.SelectionSet, obj *ClusterTestResult) graphql.Marshaler {
@@ -27808,6 +28045,12 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._User_GrantedClusters(ctx, field, obj)
 				})
+		case "ClusterGrants":
+			out.ResolveConcurrently(ec.OperationContext, &deferred, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._User_ClusterGrants(ctx, field, obj)
+				})
 		case "MyTickets":
 			out.ResolveConcurrently(ec.OperationContext, &deferred, i,
 				true, false,
@@ -28363,6 +28606,30 @@ func (ec *executionContext) marshalNClusterEdge2ᚖgithubᚗcomᚋmia0x75ᚋhalo
 		return graphql.Null
 	}
 	return ec._ClusterEdge(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNClusterGrant2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐClusterGrantᚄ(ctx context.Context, sel ast.SelectionSet, v []*ClusterGrant) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNClusterGrant2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐClusterGrant(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNClusterGrant2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐClusterGrant(ctx context.Context, sel ast.SelectionSet, v *ClusterGrant) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "ClusterGrant!")
+		return graphql.Null
+	}
+	return ec._ClusterGrant(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNClusterTestResult2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐClusterTestResult(ctx context.Context, sel ast.SelectionSet, v *ClusterTestResult) graphql.Marshaler {

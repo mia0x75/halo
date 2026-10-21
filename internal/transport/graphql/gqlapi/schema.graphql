@@ -801,6 +801,31 @@ type SystemInfo {
 	UserCount: Int!
 }
 
+"""
+用户对某个群集的生效权限及其来源
+"""
+type ClusterGrant {
+	"""
+	群集
+	"""
+	Cluster: Cluster!
+
+	"""
+	是否有直接授权
+	"""
+	Direct: Boolean!
+
+	"""
+	是否通过角色继承的分组获得权限
+	"""
+	Inherited: Boolean!
+
+	"""
+	继承来源，形如「角色 / 分组」
+	"""
+	Sources: [String!]!
+}
+
 type Option implements Node {
 	"""
 	系统选项的UUID
@@ -1735,6 +1760,11 @@ type User implements Node {
 	直接授权给用户的群集，不含角色继承的分组权限
 	"""
 	GrantedClusters: [Cluster]
+
+	"""
+	用户对每个群集的生效权限与来源
+	"""
+	ClusterGrants: [ClusterGrant!]!
 
 	"""
 	我提交的工单

@@ -44,6 +44,18 @@ type ClusterEdge struct {
 	Cursor string `json:"cursor"`
 }
 
+// 用户对某个群集的生效权限及其来源
+type ClusterGrant struct {
+	// 群集
+	Cluster *models.Cluster `json:"Cluster"`
+	// 是否有直接授权
+	Direct bool `json:"Direct"`
+	// 是否通过角色继承的分组获得权限
+	Inherited bool `json:"Inherited"`
+	// 继承来源，形如「角色 / 分组」
+	Sources []string `json:"Sources"`
+}
+
 // 试连目标库的结果
 type ClusterTestResult struct {
 	// 是否连通
