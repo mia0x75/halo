@@ -1282,7 +1282,8 @@ L:
 		var user *models.User
 		rc := gqlapi.ReturnCodeOK
 
-		if input.Status < 0 || input.Status > 2 {
+		// 状态取值是 1 正常 / 2 禁用 / 3 待验证。
+		if input.Status < 1 || input.Status > 3 {
 			rc = gqlapi.ReturnCodeInvalidParams
 			err = fmt.Errorf("错误代码: %s, 错误信息: 参数(status=%d)无效。", rc, input.Status)
 			break L
