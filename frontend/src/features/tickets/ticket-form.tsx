@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
+import { SqlEditor, type SqlDialect } from "@/components/ui/sql-editor"
 import { useGraphQL } from "@/hooks/use-graphql"
 import { graphqlRequest } from "@/lib/api/client"
 import {
@@ -79,11 +79,12 @@ export function TicketForm({
     const edges = remoteClusters.data?.me?.Clusters?.edges ?? []
     const options = edges.map((edge) => ({
       uuid: edge.node.UUID,
+      type: edge.node.Type,
       label: `${edge.node.Alias} · ${edge.node.Type} (${edge.node.IP}:${edge.node.Port})`,
     }))
     // 原工单的群集可能不在当前可选列表里，补一条免得回填的值丢失。
     if (initial?.clusterUUID && !options.some((option) => option.uuid === initial.clusterUUID)) {
-      options.unshift({ uuid: initial.clusterUUID, label: "原工单群集" })
+      options.unshift({ uuid: initial.clusterUUID, type: "mysql", label: "原工单群集" })
     }
     return options
   }, [remoteClusters.data, initial])
@@ -103,6 +104,11 @@ export function TicketForm({
   // 默认选第一项：渲染时推导，不在 effect 里改状态。
   const selectedCluster = clusterUUID || clusterOptions[0]?.uuid || ""
   const selectedReviewer = reviewerUUID || reviewerOptions[0]?.uuid || ""
+  // 方言跟着目标群集走，关键字补全和语法高亮才不会串库。
+  const dialect: SqlDialect =
+    clusterOptions.find((option) => option.uuid === selectedCluster)?.type === "postgres"
+      ? "postgres"
+      : "mysql"
 
   const submit = async () => {
     // 没登录时接口会拒绝，这里先给出明确提示，避免只看到 1401 错误码。
@@ -194,14 +200,15 @@ export function TicketForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="ticket-content">工单内容</Label>
-        <Textarea
-          id="ticket-content"
+        <Label>SQL 语句</Label>
+        <SqlEditor
           value={content}
-          onChange={(event) => setContent(event.target.value)}
+          onChange={setContent}
+          dialect={dialect}
           placeholder="ALTER TABLE orders ADD COLUMN archived_at DATETIME NULL;"
-          className="min-h-56 font-mono"
+          className="min-h-56"
         />
+        <p className="text-xs text-muted-foreground">支持多条语句，用分号分隔。</p>
       </div>
 
       <div className="flex flex-col gap-1.5">

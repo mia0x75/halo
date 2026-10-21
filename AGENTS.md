@@ -48,6 +48,7 @@
 | 前端 UI | shadcn/ui + Radix + Tailwind 4 |
 | 前端表单 | react-hook-form + zod |
 | 前端表格 | TanStack Table |
+| 前端 SQL 编辑 | CodeMirror 6（@uiw/react-codemirror） |
 | 前端测试 | Vitest + Testing Library |
 
 **换栈唯一途径**：改本文件技术栈表并由人类确认。AI 不得单方面换栈。
