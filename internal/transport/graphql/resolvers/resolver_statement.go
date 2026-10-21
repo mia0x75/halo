@@ -48,6 +48,25 @@ func (r *statementResolver) TypeDesc(ctx context.Context, obj *models.Statement)
 // statementCursorUpperBound 是语句游标的首屏上界：UUID 都小于它。
 const statementCursorUpperBound = "ffffffff-ffff-ffff-ffff-ffffffffffff"
 
+// encodeStatementCursor 与 decodeStatementCursor 成对：语句游标携带的是
+// uuid，不能走 EncodeCursor（那个把值当数字解析）。
+func encodeStatementCursor(uuid string) string {
+	return base64.StdEncoding.EncodeToString([]byte("cursor" + uuid))
+}
+
+// decodeStatementCursor 把前端的游标还原成仓储层要的 uuid 上界。
+// 首屏没有游标，用上界哨兵兜住「小于游标」的查询条件。
+func decodeStatementCursor(after *string) (string, error) {
+	if after == nil || *after == "" {
+		return statementCursorUpperBound, nil
+	}
+	decoded, err := base64.StdEncoding.DecodeString(*after)
+	if err != nil {
+		return "", fmt.Errorf("错误代码: %s, 错误信息: 游标无效。", gqlapi.ReturnCodeInvalidParams)
+	}
+	return strings.TrimPrefix(string(decoded), "cursor"), nil
+}
+
 // Statements 全量语句列表，按 UUID 倒序分页。
 func (r *queryRootResolver) Statements(ctx context.Context, after *string, first *int) (*gqlapi.StatementConnection, error) {
 	limit := 20
@@ -55,14 +74,9 @@ func (r *queryRootResolver) Statements(ctx context.Context, after *string, first
 		limit = *first
 	}
 
-	// 仓储层按 uuid 倒序取「小于游标」的一段，首屏用上界哨兵。
-	cursor := statementCursorUpperBound
-	if after != nil && *after != "" {
-		decoded, err := base64.StdEncoding.DecodeString(*after)
-		if err != nil {
-			return nil, fmt.Errorf("错误代码: %s, 错误信息: 游标无效。", gqlapi.ReturnCodeInvalidParams)
-		}
-		cursor = strings.TrimPrefix(string(decoded), "cursor")
+	cursor, err := decodeStatementCursor(after)
+	if err != nil {
+		return nil, err
 	}
 
 	domainStmts, err := r.app.Services.Statement.List(ctx, cursor, limit)
@@ -74,7 +88,7 @@ func (r *queryRootResolver) Statements(ctx context.Context, after *string, first
 	for _, stmt := range domainStmts {
 		edges = append(edges, &gqlapi.StatementEdge{
 			Node:   bridge.StatementFromDomain(stmt),
-			Cursor: EncodeCursor(stmt.UUID),
+			Cursor: encodeStatementCursor(stmt.UUID),
 		})
 	}
 
