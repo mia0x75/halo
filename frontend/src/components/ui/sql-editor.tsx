@@ -1,6 +1,7 @@
 import { useMemo } from "react"
-import { syntaxHighlighting } from "@codemirror/language"
-import { MySQL, PostgreSQL, sql } from "@codemirror/lang-sql"
+import { SQLDialect, MySQL, PostgreSQL, sql } from "@codemirror/lang-sql"
+import { syntaxHighlighting, syntaxTree } from "@codemirror/language"
+import type { SyntaxNode } from "@lezer/common"
 import CodeMirror, { EditorView, oneDarkHighlightStyle } from "@uiw/react-codemirror"
 
 import { useTheme } from "@/hooks/use-theme"
@@ -18,6 +19,55 @@ export interface SqlEditorProps {
 }
 
 const monoFont = 'ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace'
+
+/** 输入到这些字符时认为一个词写完了，触发关键字大写。 */
+const wordBoundaries = new Set([" ", "Enter", "(", ")", ",", ";", "\t"])
+
+const protectedNodes = /Comment|String|Quoted/
+
+function keywordSet(dialect: SQLDialect): Set<string> {
+  const spec = dialect.spec
+  const words = [spec.keywords, spec.builtin, spec.types]
+    .filter((item): item is string => typeof item === "string")
+    .join(" ")
+    .split(/\s+/)
+    .filter(Boolean)
+  return new Set(words.map((word) => word.toUpperCase()))
+}
+
+/**
+ * SQL 关键字在输入空格/标点后转大写，和 DataGrip 的「大写关键字」习惯一致。
+ * 字符串、注释、引号标识符里的词不动。
+ */
+function upperCaseKeywords(dialect: SQLDialect) {
+  const keywords = keywordSet(dialect)
+  return EditorView.domEventHandlers({
+    keydown(event, view) {
+      if (!wordBoundaries.has(event.key)) return false
+      if (event.ctrlKey || event.metaKey || event.altKey) return false
+      const { state } = view
+      const selection = state.selection.main
+      if (!selection.empty) return false
+
+      const pos = selection.head
+      const line = state.doc.lineAt(pos)
+      const matched = /([A-Za-z_][A-Za-z0-9_]*)$/.exec(state.sliceDoc(line.from, pos))
+      if (!matched) return false
+      const word = matched[1]!
+      if (!keywords.has(word.toUpperCase()) || word === word.toUpperCase()) return false
+
+      const start = pos - word.length
+      let node: SyntaxNode | null = syntaxTree(state).resolveInner(start, 1)
+      while (node) {
+        if (protectedNodes.test(node.name)) return false
+        node = node.parent
+      }
+
+      view.dispatch({ changes: { from: start, to: pos, insert: word.toUpperCase() } })
+      return false
+    },
+  })
+}
 
 /**
  * 编辑器底色交给外层卡片，避免 oneDark 自带背景和暗色主题打架；
@@ -68,7 +118,11 @@ export function SqlEditor({ value, onChange, dialect = "mysql", placeholder, cla
 
   const extensions = useMemo(
     () => [
-      sql({ dialect: dialect === "postgres" ? PostgreSQL : MySQL }),
+      sql({
+        dialect: dialect === "postgres" ? PostgreSQL : MySQL,
+        upperCaseKeywords: true,
+      }),
+      upperCaseKeywords(dialect === "postgres" ? PostgreSQL : MySQL),
       EditorView.lineWrapping,
       editorTheme(dark),
       ...(dark ? [syntaxHighlighting(oneDarkHighlightStyle)] : []),
