@@ -24,8 +24,24 @@ func (f *fakeMessageRepo) GetByUUID(_ context.Context, uuid string) (*domain.Mes
 	return nil, f.err
 }
 
-func (f *fakeMessageRepo) ListByUser(_ context.Context, _ uint, _ bool, _ int) ([]*domain.Message, error) {
+func (f *fakeMessageRepo) ListByUser(
+	_ context.Context,
+	_ uint,
+	_ uint,
+	_ bool,
+	_ string,
+	_ string,
+	_ int,
+) ([]*domain.Message, error) {
 	return f.messages, f.err
+}
+
+func (f *fakeMessageRepo) CountByUser(_ context.Context, _ uint, _ bool, _ string, _ string) (uint, error) {
+	return uint(len(f.messages)), f.err
+}
+
+func (f *fakeMessageRepo) Delete(_ context.Context, _ string, _ uint) error {
+	return f.err
 }
 
 func (f *fakeMessageRepo) CountUnread(_ context.Context, _ uint) (uint, error) {

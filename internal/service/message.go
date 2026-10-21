@@ -21,12 +21,37 @@ func (s *MessageService) Send(ctx context.Context, m *domain.Message) error {
 	return s.messages.Create(ctx, m)
 }
 
-// ListByUser returns the messages of one user, newest first.
-func (s *MessageService) ListByUser(ctx context.Context, userID uint, unreadOnly bool, limit int) ([]*domain.Message, error) {
-	if limit <= 0 {
-		limit = 20
+// MessageFilter narrows one message page.
+type MessageFilter struct {
+	// BeforeID is the exclusive upper bound on message_id, 0 means no bound.
+	BeforeID uint
+	// UnreadOnly keeps only the messages that were never read.
+	UnreadOnly bool
+	// Category filters by category, empty matches every category.
+	Category string
+	// Keyword matches the title or the content, empty matches everything.
+	Keyword string
+	// Limit is the page size.
+	Limit int
+}
+
+// ListByUser returns one page of the messages of one user, newest first.
+func (s *MessageService) ListByUser(ctx context.Context, userID uint, filter MessageFilter) ([]*domain.Message, error) {
+	if filter.Limit <= 0 {
+		filter.Limit = 20
 	}
-	return s.messages.ListByUser(ctx, userID, unreadOnly, limit)
+	return s.messages.ListByUser(
+		ctx, userID, filter.BeforeID, filter.UnreadOnly, filter.Category, filter.Keyword, filter.Limit)
+}
+
+// CountByUser returns how many messages match the filter.
+func (s *MessageService) CountByUser(ctx context.Context, userID uint, filter MessageFilter) (uint, error) {
+	return s.messages.CountByUser(ctx, userID, filter.UnreadOnly, filter.Category, filter.Keyword)
+}
+
+// Delete removes one message of the given user.
+func (s *MessageService) Delete(ctx context.Context, uuid string, userID uint) error {
+	return s.messages.Delete(ctx, uuid, userID)
 }
 
 // CountUnread returns the number of unread messages of one user.

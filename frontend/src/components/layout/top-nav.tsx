@@ -31,6 +31,7 @@ import {
   MARK_MESSAGE_READ_MUTATION,
   MESSAGES_QUERY,
   UNREAD_MESSAGE_COUNT_QUERY,
+  type MessageConnectionNode,
   type MessageNode,
 } from "@/lib/api/queries"
 import { getToken, isDemoSession } from "@/lib/api/session"
@@ -59,11 +60,11 @@ export function TopNav({
   const unread = useGraphQL<{ unreadMessageCount: number }>(UNREAD_MESSAGE_COUNT_QUERY)
   const unreadCount = unread.data?.unreadMessageCount ?? 0
 
-  const messages = useGraphQL<{ messages: MessageNode[] }, { unreadOnly: boolean; first: number }>(
-    MESSAGES_QUERY,
-    { unreadOnly: true, first: 5 },
-  )
-  const items = messages.data?.messages ?? []
+  const messages = useGraphQL<
+    { messages: MessageConnectionNode },
+    { unreadOnly: boolean; first: number }
+  >(MESSAGES_QUERY, { unreadOnly: true, first: 5 })
+  const items = messages.data?.messages.edges.map((edge) => edge.node) ?? []
   const refetchMessages = messages.refetch
   const refetchUnread = unread.refetch
 

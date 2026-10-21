@@ -49,20 +49,23 @@ func (r *MessageRepo) GetByUUID(ctx context.Context, uuid string) (*domain.Messa
 	return messageFromRow(row), nil
 }
 
-func (r *MessageRepo) ListByUser(ctx context.Context, userID uint, unreadOnly bool, limit int) ([]*domain.Message, error) {
-	var rows []MmMessage
-	var err error
-	if unreadOnly {
-		rows, err = r.q.ListUnreadMessagesByUser(ctx, ListUnreadMessagesByUserParams{
-			UserID: uint32(userID),
-			Limit:  clampInt32(limit),
-		})
-	} else {
-		rows, err = r.q.ListMessagesByUser(ctx, ListMessagesByUserParams{
-			UserID: uint32(userID),
-			Limit:  clampInt32(limit),
-		})
-	}
+func (r *MessageRepo) ListByUser(
+	ctx context.Context,
+	userID uint,
+	beforeID uint,
+	unreadOnly bool,
+	category string,
+	keyword string,
+	limit int,
+) ([]*domain.Message, error) {
+	rows, err := r.q.ListMessagesByUser(ctx, ListMessagesByUserParams{
+		UserID:     uint32(userID),
+		BeforeID:   uint32(beforeID),
+		UnreadOnly: boolToInt(unreadOnly),
+		Category:   category,
+		Keyword:    keyword,
+		Limit:      clampInt32(limit),
+	})
 	if err != nil {
 		return nil, wrap("message.ListByUser", err)
 	}
@@ -71,6 +74,33 @@ func (r *MessageRepo) ListByUser(ctx context.Context, userID uint, unreadOnly bo
 		out = append(out, messageFromRow(row))
 	}
 	return out, nil
+}
+
+func (r *MessageRepo) CountByUser(ctx context.Context, userID uint, unreadOnly bool, category string, keyword string) (uint, error) {
+	count, err := r.q.CountMessagesByUser(ctx, CountMessagesByUserParams{
+		UserID:     uint32(userID),
+		UnreadOnly: boolToInt(unreadOnly),
+		Category:   category,
+		Keyword:    keyword,
+	})
+	if err != nil {
+		return 0, wrap("message.CountByUser", err)
+	}
+	return uint(count), nil
+}
+
+func (r *MessageRepo) Delete(ctx context.Context, uuid string, userID uint) error {
+	rows, err := r.q.DeleteMessageByUUID(ctx, DeleteMessageByUUIDParams{
+		Uuid:   uuid,
+		UserID: uint32(userID),
+	})
+	if err != nil {
+		return wrap("message.Delete", err)
+	}
+	if rows == 0 {
+		return domain.ErrNotFound
+	}
+	return nil
 }
 
 func (r *MessageRepo) CountUnread(ctx context.Context, userID uint) (uint, error) {
@@ -94,4 +124,12 @@ func (r *MessageRepo) MarkRead(ctx context.Context, uuid string, userID uint) er
 		Uuid:   uuid,
 		UserID: uint32(userID),
 	}))
+}
+
+// boolToInt renders a flag for the SQL layer, which compares it to 0.
+func boolToInt(value bool) int {
+	if value {
+		return 1
+	}
+	return 0
 }

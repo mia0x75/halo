@@ -2,12 +2,16 @@ package mysqlrepo
 
 import (
 	"context"
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
 	"github.com/mia0x75/halo/internal/domain"
 )
+
+// messageUpperBound 是首屏查询用的 message_id 上界哨兵。
+const messageUpperBound = math.MaxUint32
 
 func TestMessageRepo(t *testing.T) {
 	repo := NewMessageRepo(setupTestDB(t))
@@ -33,7 +37,7 @@ func TestMessageRepo(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, uint(1), count)
 
-	unread, err := repo.ListByUser(ctx, userID, true, 10)
+	unread, err := repo.ListByUser(ctx, userID, messageUpperBound, true, "", "", 10)
 	require.NoError(t, err)
 	require.Len(t, unread, 1)
 
@@ -42,10 +46,19 @@ func TestMessageRepo(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, uint(0), count)
 
-	all, err := repo.ListByUser(ctx, userID, false, 10)
+	all, err := repo.ListByUser(ctx, userID, messageUpperBound, false, "", "", 10)
 	require.NoError(t, err)
 	require.Len(t, all, 1)
 	require.NotNil(t, all[0].ReadAt)
+
+	// 按分类过滤只返回该分类的消息。
+	other, err := repo.ListByUser(ctx, userID, messageUpperBound, false, "review", "", 10)
+	require.NoError(t, err)
+	require.Empty(t, other)
+
+	total, err := repo.CountByUser(ctx, userID, false, "", "")
+	require.NoError(t, err)
+	require.Equal(t, uint(1), total)
 
 	second := &domain.Message{
 		UUID:     newUUID(),

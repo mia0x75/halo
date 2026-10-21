@@ -189,6 +189,22 @@ type Message struct {
 	CreateAt uint `json:"CreateAt"`
 }
 
+type MessageConnection struct {
+	// 分页信息
+	PageInfo *PageInfo `json:"pageInfo"`
+	// 记录信息
+	Edges []*MessageEdge `json:"edges,omitempty"`
+	// 记录总数
+	TotalCount int `json:"totalCount"`
+}
+
+type MessageEdge struct {
+	// 消息
+	Node *Message `json:"node,omitempty"`
+	// 分页时使用的光标
+	Cursor string `json:"cursor"`
+}
+
 // 数据修改入口
 type MutationRoot struct {
 }

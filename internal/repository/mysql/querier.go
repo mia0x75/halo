@@ -12,6 +12,7 @@ import (
 
 type Querier interface {
 	CountClustersByGroup(ctx context.Context, groupID uint32) (int64, error)
+	CountMessagesByUser(ctx context.Context, arg CountMessagesByUserParams) (int64, error)
 	CountRuleHitsByLevel(ctx context.Context, arg CountRuleHitsByLevelParams) ([]CountRuleHitsByLevelRow, error)
 	CountRuleHitsByRule(ctx context.Context, arg CountRuleHitsByRuleParams) ([]CountRuleHitsByRuleRow, error)
 	CountTasksByStatus(ctx context.Context) ([]CountTasksByStatusRow, error)
@@ -53,6 +54,7 @@ type Querier interface {
 	DeleteGroupByUUID(ctx context.Context, uuid string) error
 	DeleteLogByID(ctx context.Context, logID uint32) error
 	DeleteLogByUUID(ctx context.Context, uuid string) error
+	DeleteMessageByUUID(ctx context.Context, arg DeleteMessageByUUIDParams) (int64, error)
 	DeleteMetricBucketsBefore(ctx context.Context, bucket string) (int64, error)
 	DeleteMetricByUUID(ctx context.Context, uuid string) error
 	DeleteOptionByUUID(ctx context.Context, uuid string) error
@@ -141,7 +143,6 @@ type Querier interface {
 	ListTicketsByUser(ctx context.Context, userID uint32) ([]MmTicket, error)
 	// status 传 0 表示不限状态；pattern 形如 %关键词%，空关键词用 %% 匹配全部
 	ListTicketsFiltered(ctx context.Context, arg ListTicketsFilteredParams) ([]MmTicket, error)
-	ListUnreadMessagesByUser(ctx context.Context, arg ListUnreadMessagesByUserParams) ([]MmMessage, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]MmUser, error)
 	MarkAllMessagesRead(ctx context.Context, userID uint32) (int64, error)
 	MarkMessageRead(ctx context.Context, arg MarkMessageReadParams) error

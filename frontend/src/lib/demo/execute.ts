@@ -301,11 +301,21 @@ export function demoExecute(query: string, variables?: Variables): Record<string
     }
     case "Messages": {
       const unreadOnly = flag(source.unreadOnly)
-      const first = num(source.first, 20)
-      const rows = state.messages
-        .filter((item) => !unreadOnly || item.ReadAt === null)
-        .slice(0, first)
-      return { messages: rows }
+      const category = text(source.category) ?? ""
+      const keyword = (text(source.keyword) ?? "").trim().toLowerCase()
+      const matched = state.messages.filter((item) => {
+        if (unreadOnly && item.ReadAt !== null) return false
+        if (category && item.Category !== category) return false
+        if (
+          keyword &&
+          !`${item.Title} ${item.Content}`.toLowerCase().includes(keyword)
+        ) {
+          return false
+        }
+        return true
+      })
+      const connection = paginate(matched, source)
+      return { messages: connection }
     }
     case "UnreadMessageCount": {
       return { unreadMessageCount: state.messages.filter((item) => item.ReadAt === null).length }
@@ -314,6 +324,11 @@ export function demoExecute(query: string, variables?: Variables): Record<string
       const target = state.messages.find((item) => item.UUID === text(source.uuid))
       if (target && target.ReadAt === null) target.ReadAt = Math.floor(Date.now() / 1000)
       return { markMessageRead: true }
+    }
+    case "RemoveMessage": {
+      const uuid = text(source.uuid)
+      state.messages = state.messages.filter((item) => item.UUID !== uuid)
+      return { removeMessage: true }
     }
     case "MarkAllMessagesRead": {
       const now = Math.floor(Date.now() / 1000)

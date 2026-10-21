@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import {
   IconCheck,
   IconExternalLink,
@@ -6,12 +6,23 @@ import {
   IconMail,
   IconMailOpened,
   IconSearch,
+  IconTrash,
 } from "@tabler/icons-react"
 
 import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { CursorPagination } from "@/components/ui/cursor-pagination"
 import { Input } from "@/components/ui/input"
 import { Select } from "@/components/ui/select"
 import { Tabs } from "@/components/ui/tabs"
@@ -23,11 +34,14 @@ import {
   MARK_ALL_MESSAGES_READ_MUTATION,
   MARK_MESSAGE_READ_MUTATION,
   MESSAGES_QUERY,
+  REMOVE_MESSAGE_MUTATION,
+  UNREAD_MESSAGE_COUNT_QUERY,
+  type MessageConnectionNode,
   type MessageNode,
 } from "@/lib/api/queries"
 import { getToken } from "@/lib/api/session"
 
-const inboxSize = 100
+const pageSize = 20
 
 interface CategoryMeta {
   label: string
@@ -53,47 +67,69 @@ export interface MessagesPageProps {
   onOpenTicket: (uuid: string) => void
 }
 
-/** 我的消息：左边列表按未读/分类筛选，右边阅读正文并跳转关联工单。 */
+/**
+ * 我的消息：过滤与分页都在服务端做，列表按未读/分类/关键词筛选，
+ * 右侧阅读正文并跳转关联工单。
+ */
 export function MessagesPage({ onOpenTicket }: MessagesPageProps) {
-  const remote = useGraphQL<{ messages: MessageNode[] }, { unreadOnly: boolean; first: number }>(
-    MESSAGES_QUERY,
-    { unreadOnly: false, first: inboxSize },
-    { messages: [] },
-  )
-  const [readOverrides, setReadOverrides] = useState<Record<string, number>>({})
   const [tab, setTab] = useState("all")
   const [category, setCategory] = useState("all")
   const [keyword, setKeyword] = useState("")
+  const [search, setSearch] = useState("")
+  const [after, setAfter] = useState<string | null>(null)
+  const [stack, setStack] = useState<(string | null)[]>([])
+  const [readOverrides, setReadOverrides] = useState<Record<string, number>>({})
   const [selectedUUID, setSelectedUUID] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
+  const [removing, setRemoving] = useState<MessageNode | null>(null)
+
+  // 搜索输入防抖，避免每敲一个字都打一次接口。
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(keyword.trim())
+      setAfter(null)
+      setStack([])
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [keyword])
+
+  const remote = useGraphQL<
+    { messages: MessageConnectionNode },
+    { unreadOnly: boolean; category: string; keyword: string; first: number; after?: string }
+  >(
+    MESSAGES_QUERY,
+    {
+      unreadOnly: tab === "unread",
+      category: category === "all" ? "" : category,
+      keyword: search,
+      first: pageSize,
+      after: after ?? undefined,
+    },
+    { messages: { totalCount: 0, pageInfo: { hasNextPage: false, hasPreviousPage: false, startCursor: "", endCursor: "" }, edges: [] } },
+  )
 
   const messages = useMemo(
     () =>
-      (remote.data?.messages ?? []).map((message) =>
-        readOverrides[message.UUID]
+      (remote.data?.messages.edges ?? []).map((edge) => {
+        const message = edge.node
+        return readOverrides[message.UUID]
           ? { ...message, ReadAt: readOverrides[message.UUID] }
-          : message,
-      ),
+          : message
+      }),
     [readOverrides, remote.data],
   )
-  const unreadCount = messages.filter((message) => message.ReadAt === null).length
+
+  const total = remote.data?.messages.totalCount ?? 0
+  const pageInfo = remote.data?.messages.pageInfo
+
+  // 未读数取全局计数，不受当前筛选影响。
+  const unread = useGraphQL<{ unreadMessageCount: number }>(UNREAD_MESSAGE_COUNT_QUERY)
+  const unreadCount = unread.data?.unreadMessageCount ?? 0
 
   const availableCategories = useMemo(
     () => Array.from(new Set(messages.map((message) => message.Category))).filter(Boolean),
     [messages],
   )
-
-  const filtered = useMemo(() => {
-    const needle = keyword.trim().toLowerCase()
-    return messages.filter((message) => {
-      if (tab === "unread" && message.ReadAt !== null) return false
-      if (category !== "all" && message.Category !== category) return false
-      if (needle && !`${message.Title} ${message.Content}`.toLowerCase().includes(needle)) {
-        return false
-      }
-      return true
-    })
-  }, [category, keyword, messages, tab])
 
   const selected = messages.find((message) => message.UUID === selectedUUID) ?? null
 
@@ -124,15 +160,31 @@ export function MessagesPage({ onOpenTicket }: MessagesPageProps) {
         {},
         getToken(),
       )
-      const now = Math.floor(Date.now() / 1000)
       setReadOverrides((previous) => {
         const next = { ...previous }
+        const now = Math.floor(Date.now() / 1000)
         for (const message of messages) {
           if (message.ReadAt === null) next[message.UUID] = now
         }
         return next
       })
       setActionError(null)
+      notifyMessagesChanged()
+      remote.refetch()
+    } catch (cause) {
+      setActionError(cause instanceof Error ? cause.message : String(cause))
+    }
+  }
+
+  const removeMessage = async (message: MessageNode) => {
+    try {
+      await graphqlRequest<{ removeMessage: boolean }, { uuid: string }>(
+        REMOVE_MESSAGE_MUTATION,
+        { uuid: message.UUID },
+        getToken(),
+      )
+      setRemoving(null)
+      if (selectedUUID === message.UUID) setSelectedUUID(null)
       notifyMessagesChanged()
       remote.refetch()
     } catch (cause) {
@@ -147,11 +199,16 @@ export function MessagesPage({ onOpenTicket }: MessagesPageProps) {
 
   const linkedTicket = selected ? ticketUUID(selected.Link) : null
 
+  const resetPage = () => {
+    setAfter(null)
+    setStack([])
+  }
+
   return (
     <>
       <PageHeader
         title="我的消息"
-        description="审核、工单状态变更等站内通知，最多展示最近 100 条。"
+        description="审核、工单状态变更等站内通知"
         action={
           <Button
             variant="outline"
@@ -170,14 +227,17 @@ export function MessagesPage({ onOpenTicket }: MessagesPageProps) {
         </p>
       ) : null}
 
-      <SectionCard title="收件箱" description={`未读 ${unreadCount} 条`} bodyClassName="p-0">
+      <SectionCard title="收件箱" bodyClassName="p-0">
         <div className="flex flex-wrap items-center gap-3 border-b border-border px-4 py-3">
           <Tabs
             className="border-b-0"
             value={tab}
-            onChange={setTab}
+            onChange={(key) => {
+              setTab(key)
+              resetPage()
+            }}
             items={[
-              { key: "all", label: "全部", badge: messages.length },
+              { key: "all", label: "全部" },
               { key: "unread", label: "未读", badge: unreadCount },
             ]}
           />
@@ -197,7 +257,10 @@ export function MessagesPage({ onOpenTicket }: MessagesPageProps) {
           </div>
           <Select
             value={category}
-            onChange={(event) => setCategory(event.target.value)}
+            onChange={(event) => {
+              setCategory(event.target.value)
+              resetPage()
+            }}
             aria-label="按分类筛选"
             className="w-32"
           >
@@ -214,23 +277,23 @@ export function MessagesPage({ onOpenTicket }: MessagesPageProps) {
           <div className="border-b border-border md:border-r md:border-b-0">
             {remote.loading && messages.length === 0 ? (
               <p className="px-4 py-6 text-sm text-muted-foreground">加载中…</p>
-            ) : filtered.length === 0 ? (
+            ) : messages.length === 0 ? (
               <div className="flex flex-col items-center gap-2 px-4 py-12 text-muted-foreground">
                 <IconInbox size={28} stroke={1.5} />
                 <p className="text-sm">没有符合条件的消息</p>
               </div>
             ) : (
               <ul className="max-h-[36rem] overflow-y-auto">
-                {filtered.map((message) => {
+                {messages.map((message) => {
                   const meta = categoryMeta(message.Category)
                   const unread = message.ReadAt === null
                   return (
-                    <li key={message.UUID}>
+                    <li key={message.UUID} className="flex items-start gap-1 pr-2">
                       <button
                         type="button"
                         onClick={() => openMessage(message)}
                         aria-current={message.UUID === selectedUUID ? "true" : undefined}
-                        className={`flex w-full flex-col gap-1 border-b border-border px-4 py-3 text-left transition-colors hover:bg-surface-secondary ${
+                        className={`flex min-w-0 flex-1 flex-col gap-1 border-b border-border px-4 py-3 text-left transition-colors hover:bg-surface-secondary ${
                           message.UUID === selectedUUID ? "bg-surface-secondary" : ""
                         }`}
                       >
@@ -263,11 +326,34 @@ export function MessagesPage({ onOpenTicket }: MessagesPageProps) {
                           {formatUnix(message.CreateAt)}
                         </span>
                       </button>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={`删除 ${message.Title}`}
+                        onClick={() => setRemoving(message)}
+                      >
+                        <IconTrash size={16} stroke={1.5} />
+                      </Button>
                     </li>
                   )
                 })}
               </ul>
             )}
+            <CursorPagination
+              divided={false}
+              total={total}
+              hasPreviousPage={pageInfo?.hasPreviousPage ?? false}
+              hasNextPage={pageInfo?.hasNextPage ?? false}
+              onPrevious={() => {
+                const previousCursor = stack[stack.length - 1] ?? null
+                setStack((items) => items.slice(0, -1))
+                setAfter(previousCursor)
+              }}
+              onNext={() => {
+                setStack((items) => [...items, after])
+                setAfter(pageInfo?.endCursor || null)
+              }}
+            />
           </div>
 
           <div className="flex flex-col">
@@ -280,9 +366,7 @@ export function MessagesPage({ onOpenTicket }: MessagesPageProps) {
                   <span className="text-sm text-muted-foreground">
                     {formatUnix(selected.CreateAt)}
                   </span>
-                  {selected.ReadAt === null ? (
-                    <Badge variant="default">未读</Badge>
-                  ) : null}
+                  {selected.ReadAt === null ? <Badge variant="default">未读</Badge> : null}
                 </div>
                 <h2 className="text-lg font-semibold text-strong">{selected.Title}</h2>
                 <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">
@@ -308,6 +392,34 @@ export function MessagesPage({ onOpenTicket }: MessagesPageProps) {
           </div>
         </div>
       </SectionCard>
+
+      <AlertDialog open={removing !== null} onOpenChange={(open) => !open && setRemoving(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-base font-medium text-strong">
+              删除消息
+            </AlertDialogTitle>
+            <AlertDialogDescription className="mt-1 text-sm text-muted-foreground">
+              删除后这条消息不再出现在收件箱。确认删除「{removing?.Title}」？
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="mt-5 flex justify-end gap-2">
+            <AlertDialogCancel asChild>
+              <Button variant="outline">取消</Button>
+            </AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button
+                variant="danger"
+                onClick={() => {
+                  if (removing) void removeMessage(removing)
+                }}
+              >
+                删除
+              </Button>
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

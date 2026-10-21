@@ -9,6 +9,33 @@ import (
 	"context"
 )
 
+const countMessagesByUser = `-- name: CountMessagesByUser :one
+SELECT COUNT(*) FROM mm_messages
+WHERE user_id = $1
+  AND (read_at IS NULL OR $2 = 0)
+  AND ($3 = '' OR category = $3)
+  AND ($4 = '' OR title LIKE $4 OR content LIKE $4)
+`
+
+type CountMessagesByUserParams struct {
+	UserID     int64
+	UnreadOnly interface{}
+	Category   interface{}
+	Keyword    interface{}
+}
+
+func (q *Queries) CountMessagesByUser(ctx context.Context, arg CountMessagesByUserParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countMessagesByUser,
+		arg.UserID,
+		arg.UnreadOnly,
+		arg.Category,
+		arg.Keyword,
+	)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const countUnreadMessages = `-- name: CountUnreadMessages :one
 SELECT COUNT(*) FROM mm_messages WHERE user_id = $1 AND read_at IS NULL
 `
@@ -45,6 +72,23 @@ func (q *Queries) CreateMessage(ctx context.Context, arg CreateMessageParams) er
 	return err
 }
 
+const deleteMessageByUUID = `-- name: DeleteMessageByUUID :execrows
+DELETE FROM mm_messages WHERE uuid = $1 AND user_id = $2
+`
+
+type DeleteMessageByUUIDParams struct {
+	Uuid   string
+	UserID int64
+}
+
+func (q *Queries) DeleteMessageByUUID(ctx context.Context, arg DeleteMessageByUUIDParams) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteMessageByUUID, arg.Uuid, arg.UserID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 const getMessageByUUID = `-- name: GetMessageByUUID :one
 SELECT message_id, uuid, user_id, category, title, content, link, read_at, create_at FROM mm_messages WHERE uuid = $1 LIMIT 1
 `
@@ -67,58 +111,34 @@ func (q *Queries) GetMessageByUUID(ctx context.Context, uuid string) (MmMessage,
 }
 
 const listMessagesByUser = `-- name: ListMessagesByUser :many
-SELECT message_id, uuid, user_id, category, title, content, link, read_at, create_at FROM mm_messages WHERE user_id = $1 ORDER BY create_at DESC, message_id DESC LIMIT $2
+SELECT message_id, uuid, user_id, category, title, content, link, read_at, create_at FROM mm_messages
+WHERE user_id = $1
+  AND message_id < $2
+  AND (read_at IS NULL OR $3 = 0)
+  AND ($4 = '' OR category = $4)
+  AND ($5 = '' OR title LIKE $5 OR content LIKE $5)
+ORDER BY message_id DESC
+LIMIT $6
 `
 
 type ListMessagesByUserParams struct {
-	UserID int64
-	Limit  int32
+	UserID     int64
+	BeforeID   int64
+	UnreadOnly interface{}
+	Category   interface{}
+	Keyword    interface{}
+	PageLimit  int32
 }
 
 func (q *Queries) ListMessagesByUser(ctx context.Context, arg ListMessagesByUserParams) ([]MmMessage, error) {
-	rows, err := q.db.QueryContext(ctx, listMessagesByUser, arg.UserID, arg.Limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []MmMessage{}
-	for rows.Next() {
-		var i MmMessage
-		if err := rows.Scan(
-			&i.MessageID,
-			&i.Uuid,
-			&i.UserID,
-			&i.Category,
-			&i.Title,
-			&i.Content,
-			&i.Link,
-			&i.ReadAt,
-			&i.CreateAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listUnreadMessagesByUser = `-- name: ListUnreadMessagesByUser :many
-SELECT message_id, uuid, user_id, category, title, content, link, read_at, create_at FROM mm_messages WHERE user_id = $1 AND read_at IS NULL ORDER BY create_at DESC, message_id DESC LIMIT $2
-`
-
-type ListUnreadMessagesByUserParams struct {
-	UserID int64
-	Limit  int32
-}
-
-func (q *Queries) ListUnreadMessagesByUser(ctx context.Context, arg ListUnreadMessagesByUserParams) ([]MmMessage, error) {
-	rows, err := q.db.QueryContext(ctx, listUnreadMessagesByUser, arg.UserID, arg.Limit)
+	rows, err := q.db.QueryContext(ctx, listMessagesByUser,
+		arg.UserID,
+		arg.BeforeID,
+		arg.UnreadOnly,
+		arg.Category,
+		arg.Keyword,
+		arg.PageLimit,
+	)
 	if err != nil {
 		return nil, err
 	}

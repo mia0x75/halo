@@ -1419,6 +1419,35 @@ type Message {
 	CreateAt: UInt!
 }
 
+type MessageConnection {
+	"""
+	分页信息
+	"""
+	pageInfo:   PageInfo!
+
+	"""
+	记录信息
+	"""
+	edges:      [MessageEdge!]
+
+	"""
+	记录总数
+	"""
+	totalCount: Int!
+}
+
+type MessageEdge {
+	"""
+	消息
+	"""
+	node:   Message
+
+	"""
+	分页时使用的光标
+	"""
+	cursor: ID!
+}
+
 """
 规则命中明细
 """
@@ -2445,10 +2474,25 @@ type QueryRoot {
 		unreadOnly: Boolean
 
 		"""
+		按分类过滤，留空表示不限
+		"""
+		category: String
+
+		"""
+		按标题或内容模糊匹配，留空表示不限
+		"""
+		keyword: String
+
+		"""
 		返回条数上限
 		"""
 		first: Int
-	): [Message] @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
+
+		"""
+		游标，返回该游标之后的记录
+		"""
+		after: String
+	): MessageConnection @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
 
 	"""
 	当前用户的未读消息数
@@ -3404,6 +3448,16 @@ type MutationRoot {
 	把当前用户的全部未读消息标记为已读
 	"""
 	markAllMessagesRead: Int! @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
+
+	"""
+	删除一条自己的站内消息
+	"""
+	removeMessage(
+		"""
+		消息的UUID
+		"""
+		uuid: ID!
+	): Boolean! @auth(requires: [USER, DEVELOPER, REVIEWER, ADMIN])
 
 	"""
 	用户获取个人信息

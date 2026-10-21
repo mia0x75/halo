@@ -83,17 +83,41 @@ export interface MessageNode {
   CreateAt: number
 }
 
+export interface MessageConnectionNode {
+  totalCount: number
+  pageInfo: { hasNextPage: boolean; hasPreviousPage: boolean; startCursor: string; endCursor: string }
+  edges: { cursor: string; node: MessageNode }[]
+}
+
 export const MESSAGES_QUERY = `
-  query Messages($unreadOnly: Boolean, $first: Int) {
-    messages(unreadOnly: $unreadOnly, first: $first) {
-      UUID
-      Category
-      Title
-      Content
-      Link
-      ReadAt
-      CreateAt
+  query Messages($unreadOnly: Boolean, $category: String, $first: Int, $after: String) {
+    messages(unreadOnly: $unreadOnly, category: $category, first: $first, after: $after) {
+      totalCount
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      edges {
+        cursor
+        node {
+          UUID
+          Category
+          Title
+          Content
+          Link
+          ReadAt
+          CreateAt
+        }
+      }
     }
+  }
+`
+
+export const REMOVE_MESSAGE_MUTATION = `
+  mutation RemoveMessage($uuid: ID!) {
+    removeMessage(uuid: $uuid)
   }
 `
 

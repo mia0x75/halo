@@ -254,6 +254,17 @@ type ComplexityRoot struct {
 		UUID     func(childComplexity int) int
 	}
 
+	MessageConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	MessageEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
 	Metric struct {
 		Bucket   func(childComplexity int) int
 		CreateAt func(childComplexity int) int
@@ -297,6 +308,7 @@ type ComplexityRoot struct {
 		RemoveCluster         func(childComplexity int, id string) int
 		RemoveCron            func(childComplexity int, id string) int
 		RemoveGroup           func(childComplexity int, id string) int
+		RemoveMessage         func(childComplexity int, uuid string) int
 		RemoveTicket          func(childComplexity int, id string) int
 		ResendActivationMail  func(childComplexity int, input models.ActivateInput) int
 		ResetPasswd           func(childComplexity int, input models.ResetPasswdInput) int
@@ -379,7 +391,7 @@ type ComplexityRoot struct {
 		Groups               func(childComplexity int) int
 		Logs                 func(childComplexity int, after *string, before *string, first *int, last *int) int
 		Me                   func(childComplexity int) int
-		Messages             func(childComplexity int, unreadOnly *bool, first *int) int
+		Messages             func(childComplexity int, unreadOnly *bool, category *string, keyword *string, first *int, after *string) int
 		Metadata             func(childComplexity int, clusterUUID string, database string) int
 		Metrics              func(childComplexity int, scope *uint8, names []string) int
 		Option               func(childComplexity int, id string) int
@@ -611,6 +623,7 @@ type MutationRootResolver interface {
 	Logout(ctx context.Context) (bool, error)
 	MarkMessageRead(ctx context.Context, uuid string) (*bool, error)
 	MarkAllMessagesRead(ctx context.Context) (int, error)
+	RemoveMessage(ctx context.Context, uuid string) (bool, error)
 	UpdateProfile(ctx context.Context, input models.UpdateProfileInput) (*models.User, error)
 	UpdatePassword(ctx context.Context, input models.PatchPasswordInput) (bool, error)
 	UpdateEmail(ctx context.Context, input models.PatchEmailInput) (bool, error)
@@ -693,7 +706,7 @@ type QueryRootResolver interface {
 	Groups(ctx context.Context) ([]*models.Group, error)
 	TaskExecutions(ctx context.Context, status *uint8, first *int) ([]*TaskExecution, error)
 	TaskExecutionSummary(ctx context.Context) ([]*TaskExecutionCount, error)
-	Messages(ctx context.Context, unreadOnly *bool, first *int) ([]*Message, error)
+	Messages(ctx context.Context, unreadOnly *bool, category *string, keyword *string, first *int, after *string) (*MessageConnection, error)
 	UnreadMessageCount(ctx context.Context) (uint, error)
 	RuleHits(ctx context.Context, ticketID *uint, rule *string, level *uint8, first *int) ([]*models.RuleHit, error)
 	RuleHitLevels(ctx context.Context, from *uint, to *uint) ([]*RuleHitCount, error)
@@ -1508,6 +1521,38 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Message.UUID(childComplexity), true
 
+	case "MessageConnection.edges":
+		if e.ComplexityRoot.MessageConnection.Edges == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MessageConnection.Edges(childComplexity), true
+	case "MessageConnection.pageInfo":
+		if e.ComplexityRoot.MessageConnection.PageInfo == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MessageConnection.PageInfo(childComplexity), true
+	case "MessageConnection.totalCount":
+		if e.ComplexityRoot.MessageConnection.TotalCount == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MessageConnection.TotalCount(childComplexity), true
+
+	case "MessageEdge.cursor":
+		if e.ComplexityRoot.MessageEdge.Cursor == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MessageEdge.Cursor(childComplexity), true
+	case "MessageEdge.node":
+		if e.ComplexityRoot.MessageEdge.Node == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MessageEdge.Node(childComplexity), true
+
 	case "Metric.Bucket":
 		if e.ComplexityRoot.Metric.Bucket == nil {
 			break
@@ -1883,6 +1928,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MutationRoot.RemoveGroup(childComplexity, args["id"].(string)), true
+	case "MutationRoot.removeMessage":
+		if e.ComplexityRoot.MutationRoot.RemoveMessage == nil {
+			break
+		}
+
+		args, err := ec.field_MutationRoot_removeMessage_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.MutationRoot.RemoveMessage(childComplexity, args["uuid"].(string)), true
 	case "MutationRoot.removeTicket":
 		if e.ComplexityRoot.MutationRoot.RemoveTicket == nil {
 			break
@@ -2397,7 +2453,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.QueryRoot.Messages(childComplexity, args["unreadOnly"].(*bool), args["first"].(*int)), true
+		return e.ComplexityRoot.QueryRoot.Messages(childComplexity, args["unreadOnly"].(*bool), args["category"].(*string), args["keyword"].(*string), args["first"].(*int), args["after"].(*string)), true
 	case "QueryRoot.metadata":
 		if e.ComplexityRoot.QueryRoot.Metadata == nil {
 			break
@@ -4021,6 +4077,28 @@ func (ec *executionContext) childFields_Message(ctx context.Context, field graph
 	return nil, fmt.Errorf("no field named %q was found under type Message", field.Name)
 }
 
+func (ec *executionContext) childFields_MessageConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "pageInfo":
+		return ec.fieldContext_MessageConnection_pageInfo(ctx, field)
+	case "edges":
+		return ec.fieldContext_MessageConnection_edges(ctx, field)
+	case "totalCount":
+		return ec.fieldContext_MessageConnection_totalCount(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type MessageConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_MessageEdge(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "node":
+		return ec.fieldContext_MessageEdge_node(ctx, field)
+	case "cursor":
+		return ec.fieldContext_MessageEdge_cursor(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type MessageEdge", field.Name)
+}
+
 func (ec *executionContext) childFields_Metric(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "UUID":
@@ -5238,6 +5316,20 @@ func (ec *executionContext) field_MutationRoot_removeGroup_args(ctx context.Cont
 	return args, nil
 }
 
+func (ec *executionContext) field_MutationRoot_removeMessage_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "uuid",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["uuid"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_MutationRoot_removeTicket_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -5731,14 +5823,38 @@ func (ec *executionContext) field_QueryRoot_messages_args(ctx context.Context, r
 		return nil, err
 	}
 	args["unreadOnly"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "category",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["category"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "keyword",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["keyword"] = arg2
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "first",
 		func(ctx context.Context, v any) (*int, error) {
 			return ec.unmarshalOInt2ᚖint(ctx, v)
 		})
 	if err != nil {
 		return nil, err
 	}
-	args["first"] = arg1
+	args["first"] = arg3
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["after"] = arg4
 	return args, nil
 }
 
@@ -9969,6 +10085,148 @@ func (ec *executionContext) fieldContext_Message_CreateAt(_ context.Context, fie
 	return graphql.NewScalarFieldContext("Message", field, false, false, "UInt")
 }
 
+func (ec *executionContext) _MessageConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *MessageConnection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MessageConnection_pageInfo(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *PageInfo) graphql.Marshaler {
+			return ec.marshalNPageInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐPageInfo(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_MessageConnection_pageInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MessageConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_PageInfo(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MessageConnection_edges(ctx context.Context, field graphql.CollectedField, obj *MessageConnection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MessageConnection_edges(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*MessageEdge) graphql.Marshaler {
+			return ec.marshalOMessageEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐMessageEdgeᚄ(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_MessageConnection_edges(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MessageConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_MessageEdge(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MessageConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *MessageConnection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MessageConnection_totalCount(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_MessageConnection_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("MessageConnection", field, false, false, "Int")
+}
+
+func (ec *executionContext) _MessageEdge_node(ctx context.Context, field graphql.CollectedField, obj *MessageEdge) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MessageEdge_node(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *Message) graphql.Marshaler {
+			return ec.marshalOMessage2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐMessage(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_MessageEdge_node(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MessageEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Message(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MessageEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *MessageEdge) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MessageEdge_cursor(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_MessageEdge_cursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("MessageEdge", field, false, false, "ID")
+}
+
 func (ec *executionContext) _Metric_UUID(ctx context.Context, field graphql.CollectedField, obj *models.Metric) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -10424,6 +10682,68 @@ func (ec *executionContext) _MutationRoot_markAllMessagesRead(ctx context.Contex
 }
 func (ec *executionContext) fieldContext_MutationRoot_markAllMessagesRead(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("MutationRoot", field, true, true, "Int")
+}
+
+func (ec *executionContext) _MutationRoot_removeMessage(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MutationRoot_removeMessage(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.MutationRoot().RemoveMessage(ctx, fc.Args["uuid"].(string))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
+				if err != nil {
+					var zeroVal bool
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_MutationRoot_removeMessage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MutationRoot",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_MutationRoot_removeMessage_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
 }
 
 func (ec *executionContext) _MutationRoot_updateProfile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -15813,7 +16133,7 @@ func (ec *executionContext) _QueryRoot_messages(ctx context.Context, field graph
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.QueryRoot().Messages(ctx, fc.Args["unreadOnly"].(*bool), fc.Args["first"].(*int))
+			return ec.Resolvers.QueryRoot().Messages(ctx, fc.Args["unreadOnly"].(*bool), fc.Args["category"].(*string), fc.Args["keyword"].(*string), fc.Args["first"].(*int), fc.Args["after"].(*string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -15821,11 +16141,11 @@ func (ec *executionContext) _QueryRoot_messages(ctx context.Context, field graph
 			directive1 := func(ctx context.Context) (any, error) {
 				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"USER", "DEVELOPER", "REVIEWER", "ADMIN"})
 				if err != nil {
-					var zeroVal []*Message
+					var zeroVal *MessageConnection
 					return zeroVal, err
 				}
 				if ec.Directives.Auth == nil {
-					var zeroVal []*Message
+					var zeroVal *MessageConnection
 					return zeroVal, errors.New("directive auth is not implemented")
 				}
 				return ec.Directives.Auth(ctx, nil, directive0, requires)
@@ -15834,8 +16154,8 @@ func (ec *executionContext) _QueryRoot_messages(ctx context.Context, field graph
 			next = directive1
 			return next
 		},
-		func(ctx context.Context, selections ast.SelectionSet, v []*Message) graphql.Marshaler {
-			return ec.marshalOMessage2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐMessage(ctx, selections, v)
+		func(ctx context.Context, selections ast.SelectionSet, v *MessageConnection) graphql.Marshaler {
+			return ec.marshalOMessageConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐMessageConnection(ctx, selections, v)
 		},
 		true,
 		false,
@@ -15848,7 +16168,7 @@ func (ec *executionContext) fieldContext_QueryRoot_messages(ctx context.Context,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Message(ctx, field)
+			return ec.childFields_MessageConnection(ctx, field)
 		},
 	}
 	defer func() {
@@ -26131,6 +26451,87 @@ func (ec *executionContext) _Message(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
+var messageConnectionImplementors = []string{"MessageConnection"}
+
+func (ec *executionContext) _MessageConnection(ctx context.Context, sel ast.SelectionSet, obj *MessageConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, messageConnectionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MessageConnection")
+		case "pageInfo":
+			out.Values[i] = ec._MessageConnection_pageInfo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "edges":
+			out.Values[i] = ec._MessageConnection_edges(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "totalCount":
+			out.Values[i] = ec._MessageConnection_totalCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
+var messageEdgeImplementors = []string{"MessageEdge"}
+
+func (ec *executionContext) _MessageEdge(ctx context.Context, sel ast.SelectionSet, obj *MessageEdge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, messageEdgeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MessageEdge")
+		case "node":
+			out.Values[i] = ec._MessageEdge_node(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "cursor":
+			out.Values[i] = ec._MessageEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
 var metricImplementors = []string{"Metric", "Node"}
 
 func (ec *executionContext) _Metric(ctx context.Context, sel ast.SelectionSet, obj *models.Metric) graphql.Marshaler {
@@ -26254,6 +26655,13 @@ func (ec *executionContext) _MutationRoot(ctx context.Context, sel ast.Selection
 		case "markAllMessagesRead":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._MutationRoot_markAllMessagesRead(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "removeMessage":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MutationRoot_removeMessage(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -28953,6 +29361,14 @@ func (ec *executionContext) marshalNMemStats2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋ
 	return ec._MemStats(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNMessageEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐMessageEdge(ctx context.Context, sel ast.SelectionSet, v *MessageEdge) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "MessageEdge!")
+		return graphql.Null
+	}
+	return ec._MessageEdge(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNPageInfo2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v *PageInfo) graphql.Marshaler {
 	if v == nil {
 		graphql.AddInvalidNullError(ctx, "PageInfo!")
@@ -29759,24 +30175,37 @@ func (ec *executionContext) marshalOLoginPayload2ᚖgithubᚗcomᚋmia0x75ᚋhal
 	return ec._LoginPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOMessage2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐMessage(ctx context.Context, sel ast.SelectionSet, v []*Message) graphql.Marshaler {
+func (ec *executionContext) marshalOMessage2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐMessage(ctx context.Context, sel ast.SelectionSet, v *Message) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Message(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOMessageConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐMessageConnection(ctx context.Context, sel ast.SelectionSet, v *MessageConnection) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._MessageConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOMessageEdge2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐMessageEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*MessageEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalOMessage2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐMessage(ctx, sel, v[i])
+		return ec.marshalNMessageEdge2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐMessageEdge(ctx, sel, v[i])
 	})
 
-	return ret
-}
-
-func (ec *executionContext) marshalOMessage2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐMessage(ctx context.Context, sel ast.SelectionSet, v *Message) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
 	}
-	return ec._Message(ctx, sel, v)
+
+	return ret
 }
 
 func (ec *executionContext) marshalOMetric2ᚕᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐMetric(ctx context.Context, sel ast.SelectionSet, v []*models.Metric) graphql.Marshaler {
