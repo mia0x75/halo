@@ -11,6 +11,7 @@ import (
 )
 
 type Querier interface {
+	CountClustersByGroup(ctx context.Context, groupID int64) (int64, error)
 	CountRuleHitsByLevel(ctx context.Context, arg CountRuleHitsByLevelParams) ([]CountRuleHitsByLevelRow, error)
 	CountRuleHitsByRule(ctx context.Context, arg CountRuleHitsByRuleParams) ([]CountRuleHitsByRuleRow, error)
 	CountTasksByStatus(ctx context.Context) ([]CountTasksByStatusRow, error)

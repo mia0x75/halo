@@ -153,6 +153,16 @@ func (f *fakeClusterRepo) List(_ context.Context, _ int64, _ int) ([]*domain.Clu
 	return nil, nil
 }
 
+func (f *fakeClusterRepo) CountByGroup(_ context.Context, groupID uint) (int64, error) {
+	var rows int64
+	for _, cluster := range f.byID {
+		if cluster.GroupID == groupID {
+			rows++
+		}
+	}
+	return rows, nil
+}
+
 type fakeExecutor struct {
 	results map[string]*agent.ExecResult
 	err     error

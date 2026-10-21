@@ -13952,7 +13952,25 @@ func (ec *executionContext) _QueryRoot_option(ctx context.Context, field graphql
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.QueryRoot().Option(ctx, fc.Args["id"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				if err != nil {
+					var zeroVal *models.Option
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal *models.Option
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
 		func(ctx context.Context, selections ast.SelectionSet, v *models.Option) graphql.Marshaler {
 			return ec.marshalOOption2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋmodelsᚐOption(ctx, selections, v)
 		},

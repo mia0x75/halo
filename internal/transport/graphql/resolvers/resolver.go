@@ -16,7 +16,6 @@ import (
 	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/platform/config"
-	"github.com/mia0x75/halo/internal/tools"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 )
@@ -58,16 +57,9 @@ func SubscriptionAuth(ctx context.Context, requires []gqlapi.RoleEnum) (user *mo
 			// 有令牌，但是找不到匹配的角色
 			rc = gqlapi.ReturnCodeForbidden
 			err = fmt.Errorf("错误代码: %s, 错误信息: 权限不足，访问被拒绝。", rc)
-			requireRoleIDs := []uint{} // requireRoleIds
-			for _, require := range requires {
-				requireRoleIDs = append(requireRoleIDs, gqlapi.RoleEnumMap[require])
-			}
-			for _, role := range credential.Roles {
-				if tools.Contains(requireRoleIDs, role.RoleID) {
-					rc = gqlapi.ReturnCodeOK
-					err = nil
-					break
-				}
+			if transportauth.HasAnyRole(credential.Roles, requires) {
+				rc = gqlapi.ReturnCodeOK
+				err = nil
 			}
 
 			if err != nil {

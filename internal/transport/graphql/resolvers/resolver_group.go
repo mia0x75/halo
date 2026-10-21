@@ -118,10 +118,28 @@ func (r *mutationRootResolver) RevokeGroups(ctx context.Context, input gqlapi.Gr
 		return false, fmt.Errorf("错误代码: %s, 错误信息: 角色(uuid=%s)不存在。", gqlapi.ReturnCodeNotFound, input.RoleUUID)
 	}
 
+	// 只收回本次指定的分组，其余分组授权保持不变。
+	groupIDs := make(map[uint]bool, len(input.GroupUUIDs))
+	for _, groupUUID := range input.GroupUUIDs {
+		group := cache.GroupsMap.Any(func(elem *models.Group) bool {
+			return elem.UUID == groupUUID
+		})
+		if group == nil {
+			return false, fmt.Errorf("错误代码: %s, 错误信息: 分组(uuid=%s)不存在。", gqlapi.ReturnCodeNotFound, groupUUID)
+		}
+		groupIDs[group.GroupID] = true
+	}
+	if len(groupIDs) == 0 {
+		return true, nil
+	}
+
 	edgeType := gqlapi.EdgeEnumMap[gqlapi.EdgeEnumRoleToGroup]
 	credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 	for _, edge := range cache.EdgesMap.All() {
 		if edge.Type != edgeType || edge.AncestorID != role.RoleID {
+			continue
+		}
+		if !groupIDs[edge.DescendantID] {
 			continue
 		}
 		if err = r.app.Services.Edge.Delete(ctx, edge.EdgeID, credential.User.UserID); err != nil {

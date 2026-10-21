@@ -19,3 +19,5 @@ DELETE FROM mm_clusters WHERE uuid = $1;
 -- name: ListClusters :many
 SELECT cluster_id, uuid, host, alias, ip, port, "user", "type", group_id, password, fingerprint, status, version, update_at, create_at FROM mm_clusters WHERE cluster_id < $1 ORDER BY cluster_id DESC LIMIT $2;
 
+-- name: CountClustersByGroup :one
+SELECT COUNT(*) FROM mm_clusters WHERE group_id = $1;

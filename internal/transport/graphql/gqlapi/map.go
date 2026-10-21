@@ -13,15 +13,6 @@ var ClusterStatusEnumMap = map[ClusterStatusEnum]uint8{
 	"DISABLED": 2, // 停用
 }
 
-// RoleEnumMap 角色枚举转uint
-var RoleEnumMap = map[RoleEnum]uint{
-	"ADMIN":     1, // 管理员
-	"REVIEWER":  2, // 审核人
-	"DEVELOPER": 3, // 开发者
-	"USER":      4, // 注册用户
-	"GUEST":     5, // 访客
-}
-
 // StatementTypeEnumMap 语法类型枚举
 var StatementTypeEnumMap = map[StatementTypeEnum]uint8{
 	"ALTER_TABLE":     1,  //
@@ -79,6 +70,7 @@ var EdgeEnumMap = map[EdgeEnum]uint{
 	"USER_TO_REVIEWER": 1, // 用户审核
 	"USER_TO_ROLE":     2, // 用户角色
 	"USER_TO_CLUSTER":  3, // 用户群集
+	"ROLE_TO_GROUP":    4, // 角色到群集分组
 }
 
 // QueryTypeEnumMap 查询类型枚举转uint8

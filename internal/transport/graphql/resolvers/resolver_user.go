@@ -236,9 +236,15 @@ L:
 		}
 		user.BeforeInsert()
 
+		defaultRole := transportauth.FindRoleByName("User")
+		if defaultRole == nil {
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: 默认角色(User)不存在。", rc)
+			break L
+		}
 		edge := &models.Edge{
-			Type:         gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToRole], // TODO: 消除硬编码
-			DescendantID: gqlapi.RoleEnumMap["USER"],                    // 默认给USER权限
+			Type:         gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToRole],
+			DescendantID: defaultRole.RoleID,
 		}
 		edge.BeforeInsert()
 
@@ -971,6 +977,11 @@ L:
 				err = fmt.Errorf("错误代码: %s, 错误信息: 角色(uuid=%s)不存在。", rc, roleUUID)
 				break L
 			}
+			if strings.EqualFold(strings.TrimSpace(role.Name), "Root") {
+				rc = gqlapi.ReturnCodeForbidden
+				err = fmt.Errorf("错误代码: %s, 错误信息: 不能收回用户的 Root 角色。", rc)
+				break L
+			}
 			edge := cache.EdgesMap.Any(func(elem *models.Edge) bool {
 				if elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToRole] &&
 					elem.AncestorID == user.UserID &&
@@ -1026,6 +1037,12 @@ L:
 			input.Status != gqlapi.UserStatusEnumMap[gqlapi.UserStatusEnumBlocked] {
 			rc = gqlapi.ReturnCodeInvalidParams
 			err = fmt.Errorf("错误代码: %s, 错误信息: 输入参数状态(status=%d)无效。", rc, input.Status)
+			break L
+		}
+		if input.Status != gqlapi.UserStatusEnumMap[gqlapi.UserStatusEnumNormal] &&
+			userHasRole(user.UserID, "Root") {
+			rc = gqlapi.ReturnCodeForbidden
+			err = fmt.Errorf("错误代码: %s, 错误信息: Root 账号不能被停用或设为待验证。", rc)
 			break L
 		}
 
@@ -1188,6 +1205,12 @@ L:
 			err = fmt.Errorf("错误代码: %s, 错误信息: 输入参数状态(status=%d)无效。", rc, input.Status)
 			break L
 		}
+		if input.Status != gqlapi.UserStatusEnumMap[gqlapi.UserStatusEnumNormal] &&
+			userHasRole(user.UserID, "Root") {
+			rc = gqlapi.ReturnCodeForbidden
+			err = fmt.Errorf("错误代码: %s, 错误信息: Root 账号不能被停用或设为待验证。", rc)
+			break L
+		}
 
 		// 找不到 => 此次更新了用户登录邮箱
 		// 找到，且UserID相同 => 此次没有更新用户邮箱
@@ -1262,6 +1285,12 @@ L:
 			err = fmt.Errorf("错误代码: %s, 错误信息: 账号(uuid=%s)不存在。", rc, input.UserUUID)
 			break L
 		}
+		if input.Status != gqlapi.UserStatusEnumMap[gqlapi.UserStatusEnumNormal] &&
+			userHasRole(user.UserID, "Root") {
+			rc = gqlapi.ReturnCodeForbidden
+			err = fmt.Errorf("错误代码: %s, 错误信息: Root 账号不能被停用或设为待验证。", rc)
+			break L
+		}
 		// 检查user.Status
 		if user.Status == input.Status {
 			// rc = g.ReturnCodeModifyUserWarn // TODO: 梳理错误代码
@@ -1295,6 +1324,40 @@ L:
 }
 
 type userResolver struct{ *Resolver }
+
+// userRoles returns the roles bound to a user.
+func userRoles(userID uint) []*models.Role {
+	edges := cache.EdgesMap.Filter(func(elem *models.Edge) bool {
+		return elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToRole] &&
+			elem.AncestorID == userID
+	})
+	if edges == nil {
+		return nil
+	}
+	return cache.RolesMap.Filter(func(elem *models.Role) bool {
+		for _, edge := range edges {
+			if elem.RoleID == edge.DescendantID {
+				return true
+			}
+		}
+		return false
+	})
+}
+
+// userHasRole reports whether the user currently owns a role with this name.
+func userHasRole(userID uint, roleName string) bool {
+	role := cache.RolesMap.Any(func(elem *models.Role) bool {
+		return strings.EqualFold(strings.TrimSpace(elem.Name), roleName)
+	})
+	if role == nil {
+		return false
+	}
+	return cache.EdgesMap.Any(func(elem *models.Edge) bool {
+		return elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToRole] &&
+			elem.AncestorID == userID &&
+			elem.DescendantID == role.RoleID
+	}) != nil
+}
 
 // Avatar 用户的头像
 func (r *userResolver) Avatar(ctx context.Context, obj *models.User) (avatar *models.Avatar, err error) {
@@ -1372,25 +1435,9 @@ func (r *userResolver) Clusters(ctx context.Context, obj *models.User, after *st
 		return &gqlapi.ClusterConnection{}, fmt.Errorf("错误代码: %s, 错误信息: 参数`after`和`before`只能选择一种。", rc)
 	}
 
-	edges := cache.EdgesMap.Filter(func(elem *models.Edge) bool {
-		if elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToCluster] &&
-			elem.AncestorID == obj.UserID {
-			return true
-		}
-		return false
-	})
-
-	if edges == nil {
-		return &gqlapi.ClusterConnection{}, nil
-	}
-
+	roles := userRoles(obj.UserID)
 	clusters := cache.ClustersMap.Filter(func(elem *models.Cluster) bool {
-		for _, r := range edges {
-			if elem.ClusterID == r.DescendantID {
-				return true
-			}
-		}
-		return false
+		return transportauth.CanAccessCluster(obj, roles, elem)
 	})
 	clusterEdges := []*gqlapi.ClusterEdge{}
 	for _, cluster := range clusters {
@@ -1413,7 +1460,7 @@ func (r *userResolver) Clusters(ctx context.Context, obj *models.User, after *st
 	return &gqlapi.ClusterConnection{
 		PageInfo:   pageInfo,
 		Edges:      clusterEdges,
-		TotalCount: len(edges),
+		TotalCount: len(clusterEdges),
 	}, nil
 }
 

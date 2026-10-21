@@ -69,15 +69,8 @@ L:
 			break
 		}
 
-		// 检查群集关联
-		if !cache.EdgesMap.Include(func(elem *models.Edge) bool {
-			if elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToCluster] &&
-				elem.AncestorID == user.UserID &&
-				elem.DescendantID == cluster.ClusterID {
-				return true
-			}
-			return false
-		}) {
+		// 检查群集访问权：直接授权，或角色被授予该群集所属分组。
+		if !transportauth.CanAccessCluster(user, credential.Roles, cluster) {
 			rc = gqlapi.ReturnCodeForbidden
 			err = fmt.Errorf("错误代码: %s, 错误信息: 用户(uuid=%s)没有关联群集(uuid=%s)。", rc, user.UUID, cluster.UUID)
 			break
@@ -242,15 +235,8 @@ L:
 			break
 		}
 
-		// 检查群集关联
-		if !cache.EdgesMap.Include(func(elem *models.Edge) bool {
-			if elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToCluster] &&
-				elem.AncestorID == user.UserID &&
-				elem.DescendantID == cluster.ClusterID {
-				return true
-			}
-			return false
-		}) {
+		// 检查群集访问权：直接授权，或角色被授予该群集所属分组。
+		if !transportauth.CanAccessCluster(user, credential.Roles, cluster) {
 			rc = gqlapi.ReturnCodeForbidden
 			err = fmt.Errorf("错误代码: %s, 错误信息: 用户(uuid=%s)没有关联群集(uuid=%s)。", rc, user.UUID, cluster.UUID)
 			break

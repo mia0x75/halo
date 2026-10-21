@@ -21,6 +21,7 @@ type JwtConfig struct {
 	TokenName string `json:"token_name"` // "Authentication"
 	Issuer    string `json:"issuer"`     // "db"
 	SecretKey string `json:"secret_key"` // "362b36fd7d514c519333234da152eaff"
+	TTL       string `json:"ttl"`        // Go duration, empty means 24h
 }
 
 // SecretConfig 安全配置

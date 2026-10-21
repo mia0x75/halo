@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/mia0x75/halo/internal/auth"
 	"github.com/mia0x75/halo/internal/cache"
@@ -27,6 +28,15 @@ type authenticator struct {
 }
 
 var authn = &authenticator{jwt: auth.NewDefault()}
+
+// Configure replaces the default signer with the configured issuer, secret and
+// lifetime. It is called once after the config file has been parsed.
+func Configure(issuer, secret string, ttl time.Duration) {
+	if ttl <= 0 {
+		ttl = 24 * time.Hour
+	}
+	authn.jwt = auth.New(issuer, secret, ttl)
+}
 
 // Issue signs a token for userUUID and records its hash.
 func Issue(userUUID string) (string, error) {

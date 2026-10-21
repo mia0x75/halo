@@ -28,10 +28,16 @@ func TestClusterRepo(t *testing.T) {
 		Version:     1,
 		CreateAt:    nowUnix(),
 	}
+	groupID := newID()
+	c.GroupID = groupID
 	id, err := repo.Create(ctx, c)
 	require.NoError(t, err)
 	require.NotZero(t, id)
 	c.ClusterID = uint(id)
+
+	count, err := repo.CountByGroup(ctx, groupID)
+	require.NoError(t, err)
+	require.Equal(t, int64(1), count)
 
 	got, err := repo.GetByUUID(ctx, c.UUID)
 	require.NoError(t, err)

@@ -2012,7 +2012,7 @@ type QueryRoot {
 		检索编码
 		"""
 		id: ID!
-	): Option
+	): Option @auth(requires: [ADMIN])
 
 	"""
 	根据检索编码查看检索记录

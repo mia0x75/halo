@@ -49,6 +49,8 @@ type ClusterRepository interface {
 	Delete(ctx context.Context, id int64) error
 	DeleteByUUID(ctx context.Context, uuid string) error
 	List(ctx context.Context, cursor int64, limit int) ([]*Cluster, error)
+	// CountByGroup counts the clusters still assigned to a group.
+	CountByGroup(ctx context.Context, groupID uint) (int64, error)
 }
 
 type LogRepository interface {

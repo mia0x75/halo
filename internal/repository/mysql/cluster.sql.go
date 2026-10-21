@@ -9,6 +9,17 @@ import (
 	"context"
 )
 
+const countClustersByGroup = `-- name: CountClustersByGroup :one
+SELECT COUNT(*) FROM mm_clusters WHERE group_id = ?
+`
+
+func (q *Queries) CountClustersByGroup(ctx context.Context, groupID uint32) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countClustersByGroup, groupID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createCluster = `-- name: CreateCluster :execlastid
 INSERT INTO mm_clusters (uuid, host, alias, ip, port, ` + "`" + `user` + "`" + `, ` + "`" + `type` + "`" + `, group_id, password, fingerprint, status, version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `

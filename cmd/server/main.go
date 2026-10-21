@@ -27,6 +27,7 @@ import (
 	"github.com/mia0x75/halo/internal/worker"
 
 	// "github.com/mia0x75/halo/internal/platform/log"
+	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/internal/transport/http"
 )
 
@@ -73,6 +74,14 @@ func main() {
 
 	config.ParseConfig(*cfg)
 	os.Setenv("HALO_CFG", config.ConfigFile)
+
+	if secret := config.Config().Secret; secret != nil && secret.Jwt != nil {
+		ttl := 24 * time.Hour
+		if parsed, err := time.ParseDuration(secret.Jwt.TTL); err == nil && parsed > 0 {
+			ttl = parsed
+		}
+		transportauth.Configure(secret.Jwt.Issuer, secret.Jwt.SecretKey, ttl)
+	}
 
 	// log.InitLog()
 

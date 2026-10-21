@@ -155,7 +155,7 @@ func New(ctx context.Context, cfg db.Config) (*App, error) {
 		Metric:    service.NewMetricService(tx, repos.Metric, repos.Ticket, repos.RuleHit),
 		RuleHit:   service.NewRuleHitService(repos.RuleHit),
 		Message:   service.NewMessageService(repos.Message),
-		Group:     service.NewGroupService(tx, repos.Group, logSvc),
+		Group:     service.NewGroupService(tx, repos.Group, repos.Cluster, logSvc),
 		Task:      service.NewTaskService(repos.Task),
 		Template:  service.NewTemplateService(tx, repos.Template),
 		User:      service.NewUserService(tx, repos.User),

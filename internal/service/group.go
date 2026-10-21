@@ -12,13 +12,14 @@ import (
 // GroupService manages the cluster groups: the servers of one group belong
 // together, and roles are granted access to groups.
 type GroupService struct {
-	tx     TxManager
-	groups domain.GroupRepository
-	log    *LogService
+	tx       TxManager
+	groups   domain.GroupRepository
+	clusters domain.ClusterRepository
+	log      *LogService
 }
 
-func NewGroupService(tx TxManager, groups domain.GroupRepository, log *LogService) *GroupService {
-	return &GroupService{tx: tx, groups: groups, log: log}
+func NewGroupService(tx TxManager, groups domain.GroupRepository, clusters domain.ClusterRepository, log *LogService) *GroupService {
+	return &GroupService{tx: tx, groups: groups, clusters: clusters, log: log}
 }
 
 func (s *GroupService) GetByUUID(ctx context.Context, uuid string) (*domain.Group, error) {
@@ -100,11 +101,19 @@ func (s *GroupService) Update(ctx context.Context, g *domain.Group, operatorID u
 	})
 }
 
-// DeleteByUUID removes a group. Clusters still pointing at it keep the id, so
-// the operator has to move them first.
+// DeleteByUUID removes a group. Clusters must be moved to another group first,
+// otherwise they would keep a dangling group_id.
 func (s *GroupService) DeleteByUUID(ctx context.Context, uuid string, operatorID uint) error {
-	if _, err := s.groups.GetByUUID(ctx, uuid); err != nil {
+	group, err := s.groups.GetByUUID(ctx, uuid)
+	if err != nil {
 		return err
+	}
+	clusters, err := s.clusters.CountByGroup(ctx, group.GroupID)
+	if err != nil {
+		return fmt.Errorf("count group clusters: %w", err)
+	}
+	if clusters > 0 {
+		return fmt.Errorf("%w: 分组下还有 %d 个群集，请先迁移", domain.ErrConflict, clusters)
 	}
 
 	return s.tx.WithTx(ctx, func(ctx context.Context, repos Repos) error {
