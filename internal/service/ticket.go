@@ -319,10 +319,19 @@ func (s *TicketService) Remove(ctx context.Context, ticketUUID string, userID ui
 	return removed, nil
 }
 
-// PatchStatus applies a manual status change. Its rules are intentionally more
-// permissive than the automated canTransition graph (a warning may go straight
-// to Lgtm), matching the legacy PatchTicketStatus endpoint.
-func (s *TicketService) PatchStatus(ctx context.Context, ticketUUID string, target domain.TicketStatus) (*domain.Ticket, error) {
+// PatchStatus applies a manual status change.
+//
+// The only manual change left is closing a ticket. Approving and rejecting go
+// through Review, which enforces that the actor is the ticket's reviewer; if
+// this endpoint could also set Lgtm or MrvFailure it would be a way around
+// that check. Only the submitter or an administrator may close a ticket.
+func (s *TicketService) PatchStatus(
+	ctx context.Context,
+	ticketUUID string,
+	target domain.TicketStatus,
+	actorID uint,
+	isAdmin bool,
+) (*domain.Ticket, error) {
 	var updated *domain.Ticket
 	err := s.tx.WithTx(ctx, func(ctx context.Context, repos Repos) error {
 		tk, err := repos.Ticket.GetByUUID(ctx, ticketUUID)
@@ -334,18 +343,16 @@ func (s *TicketService) PatchStatus(ctx context.Context, ticketUUID string, targ
 			return &TransitionError{Current: tk.Status, Kind: TransitionTerminal}
 		}
 
-		fromWarningOrMrv := tk.Status == domain.TicketStatusVldWarning || tk.Status == domain.TicketStatusWaitingForMrv
-		switch target {
-		case domain.TicketStatusClosed:
-			if tk.Status != domain.TicketStatusVldFailure && !fromWarningOrMrv {
-				return &TransitionError{Current: tk.Status, Kind: TransitionClose}
-			}
-		case domain.TicketStatusLgtm, domain.TicketStatusMrvFailure:
-			if !fromWarningOrMrv {
-				return &TransitionError{Current: tk.Status, Kind: TransitionManualReview}
-			}
-		default:
+		if target != domain.TicketStatusClosed {
 			return &TransitionError{Current: tk.Status, Kind: TransitionInvalidTarget}
+		}
+		if tk.UserID != actorID && !isAdmin {
+			return fmt.Errorf("%w: 只有工单发起人或管理员可以关闭工单", domain.ErrForbidden)
+		}
+		if tk.Status != domain.TicketStatusVldFailure &&
+			tk.Status != domain.TicketStatusVldWarning &&
+			tk.Status != domain.TicketStatusWaitingForMrv {
+			return &TransitionError{Current: tk.Status, Kind: TransitionClose}
 		}
 
 		tk.Status = target
@@ -354,7 +361,11 @@ func (s *TicketService) PatchStatus(ctx context.Context, ticketUUID string, targ
 			return err
 		}
 		updated = tk
-		return NewLogService(repos.Log).Log(ctx, LogEntry{Operation: "ticket.patch_status", Target: "ticket:" + tk.UUID})
+		return NewLogService(repos.Log).Log(ctx, LogEntry{
+			UserID:    actorID,
+			Operation: "ticket.patch_status",
+			Target:    "ticket:" + tk.UUID,
+		})
 	})
 	if err != nil {
 		return nil, err

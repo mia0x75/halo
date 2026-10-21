@@ -113,12 +113,13 @@ func TestTicketServicePatchStatus(t *testing.T) {
 		wantErr bool
 		kind    TransitionKind
 	}{
-		{name: "terminal", from: domain.TicketStatusDone, target: domain.TicketStatusLgtm, wantErr: true, kind: TransitionTerminal},
+		{name: "terminal", from: domain.TicketStatusDone, target: domain.TicketStatusClosed, wantErr: true, kind: TransitionTerminal},
 		{name: "close from vld", from: domain.TicketStatusWaitingForVld, target: domain.TicketStatusClosed, wantErr: true, kind: TransitionClose},
-		{name: "manual from vld", from: domain.TicketStatusWaitingForVld, target: domain.TicketStatusLgtm, wantErr: true, kind: TransitionManualReview},
+		{name: "approve is not allowed here", from: domain.TicketStatusVldWarning, target: domain.TicketStatusLgtm, wantErr: true, kind: TransitionInvalidTarget},
+		{name: "reject is not allowed here", from: domain.TicketStatusWaitingForMrv, target: domain.TicketStatusMrvFailure, wantErr: true, kind: TransitionInvalidTarget},
 		{name: "invalid target", from: domain.TicketStatusWaitingForVld, target: domain.TicketStatusWaitingForVld, wantErr: true, kind: TransitionInvalidTarget},
-		{name: "warning to lgtm", from: domain.TicketStatusVldWarning, target: domain.TicketStatusLgtm, wantTo: domain.TicketStatusLgtm},
-		{name: "mrv to reject", from: domain.TicketStatusWaitingForMrv, target: domain.TicketStatusMrvFailure, wantTo: domain.TicketStatusMrvFailure},
+		{name: "warning to close", from: domain.TicketStatusVldWarning, target: domain.TicketStatusClosed, wantTo: domain.TicketStatusClosed},
+		{name: "mrv to close", from: domain.TicketStatusWaitingForMrv, target: domain.TicketStatusClosed, wantTo: domain.TicketStatusClosed},
 		{name: "vld failure to close", from: domain.TicketStatusVldFailure, target: domain.TicketStatusClosed, wantTo: domain.TicketStatusClosed},
 	}
 
@@ -127,7 +128,8 @@ func TestTicketServicePatchStatus(t *testing.T) {
 			tickets, logs := ticketFixture(t, tc.from)
 			svc := NewTicketService(&fakeTx{repos: Repos{Ticket: tickets, Log: logs}}, tickets)
 
-			got, err := svc.PatchStatus(ctx, "t1", tc.target)
+			// 5 是工单发起人，见 ticketFixture。
+			got, err := svc.PatchStatus(ctx, "t1", tc.target, 5, false)
 			if tc.wantErr {
 				var te *TransitionError
 				require.ErrorAs(t, err, &te)
@@ -140,6 +142,25 @@ func TestTicketServicePatchStatus(t *testing.T) {
 			require.Equal(t, 2, got.Version)
 		})
 	}
+}
+
+func TestTicketServicePatchStatusRejectsOtherUser(t *testing.T) {
+	ctx := context.Background()
+	tickets, logs := ticketFixture(t, domain.TicketStatusWaitingForMrv)
+	svc := NewTicketService(&fakeTx{repos: Repos{Ticket: tickets, Log: logs}}, tickets)
+
+	_, err := svc.PatchStatus(ctx, "t1", domain.TicketStatusClosed, 99, false)
+	require.ErrorIs(t, err, domain.ErrForbidden)
+}
+
+func TestTicketServicePatchStatusAllowsAdmin(t *testing.T) {
+	ctx := context.Background()
+	tickets, logs := ticketFixture(t, domain.TicketStatusWaitingForMrv)
+	svc := NewTicketService(&fakeTx{repos: Repos{Ticket: tickets, Log: logs}}, tickets)
+
+	got, err := svc.PatchStatus(ctx, "t1", domain.TicketStatusClosed, 99, true)
+	require.NoError(t, err)
+	require.Equal(t, domain.TicketStatusClosed, got.Status)
 }
 
 func TestTransitionErrorMessageAndIs(t *testing.T) {

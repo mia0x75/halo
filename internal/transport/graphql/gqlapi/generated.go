@@ -12116,7 +12116,7 @@ func (ec *executionContext) _MutationRoot_patchTicketStatus(ctx context.Context,
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"REVIEWER", "DEVELOPER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"DEVELOPER", "ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -12178,7 +12178,7 @@ func (ec *executionContext) _MutationRoot_reviewTicket(ctx context.Context, fiel
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"REVIEWER", "ADMIN"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"REVIEWER"})
 				if err != nil {
 					var zeroVal *models.Ticket
 					return zeroVal, err

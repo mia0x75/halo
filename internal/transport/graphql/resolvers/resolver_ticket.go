@@ -469,13 +469,18 @@ func (r *mutationRootResolver) PatchTicketStatus(ctx context.Context, input mode
 			break
 		}
 
-		t, patchErr := r.app.Services.Ticket.PatchStatus(ctx, input.TicketUUID, domain.TicketStatus(statusValue))
+		isAdmin := transportauth.IsAdmin(credential.Roles)
+		t, patchErr := r.app.Services.Ticket.PatchStatus(
+			ctx, input.TicketUUID, domain.TicketStatus(statusValue), user.UserID, isAdmin)
 		if patchErr != nil {
 			var te *service.TransitionError
 			switch {
 			case errors.Is(patchErr, domain.ErrNotFound):
 				rc = gqlapi.ReturnCodeNotFound
 				err = fmt.Errorf("错误代码: %s, 错误信息: 工单(uuid=%s)不存在。", rc, input.TicketUUID)
+			case errors.Is(patchErr, domain.ErrForbidden):
+				rc = gqlapi.ReturnCodeForbidden
+				err = fmt.Errorf("错误代码: %s, 错误信息: 只有工单发起人或管理员可以关闭工单。", rc)
 			case errors.As(patchErr, &te):
 				switch te.Kind {
 				case service.TransitionTerminal:

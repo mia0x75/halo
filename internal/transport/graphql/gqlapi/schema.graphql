@@ -3683,7 +3683,7 @@ type MutationRoot {
 		工单唯一标识符、状态
 		"""
 		input:PatchTicketStatusInput!
-	): Boolean! @auth(requires: [REVIEWER, DEVELOPER, ADMIN])
+	): Boolean! @auth(requires: [DEVELOPER, ADMIN])
 
 	"""
 	人工审核工单：通过或驳回
@@ -3693,7 +3693,7 @@ type MutationRoot {
 		审核信息
 		"""
 		input: ReviewTicketInput!
-	): Ticket @auth(requires: [REVIEWER, ADMIN])
+	): Ticket @auth(requires: [REVIEWER])
 
 	"""
 	立刻执行一个工单
