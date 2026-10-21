@@ -201,6 +201,8 @@ function updateTicket(input: Variables): DemoTicket | undefined {
 }
 
 function clusterInput(input: Variables, existing?: ClusterNode): ClusterNode {
+  // GroupUUID 传空串表示「未分组」，与「不传该字段」要区分开。
+  const groupGiven = "GroupUUID" in input
   const groupUUID = text(input.GroupUUID)
   const group = state.groups.find((item) => item.UUID === groupUUID)
   return {
@@ -212,8 +214,8 @@ function clusterInput(input: Variables, existing?: ClusterNode): ClusterNode {
     User: text(input.User) ?? existing?.User ?? "root",
     Status: num(input.Status, existing?.Status ?? 1),
     Type: text(input.Type) ?? existing?.Type ?? "mysql",
-    Group: group?.Name ?? existing?.Group ?? null,
-    GroupUUID: group?.UUID ?? existing?.GroupUUID ?? null,
+    Group: groupGiven ? (group?.Name ?? null) : (existing?.Group ?? null),
+    GroupUUID: groupGiven ? (group?.UUID ?? null) : (existing?.GroupUUID ?? null),
     CreateAt: existing?.CreateAt ?? Math.floor(Date.now() / 1000),
   }
 }
