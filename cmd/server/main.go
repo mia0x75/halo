@@ -99,6 +99,12 @@ func main() {
 	}
 	defer func() { _ = application.Close() }()
 
+	// 角色名承载权限，角色表又不可增删。名字对不上意味着权限会静默失效，
+	// 所以启动时就拒绝，而不是等接口 403。
+	if err := transportauth.ValidateRoles(cache.RolesMap.All()); err != nil {
+		lg.Fatalf("[F] 角色表与权限映射不一致: %v", err)
+	}
+
 	cachedRules := cache.RulesMap.All()
 	rules := make([]*domain.Rule, 0, len(cachedRules))
 	for _, m := range cachedRules {
