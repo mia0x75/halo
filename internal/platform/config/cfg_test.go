@@ -22,7 +22,6 @@ func TestParseConfigLoadsFields(t *testing.T) {
 		"listen": ":8080",
 		"log": {"level": "debug"},
 		"database": {"addr": "postgres://localhost:5432/halo", "max_idle": 3, "max_connections": 9, "driver": "postgres"},
-		"mail": {"enabled": true, "addr": "smtp.test:465", "user": "halo"},
 		"secret": {"crypto": "0123456789abcdef", "jwt": {"issuer": "halo"}}
 	}`)
 
@@ -34,7 +33,6 @@ func TestParseConfigLoadsFields(t *testing.T) {
 	require.Equal(t, "debug", cfg.Log.Level)
 	require.Equal(t, "postgres", cfg.Database.Driver)
 	require.Equal(t, 9, cfg.Database.MaxConnections)
-	require.True(t, cfg.Mail.Enabled)
 	require.Equal(t, "halo", cfg.Secret.Jwt.Issuer)
 	require.Equal(t, path, ConfigFile)
 }

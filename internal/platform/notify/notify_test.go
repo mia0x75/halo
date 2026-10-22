@@ -3,14 +3,10 @@ package notify
 import (
 	"context"
 	"errors"
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
-	"github.com/mia0x75/halo/internal/platform/config"
 )
 
 // TestSanitizeHeaderStripsCRLF guards against SMTP header injection: a value
@@ -64,25 +60,31 @@ func TestMultiWithoutNotifiers(t *testing.T) {
 	require.NoError(t, m.Send(context.Background(), Message{}))
 }
 
-// loadMailConfig points the global config at a temp file with the given mail
-// block so EmailNotifier can be exercised without a live SMTP server.
-func loadMailConfig(t *testing.T, mail string) {
-	t.Helper()
-	body := `{"mail":` + mail + `}`
-	path := filepath.Join(t.TempDir(), "cfg.json")
-	require.NoError(t, os.WriteFile(path, []byte(body), 0o600))
-	config.ParseConfig(path)
+// mailNotifier builds an EmailNotifier with fixed settings so it can be
+// exercised without a live SMTP server. The settings come from the metadata
+// database in production, never from the config file.
+func mailNotifier(settings MailSettings) EmailNotifier {
+	return EmailNotifier{Settings: func(context.Context) (MailSettings, error) {
+		return settings, nil
+	}}
 }
 
 func TestEmailNotifierDisabledIsNoOp(t *testing.T) {
-	loadMailConfig(t, `{"enabled":false,"addr":"smtp.test:465"}`)
-	require.NoError(t, EmailNotifier{}.Send(context.Background(), Message{ToEmail: "a@b.test"}))
-	require.Equal(t, "email", EmailNotifier{}.Name())
+	notifier := mailNotifier(MailSettings{Enabled: false, Addr: "smtp.test:465"})
+	require.NoError(t, notifier.Send(context.Background(), Message{ToEmail: "a@b.test"}))
+	require.Equal(t, "email", notifier.Name())
+}
+
+// TestEmailNotifierWithoutProvider documents that the notifier refuses to run
+// without a settings source: the SMTP settings only live in the database.
+func TestEmailNotifierWithoutProvider(t *testing.T) {
+	err := EmailNotifier{}.Send(context.Background(), Message{ToEmail: "a@b.test"})
+	require.Error(t, err)
 }
 
 func TestEmailNotifierRejectsInvalidRecipient(t *testing.T) {
-	loadMailConfig(t, `{"enabled":true,"addr":"127.0.0.1:1","user":"halo"}`)
-	err := EmailNotifier{}.Send(context.Background(), Message{ToEmail: "not an address"})
+	notifier := mailNotifier(MailSettings{Enabled: true, Addr: "127.0.0.1:1", User: "halo"})
+	err := notifier.Send(context.Background(), Message{ToEmail: "not an address"})
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "invalid recipient")
 }
@@ -91,8 +93,8 @@ func TestEmailNotifierRejectsInvalidRecipient(t *testing.T) {
 // recipient/body cannot abort Send before the transport stage: the call reaches
 // the network and fails there, not on malformed input.
 func TestEmailNotifierDialFailure(t *testing.T) {
-	loadMailConfig(t, `{"enabled":true,"addr":"127.0.0.1:1","user":"halo"}`)
-	err := EmailNotifier{}.Send(context.Background(), Message{
+	notifier := mailNotifier(MailSettings{Enabled: true, Addr: "127.0.0.1:1", User: "halo"})
+	err := notifier.Send(context.Background(), Message{
 		ToName:  "Eve\r\nBcc: evil@example.com",
 		ToEmail: "victim@example.com",
 		Subject: "hi\r\nX-Evil: 1",

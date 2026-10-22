@@ -71,11 +71,8 @@ func (r *queryRootResolver) SystemInfo(ctx context.Context) (*gqlapi.SystemInfo,
 			database = "mysql"
 		}
 	}
-	// 邮件开关以 mm_options 为准，配置文件只作缺省值。
+	// 邮件开关以 mm_options 为准，配置文件不再带 mail 段。
 	mailEnabled := false
-	if cfg := config.Config(); cfg != nil && cfg.Mail != nil {
-		mailEnabled = cfg.Mail.Enabled
-	}
 	if option, optErr := r.app.Services.Option.GetByName(ctx, "mail.enabled"); optErr == nil {
 		mailEnabled = option.Parameter == "true"
 	}
@@ -168,10 +165,7 @@ func (r *mutationRootResolver) SendTestMail(ctx context.Context, email string) (
 		return false, fmt.Errorf("邮件通知未启用，请先在系统选项里开启 mail.enabled。")
 	}
 	if err == domain.ErrNotFound {
-		cfg := config.Config()
-		if cfg == nil || cfg.Mail == nil || !cfg.Mail.Enabled {
-			return false, fmt.Errorf("邮件通知未启用，请先在系统选项里开启 mail.enabled。")
-		}
+		return false, fmt.Errorf("邮件通知未启用，请先在系统选项里开启 mail.enabled。")
 	}
 
 	msg := notify.Message{

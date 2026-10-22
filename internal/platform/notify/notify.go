@@ -16,8 +16,6 @@ import (
 	"unicode"
 
 	log "github.com/sirupsen/logrus"
-
-	"github.com/mia0x75/halo/internal/platform/config"
 )
 
 // Message is a channel-agnostic notification.
@@ -80,7 +78,8 @@ type MailSettingsFunc func(ctx context.Context) (MailSettings, error)
 
 // EmailNotifier sends mail over SMTP with implicit TLS (port 465 style).
 type EmailNotifier struct {
-	// Settings overrides the static file configuration when set.
+	// Settings resolves the SMTP settings at send time. It is required: the
+	// settings live in the metadata database, not in the config file.
 	Settings MailSettingsFunc
 }
 
@@ -162,22 +161,12 @@ func (n EmailNotifier) Send(ctx context.Context, msg Message) error {
 	return c.Quit()
 }
 
-// resolve falls back to the static configuration when no provider is wired.
+// resolve reads the SMTP settings through the wired provider.
 func (n EmailNotifier) resolve(ctx context.Context) (MailSettings, error) {
-	if n.Settings != nil {
-		return n.Settings(ctx)
+	if n.Settings == nil {
+		return MailSettings{}, errors.New("邮件通道没有配置数据源")
 	}
-	cfg := config.Config().Mail
-	if cfg == nil {
-		return MailSettings{}, nil
-	}
-	return MailSettings{
-		Enabled:            cfg.Enabled,
-		Addr:               cfg.Addr,
-		User:               cfg.User,
-		Password:           cfg.Password,
-		InsecureSkipVerify: cfg.InsecureSkipVerify,
-	}, nil
+	return n.Settings(ctx)
 }
 
 // sanitizeHeader strips CR and LF so an attacker-controlled value cannot inject

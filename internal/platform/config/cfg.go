@@ -41,24 +41,12 @@ type DatabaseConfig struct {
 	Driver string `json:"driver"`
 }
 
-// MailConfig 邮件发送配置
-type MailConfig struct {
-	Enabled            bool   `json:"enabled"`
-	Addr               string `json:"addr"`
-	User               string `json:"user"`
-	Password           string `json:"password"`
-	Encryption         string `json:"encryption"`
-	InsecureSkipVerify bool   `json:"insecure_skip_verify"`
-}
-
 // GlobalConfig 配置
 type GlobalConfig struct {
 	Log      *LogConfig      `json:"log"`
 	Cert     string          `json:"cert"`
 	Key      string          `json:"key"`
 	Database *DatabaseConfig `json:"database"`
-	Backup   *DatabaseConfig `json:"backup"`
-	Mail     *MailConfig     `json:"mail"`
 	Listen   string          `json:"listen"`
 	Secret   *SecretConfig   `json:"secret"`
 }

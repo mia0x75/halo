@@ -21,20 +21,12 @@ const (
 	mailInsecureSkipVerify = "mail.insecure-skip-verify"
 )
 
-// mailSettingsProvider resolves the SMTP settings from mm_options, falling
-// back to the static configuration for values that were never stored.
+// mailSettingsProvider resolves the SMTP settings from mm_options. The
+// options are the only source: the config file no longer carries a mail
+// section, so a missing option simply means "not configured".
 func mailSettingsProvider(options domain.OptionRepository) notify.MailSettingsFunc {
 	return func(ctx context.Context) (notify.MailSettings, error) {
 		settings := notify.MailSettings{}
-		if cfg := config.Config(); cfg != nil && cfg.Mail != nil {
-			settings = notify.MailSettings{
-				Enabled:            cfg.Mail.Enabled,
-				Addr:               cfg.Mail.Addr,
-				User:               cfg.Mail.User,
-				Password:           cfg.Mail.Password,
-				InsecureSkipVerify: cfg.Mail.InsecureSkipVerify,
-			}
-		}
 
 		read := func(name string) (string, bool, error) {
 			option, err := options.GetByName(ctx, name)
