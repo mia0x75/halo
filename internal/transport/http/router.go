@@ -20,6 +20,7 @@ import (
 	"github.com/mia0x75/halo/internal/transport/graphql/directives"
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 	"github.com/mia0x75/halo/internal/transport/graphql/resolvers"
+	"github.com/mia0x75/halo/internal/transport/web"
 )
 
 var cfg = gqlapi.Config{}
@@ -97,8 +98,6 @@ func Routes(r *mux.Router, application *app.App) {
 	r.Use(Logging)
 	r.Use(Compress)
 
-	r.HandleFunc("/", playground.Handler("GraphQL playground", "/api/query"))
-
 	srv := handler.New(gqlapi.NewExecutableSchema(cfg))
 
 	// WebSocket 传输（替代旧版 handler.WebsocketUpgrader，默认允许所有来源的等价行为由 coder/websocket 实现承担；
@@ -130,6 +129,15 @@ func Routes(r *mux.Router, application *app.App) {
 	*/
 
 	r.HandleFunc("/api/query", srv.ServeHTTP)
+	r.HandleFunc("/playground", playground.Handler("GraphQL playground", "/api/query"))
+
+	// The SPA fallback is registered last so /api and /playground win.
+	dist, err := web.Dist()
+	if err != nil {
+		log.Printf("[W] 前端资源不可用，仅提供 API: %v", err)
+		return
+	}
+	r.PathPrefix("/").Handler(web.NewHandler(dist))
 }
 
 func Error403(w http.ResponseWriter, r *http.Request) {

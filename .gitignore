@@ -5,3 +5,7 @@ bin/
 cfg.json
 .Makefile.swp
 docs/review/
+
+# 前端构建产物：只保留占位文件，构建时由 make frontend-build 填充
+internal/transport/web/dist/*
+!internal/transport/web/dist/.gitkeep

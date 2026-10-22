@@ -114,7 +114,7 @@ cover: test
 			{print "\033[93m"$$0"%\033[0m"}}'
 
 # 项目构建
-build: fmt
+build: fmt frontend-build
 	@echo "$(CGREEN)Building ...$(CEND)"
 	@P=github.com/mia0x75/halo/internal/app; \
 	git="$$(git describe --tags --always 2>/dev/null)"; \
@@ -200,6 +200,10 @@ frontend-install:
 frontend-build:
 	@echo "$(CGREEN)Building frontend ...$(CEND)"
 	cd frontend && bun run build
+	@echo "$(CGREEN)Copying frontend into embed dir ...$(CEND)"
+	@mkdir -p internal/transport/web/dist
+	@find internal/transport/web/dist -mindepth 1 ! -name .gitkeep -delete
+	@cp -r frontend/dist/. internal/transport/web/dist/
 	@echo "$(CGREEN)frontend build Success!$(CEND)"
 
 # 前端静态检查
