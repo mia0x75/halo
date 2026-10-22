@@ -5,6 +5,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"net/http"
@@ -58,6 +59,8 @@ func main() {
 
 	flag.Parse()
 
+	var application *app.App
+
 	fmt.Print(app.Banner)
 	fmt.Printf("%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n",
 		"Version", app.Version,
@@ -75,65 +78,46 @@ func main() {
 
 	config.ParseConfig(*cfg)
 	os.Setenv("HALO_CFG", config.ConfigFile)
+	configureAuth()
 
-	if secret := config.Config().Secret; secret != nil && secret.Jwt != nil {
-		ttl := 24 * time.Hour
-		if parsed, err := time.ParseDuration(secret.Jwt.TTL); err == nil && parsed > 0 {
-			ttl = parsed
+	// 未配置元数据库与密钥时，服务器先跑在初始化模式：只提供 /welcome 向导
+	// 与前端静态资源，向导完成后热切换到正常路由。
+	handler := server.NewSwitchable(nil)
+	defer func() {
+		if application != nil {
+			_ = application.Close()
 		}
-		transportauth.Configure(secret.Jwt.Issuer, secret.Jwt.SecretKey, ttl)
-	}
+	}()
 
-	// log.InitLog()
-
-	// The new dependency container replaces the legacy ORM engine.
-
-	application, err := app.New(context.Background(), db.Config{
-		Addr:           config.Config().Database.Addr,
-		MaxIdle:        config.Config().Database.MaxIdle,
-		MaxConnections: config.Config().Database.MaxConnections,
-		WaitTimeout:    config.Config().Database.WaitTimeout,
-		Driver:         config.Config().Database.Driver,
-	})
-	if err != nil {
-		lg.Fatalf("[F] init app fail: %v", err)
+	if config.Configured() {
+		built, err := bootApp(context.Background())
+		if err != nil {
+			lg.Fatalf("[F] init app fail: %v", err)
+		}
+		application = built
+		handler.Set(normalRouter(application))
+	} else {
+		lg.Warnf("[W] 尚未配置元数据库与密钥，请访问 /welcome 完成初始化。")
+		setup := server.NewSetupHandler(func(built *app.App) error {
+			application = built
+			configureAuth()
+			handler.Set(normalRouter(built))
+			return nil
+		})
+		r := mux.NewRouter()
+		server.SetupRoutes(r, setup)
+		handler.Set(r)
 	}
-	defer func() { _ = application.Close() }()
-
-	// 角色名承载权限，角色表又不可增删。名字对不上意味着权限会静默失效，
-	// 所以启动时就拒绝，而不是等接口 403。
-	if err := transportauth.ValidateRoles(cache.RolesMap.All()); err != nil {
-		lg.Fatalf("[F] 角色表与权限映射不一致: %v", err)
-	}
-
-	cachedRules := cache.RulesMap.All()
-	rules := make([]*domain.Rule, 0, len(cachedRules))
-	for _, m := range cachedRules {
-		rules = append(rules, bridge.RuleToDomain(m))
-	}
-	if err := validate.ValidateRules(rules); err != nil {
-		lg.Fatalf("[F] invalid validation rules: %v", err)
-	}
-	// Surface rules whose handler is missing; these were silently skipped by
-	// the former reflection dispatch.
-	validate.ValidateRegistry(rules)
-	worker.Init(application.Repos)
-	worker.NewScheduler()
 
 	addr := config.Config().Listen
 	lg.Infof("[I] http listening %s", addr)
 
-	r := mux.NewRouter()
-	server.Routes(r, application)
-	if strings.EqualFold(config.Config().Log.Level, "debug") {
-		server.ProfilerRoutes(r)
-	}
 	srv := &http.Server{
 		Addr:         addr,
 		WriteTimeout: time.Second * 15, // Good practice to set timeouts to avoid Slowloris attacks.
 		ReadTimeout:  time.Second * 15, //
 		IdleTimeout:  time.Second * 60, //
-		Handler:      r,                // Pass our instance of gorilla/mux in.
+		Handler:      handler,          // 初始化完成后热切换到正常路由。
 	}
 	srv.SetKeepAlivesEnabled(true)
 	// 各种中间件
@@ -169,4 +153,69 @@ func main() {
 	// to finalize based on context cancellation.
 	lg.Println("[I] Shutting down")
 	os.Exit(0)
+}
+
+// bootApp 装配应用：连接元数据库、加载缓存、校验规则并启动后台作业。
+func bootApp(ctx context.Context) (*app.App, error) {
+	cfg := config.Config()
+	if cfg.Database == nil {
+		return nil, errors.New("缺少元数据库配置（database.addr）")
+	}
+	application, err := app.New(ctx, db.Config{
+		Addr:           cfg.Database.Addr,
+		MaxIdle:        cfg.Database.MaxIdle,
+		MaxConnections: cfg.Database.MaxConnections,
+		WaitTimeout:    cfg.Database.WaitTimeout,
+		Driver:         cfg.Database.Driver,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// 角色名承载权限，角色表又不可增删。名字对不上意味着权限会静默失效，
+	// 所以启动时就拒绝，而不是等接口 403。
+	if err := transportauth.ValidateRoles(cache.RolesMap.All()); err != nil {
+		_ = application.Close()
+		return nil, err
+	}
+
+	cachedRules := cache.RulesMap.All()
+	rules := make([]*domain.Rule, 0, len(cachedRules))
+	for _, m := range cachedRules {
+		rules = append(rules, bridge.RuleToDomain(m))
+	}
+	if err := validate.ValidateRules(rules); err != nil {
+		_ = application.Close()
+		return nil, err
+	}
+	// Surface rules whose handler is missing; these were silently skipped by
+	// the former reflection dispatch.
+	validate.ValidateRegistry(rules)
+
+	worker.Init(application.Repos)
+	worker.NewScheduler()
+	return application, nil
+}
+
+// normalRouter builds the route table of a configured server.
+func normalRouter(application *app.App) http.Handler {
+	r := mux.NewRouter()
+	server.Routes(r, application)
+	if cfg := config.Config(); cfg != nil && cfg.Log != nil && strings.EqualFold(cfg.Log.Level, "debug") {
+		server.ProfilerRoutes(r)
+	}
+	return r
+}
+
+// configureAuth applies the JWT settings to the auth package.
+func configureAuth() {
+	secret := config.Config().Secret
+	if secret == nil || secret.Jwt == nil {
+		return
+	}
+	ttl := 24 * time.Hour
+	if parsed, err := time.ParseDuration(secret.Jwt.TTL); err == nil && parsed > 0 {
+		ttl = parsed
+	}
+	transportauth.Configure(secret.Jwt.Issuer, secret.Jwt.SecretKey, ttl)
 }

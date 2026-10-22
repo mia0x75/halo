@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { AppShell } from "@/components/layout/app-shell"
 import type { NavKey } from "@/components/layout/nav-items"
 import { ClusterFormPage } from "@/pages/cluster-form-page"
@@ -23,8 +23,10 @@ import { TicketQueuePage } from "@/pages/ticket-queue-page"
 import { TicketsPage } from "@/pages/tickets-page"
 import { ViolationsPage } from "@/pages/violations-page"
 import { LoginPage } from "@/pages/login-page"
+import { WelcomePage } from "@/pages/welcome-page"
 import { useSession } from "@/hooks/use-session"
 import { clearToken } from "@/lib/api/session"
+import { fetchSetupStatus } from "@/lib/api/setup"
 
 type View =
   | { kind: "nav"; key: NavKey }
@@ -37,11 +39,38 @@ type View =
   | { kind: "user-form"; mode: "create" | "edit"; uuid?: string }
   | { kind: "ticket-reject"; uuid: string }
 
+type SetupState =
+  | { status: "checking" }
+  | { status: "ready" }
+  | { status: "needed"; configFile: string }
+
 export default function App() {
   const session = useSession()
+  const [setup, setSetup] = useState<SetupState>({ status: "checking" })
   const [view, setView] = useState<View>({ kind: "nav", key: "dashboard" })
   const [searchKeyword, setSearchKeyword] = useState("")
   const [settingsTab, setSettingsTab] = useState<SettingsTab>("options")
+
+  // 服务器没配置元数据库时先走安装向导。拿不到状态就按已配置处理，
+  // 免得演示环境与旧版本后端被挡住。
+  useEffect(() => {
+    let cancelled = false
+    fetchSetupStatus()
+      .then((status) => {
+        if (cancelled) return
+        setSetup(
+          status.configured
+            ? { status: "ready" }
+            : { status: "needed", configFile: status.configFile },
+        )
+      })
+      .catch(() => {
+        if (!cancelled) setSetup({ status: "ready" })
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const signOut = useCallback(() => {
     clearToken()
@@ -76,6 +105,18 @@ export default function App() {
   }, [])
 
   const page = view.kind === "nav" ? view.key : "tickets"
+
+  if (setup.status === "checking") {
+    return (
+      <div className="flex min-h-svh items-center justify-center text-sm text-muted-foreground">
+        正在加载…
+      </div>
+    )
+  }
+
+  if (setup.status === "needed") {
+    return <WelcomePage onDone={() => window.location.reload()} />
+  }
 
   if (session.status !== "authenticated") {
     return <LoginPage />

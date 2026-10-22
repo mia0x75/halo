@@ -128,6 +128,13 @@ func Routes(r *mux.Router, application *app.App) {
 	}
 	*/
 
+	// 初始化完成后引导接口不再存在，明确返回 404，而不是落到 SPA 页面。
+	r.PathPrefix("/api/setup").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set(HeaderContentType, "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusNotFound)
+		_, _ = w.Write([]byte(`{"error":"系统已初始化"}`))
+	})
+
 	r.HandleFunc("/api/query", srv.ServeHTTP)
 	r.HandleFunc("/playground", playground.Handler("GraphQL playground", "/api/query"))
 

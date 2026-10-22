@@ -188,7 +188,12 @@ func Headers(next http.Handler) http.Handler {
 
 func Context(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get(config.Config().Secret.Jwt.TokenName)
+		// 首次安装时还没有 secret 段，此时没有令牌可解析。
+		tokenName := ""
+		if cfg := config.Config(); cfg != nil && cfg.Secret != nil && cfg.Secret.Jwt != nil {
+			tokenName = cfg.Secret.Jwt.TokenName
+		}
+		token := r.Header.Get(tokenName)
 		for {
 			// 没有提供令牌不处理
 			if strings.TrimSpace(token) == "" {
