@@ -14,10 +14,11 @@ var versionCmd = &cobra.Command{
 	Short: "Show version",
 	Long:  `This subcommand shows version information`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n",
+		fmt.Printf("%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n",
 			"Version", app.Version,
 			"Git commit", app.Git,
-			"Compile", app.Compile,
+			"BuildAt", app.BuildAt,
+			"Go version", app.GoVer,
 			"Distro", app.Distro,
 			"Kernel", app.Kernel,
 			"Branch", app.Branch,

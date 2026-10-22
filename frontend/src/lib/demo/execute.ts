@@ -669,7 +669,8 @@ export function demoExecute(query: string, variables?: Variables): Record<string
         systemInfo: {
           Version: "0.1.0",
           Git: "demo",
-          Compile: "2026-10-21",
+          BuildAt: "2026-10-21",
+          GoVer: "1.26",
           Branch: "main",
           Database: "mysql",
           MailEnabled: false,

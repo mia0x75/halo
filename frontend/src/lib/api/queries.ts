@@ -830,7 +830,8 @@ export const ROLES_QUERY = `
 export interface SystemInfoNode {
   Version: string
   Git: string
-  Compile: string
+  BuildAt: string
+  GoVer: string
   Branch: string
   Database: string
   MailEnabled: boolean
@@ -843,7 +844,8 @@ export const SYSTEM_INFO_QUERY = `
     systemInfo {
       Version
       Git
-      Compile
+      BuildAt
+      GoVer
       Branch
       Database
       MailEnabled

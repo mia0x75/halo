@@ -5,7 +5,8 @@ package app
 var (
 	Version = "0.0.0"
 	Git     = "not a git repo"
-	Compile = "unknown"
+	GoVer   = "unknown"
+	BuildAt = "unknown"
 	Branch  = "unknown"
 	Distro  = "Unknown"
 	Kernel  = "Unknown"

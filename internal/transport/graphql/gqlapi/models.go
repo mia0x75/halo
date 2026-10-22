@@ -288,7 +288,9 @@ type SystemInfo struct {
 	// 构建时的 Git 提交
 	Git string `json:"Git"`
 	// 构建时间
-	Compile string `json:"Compile"`
+	BuildAt string `json:"BuildAt"`
+	// 构建使用的 Go 版本
+	GoVer string `json:"GoVer"`
 	// 构建分支
 	Branch string `json:"Branch"`
 	// 元数据库类型：mysql 或 postgres

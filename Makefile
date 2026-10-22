@@ -117,7 +117,7 @@ cover: test
 build: fmt
 	@echo "$(CGREEN)Building ...$(CEND)"
 	@P=github.com/mia0x75/halo/internal/app; \
-	git="$$(git log --date=iso --pretty=format:'%cd' -1 2>/dev/null) $$(git describe --tags --always 2>/dev/null)"; \
+	git="$$(git describe --tags --always 2>/dev/null)"; \
 	[ -n "$$git" ] || git="not a git repo"; \
 	version="$$(cat VERSION 2>/dev/null || echo 0.0.0)"; \
 	build="$$(cat BUILD 2>/dev/null || echo 0)"; \
@@ -126,9 +126,11 @@ build: fmt
 	kernel="$$(uname -r 2>/dev/null || echo unknown)"; \
 	[ -r /etc/os-release ] && . /etc/os-release; \
 	distro="$${PRETTY_NAME:-Unknown}"; \
-	compile="$$(date '+%F %T %z') by $$(go version 2>/dev/null || echo 'go not found')"; \
+	buildAt="$$(date '+%F %T %z')"; \
+	gover="$$(go env GOVERSION | sed -E 's/^go//; s/[[:space:]-].*//')"; \
+	[ -n "$$gover" ] || gover="unknown"; \
 	ldflags="-X \"$$P.Version=$$version.$$build\""; \
-	for kv in "Git:$$git" "Compile:$$compile" "Branch:$$branch" "Distro:$$distro" "Kernel:$$kernel"; do \
+	for kv in "Git:$$git" "BuildAt:$$buildAt" "Branch:$$branch" "Distro:$$distro" "Kernel:$$kernel" "GoVer:$$gover"; do \
 		ldflags="$$ldflags -X \"$$P.$${kv%%:*}=$${kv#*:}\""; \
 	done; \
 	ret=0; \

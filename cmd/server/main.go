@@ -28,7 +28,7 @@ import (
 
 	// "github.com/mia0x75/halo/internal/platform/log"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
-	"github.com/mia0x75/halo/internal/transport/http"
+	server "github.com/mia0x75/halo/internal/transport/http"
 )
 
 var lg = logrus.New()
@@ -59,10 +59,11 @@ func main() {
 	flag.Parse()
 
 	fmt.Print(app.Banner)
-	fmt.Printf("%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n",
+	fmt.Printf("%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n%-11s: %s\n",
 		"Version", app.Version,
 		"Git commit", app.Git,
-		"Compile", app.Compile,
+		"BuildAt", app.BuildAt,
+		"Go version", app.GoVer,
 		"Distro", app.Distro,
 		"Kernel", app.Kernel,
 		"Branch", app.Branch,

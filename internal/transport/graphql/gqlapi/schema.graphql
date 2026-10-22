@@ -778,7 +778,12 @@ type SystemInfo {
 	"""
 	构建时间
 	"""
-	Compile: String!
+	BuildAt: String!
+
+	"""
+	构建使用的 Go 版本
+	"""
+	GoVer: String!
 
 	"""
 	构建分支

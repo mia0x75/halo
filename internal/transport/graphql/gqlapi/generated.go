@@ -499,10 +499,11 @@ type ComplexityRoot struct {
 
 	SystemInfo struct {
 		Branch       func(childComplexity int) int
+		BuildAt      func(childComplexity int) int
 		ClusterCount func(childComplexity int) int
-		Compile      func(childComplexity int) int
 		Database     func(childComplexity int) int
 		Git          func(childComplexity int) int
+		GoVer        func(childComplexity int) int
 		MailEnabled  func(childComplexity int) int
 		UserCount    func(childComplexity int) int
 		Version      func(childComplexity int) int
@@ -3060,18 +3061,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.SystemInfo.Branch(childComplexity), true
+	case "SystemInfo.BuildAt":
+		if e.ComplexityRoot.SystemInfo.BuildAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SystemInfo.BuildAt(childComplexity), true
 	case "SystemInfo.ClusterCount":
 		if e.ComplexityRoot.SystemInfo.ClusterCount == nil {
 			break
 		}
 
 		return e.ComplexityRoot.SystemInfo.ClusterCount(childComplexity), true
-	case "SystemInfo.Compile":
-		if e.ComplexityRoot.SystemInfo.Compile == nil {
-			break
-		}
-
-		return e.ComplexityRoot.SystemInfo.Compile(childComplexity), true
 	case "SystemInfo.Database":
 		if e.ComplexityRoot.SystemInfo.Database == nil {
 			break
@@ -3084,6 +3085,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.SystemInfo.Git(childComplexity), true
+	case "SystemInfo.GoVer":
+		if e.ComplexityRoot.SystemInfo.GoVer == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SystemInfo.GoVer(childComplexity), true
 	case "SystemInfo.MailEnabled":
 		if e.ComplexityRoot.SystemInfo.MailEnabled == nil {
 			break
@@ -4378,8 +4385,10 @@ func (ec *executionContext) childFields_SystemInfo(ctx context.Context, field gr
 		return ec.fieldContext_SystemInfo_Version(ctx, field)
 	case "Git":
 		return ec.fieldContext_SystemInfo_Git(ctx, field)
-	case "Compile":
-		return ec.fieldContext_SystemInfo_Compile(ctx, field)
+	case "BuildAt":
+		return ec.fieldContext_SystemInfo_BuildAt(ctx, field)
+	case "GoVer":
+		return ec.fieldContext_SystemInfo_GoVer(ctx, field)
 	case "Branch":
 		return ec.fieldContext_SystemInfo_Branch(ctx, field)
 	case "Database":
@@ -18483,16 +18492,16 @@ func (ec *executionContext) fieldContext_SystemInfo_Git(_ context.Context, field
 	return graphql.NewScalarFieldContext("SystemInfo", field, false, false, "String")
 }
 
-func (ec *executionContext) _SystemInfo_Compile(ctx context.Context, field graphql.CollectedField, obj *SystemInfo) (ret graphql.Marshaler) {
+func (ec *executionContext) _SystemInfo_BuildAt(ctx context.Context, field graphql.CollectedField, obj *SystemInfo) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_SystemInfo_Compile(ctx, field)
+			return ec.fieldContext_SystemInfo_BuildAt(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
-			return obj.Compile, nil
+			return obj.BuildAt, nil
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
@@ -18502,7 +18511,30 @@ func (ec *executionContext) _SystemInfo_Compile(ctx context.Context, field graph
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_SystemInfo_Compile(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SystemInfo_BuildAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("SystemInfo", field, false, false, "String")
+}
+
+func (ec *executionContext) _SystemInfo_GoVer(ctx context.Context, field graphql.CollectedField, obj *SystemInfo) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_SystemInfo_GoVer(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.GoVer, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_SystemInfo_GoVer(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("SystemInfo", field, false, false, "String")
 }
 
@@ -28188,8 +28220,13 @@ func (ec *executionContext) _SystemInfo(ctx context.Context, sel ast.SelectionSe
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "Compile":
-			out.Values[i] = ec._SystemInfo_Compile(ctx, field, obj)
+		case "BuildAt":
+			out.Values[i] = ec._SystemInfo_BuildAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "GoVer":
+			out.Values[i] = ec._SystemInfo_GoVer(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

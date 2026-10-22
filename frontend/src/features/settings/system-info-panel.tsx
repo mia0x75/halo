@@ -27,7 +27,8 @@ export function SystemInfoPanel() {
     ? [
         ["版本", info.Version],
         ["Git 提交", info.Git],
-        ["构建时间", info.Compile],
+        ["构建时间", info.BuildAt],
+        ["Go 版本", info.GoVer],
         ["构建分支", info.Branch],
         ["元数据库", info.Database],
         ["邮件通道", info.MailEnabled ? "已启用" : "未启用"],
