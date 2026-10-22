@@ -19,12 +19,22 @@ TEST_MYSQL_DSN ?= root:test@tcp(127.0.0.1:3307)/halo_test?charset=utf8mb4&parseT
 TEST_PG_DSN ?= postgres://postgres:test@127.0.0.1:5433/halo_test?sslmode=disable
 TEST_CONFIG ?= $(CURDIR)/bin/config.test.json
 
+
+# 帮助：列出可用目标（目标后的 ## 注释即是说明）
+.PHONY: help
+help:
+	@echo "用法: make <target>"
+	@echo ""
+	@grep -hE '^[a-zA-Z0-9_.-]+:.*## ' $(MAKEFILE_LIST) \
+		| sort \
+		| awk 'BEGIN {FS = ":.*## "}; {printf "  $(CGREEN)%-20s$(CEND) %s\n", $$1, $$2}'
+
 .PHONY: all
-all: | fmt build
+all: | fmt build ## 格式化并构建全部二进制
 
 # TODO: 依赖检查
 .PHONY: deps
-deps:
+deps: ## 安装 Go 依赖
 	@echo "$(CGREEN)Dependency check$(CEND)"
 	@bash ./deps.sh
 	# The retool tools.json is setup from retool-install.sh
@@ -33,7 +43,7 @@ deps:
 
 # 代码格式化
 .PHONY: fmt
-fmt:
+fmt: ## 格式化 Go 代码
 	@echo "$(CGREEN)Run gofmt on all source files ...$(CEND)"
 	@echo "gofmt -l -s -w ..."
 	@ret=0 && for d in $$(go list -f '{{.Dir}}' ./... | grep -v /vendor/ | grep -v '/frontend'); do \
@@ -42,14 +52,14 @@ fmt:
 
 # 运行全部测试用例（无数据库时 DB 相关用例自动跳过）
 .PHONY: test
-test:
+test: ## 运行 Go 测试
 	@echo "$(CGREEN)Run all test cases ...$(CEND)"
 	go test ./...
 	@echo "test Success!"
 
 # 启动测试用元数据库（MySQL 3307 / PG 5433），等待 schema+seed 加载完成
 .PHONY: test-db-up
-test-db-up: test-config
+test-db-up: test-config ## 拉起测试用 MySQL/PostgreSQL
 	@echo "$(CGREEN)Starting test databases ...$(CEND)"
 	$(COMPOSE) -f $(COMPOSE_FILE) up -d
 	@for c in halo-test-mysql halo-test-postgres; do \
@@ -64,13 +74,13 @@ test-db-up: test-config
 
 # 停止并清除测试数据库（含数据卷）
 .PHONY: test-db-down
-test-db-down:
+test-db-down: ## 停止测试数据库
 	@echo "$(CGREEN)Stopping test databases ...$(CEND)"
 	$(COMPOSE) -f $(COMPOSE_FILE) down -v
 
 # 从示例生成测试配置（已存在则不覆盖）
 .PHONY: test-config
-test-config:
+test-config: ## 生成测试配置
 	@test -f bin/config.test.json || cp config.test.json.example bin/config.test.json
 
 # 元数据库连接读取的配置文件：优先 bin/config.json，回退 bin/config.mysql.json
@@ -78,7 +88,7 @@ META_CONFIG ?= $(shell test -f bin/config.json && echo bin/config.json || echo b
 
 # 向元数据库灌入测试 cluster（幂等）。连接信息取自 $(META_CONFIG) 的 database.addr。
 .PHONY: test-seed-meta
-test-seed-meta:
+test-seed-meta: ## 写入测试种子数据
 	@dsn=$$(grep -m1 '"addr"' $(META_CONFIG) | sed -E 's/.*"addr"[[:space:]]*:[[:space:]]*"([^"]*)".*/\1/'); \
 	if [ -z "$$dsn" ]; then echo "$(CRED)cannot parse database.addr from $(META_CONFIG)$(CEND)"; exit 1; fi; \
 	user=$${dsn%%:*}; rest=$${dsn#*:}; pass=$${rest%%@tcp(*}; \
@@ -89,7 +99,7 @@ test-seed-meta:
 
 # 起测试库 → 跑全部测试（含 DB 集成）→ 拆测试库；无库时不依赖此目标
 .PHONY: test-all
-test-all: test-db-up
+test-all: test-db-up ## 拉起测试库并跑全量测试
 	@echo "$(CGREEN)Run all test cases against test databases ...$(CEND)"
 	@HALO_TEST_DSN='$(TEST_MYSQL_DSN)' \
 	 HALO_TEST_PG_DSN='$(TEST_PG_DSN)' \
@@ -100,7 +110,7 @@ test-all: test-db-up
 
 # 测试代码覆盖率
 .PHONY: cover
-cover: test
+cover: test ## 运行测试并生成覆盖率报告
 	@echo "$(CGREEN)Run test cover check ...$(CEND)"
 	go test -coverpkg=./... -coverprofile=coverage.data ./... | column -t
 	go tool cover -html=coverage.data -o coverage.html
@@ -114,7 +124,7 @@ cover: test
 			{print "\033[93m"$$0"%\033[0m"}}'
 
 # 项目构建
-build: fmt frontend-build
+build: fmt frontend-build ## 构建前端并编译全部二进制（前端打入 server）
 	@echo "$(CGREEN)Building ...$(CEND)"
 	@P=github.com/mia0x75/halo/internal/app; \
 	git="$$(git describe --tags --always 2>/dev/null)"; \
@@ -141,7 +151,7 @@ build: fmt frontend-build
 	@echo "$(CGREEN)build Success!$(CEND)"
 
 # 安装
-install: build
+install: build ## 构建并安装二进制
 	@echo "$(CGREEN)Install ...$(CEND)"
 	go install ./...
 	@echo "install Success!"
@@ -150,7 +160,7 @@ install: build
 # 如果有不想改的lint问题可以使用metalinter.sh加黑名单
 #@bash doc/example/metalinter.sh
 .PHONY: lint
-lint: build
+lint: build ## 运行 Go 静态检查
 	@echo "$(CGREEN)Run linter check ...$(CEND)"
 	CGO_ENABLED=0 retool do gometalinter.v2 -j 1 --config doc/example/metalinter.json ./...
 	retool do revive -formatter friendly --exclude vendor/... -config doc/example/revive.toml ./...
@@ -159,45 +169,45 @@ lint: build
 
 # 重新生成 sqlc 与 GraphQL 服务端代码
 .PHONY: generate
-generate: sqlc gqlgen
+generate: sqlc gqlgen ## 重新生成 sqlc 与 gqlgen 代码
 
 .PHONY: sqlc
-sqlc:
+sqlc: ## 重新生成 sqlc 数据访问代码
 	@echo "$(CGREEN)Generating sqlc code ...$(CEND)"
 	sqlc generate
 
 .PHONY: gqlgen
-gqlgen:
+gqlgen: ## 重新生成 gqlapi/generated.go
 	@echo "$(CGREEN)Generating GraphQL server code ...$(CEND)"
 	go tool gqlgen generate
 
 # 校验迁移基线与权威 schema 脚本是否同步
 .PHONY: check-migrations
-check-migrations:
+check-migrations: ## 校验迁移链与权威 schema 是否同步
 	@echo "$(CGREEN)Checking migration baselines against schema scripts ...$(CEND)"
 	@bash scripts/check_migrations_sync.sh
 
 # 执行元数据库 schema 迁移（需先设置 HALO_CFG）
 .PHONY: migrate-up
-migrate-up:
+migrate-up: ## 执行元数据库迁移
 	@echo "$(CGREEN)Applying metadata migrations ...$(CEND)"
 	@go run ./cmd/halocli migrate up
 
 # 查看元数据库迁移状态
 .PHONY: migrate-status
-migrate-status:
+migrate-status: ## 查看元数据库迁移状态
 	@echo "$(CGREEN)Migration status ...$(CEND)"
 	@go run ./cmd/halocli migrate status
 
 # 前端依赖安装
 .PHONY: frontend-install
-frontend-install:
+frontend-install: ## 安装前端依赖
 	@echo "$(CGREEN)Installing frontend dependencies ...$(CEND)"
 	cd frontend && bun install
 
 # 前端构建（类型检查 + 打包）
 .PHONY: frontend-build
-frontend-build:
+frontend-build: ## 构建前端并复制进 embed 目录
 	@echo "$(CGREEN)Building frontend ...$(CEND)"
 	cd frontend && bun run build
 	@echo "$(CGREEN)Copying frontend into embed dir ...$(CEND)"
@@ -208,14 +218,14 @@ frontend-build:
 
 # 前端静态检查
 .PHONY: frontend-lint
-frontend-lint:
+frontend-lint: ## 前端静态检查
 	@echo "$(CGREEN)Run frontend linter ...$(CEND)"
 	cd frontend && bun run lint
 	@echo "$(CGREEN)frontend lint Success!$(CEND)"
 
 # 前端开发服务器
 .PHONY: frontend-dev
-frontend-dev:
+frontend-dev: ## 启动前端开发服务器
 	@echo "$(CGREEN)Starting frontend dev server ...$(CEND)"
 	cd frontend && bun run dev
 
