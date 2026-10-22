@@ -73,7 +73,8 @@ func (h *SetupHandler) status(w http.ResponseWriter, r *http.Request) {
 	}
 	response := statusResponse{
 		Configured: config.Configured(),
-		ConfigFile: config.ConfigFile,
+		// 还没有配置文件时，这里是向导将要写入的位置。
+		ConfigFile: config.SavePath,
 	}
 	if cfg := config.Config(); cfg != nil && cfg.Database != nil {
 		response.Driver = cfg.Database.Driver

@@ -77,7 +77,12 @@ func main() {
 	}
 
 	config.ParseConfig(*cfg)
-	os.Setenv("HALO_CFG", config.ConfigFile)
+	// 子命令（halocli migrate 等）用同一个配置文件；还没写盘时指向将要写入的位置。
+	if config.SavePath != "" {
+		os.Setenv("HALO_CFG", config.SavePath)
+	} else {
+		os.Setenv("HALO_CFG", config.ConfigFile)
+	}
 	configureAuth()
 
 	// 未配置元数据库与密钥时，服务器先跑在初始化模式：只提供 /welcome 向导
@@ -110,6 +115,13 @@ func main() {
 	}
 
 	addr := config.Config().Listen
+	certFile := config.Config().Cert
+	keyFile := config.Config().Key
+	for _, path := range []string{certFile, keyFile} {
+		if _, err := os.Stat(path); err != nil {
+			lg.Fatalf("[F] 缺少 TLS 证书 %s（相对当前工作目录）。请把证书放到该路径，或用 -c 指定配置里的 cert/key。", path)
+		}
+	}
 	lg.Infof("[I] http listening %s", addr)
 
 	srv := &http.Server{
@@ -124,7 +136,7 @@ func main() {
 	// csrf + gzip
 	// Run our server in a goroutine so that it doesn't block.
 	go func() {
-		if err := srv.ListenAndServeTLS(config.Config().Cert, config.Config().Key); err != http.ErrServerClosed {
+		if err := srv.ListenAndServeTLS(certFile, keyFile); err != http.ErrServerClosed {
 			lg.Fatalf("错误代码: 1500, 错误信息: %s", err.Error())
 		}
 	}()

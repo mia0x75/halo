@@ -35,6 +35,24 @@ func TestParseConfigLoadsFields(t *testing.T) {
 	require.Equal(t, 9, cfg.Database.MaxConnections)
 	require.Equal(t, "halo", cfg.Secret.Jwt.Issuer)
 	require.Equal(t, path, ConfigFile)
+	require.Equal(t, path, SavePath)
+}
+
+// TestParseConfigWithoutFileUsesDefaults covers the no-config-file start: the
+// server boots on the defaults and the wizard writes the file later.
+func TestParseConfigWithoutFileUsesDefaults(t *testing.T) {
+	missing := filepath.Join(t.TempDir(), "cfg.json")
+	ParseConfig(missing)
+
+	cfg := Config()
+	require.NotNil(t, cfg)
+	require.Equal(t, "info", cfg.Log.Level)
+	require.Equal(t, "certs/cert.pem", cfg.Cert)
+	require.Equal(t, "certs/key.pem", cfg.Key)
+	require.Equal(t, ":8443", cfg.Listen)
+	require.Equal(t, missing, SavePath)
+	require.Empty(t, ConfigFile)
+	require.False(t, Configured())
 }
 
 // TestParseConfigDefaultsCerts covers the empty-cert/key fallback applied after
@@ -45,8 +63,9 @@ func TestParseConfigDefaultsCerts(t *testing.T) {
 
 	cfg := Config()
 	require.NotNil(t, cfg)
-	require.Equal(t, "cert.pem", config.Cert)
-	require.Equal(t, "key.pem", config.Key)
+	require.Equal(t, "certs/cert.pem", config.Cert)
+	require.Equal(t, "certs/key.pem", config.Key)
+	require.Equal(t, "info", config.Log.Level)
 }
 
 func TestTemplateConstantsAreDistinct(t *testing.T) {

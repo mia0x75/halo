@@ -36,7 +36,10 @@ func TestSaveWritesFileAndKeepsOtherSections(t *testing.T) {
 
 	body, err := os.ReadFile(path)
 	require.NoError(t, err)
+	// 写回的是完整配置：默认值与向导填的内容都在里面。
 	require.Contains(t, string(body), `"listen": ":8443"`)
+	require.Contains(t, string(body), `"cert": "certs/cert.pem"`)
+	require.Contains(t, string(body), `"level": "debug"`)
 	require.Contains(t, string(body), "root@tcp(127.0.0.1:3306)/halo")
 
 	// 内存里的配置也要跟着更新，服务重启前就能用。

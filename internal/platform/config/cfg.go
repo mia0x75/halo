@@ -53,8 +53,10 @@ type GlobalConfig struct {
 }
 
 var (
-	// ConfigFile 配置文件
+	// ConfigFile 实际读到的配置文件，没有则为空。
 	ConfigFile string
+	// SavePath 配置写入位置：向导完成后把完整配置写到这里。
+	SavePath   string
 	config     *GlobalConfig
 	configLock = new(sync.RWMutex)
 )
@@ -66,40 +68,47 @@ func Config() *GlobalConfig {
 	return config
 }
 
-// ParseConfig 从配置文件读取配置，反序列化成配置对象
+// ParseConfig 从配置文件读取配置，反序列化成配置对象。
+//
+// 查找顺序：-c 指定的文件 → 运行目录的 cfg.json → /etc/halo/cfg.json。
+// 都没有就用默认值启动，由 /welcome 向导写出配置文件。
 func ParseConfig(cfg string) {
-	var configs []string
-	var path, content string
-	var err error
+	configLock.Lock()
+	ConfigFile = ""
+	SavePath = ""
+	configLock.Unlock()
 
-	path, err = os.Executable()
-	if err != nil {
-		log.Fatalf("[F] 错误信息: %s", err.Error())
-	}
-	baseDir := filepath.Dir(path)
-
-	// 指定了配置文件优先读配置文件，未指定配置文件按如下顺序加载，先找到哪个加载哪个
-	if strings.TrimSpace(cfg) == "" {
-		configs = []string{
-			"/etc/halo/cfg.json",
-			filepath.Join(baseDir, "etc", "cfg.json"),
-			filepath.Join(baseDir, "cfg.json"),
-		}
+	candidates := []string{}
+	if trimmed := strings.TrimSpace(cfg); trimmed != "" {
+		candidates = append(candidates, trimmed)
 	} else {
-		configs = []string{cfg}
+		if cwd, err := os.Getwd(); err == nil {
+			candidates = append(candidates, filepath.Join(cwd, "cfg.json"))
+		}
+		candidates = append(candidates, "/etc/halo/cfg.json")
 	}
 
-	for _, candidate := range configs {
-		if _, err = os.Stat(candidate); err == nil {
+	for _, candidate := range candidates {
+		if _, err := os.Stat(candidate); err == nil {
 			ConfigFile = candidate
 			log.Debugf("[D] Loading config from: %s", candidate)
 			break
 		}
 	}
+	// 写入位置：-c 指定的文件优先，否则写运行目录，再不行写 /etc/halo。
+	SavePath = candidates[0]
+	if len(candidates) > 1 && !writable(filepath.Dir(SavePath)) {
+		for _, candidate := range candidates[1:] {
+			if writable(filepath.Dir(candidate)) {
+				SavePath = candidate
+				break
+			}
+		}
+	}
+
 	if ConfigFile == "" {
-		// 配置文件还不存在：首次安装走 /welcome 向导，写入时才真正落盘。
-		ConfigFile = firstWritablePath(configs)
-		log.Warnf("[W] 未找到配置文件，将新建 %s 并进入初始化向导。", ConfigFile)
+		// 没有配置文件：先用默认值跑起来，向导完成后再落盘。
+		log.Infof("[I] 未找到配置文件，使用默认配置，初始化向导会把配置写入 %s", SavePath)
 		configLock.Lock()
 		config = &GlobalConfig{}
 		configLock.Unlock()
@@ -107,7 +116,7 @@ func ParseConfig(cfg string) {
 		return
 	}
 
-	content, err = file.ToTrimString(ConfigFile)
+	content, err := file.ToTrimString(ConfigFile)
 	if err != nil {
 		log.Fatalf("[F] 读取配置文件 \"%s\" 错误: %s", ConfigFile, err.Error())
 	}
@@ -127,40 +136,41 @@ func ParseConfig(cfg string) {
 	log.Debugf("[D] 读取配置文件 \"%s\" 成功。", ConfigFile)
 }
 
+// writable reports whether the directory accepts new files.
+func writable(dir string) bool {
+	info, err := os.Stat(dir)
+	if err != nil || !info.IsDir() {
+		return false
+	}
+	probe, err := os.CreateTemp(dir, ".halo-probe-*")
+	if err != nil {
+		return false
+	}
+	name := probe.Name()
+	_ = probe.Close()
+	_ = os.Remove(name)
+	return true
+}
+
 // applyDefaults fills in the values the server always needs.
 func applyDefaults() {
 	configLock.Lock()
 	defer configLock.Unlock()
+	if config.Log == nil {
+		config.Log = &LogConfig{}
+	}
+	if config.Log.Level == "" {
+		config.Log.Level = "info"
+	}
 	if config.Cert == "" {
-		config.Cert = "cert.pem"
+		config.Cert = "certs/cert.pem"
 	}
 	if config.Key == "" {
-		config.Key = "key.pem"
+		config.Key = "certs/key.pem"
 	}
 	if config.Listen == "" {
 		config.Listen = ":8443"
 	}
-}
-
-// firstWritablePath returns the first candidate whose directory exists and
-// accepts new files, so the setup wizard can create the config file.
-func firstWritablePath(candidates []string) string {
-	for _, candidate := range candidates {
-		dir := filepath.Dir(candidate)
-		info, err := os.Stat(dir)
-		if err != nil || !info.IsDir() {
-			continue
-		}
-		probe, err := os.CreateTemp(dir, ".halo-probe-*")
-		if err != nil {
-			continue
-		}
-		name := probe.Name()
-		_ = probe.Close()
-		_ = os.Remove(name)
-		return candidate
-	}
-	return candidates[len(candidates)-1]
 }
 
 // Configured reports whether the metadata database and the secrets are set.
@@ -189,7 +199,7 @@ func Save(mutate func(*GlobalConfig)) error {
 	if mutate == nil {
 		return fmt.Errorf("config: 没有要保存的变更")
 	}
-	if strings.TrimSpace(ConfigFile) == "" {
+	if strings.TrimSpace(SavePath) == "" {
 		return fmt.Errorf("config: 配置文件路径未知")
 	}
 
@@ -221,13 +231,13 @@ func Save(mutate func(*GlobalConfig)) error {
 	}
 	body = append(body, '\n')
 
-	dir := filepath.Dir(ConfigFile)
+	dir := filepath.Dir(SavePath)
 	if err := os.MkdirAll(dir, 0o750); err != nil {
 		return fmt.Errorf("config: 创建配置目录失败: %w", err)
 	}
 	tmp, err := os.CreateTemp(dir, ".cfg-*.json")
 	if err != nil {
-		return fmt.Errorf("config: 创建临时配置文件失败: %w", err)
+		return fmt.Errorf("config: 无法在 %s 写入配置文件，该目录不可写，请用 -c 指定可写路径: %w", dir, err)
 	}
 	tmpName := tmp.Name()
 	defer func() { _ = os.Remove(tmpName) }()
@@ -243,9 +253,10 @@ func Save(mutate func(*GlobalConfig)) error {
 	if err := tmp.Close(); err != nil {
 		return fmt.Errorf("config: 关闭临时配置文件失败: %w", err)
 	}
-	if err := os.Rename(tmpName, ConfigFile); err != nil {
-		return fmt.Errorf("config: 替换配置文件失败: %w", err)
+	if err := os.Rename(tmpName, SavePath); err != nil {
+		return fmt.Errorf("config: 替换配置文件 %s 失败: %w", SavePath, err)
 	}
+	ConfigFile = SavePath
 
 	configLock.Lock()
 	config = &current
