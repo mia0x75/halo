@@ -112,16 +112,16 @@ func (q *Queries) GetRuleByUUID(ctx context.Context, uuid string) (MmRule, error
 }
 
 const listRules = `-- name: ListRules :many
-SELECT name, uuid, ` + "`" + `group` + "`" + `, description, level, vldr_group, operator, parameters, bitwise, func, message, element, version, update_at, create_at FROM mm_rules WHERE uuid < ? ORDER BY uuid DESC LIMIT ?
+SELECT name, uuid, ` + "`" + `group` + "`" + `, description, level, vldr_group, operator, parameters, bitwise, func, message, element, version, update_at, create_at FROM mm_rules WHERE name > ? ORDER BY name ASC LIMIT ?
 `
 
 type ListRulesParams struct {
-	Uuid  string
+	Name  string
 	Limit int32
 }
 
 func (q *Queries) ListRules(ctx context.Context, arg ListRulesParams) ([]MmRule, error) {
-	rows, err := q.db.QueryContext(ctx, listRules, arg.Uuid, arg.Limit)
+	rows, err := q.db.QueryContext(ctx, listRules, arg.Name, arg.Limit)
 	if err != nil {
 		return nil, err
 	}

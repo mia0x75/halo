@@ -12,7 +12,9 @@ var RulesMap = &safecache.SafeMap[models.Rule]{}
 // Init 缓存初始化
 func RulesInit() (err error) {
 	_, err = RulesMap.WithInit(func() ([]*models.Rule, error) {
-		return loadUUIDKeyed(repos.Rule.List, bridge.RuleFromDomain)
+		// The rule list is ordered by rule ID, so the cache starts at the first
+		// rule instead of the UUID sentinel.
+		return loadFrom(repos.Rule.List, "", bridge.RuleFromDomain)
 	})
 	return
 }

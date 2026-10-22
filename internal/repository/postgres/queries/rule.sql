@@ -14,4 +14,4 @@ UPDATE mm_rules SET "group" = $1, description = $2, level = $3, vldr_group = $4,
 DELETE FROM mm_rules WHERE uuid = $1;
 
 -- name: ListRules :many
-SELECT name, uuid, "group", description, level, vldr_group, operator, parameters, bitwise, func, message, element, version, update_at, create_at FROM mm_rules WHERE uuid < $1 ORDER BY uuid DESC LIMIT $2;
+SELECT name, uuid, "group", description, level, vldr_group, operator, parameters, bitwise, func, message, element, version, update_at, create_at FROM mm_rules WHERE name > $1 ORDER BY name ASC LIMIT $2;

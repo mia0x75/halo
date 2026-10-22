@@ -14,4 +14,4 @@ UPDATE mm_rules SET `group` = ?, description = ?, level = ?, vldr_group = ?, ope
 DELETE FROM mm_rules WHERE uuid = ?;
 
 -- name: ListRules :many
-SELECT name, uuid, `group`, description, level, vldr_group, operator, parameters, bitwise, func, message, element, version, update_at, create_at FROM mm_rules WHERE uuid < ? ORDER BY uuid DESC LIMIT ?;
+SELECT name, uuid, `group`, description, level, vldr_group, operator, parameters, bitwise, func, message, element, version, update_at, create_at FROM mm_rules WHERE name > ? ORDER BY name ASC LIMIT ?;

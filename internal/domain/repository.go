@@ -198,6 +198,8 @@ type RuleRepository interface {
 	GetByName(ctx context.Context, name string) (*Rule, error)
 	Update(ctx context.Context, r *Rule) error
 	DeleteByUUID(ctx context.Context, uuid string) error
+	// List returns rules ordered by rule ID (name) ascending. The cursor is the
+	// rule name to continue from; an empty cursor starts at the first rule.
 	List(ctx context.Context, cursor string, limit int) ([]*Rule, error)
 }
 

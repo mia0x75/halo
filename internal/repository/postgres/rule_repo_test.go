@@ -52,9 +52,14 @@ func TestRuleRepo(t *testing.T) {
 	require.Equal(t, domain.RuleLevelWarning, got.Level)
 	require.Equal(t, "be careful", got.Message)
 
-	list, err := repo.List(ctx, rule.UUID+"~", 100)
+	// The list is ordered by rule ID, and the cursor continues after a name.
+	list, err := repo.List(ctx, "", 1000)
 	require.NoError(t, err)
 	require.True(t, hasRule(list, rule.UUID))
+
+	after, err := repo.List(ctx, rule.Name, 1000)
+	require.NoError(t, err)
+	require.False(t, hasRule(after, rule.UUID))
 
 	require.NoError(t, repo.DeleteByUUID(ctx, rule.UUID))
 	_, err = repo.GetByUUID(ctx, rule.UUID)

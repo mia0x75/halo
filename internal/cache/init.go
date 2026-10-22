@@ -45,7 +45,13 @@ func loadIntKeyed[D any, M any](list func(context.Context, int64, int) ([]D, err
 
 // loadUUIDKeyed pages in every row of a UUID-keyed table.
 func loadUUIDKeyed[D any, M any](list func(context.Context, string, int) ([]D, error), conv func(D) *M) ([]*M, error) {
-	items, err := list(context.Background(), cacheUUIDCursor, cacheLimit)
+	return loadFrom(list, cacheUUIDCursor, conv)
+}
+
+// loadFrom pages in every row of a table whose key sorts ascending, starting
+// after the given cursor.
+func loadFrom[D any, M any](list func(context.Context, string, int) ([]D, error), cursor string, conv func(D) *M) ([]*M, error) {
+	items, err := list(context.Background(), cursor, cacheLimit)
 	if err != nil {
 		return nil, err
 	}

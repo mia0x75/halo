@@ -336,7 +336,7 @@ const ruleDescriptions: Record<string, string> = {
 }
 
 function buildRules(): RuleNode[] {
-  return rulePrefixes.flatMap(([prefix, level], index) => {
+  const rules = rulePrefixes.flatMap(([prefix, level], index) => {
     const count = prefix === "UPD" || prefix === "DEL" ? 3 : 2
     return Array.from({ length: count }, (_, seq) => {
       const name = `${prefix}-L${level + 1}-${String(seq + 1).padStart(3, "0")}`
@@ -353,6 +353,8 @@ function buildRules(): RuleNode[] {
       }
     })
   })
+  // The real service lists rules by rule ID, so the demo keeps the same order.
+  return rules.sort((a, b) => a.Name.localeCompare(b.Name))
 }
 
 function buildHits(rules: RuleNode[], tickets: DemoTicket[]): RuleHitNode[] {
