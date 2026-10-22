@@ -157,6 +157,20 @@ lint: build
 	retool do golangci-lint --tests=false run
 	@echo "gometalinter check your code is pretty good"
 
+# 重新生成 sqlc 与 GraphQL 服务端代码
+.PHONY: generate
+generate: sqlc gqlgen
+
+.PHONY: sqlc
+sqlc:
+	@echo "$(CGREEN)Generating sqlc code ...$(CEND)"
+	sqlc generate
+
+.PHONY: gqlgen
+gqlgen:
+	@echo "$(CGREEN)Generating GraphQL server code ...$(CEND)"
+	go tool gqlgen generate
+
 # 校验迁移基线与权威 schema 脚本是否同步
 .PHONY: check-migrations
 check-migrations:
