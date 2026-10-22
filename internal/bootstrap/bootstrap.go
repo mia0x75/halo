@@ -176,6 +176,25 @@ func Run(ctx context.Context, request Request) (*app.App, error) {
 	return application, nil
 }
 
+// TestConnection tries to reach the metadata database without writing
+// anything, so the wizard can verify the connection before the setup runs.
+func TestConnection(ctx context.Context, request DatabaseRequest) error {
+	if strings.TrimSpace(request.Addr) == "" {
+		return errors.New("请填写元数据库连接串")
+	}
+	pool, err := db.New(ctx, db.Config{
+		Addr:           request.Addr,
+		MaxIdle:        request.MaxIdle,
+		MaxConnections: request.MaxConnections,
+		WaitTimeout:    request.WaitTimeout,
+		Driver:         request.Driver,
+	})
+	if err != nil {
+		return fmt.Errorf("连接元数据库失败: %w", err)
+	}
+	return pool.Close()
+}
+
 // migrateSchema applies the pending schema migrations.
 func migrateSchema(ctx context.Context, pool *db.DB) error {
 	fsys, err := migrationFS(pool.Driver)

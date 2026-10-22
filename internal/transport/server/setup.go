@@ -54,6 +54,7 @@ func SetupRoutes(r *mux.Router, handler *SetupHandler) {
 // Register mounts the setup endpoints on the router.
 func (h *SetupHandler) Register(r *mux.Router) {
 	r.HandleFunc("/api/setup/status", h.status)
+	r.HandleFunc("/api/setup/test", h.test)
 	r.HandleFunc("/api/setup", h.setup)
 }
 
@@ -81,6 +82,25 @@ func (h *SetupHandler) status(w http.ResponseWriter, r *http.Request) {
 		response.Addr = cfg.Database.Addr
 	}
 	writeSetupJSON(w, http.StatusOK, response)
+}
+
+// test checks the metadata database connection without changing anything.
+func (h *SetupHandler) test(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeSetupError(w, http.StatusMethodNotAllowed, "只支持 POST 请求")
+		return
+	}
+	var request bootstrap.DatabaseRequest
+	decoder := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20))
+	if err := decoder.Decode(&request); err != nil {
+		writeSetupError(w, http.StatusBadRequest, "请求格式错误: "+err.Error())
+		return
+	}
+	if err := bootstrap.TestConnection(r.Context(), request); err != nil {
+		writeSetupError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeSetupJSON(w, http.StatusOK, map[string]any{"ok": true})
 }
 
 // setup runs the wizard: it writes the config file, migrates the database and

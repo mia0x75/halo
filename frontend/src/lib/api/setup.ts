@@ -58,6 +58,19 @@ export async function runSetup(payload: SetupPayload): Promise<void> {
   }
 }
 
+/** 试连元数据库，不写任何东西。 */
+export async function testSetupConnection(payload: SetupPayload["database"]): Promise<void> {
+  const response = await fetch("/api/setup/test", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as { error?: string } | null
+    throw new Error(body?.error ?? `连接测试失败：${response.status}`)
+  }
+}
+
 /** 生成一段十六进制随机串，用作密钥。 */
 export function randomSecret(bytes: number): string {
   const buffer = new Uint8Array(bytes)
