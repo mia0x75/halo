@@ -391,7 +391,7 @@ CREATE TABLE `mm_clusters` (
   `password`    VARBINARY(48)
                 NOT NULL
                 COMMENT '密码',
-  `fingerprint` VARBINARY(20)
+  `fingerprint` VARBINARY(32)
                 NOT NULL
                 COMMENT '指纹',
   `status`      TINYINT UNSIGNED
