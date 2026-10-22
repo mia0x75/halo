@@ -75,7 +75,7 @@ export function TicketQueuePage({ mode, onOpenTicket, onCreateTicket }: TicketQu
         }
       />
 
-      <SectionCard title={title} description={`共 ${total} 条`} bodyClassName="p-0">
+      <SectionCard bodyClassName="p-0">
         <Table>
           <TableHeader>
             <TableRow>

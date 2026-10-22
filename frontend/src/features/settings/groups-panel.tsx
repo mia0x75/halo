@@ -124,7 +124,6 @@ export function GroupsPanel({ onCreate, onEdit }: GroupsPanelProps) {
 
   return (
     <SectionCard
-      title="群集分组"
       description="群集按分组归类，角色获得分组授权后其成员才能在该分组的群集上提交工单"
       action={
         <Button onClick={onCreate}>
@@ -195,7 +194,6 @@ export function GroupsPanel({ onCreate, onEdit }: GroupsPanelProps) {
       </Table>
 
       <SectionCard
-        title="群集归组"
         description="群集归属的分组决定谁能访问它：角色被授予分组后，持有该角色的成员即可访问"
         className="mt-4"
         bodyClassName="p-0"

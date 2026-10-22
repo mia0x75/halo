@@ -60,7 +60,6 @@ export function ClusterFormPage({ mode, uuid, onBack, onSaved }: ClusterFormPage
       />
 
       <SectionCard
-        title="接入信息"
         description="密码由服务端加密保存；编辑时留空表示不修改原密码"
       >
         {mode === "edit" && !initial ? (

@@ -110,11 +110,7 @@ export function RulesPage() {
         }
       />
 
-      <SectionCard
-        title="规则清单"
-        description="规则来自内置规则库，命中次数来自最近的命中记录"
-        bodyClassName="p-0"
-      >
+      <SectionCard bodyClassName="p-0">
         <div className="flex flex-wrap items-end gap-3 border-b border-border px-5 py-4">
           <div className="flex flex-col gap-1.5 sm:w-64">
             <Label htmlFor="rule-keyword">关键词</Label>

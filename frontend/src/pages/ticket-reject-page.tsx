@@ -56,7 +56,7 @@ export function TicketRejectPage({ uuid, onBack, onDone }: TicketRejectPageProps
         }
       />
 
-      <SectionCard title="驳回原因">
+      <SectionCard>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="reject-reason">原因</Label>
           <Textarea

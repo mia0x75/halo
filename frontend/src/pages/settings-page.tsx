@@ -53,7 +53,6 @@ export function SettingsPage({ tab, onTabChange, onCreateGroup, onEditGroup }: S
 
       {tab === "options" ? (
         <SectionCard
-          title="平台参数"
           description="只读项由服务端固定，可写项能在这里改值"
           bodyClassName="p-0"
         >

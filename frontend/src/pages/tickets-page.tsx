@@ -89,7 +89,7 @@ export function TicketsPage({ onOpenTicket, onCreateTicket, initialKeyword }: Ti
         }
       />
 
-      <SectionCard title="工单列表" description={`共 ${total} 条`} bodyClassName="p-0">
+      <SectionCard bodyClassName="p-0">
         <div className="flex flex-wrap items-end gap-3 border-b border-border px-5 py-4">
           <div className="flex flex-col gap-1.5 sm:w-72">
             <Label htmlFor="ticket-keyword">关键词</Label>

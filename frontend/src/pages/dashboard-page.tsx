@@ -17,7 +17,7 @@ import {
   type RuleHitCountNode,
 } from "@/lib/api/queries"
 import { PeriodSelect } from "@/features/dashboard/period-select"
-import { periodLabels, type Period } from "@/features/dashboard/periods"
+import { type Period } from "@/features/dashboard/periods"
 import { StatCard } from "@/features/dashboard/stat-card"
 
 import { TopRules } from "@/features/dashboard/top-rules"
@@ -169,7 +169,6 @@ export function DashboardPage({ onOpenTicket, onCreateTicket, onViewTickets }: D
       <div className="grid gap-4 xl:grid-cols-3">
         <SectionCard
           title="工单趋势"
-          description={`${periodLabels[period]}提交、执行与失败数量`}
           className="xl:col-span-2"
           bodyClassName="p-0"
           action={<PeriodSelect value={period} onChange={setPeriod} />}
@@ -194,7 +193,6 @@ export function DashboardPage({ onOpenTicket, onCreateTicket, onViewTickets }: D
 
         <SectionCard
           title="风险分级"
-          description={`${periodLabels[period]}规则命中分布`}
           bodyClassName="p-0"
           action={<PeriodSelect value={period} onChange={setPeriod} />}
         >
@@ -238,7 +236,7 @@ export function DashboardPage({ onOpenTicket, onCreateTicket, onViewTickets }: D
           </ul>
         </SectionCard>
 
-        <SectionCard title="操作日志" description="最近审计记录" bodyClassName="p-0">
+        <SectionCard title="操作日志" bodyClassName="p-0">
           <ul className="divide-y divide-border">
             {recentLogs.length === 0 ? (
               <li className="px-5 py-6 text-center text-sm text-muted-foreground">暂无审计记录</li>

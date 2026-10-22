@@ -158,7 +158,7 @@ export function GroupFormPage({ mode, uuid, onBack, onSaved }: GroupFormPageProp
         }
       />
 
-      <SectionCard title="分组信息">
+      <SectionCard>
         {mode === "edit" && !initial ? (
           <p className="text-sm text-muted-foreground">正在读取分组信息…</p>
         ) : (

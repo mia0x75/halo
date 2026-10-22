@@ -126,7 +126,7 @@ export function ViolationsPage() {
         }
       />
 
-      <SectionCard title="命中明细" description="每条命中对应工单里的一个语句" bodyClassName="p-0">
+      <SectionCard bodyClassName="p-0">
         <div className="flex flex-wrap items-end gap-3 border-b border-border px-5 py-4">
           <div className="flex flex-col gap-1.5 sm:w-64">
             <Label htmlFor="hit-keyword">关键词</Label>

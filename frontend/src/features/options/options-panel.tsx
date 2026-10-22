@@ -191,7 +191,7 @@ function OptionGroup({
   onEditSecret,
 }: OptionGroupProps) {
   return (
-    <SectionCard title={name} description={`${items.length} 项`} bodyClassName="p-0">
+    <SectionCard title={name} bodyClassName="p-0">
       <ul className="divide-y divide-border">
         {items.map((option) => {
           const writable = option.Writable === 1

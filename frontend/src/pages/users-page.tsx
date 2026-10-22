@@ -128,7 +128,7 @@ export function UsersPage({ onCreateUser, onEditUser }: UsersPageProps) {
         <p className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{actionError}</p>
       ) : null}
 
-      <SectionCard title="账号与角色" description="角色决定能做什么，审核关系决定能审谁的工单" bodyClassName="p-0">
+      <SectionCard description="角色决定能做什么，审核关系决定能审谁的工单" bodyClassName="p-0">
         <div className="flex gap-4 border-b border-border px-5 pt-3">
           {(
             [

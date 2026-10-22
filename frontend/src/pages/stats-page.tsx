@@ -113,7 +113,6 @@ export function StatsPage() {
 
       <SectionCard
         title="工单趋势"
-        description="提交、执行与失败数量"
         action={
           <div className="flex items-center gap-2">
             <Label htmlFor="stats-range" className="text-muted-foreground">
@@ -155,7 +154,7 @@ export function StatsPage() {
         )}
       </SectionCard>
 
-      <SectionCard title="每日明细" description="按日期倒序" bodyClassName="p-0">
+      <SectionCard title="每日明细" bodyClassName="p-0">
         <Table>
           <TableHeader>
             <TableRow>

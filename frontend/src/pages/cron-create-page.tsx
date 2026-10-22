@@ -77,7 +77,7 @@ export function CronCreatePage({ onBack, onSaved }: CronCreatePageProps) {
         }
       />
 
-      <SectionCard title="作业配置">
+      <SectionCard>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="cron-name">作业名称</Label>

@@ -142,11 +142,7 @@ export function ClustersPage({ onCreate, onEdit }: ClustersPageProps) {
         <p className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
       ) : null}
 
-      <SectionCard
-        title="群集列表"
-        description={`共 ${page.total} 个群集`}
-        bodyClassName="p-0"
-      >
+      <SectionCard bodyClassName="p-0">
         <div className="flex flex-wrap items-end gap-3 border-b border-border px-5 py-4">
           <div className="flex flex-col gap-1.5 sm:w-56">
             <Label htmlFor="cluster-keyword">关键词</Label>

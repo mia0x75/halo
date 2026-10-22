@@ -54,7 +54,7 @@ export function SystemInfoPanel() {
   }
 
   return (
-    <SectionCard title="运行信息" description="平台版本与规模概览" bodyClassName="p-5">
+    <SectionCard bodyClassName="p-5">
       {!info ? (
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
           <IconInfoCircle size={16} stroke={1.5} />

@@ -58,7 +58,7 @@ export function DatabasesPage() {
         }
       />
 
-      <SectionCard title="用户库" description="选择群集后读取目标实例的库清单" bodyClassName="p-0">
+      <SectionCard bodyClassName="p-0">
         <div className="flex flex-wrap items-end gap-3 border-b border-border px-5 py-4">
           <div className="flex flex-col gap-1.5 sm:w-72">
             <Label htmlFor="database-cluster">目标群集</Label>

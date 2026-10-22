@@ -111,7 +111,7 @@ export function LogsPage() {
         }
       />
 
-      <SectionCard title="日志明细" description="最新的在最前面" bodyClassName="p-0">
+      <SectionCard bodyClassName="p-0">
         <div className="flex flex-wrap items-end gap-3 border-b border-border px-5 py-4">
           <div className="flex flex-col gap-1.5 sm:w-64">
             <Label htmlFor="log-keyword">关键词</Label>

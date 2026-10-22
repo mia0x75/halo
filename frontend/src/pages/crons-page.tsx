@@ -126,7 +126,7 @@ export function CronsPage({ onCreate }: CronsPageProps) {
         <p className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
       ) : null}
 
-      <SectionCard title="作业与执行" description="系统作业按固定间隔运行，命令由服务端固定" bodyClassName="p-0">
+      <SectionCard description="系统作业按固定间隔运行，命令由服务端固定" bodyClassName="p-0">
         <div className="flex gap-4 border-b border-border px-5 pt-3">
           {(
             [

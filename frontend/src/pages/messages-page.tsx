@@ -233,7 +233,7 @@ export function MessagesPage({ onOpenTicket }: MessagesPageProps) {
         </p>
       ) : null}
 
-      <SectionCard title="收件箱" bodyClassName="p-0">
+      <SectionCard bodyClassName="p-0">
         <div className="flex flex-wrap items-center gap-3 border-b border-border px-4 py-3">
           <Tabs
             className="border-b-0"

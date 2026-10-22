@@ -190,7 +190,6 @@ export function AccessPanel({ scope }: AccessPanelProps) {
       ) : null}
 
       <SectionCard
-        title="选择对象"
         description={
           scope === "role"
             ? "先选角色，再勾选它能管理的分组"

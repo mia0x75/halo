@@ -337,7 +337,7 @@ export function UserFormPage({ mode, uuid, onBack, onSaved }: UserFormPageProps)
         }
       />
 
-      <SectionCard title="账号信息">
+      <SectionCard>
         {mode === "edit" && !initial ? (
           <p className="text-sm text-muted-foreground">正在读取账号信息…</p>
         ) : (

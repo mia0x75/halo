@@ -58,7 +58,7 @@ export function TicketEditPage({ uuid, onBack, onSaved }: TicketEditPageProps) {
         }
       />
 
-      <SectionCard title="工单内容" description="改完保存即可，语句会按新的正文重新拆分">
+      <SectionCard description="改完保存即可，语句会按新的正文重新拆分">
         {initial ? (
           <TicketForm
             mode="edit"
