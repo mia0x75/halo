@@ -2,6 +2,7 @@ package resolvers
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 
 	"github.com/mia0x75/halo/internal/app"
@@ -11,6 +12,8 @@ import (
 	"github.com/mia0x75/halo/internal/event"
 	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/platform/config"
+	"github.com/mia0x75/halo/internal/platform/crypto"
+	"github.com/mia0x75/halo/internal/platform/notify"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 )
@@ -68,9 +71,13 @@ func (r *queryRootResolver) SystemInfo(ctx context.Context) (*gqlapi.SystemInfo,
 			database = "mysql"
 		}
 	}
+	// 邮件开关以 mm_options 为准，配置文件只作缺省值。
 	mailEnabled := false
 	if cfg := config.Config(); cfg != nil && cfg.Mail != nil {
 		mailEnabled = cfg.Mail.Enabled
+	}
+	if option, optErr := r.app.Services.Option.GetByName(ctx, "mail.enabled"); optErr == nil {
+		mailEnabled = option.Parameter == "true"
 	}
 	return &gqlapi.SystemInfo{
 		Version:      app.Version,
@@ -102,7 +109,32 @@ func (r *mutationRootResolver) PatchOptionParameters(ctx context.Context, input 
 			break
 		}
 
-		option.Parameter = input.Parameter
+		spec := domain.OptionSpecFor(option.Name)
+		if spec.Secret {
+			// 前端回显的是掩码；原样提交表示不改密码。
+			if input.Parameter == domain.MaskOptionValue(option.Name, "set") {
+				ok = true
+				break
+			}
+			key := ""
+			if cfg := config.Config(); cfg != nil && cfg.Secret != nil {
+				key = cfg.Secret.Crypto
+			}
+			if len(key) < 16 {
+				rc = gqlapi.ReturnCodeUnknowError
+				err = fmt.Errorf("错误代码: %s, 错误信息: 保存密钥需要一个至少 16 字节的 secret.crypto。", rc)
+				break
+			}
+			ciphertext, encErr := crypto.EncryptAES([]byte(input.Parameter), key)
+			if encErr != nil {
+				rc = gqlapi.ReturnCodeUnknowError
+				err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, encErr.Error())
+				break
+			}
+			option.Parameter = base64.StdEncoding.EncodeToString(ciphertext)
+		} else {
+			option.Parameter = input.Parameter
+		}
 		option.BeforeUpdate()
 		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
 		if err = r.app.Services.Option.Update(ctx, bridge.OptionToDomain(option), credential.User.UserID); err != nil {
@@ -122,4 +154,32 @@ func (r *mutationRootResolver) PatchOptionParameters(ctx context.Context, input 
 	}
 
 	return
+}
+
+// SendTestMail sends a test message through the configured notification
+// channels so an administrator can verify the SMTP settings.
+func (r *mutationRootResolver) SendTestMail(ctx context.Context, email string) (bool, error) {
+	enabled, err := r.app.Services.Option.GetByName(ctx, "mail.enabled")
+	if err != nil && err != domain.ErrNotFound {
+		return false, err
+	}
+	if err == nil && enabled.Parameter != "true" {
+		return false, fmt.Errorf("邮件通知未启用，请先在系统选项里开启 mail.enabled。")
+	}
+	if err == domain.ErrNotFound {
+		cfg := config.Config()
+		if cfg == nil || cfg.Mail == nil || !cfg.Mail.Enabled {
+			return false, fmt.Errorf("邮件通知未启用，请先在系统选项里开启 mail.enabled。")
+		}
+	}
+
+	msg := notify.Message{
+		ToEmail: email,
+		Subject: "[Halo] 测试邮件",
+		Body:    "这是一封来自 Halo 的测试邮件。收到它说明邮件通道配置可用。",
+	}
+	if err := r.app.Notifier.Send(ctx, msg); err != nil {
+		return false, fmt.Errorf("发送测试邮件失败: %w", err)
+	}
+	return true, nil
 }

@@ -319,6 +319,7 @@ type ComplexityRoot struct {
 		RevokeRoles           func(childComplexity int, input models.RevokeRolesInput) int
 		RewriteQuery          func(childComplexity int, input models.SoarQueryInput) int
 		ScheduleTicket        func(childComplexity int, input models.ScheduleTicketInput) int
+		SendTestMail          func(childComplexity int, email string) int
 		UpdateCluster         func(childComplexity int, input models.UpdateClusterInput) int
 		UpdateEmail           func(childComplexity int, input models.PatchEmailInput) int
 		UpdateGroup           func(childComplexity int, input UpdateGroupInput) int
@@ -618,6 +619,7 @@ type LogResolver interface {
 	User(ctx context.Context, obj *models.Log) (*models.User, error)
 }
 type MutationRootResolver interface {
+	SendTestMail(ctx context.Context, email string) (bool, error)
 	Register(ctx context.Context, input models.UserRegisterInput) (*models.User, error)
 	Login(ctx context.Context, input models.UserLoginInput) (*LoginPayload, error)
 	Logout(ctx context.Context) (bool, error)
@@ -2049,6 +2051,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MutationRoot.ScheduleTicket(childComplexity, args["input"].(models.ScheduleTicketInput)), true
+	case "MutationRoot.sendTestMail":
+		if e.ComplexityRoot.MutationRoot.SendTestMail == nil {
+			break
+		}
+
+		args, err := ec.field_MutationRoot_sendTestMail_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.MutationRoot.SendTestMail(childComplexity, args["email"].(string)), true
 	case "MutationRoot.updateCluster":
 		if e.ComplexityRoot.MutationRoot.UpdateCluster == nil {
 			break
@@ -5467,6 +5480,20 @@ func (ec *executionContext) field_MutationRoot_scheduleTicket_args(ctx context.C
 		return nil, err
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_MutationRoot_sendTestMail_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "email",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNString2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["email"] = arg0
 	return args, nil
 }
 
@@ -10450,6 +10477,68 @@ func (ec *executionContext) _Metric_UpdateAt(ctx context.Context, field graphql.
 }
 func (ec *executionContext) fieldContext_Metric_UpdateAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("Metric", field, false, false, "UInt")
+}
+
+func (ec *executionContext) _MutationRoot_sendTestMail(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MutationRoot_sendTestMail(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.MutationRoot().SendTestMail(ctx, fc.Args["email"].(string))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"ADMIN"})
+				if err != nil {
+					var zeroVal bool
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_MutationRoot_sendTestMail(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MutationRoot",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_MutationRoot_sendTestMail_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
 }
 
 func (ec *executionContext) _MutationRoot_register(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -26624,6 +26713,13 @@ func (ec *executionContext) _MutationRoot(ctx context.Context, sel ast.Selection
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("MutationRoot")
+		case "sendTestMail":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MutationRoot_sendTestMail(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "register":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._MutationRoot_register(ctx, field)

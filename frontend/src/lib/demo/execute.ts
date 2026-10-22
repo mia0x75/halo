@@ -678,6 +678,9 @@ export function demoExecute(query: string, variables?: Variables): Record<string
         },
       }
     }
+    case "SendTestMail": {
+      return { sendTestMail: true }
+    }
     case "PatchOption": {
       const input = record(source.input)
       const option = state.options.find((item) => item.UUID === text(input.OptionUUID))

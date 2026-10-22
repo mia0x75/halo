@@ -65,16 +65,35 @@ func (m *Multi) Send(ctx context.Context, msg Message) error {
 	return errors.Join(errs...)
 }
 
+// MailSettings is the SMTP configuration used by EmailNotifier.
+type MailSettings struct {
+	Enabled            bool
+	Addr               string
+	User               string
+	Password           string
+	InsecureSkipVerify bool
+}
+
+// MailSettingsFunc resolves the SMTP configuration at send time, so settings
+// edited in the database take effect without restarting the server.
+type MailSettingsFunc func(ctx context.Context) (MailSettings, error)
+
 // EmailNotifier sends mail over SMTP with implicit TLS (port 465 style).
-type EmailNotifier struct{}
+type EmailNotifier struct {
+	// Settings overrides the static file configuration when set.
+	Settings MailSettingsFunc
+}
 
 // Name identifies the email channel.
 func (EmailNotifier) Name() string { return "email" }
 
-// Send delivers an email. It is a no-op when mail is disabled in config.
-func (EmailNotifier) Send(_ context.Context, msg Message) error {
-	cfg := config.Config().Mail
-	if cfg == nil || !cfg.Enabled {
+// Send delivers an email. It is a no-op when mail is disabled.
+func (n EmailNotifier) Send(ctx context.Context, msg Message) error {
+	cfg, err := n.resolve(ctx)
+	if err != nil {
+		return err
+	}
+	if !cfg.Enabled {
 		return nil
 	}
 
@@ -141,6 +160,24 @@ func (EmailNotifier) Send(_ context.Context, msg Message) error {
 		return err
 	}
 	return c.Quit()
+}
+
+// resolve falls back to the static configuration when no provider is wired.
+func (n EmailNotifier) resolve(ctx context.Context) (MailSettings, error) {
+	if n.Settings != nil {
+		return n.Settings(ctx)
+	}
+	cfg := config.Config().Mail
+	if cfg == nil {
+		return MailSettings{}, nil
+	}
+	return MailSettings{
+		Enabled:            cfg.Enabled,
+		Addr:               cfg.Addr,
+		User:               cfg.User,
+		Password:           cfg.Password,
+		InsecureSkipVerify: cfg.InsecureSkipVerify,
+	}, nil
 }
 
 // sanitizeHeader strips CR and LF so an attacker-controlled value cannot inject

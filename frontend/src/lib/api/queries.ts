@@ -872,6 +872,12 @@ export const PATCH_OPTION_MUTATION = `
   }
 `
 
+export const SEND_TEST_MAIL_MUTATION = `
+  mutation SendTestMail($email: String!) {
+    sendTestMail(email: $email)
+  }
+`
+
 export const METRIC_SUMMARY_QUERY = `
   query MetricSummary($Scope: UInt8, $Names: [String!]) {
     metrics(Scope: $Scope, Names: $Names) {

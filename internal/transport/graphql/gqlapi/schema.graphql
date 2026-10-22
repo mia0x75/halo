@@ -3415,6 +3415,16 @@ input ResendActivationMailInput {
 """
 type MutationRoot {
 	"""
+	发送测试邮件（管理员）
+	"""
+	sendTestMail(
+		"""
+		收件人邮箱
+		"""
+		email: String!
+	): Boolean! @auth(requires: [ADMIN])
+
+	"""
 	用户注册
 	"""
 	register(

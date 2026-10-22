@@ -29,6 +29,8 @@ type App struct {
 	Tx       service.TxManager
 	Agent    agent.Executor
 	EventBus *event.Bus
+	// Notifier 是事件总线使用的通知通道集合。
+	Notifier notify.Notifier
 	Services Services
 }
 
@@ -165,7 +167,15 @@ func New(ctx context.Context, cfg db.Config) (*App, error) {
 		User: service.NewUserService(tx, repos.User),
 	}
 
-	a := &App{DB: database, Repos: repos, Tx: tx, Agent: agent.LocalExecutor{}, Services: services}
+	notifier := notify.NewMulti(notify.EmailNotifier{Settings: mailSettingsProvider(repos.Option)})
+	a := &App{
+		DB:       database,
+		Repos:    repos,
+		Tx:       tx,
+		Agent:    agent.LocalExecutor{},
+		Notifier: notifier,
+		Services: services,
+	}
 
 	// The event bus needs the repositories and the notifier. Wiring it here
 	// keeps internal/event free of any service/transport dependency and removes
@@ -176,7 +186,7 @@ func New(ctx context.Context, cfg db.Config) (*App, error) {
 		Metric:   repos.Metric,
 		Message:  repos.Message,
 		User:     repos.User,
-		Notifier: notify.NewMulti(notify.EmailNotifier{}),
+		Notifier: notifier,
 	})
 
 	// The caches read through the repositories, so they can only be populated

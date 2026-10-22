@@ -55,11 +55,16 @@ var optionSpecs = map[string]OptionSpec{
 	"ldap.sc":         {Element: "input", Writable: false},
 	"ldap.ou":         {Element: "input", Writable: false},
 	// 保留期以天为单位，由 halocli retention cleanup 读取。
-	"retention.metrics-days":  {Element: "number", Writable: true, Default: "90", Min: 1, Max: 3650},
-	"retention.hits-days":     {Element: "number", Writable: true, Default: "90", Min: 1, Max: 3650},
-	"retention.logs-days":     {Element: "number", Writable: true, Default: "180", Min: 1, Max: 3650},
-	"retention.messages-days": {Element: "number", Writable: true, Default: "90", Min: 1, Max: 3650},
-	"retention.tasks-days":    {Element: "number", Writable: true, Default: "30", Min: 1, Max: 3650},
+	"retention.metrics-days":    {Element: "number", Writable: true, Default: "90", Min: 1, Max: 3650},
+	"retention.hits-days":       {Element: "number", Writable: true, Default: "90", Min: 1, Max: 3650},
+	"retention.logs-days":       {Element: "number", Writable: true, Default: "180", Min: 1, Max: 3650},
+	"retention.messages-days":   {Element: "number", Writable: true, Default: "90", Min: 1, Max: 3650},
+	"retention.tasks-days":      {Element: "number", Writable: true, Default: "30", Min: 1, Max: 3650},
+	"mail.enabled":              {Element: "switch", Writable: true, Default: "false"},
+	"mail.addr":                 {Element: "input", Writable: true},
+	"mail.user":                 {Element: "input", Writable: true},
+	"mail.password":             {Element: "password", Writable: true, Secret: true},
+	"mail.insecure-skip-verify": {Element: "switch", Writable: true, Default: "false"},
 }
 
 // OptionSpecFor returns the spec of an option name. Unknown names fall back to

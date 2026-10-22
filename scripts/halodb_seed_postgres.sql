@@ -219,7 +219,12 @@ INSERT INTO mm_options VALUES
 ('retention.hits-days','7c1f4a10-0002-4a10-9a01-000000000002','90','','input',1,1, NOW(), NOW()),
 ('retention.logs-days','7c1f4a10-0003-4a10-9a01-000000000003','180','','input',1,1, NOW(), NOW()),
 ('retention.messages-days','7c1f4a10-0004-4a10-9a01-000000000004','90','','input',1,1, NOW(), NOW()),
-('retention.tasks-days','7c1f4a10-0005-4a10-9a01-000000000005','30','','input',1,1, NOW(), NOW());
+('retention.tasks-days','7c1f4a10-0005-4a10-9a01-000000000005','30','','input',1,1, NOW(), NOW()),
+('mail.enabled','9d2f1b10-0001-4b10-8b01-000000000001','false','邮件通知开关','switch',1,1, NOW(), NOW()),
+('mail.addr','9d2f1b10-0002-4b10-8b01-000000000002','','SMTP 服务器（host:port）','input',1,1, NOW(), NOW()),
+('mail.user','9d2f1b10-0003-4b10-8b01-000000000003','','SMTP 账号','input',1,1, NOW(), NOW()),
+('mail.password','9d2f1b10-0004-4b10-8b01-000000000004','','SMTP 密码（加密存储）','password',1,1, NOW(), NOW()),
+('mail.insecure-skip-verify','9d2f1b10-0005-4b10-8b01-000000000005','false','跳过 SMTP 证书校验','switch',1,1, NOW(), NOW());
 
 INSERT INTO mm_edges VALUES
 (1, 'dfd02e74-cd54-4ca8-984a-42dcfc2f4d35', 3, 1, 1,  1, NULL, NOW()),
