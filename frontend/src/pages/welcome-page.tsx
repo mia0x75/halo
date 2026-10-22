@@ -66,27 +66,21 @@ export function WelcomePage({ onDone }: WelcomePageProps) {
   }
 
   return (
-    <div className="min-h-svh bg-background px-4 py-10 text-foreground">
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <span className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <IconDatabase size={20} stroke={1.5} />
+    <div className="min-h-svh bg-background px-4 py-8 text-foreground">
+      <div className="mx-auto w-full max-w-2xl">
+        <form className="overflow-hidden rounded-lg border border-border bg-card shadow-xs" onSubmit={(event) => void submit(event)}>
+          <div className="flex flex-col items-center gap-3 px-6 py-8 text-center">
+            <span className="flex size-11 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <IconDatabase size={24} stroke={1.5} />
             </span>
-            <span className="text-2xl font-semibold tracking-tight text-strong">Halo</span>
+            <h1 className="text-xl font-medium text-strong">欢迎使用 Halo</h1>
+            <p className="max-w-md text-sm text-muted-foreground">
+              填写元数据库连接、签名密钥与初始管理员账号。配置会写入服务器配置文件，随后自动执行数据库迁移。
+            </p>
           </div>
-          <h1 className="text-xl font-medium text-strong">初始化安装</h1>
-          <p className="text-sm text-muted-foreground">
-            填写元数据库连接、签名密钥与初始管理员账号。配置会写入服务器配置文件，随后自动执行数据库迁移。
-          </p>
-        </div>
 
-        <form className="flex flex-col gap-6" onSubmit={(event) => void submit(event)}>
-          <section className="flex flex-col gap-4 rounded-lg border border-border bg-card p-5">
-            <div className="flex items-center gap-2">
-              <IconDatabase size={18} stroke={1.5} className="text-muted-foreground" />
-              <h2 className="text-base font-medium text-strong">元数据库</h2>
-            </div>
+          <HrText label="元数据库" />
+          <div className="flex flex-col gap-4 px-6 pb-6">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="setup-driver">数据库类型</Label>
@@ -140,13 +134,10 @@ export function WelcomePage({ onDone }: WelcomePageProps) {
                 />
               </div>
             </div>
-          </section>
+          </div>
 
-          <section className="flex flex-col gap-4 rounded-lg border border-border bg-card p-5">
-            <div className="flex items-center gap-2">
-              <IconKey size={18} stroke={1.5} className="text-muted-foreground" />
-              <h2 className="text-base font-medium text-strong">签名与加密密钥</h2>
-            </div>
+          <HrText label="签名与加密密钥" />
+          <div className="flex flex-col gap-4 px-6 pb-6">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="setup-token-name">令牌请求头</Label>
@@ -205,13 +196,10 @@ export function WelcomePage({ onDone }: WelcomePageProps) {
                 </Button>
               </div>
             </div>
-          </section>
+          </div>
 
-          <section className="flex flex-col gap-4 rounded-lg border border-border bg-card p-5">
-            <div className="flex items-center gap-2">
-              <IconUser size={18} stroke={1.5} className="text-muted-foreground" />
-              <h2 className="text-base font-medium text-strong">初始管理员</h2>
-            </div>
+          <HrText label="初始管理员" />
+          <div className="flex flex-col gap-4 px-6 pb-6">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="setup-admin-email">邮箱</Label>
@@ -244,17 +232,37 @@ export function WelcomePage({ onDone }: WelcomePageProps) {
                 required
               />
             </div>
-          </section>
+          </div>
 
-          {error ? (
-            <p className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
-          ) : null}
-
-          <Button type="submit" size="lg" disabled={submitting}>
-            {submitting ? "正在初始化…" : "完成初始化"}
-          </Button>
+          <div className="flex flex-col gap-3 border-t border-border bg-surface-secondary px-6 py-4">
+            {error ? (
+              <p className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
+            ) : null}
+            <div className="flex items-center justify-end gap-2">
+              <Button type="submit" disabled={submitting}>
+                <IconUser size={16} stroke={1.5} />
+                {submitting ? "正在初始化…" : "完成初始化"}
+              </Button>
+            </div>
+          </div>
         </form>
+
+        <p className="mt-4 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+          <IconKey size={13} stroke={1.5} />
+          密钥只写入服务器配置文件，不会回显。
+        </p>
       </div>
+    </div>
+  )
+}
+
+/** 分节标题：一条横线中间夹小字。 */
+function HrText({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-3 px-6 pb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+      <span className="h-px flex-1 bg-border" />
+      {label}
+      <span className="h-px flex-1 bg-border" />
     </div>
   )
 }
