@@ -189,7 +189,8 @@ type OptionRepository interface {
 	GetByName(ctx context.Context, name string) (*Option, error)
 	Update(ctx context.Context, o *Option) error
 	DeleteByUUID(ctx context.Context, uuid string) error
-	List(ctx context.Context, cursor string, limit int) ([]*Option, error)
+	// List returns the options ordered by group and by the display order.
+	List(ctx context.Context, limit int) ([]*Option, error)
 }
 
 type RuleRepository interface {

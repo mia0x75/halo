@@ -868,6 +868,31 @@ type Option implements Node {
 	Element:     String! @length(max: 75)
 
 	"""
+	所属分组，同组共用一个标题
+	"""
+	GroupName:   String! @length(max: 50)
+
+	"""
+	组内展示顺序
+	"""
+	SortOrder:   Int!
+
+	"""
+	依赖的选项名，为空表示无依赖
+	"""
+	DependsOn:   String! @length(max: 50)
+
+	"""
+	数值下界
+	"""
+	MinValue:    Int
+
+	"""
+	数值上界
+	"""
+	MaxValue:    Int
+
+	"""
 	记录创建时间
 	"""
 	CreateAt:    UInt!

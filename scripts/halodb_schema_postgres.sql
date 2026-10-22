@@ -133,6 +133,11 @@ CREATE TABLE mm_options (
     version     BIGINT NOT NULL,
     update_at   TIMESTAMPTZ NULL DEFAULT NULL,
     create_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    group_name  VARCHAR(50) NOT NULL DEFAULT '',
+    sort_order  INT NOT NULL DEFAULT 0,
+    depends_on  VARCHAR(50) NOT NULL DEFAULT '',
+    min_value   INT NULL,
+    max_value   INT NULL,
     CONSTRAINT uq_mm_options_uuid UNIQUE (uuid)
 );
 COMMENT ON TABLE mm_options IS '系统选项表';

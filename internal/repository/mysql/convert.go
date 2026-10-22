@@ -93,6 +93,15 @@ func uintFromNull(v sql.NullInt32) *uint {
 	return &u
 }
 
+// intFromNull converts a nullable signed int column.
+func intFromNull(v sql.NullInt32) *int {
+	if !v.Valid {
+		return nil
+	}
+	i := int(v.Int32)
+	return &i
+}
+
 func nullFromUint(v *uint) sql.NullInt32 {
 	if v == nil {
 		return sql.NullInt32{}

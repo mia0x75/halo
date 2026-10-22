@@ -332,10 +332,15 @@ type ComplexityRoot struct {
 
 	Option struct {
 		CreateAt    func(childComplexity int) int
+		DependsOn   func(childComplexity int) int
 		Description func(childComplexity int) int
 		Element     func(childComplexity int) int
+		GroupName   func(childComplexity int) int
+		MaxValue    func(childComplexity int) int
+		MinValue    func(childComplexity int) int
 		Name        func(childComplexity int) int
 		Parameter   func(childComplexity int) int
+		SortOrder   func(childComplexity int) int
 		UUID        func(childComplexity int) int
 		UpdateAt    func(childComplexity int) int
 		Writable    func(childComplexity int) int
@@ -2158,6 +2163,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Option.CreateAt(childComplexity), true
+	case "Option.DependsOn":
+		if e.ComplexityRoot.Option.DependsOn == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Option.DependsOn(childComplexity), true
 	case "Option.Description":
 		if e.ComplexityRoot.Option.Description == nil {
 			break
@@ -2170,6 +2181,24 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Option.Element(childComplexity), true
+	case "Option.GroupName":
+		if e.ComplexityRoot.Option.GroupName == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Option.GroupName(childComplexity), true
+	case "Option.MaxValue":
+		if e.ComplexityRoot.Option.MaxValue == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Option.MaxValue(childComplexity), true
+	case "Option.MinValue":
+		if e.ComplexityRoot.Option.MinValue == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Option.MinValue(childComplexity), true
 	case "Option.Name":
 		if e.ComplexityRoot.Option.Name == nil {
 			break
@@ -2182,6 +2211,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Option.Parameter(childComplexity), true
+	case "Option.SortOrder":
+		if e.ComplexityRoot.Option.SortOrder == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Option.SortOrder(childComplexity), true
 	case "Option.UUID":
 		if e.ComplexityRoot.Option.UUID == nil {
 			break
@@ -4157,6 +4192,16 @@ func (ec *executionContext) childFields_Option(ctx context.Context, field graphq
 		return ec.fieldContext_Option_Description(ctx, field)
 	case "Element":
 		return ec.fieldContext_Option_Element(ctx, field)
+	case "GroupName":
+		return ec.fieldContext_Option_GroupName(ctx, field)
+	case "SortOrder":
+		return ec.fieldContext_Option_SortOrder(ctx, field)
+	case "DependsOn":
+		return ec.fieldContext_Option_DependsOn(ctx, field)
+	case "MinValue":
+		return ec.fieldContext_Option_MinValue(ctx, field)
+	case "MaxValue":
+		return ec.fieldContext_Option_MaxValue(ctx, field)
 	case "CreateAt":
 		return ec.fieldContext_Option_CreateAt(ctx, field)
 	case "UpdateAt":
@@ -13681,6 +13726,157 @@ func (ec *executionContext) _Option_Element(ctx context.Context, field graphql.C
 }
 func (ec *executionContext) fieldContext_Option_Element(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("Option", field, false, false, "String")
+}
+
+func (ec *executionContext) _Option_GroupName(ctx context.Context, field graphql.CollectedField, obj *models.Option) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Option_GroupName(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.GroupName, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				max, err := ec.unmarshalNInt2int(ctx, 50)
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.Length == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive length is not implemented")
+				}
+				return ec.Directives.Length(ctx, obj, directive0, max)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Option_GroupName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Option", field, false, false, "String")
+}
+
+func (ec *executionContext) _Option_SortOrder(ctx context.Context, field graphql.CollectedField, obj *models.Option) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Option_SortOrder(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.SortOrder, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Option_SortOrder(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Option", field, false, false, "Int")
+}
+
+func (ec *executionContext) _Option_DependsOn(ctx context.Context, field graphql.CollectedField, obj *models.Option) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Option_DependsOn(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.DependsOn, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				max, err := ec.unmarshalNInt2int(ctx, 50)
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.Length == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive length is not implemented")
+				}
+				return ec.Directives.Length(ctx, obj, directive0, max)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Option_DependsOn(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Option", field, false, false, "String")
+}
+
+func (ec *executionContext) _Option_MinValue(ctx context.Context, field graphql.CollectedField, obj *models.Option) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Option_MinValue(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.MinValue, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *int) graphql.Marshaler {
+			return ec.marshalOInt2ᚖint(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Option_MinValue(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Option", field, false, false, "Int")
+}
+
+func (ec *executionContext) _Option_MaxValue(ctx context.Context, field graphql.CollectedField, obj *models.Option) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Option_MaxValue(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.MaxValue, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *int) graphql.Marshaler {
+			return ec.marshalOInt2ᚖint(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Option_MaxValue(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Option", field, false, false, "Int")
 }
 
 func (ec *executionContext) _Option_CreateAt(ctx context.Context, field graphql.CollectedField, obj *models.Option) (ret graphql.Marshaler) {
@@ -27151,6 +27347,31 @@ func (ec *executionContext) _Option(ctx context.Context, sel ast.SelectionSet, o
 		case "Element":
 			out.Values[i] = ec._Option_Element(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "GroupName":
+			out.Values[i] = ec._Option_GroupName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "SortOrder":
+			out.Values[i] = ec._Option_SortOrder(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "DependsOn":
+			out.Values[i] = ec._Option_DependsOn(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "MinValue":
+			out.Values[i] = ec._Option_MinValue(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "MaxValue":
+			out.Values[i] = ec._Option_MaxValue(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
 				out.Invalids++
 			}
 		case "CreateAt":

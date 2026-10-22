@@ -48,6 +48,19 @@ func loadUUIDKeyed[D any, M any](list func(context.Context, string, int) ([]D, e
 	return loadFrom(list, cacheUUIDCursor, conv)
 }
 
+// loadAll reads every row of a table that is listed without a cursor.
+func loadAll[D any, M any](list func(context.Context, int) ([]D, error), conv func(D) *M) ([]*M, error) {
+	items, err := list(context.Background(), cacheLimit)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*M, 0, len(items))
+	for _, item := range items {
+		out = append(out, conv(item))
+	}
+	return out, nil
+}
+
 // loadFrom pages in every row of a table whose key sorts ascending, starting
 // after the given cursor.
 func loadFrom[D any, M any](list func(context.Context, string, int) ([]D, error), cursor string, conv func(D) *M) ([]*M, error) {

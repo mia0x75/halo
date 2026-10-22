@@ -46,7 +46,7 @@ func (q *Queries) DeleteOptionByUUID(ctx context.Context, uuid string) error {
 }
 
 const getOptionByName = `-- name: GetOptionByName :one
-SELECT name, uuid, parameter, description, element, writable, version, update_at, create_at FROM mm_options WHERE name = $1 LIMIT 1
+SELECT name, uuid, parameter, description, element, writable, group_name, sort_order, depends_on, min_value, max_value, version, update_at, create_at FROM mm_options WHERE name = $1 LIMIT 1
 `
 
 func (q *Queries) GetOptionByName(ctx context.Context, name string) (MmOption, error) {
@@ -59,6 +59,11 @@ func (q *Queries) GetOptionByName(ctx context.Context, name string) (MmOption, e
 		&i.Description,
 		&i.Element,
 		&i.Writable,
+		&i.GroupName,
+		&i.SortOrder,
+		&i.DependsOn,
+		&i.MinValue,
+		&i.MaxValue,
 		&i.Version,
 		&i.UpdateAt,
 		&i.CreateAt,
@@ -67,7 +72,7 @@ func (q *Queries) GetOptionByName(ctx context.Context, name string) (MmOption, e
 }
 
 const getOptionByUUID = `-- name: GetOptionByUUID :one
-SELECT name, uuid, parameter, description, element, writable, version, update_at, create_at FROM mm_options WHERE uuid = $1 LIMIT 1
+SELECT name, uuid, parameter, description, element, writable, group_name, sort_order, depends_on, min_value, max_value, version, update_at, create_at FROM mm_options WHERE uuid = $1 LIMIT 1
 `
 
 func (q *Queries) GetOptionByUUID(ctx context.Context, uuid string) (MmOption, error) {
@@ -80,6 +85,11 @@ func (q *Queries) GetOptionByUUID(ctx context.Context, uuid string) (MmOption, e
 		&i.Description,
 		&i.Element,
 		&i.Writable,
+		&i.GroupName,
+		&i.SortOrder,
+		&i.DependsOn,
+		&i.MinValue,
+		&i.MaxValue,
 		&i.Version,
 		&i.UpdateAt,
 		&i.CreateAt,
@@ -88,16 +98,11 @@ func (q *Queries) GetOptionByUUID(ctx context.Context, uuid string) (MmOption, e
 }
 
 const listOptions = `-- name: ListOptions :many
-SELECT name, uuid, parameter, description, element, writable, version, update_at, create_at FROM mm_options WHERE uuid < $1 ORDER BY uuid DESC LIMIT $2
+SELECT name, uuid, parameter, description, element, writable, group_name, sort_order, depends_on, min_value, max_value, version, update_at, create_at FROM mm_options ORDER BY sort_order, name LIMIT $1
 `
 
-type ListOptionsParams struct {
-	Uuid  string
-	Limit int32
-}
-
-func (q *Queries) ListOptions(ctx context.Context, arg ListOptionsParams) ([]MmOption, error) {
-	rows, err := q.db.QueryContext(ctx, listOptions, arg.Uuid, arg.Limit)
+func (q *Queries) ListOptions(ctx context.Context, limit int32) ([]MmOption, error) {
+	rows, err := q.db.QueryContext(ctx, listOptions, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -112,6 +117,11 @@ func (q *Queries) ListOptions(ctx context.Context, arg ListOptionsParams) ([]MmO
 			&i.Description,
 			&i.Element,
 			&i.Writable,
+			&i.GroupName,
+			&i.SortOrder,
+			&i.DependsOn,
+			&i.MinValue,
+			&i.MaxValue,
 			&i.Version,
 			&i.UpdateAt,
 			&i.CreateAt,

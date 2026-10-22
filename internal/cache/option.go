@@ -12,7 +12,7 @@ var OptionsMap = &safecache.SafeMap[models.Option]{}
 // Init 缓存初始化
 func OptionsInit() (err error) {
 	_, err = OptionsMap.WithInit(func() ([]*models.Option, error) {
-		return loadUUIDKeyed(repos.Option.List, bridge.OptionFromDomain)
+		return loadAll(repos.Option.List, bridge.OptionFromDomain)
 	})
 	return
 }

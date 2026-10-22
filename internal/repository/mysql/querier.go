@@ -129,7 +129,7 @@ type Querier interface {
 	ListLogs(ctx context.Context, arg ListLogsParams) ([]MmLog, error)
 	ListMessagesByUser(ctx context.Context, arg ListMessagesByUserParams) ([]MmMessage, error)
 	ListMetrics(ctx context.Context, arg ListMetricsParams) ([]MmMetric, error)
-	ListOptions(ctx context.Context, arg ListOptionsParams) ([]MmOption, error)
+	ListOptions(ctx context.Context, limit int32) ([]MmOption, error)
 	ListPendingTasks(ctx context.Context, limit int32) ([]MmTask, error)
 	ListQueries(ctx context.Context, arg ListQueriesParams) ([]MmQuery, error)
 	ListQueriesByUser(ctx context.Context, userID uint32) ([]MmQuery, error)

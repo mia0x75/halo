@@ -43,7 +43,7 @@ func TestOptionRepo(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "false", got.Parameter)
 
-	list, err := repo.List(ctx, o.UUID+"~", 100)
+	list, err := repo.List(ctx, 100)
 	require.NoError(t, err)
 	require.True(t, hasOption(list, o.UUID))
 

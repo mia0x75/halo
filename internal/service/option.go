@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/mia0x75/halo/internal/domain"
@@ -24,8 +25,8 @@ func (s *OptionService) GetByName(ctx context.Context, name string) (*domain.Opt
 	return s.options.GetByName(ctx, name)
 }
 
-func (s *OptionService) List(ctx context.Context, cursor string, limit int) ([]*domain.Option, error) {
-	return s.options.List(ctx, cursor, limit)
+func (s *OptionService) List(ctx context.Context, limit int) ([]*domain.Option, error) {
+	return s.options.List(ctx, limit)
 }
 
 func (s *OptionService) Create(ctx context.Context, o *domain.Option, operatorID uint) error {
@@ -40,7 +41,10 @@ func (s *OptionService) Create(ctx context.Context, o *domain.Option, operatorID
 // Update stores a new value for an option and records the old and new value in
 // the audit log.
 func (s *OptionService) Update(ctx context.Context, o *domain.Option, operatorID uint) error {
-	if err := domain.ValidateOptionValue(o.Name, o.Parameter); err != nil {
+	if err := domain.ValidateOptionValue(o); err != nil {
+		return err
+	}
+	if err := s.checkDependency(ctx, o); err != nil {
 		return err
 	}
 	current, err := s.options.GetByUUID(ctx, o.UUID)
@@ -53,8 +57,8 @@ func (s *OptionService) Update(ctx context.Context, o *domain.Option, operatorID
 			return err
 		}
 		detail := fmt.Sprintf("%s->%s",
-			domain.MaskOptionValue(current.Name, current.Parameter),
-			domain.MaskOptionValue(o.Name, o.Parameter))
+			domain.MaskOptionValue(current),
+			domain.MaskOptionValue(o))
 		return NewLogService(repos.Log).Log(ctx, LogEntry{
 			UserID:    operatorID,
 			Operation: "option.update",
@@ -62,6 +66,25 @@ func (s *OptionService) Update(ctx context.Context, o *domain.Option, operatorID
 			Detail:    detail,
 		})
 	})
+}
+
+// checkDependency rejects the change when the option this one depends on is
+// switched off, so a disabled group cannot be edited behind the master's back.
+func (s *OptionService) checkDependency(ctx context.Context, o *domain.Option) error {
+	if o.DependsOn == "" {
+		return nil
+	}
+	dependency, err := s.options.GetByName(ctx, o.DependsOn)
+	if err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			return nil
+		}
+		return err
+	}
+	if dependency.Parameter != "true" {
+		return fmt.Errorf("%w: 选项 %s 依赖 %s，当前未启用", domain.ErrInvalidInput, o.Name, o.DependsOn)
+	}
+	return nil
 }
 
 func (s *OptionService) DeleteByUUID(ctx context.Context, uuid string, operatorID uint) error {

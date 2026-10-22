@@ -271,6 +271,16 @@ type MmOption struct {
 	Element string
 	// 是否可写
 	Writable uint8
+	// 所属分组，同组共用一个标题
+	GroupName string
+	// 组内展示顺序
+	SortOrder int64
+	// 依赖的选项名，为空表示无依赖
+	DependsOn string
+	// 数值下界
+	MinValue sql.NullInt32
+	// 数值上界
+	MaxValue sql.NullInt32
 	// 版本
 	Version uint32
 	// 修改时间

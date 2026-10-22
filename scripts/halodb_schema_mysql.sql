@@ -279,6 +279,22 @@ CREATE TABLE `mm_options` (
                 COMMENT '修改时间',
   `create_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                 COMMENT '创建时间',
+  `group_name`  VARCHAR(50)
+                NOT NULL
+                DEFAULT ''
+                COMMENT '所属分组，同组共用一个标题',
+  `sort_order`  INT
+                NOT NULL
+                DEFAULT 0
+                COMMENT '组内展示顺序',
+  `depends_on`  VARCHAR(50)
+                NOT NULL
+                DEFAULT ''
+                COMMENT '依赖的选项名，为空表示无依赖',
+  `min_value`   INT NULL
+                COMMENT '数值下界',
+  `max_value`   INT NULL
+                COMMENT '数值上界',
 
   PRIMARY KEY (`name`),
   UNIQUE KEY `unique_1` (`uuid`)

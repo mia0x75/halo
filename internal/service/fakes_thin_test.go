@@ -209,7 +209,7 @@ func (s *stubOptionRepo) GetByUUID(context.Context, string) (*domain.Option, err
 func (s *stubOptionRepo) GetByName(context.Context, string) (*domain.Option, error) {
 	return s.got, nil
 }
-func (s *stubOptionRepo) List(context.Context, string, int) ([]*domain.Option, error) {
+func (s *stubOptionRepo) List(context.Context, int) ([]*domain.Option, error) {
 	return nil, nil
 }
 func (s *stubOptionRepo) Update(context.Context, *domain.Option) error { return s.updateErr }

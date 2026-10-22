@@ -219,7 +219,7 @@ func TestOptionService(t *testing.T) {
 	require.Equal(t, repo.got, got)
 	_, err = svc.GetByName(ctx, "n")
 	require.NoError(t, err)
-	_, err = svc.List(ctx, "", 10)
+	_, err = svc.List(ctx, 10)
 	require.NoError(t, err)
 
 	require.NoError(t, svc.Create(ctx, &domain.Option{UUID: "o1"}, 3))

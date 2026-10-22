@@ -41,25 +41,20 @@ func (r *queryRootResolver) Options(ctx context.Context) (L []*models.Option, er
 	return
 }
 
-// maskOption returns a copy with the secret value hidden and the control type
-// filled in from the option spec.
+// maskOption returns a copy with the secret value hidden. The control type and
+// the writable flag come from the database, so the settings page renders what
+// the row says.
 func maskOption(option *models.Option) *models.Option {
 	if option == nil {
 		return nil
 	}
 	copied := *option
-	copied.Parameter = domain.MaskOptionValue(option.Name, option.Parameter)
-	spec := domain.OptionSpecFor(option.Name)
-	copied.Element = spec.Element
-	copied.Writable = boolToUint8(spec.Writable)
-	return &copied
-}
-
-func boolToUint8(value bool) uint8 {
-	if value {
-		return 1
+	if copied.Secret() {
+		if copied.Parameter != "" {
+			copied.Parameter = "********"
+		}
 	}
-	return 0
+	return &copied
 }
 
 // SystemInfo 平台运行信息
@@ -107,10 +102,9 @@ func (r *mutationRootResolver) PatchOptionParameters(ctx context.Context, input 
 			break
 		}
 
-		spec := domain.OptionSpecFor(option.Name)
-		if spec.Secret {
+		if option.Secret() {
 			// 前端回显的是掩码；原样提交表示不改密码。
-			if input.Parameter == domain.MaskOptionValue(option.Name, "set") {
+			if input.Parameter == "********" {
 				ok = true
 				break
 			}
