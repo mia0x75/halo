@@ -1,7 +1,6 @@
 import { IconSettings } from "@tabler/icons-react"
 
 import { PageHeader } from "@/components/layout/page-header"
-import { SectionCard } from "@/components/shared/section-card"
 import { Tabs } from "@/components/ui/tabs"
 import { AccessPanel } from "@/features/settings/access-panel"
 import { GroupsPanel } from "@/features/settings/groups-panel"
@@ -51,14 +50,7 @@ export function SettingsPage({ tab, onTabChange, onCreateGroup, onEditGroup }: S
         ]}
       />
 
-      {tab === "options" ? (
-        <SectionCard
-          description="只读项由服务端固定，可写项能在这里改值"
-          bodyClassName="p-0"
-        >
-          <OptionsPanel showHeader={false} />
-        </SectionCard>
-      ) : null}
+      {tab === "options" ? <OptionsPanel /> : null}
 
       {tab === "groups" ? (
         <GroupsPanel onCreate={onCreateGroup} onEdit={onEditGroup} />

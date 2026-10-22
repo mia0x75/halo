@@ -134,7 +134,7 @@ CREATE TABLE mm_options (
     update_at   TIMESTAMPTZ NULL DEFAULT NULL,
     create_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
     group_name  VARCHAR(50) NOT NULL DEFAULT '',
-    sort_order  INT NOT NULL DEFAULT 0,
+    sort_order  INT NOT NULL DEFAULT 0, -- 展示顺序：组内按此排序，跨组时也决定分组的先后
     depends_on  VARCHAR(50) NOT NULL DEFAULT '',
     min_value   INT NULL,
     max_value   INT NULL,

@@ -286,7 +286,7 @@ CREATE TABLE `mm_options` (
   `sort_order`  INT
                 NOT NULL
                 DEFAULT 0
-                COMMENT '组内展示顺序',
+                COMMENT '展示顺序：组内按此排序，跨组时也决定分组的先后',
   `depends_on`  VARCHAR(50)
                 NOT NULL
                 DEFAULT ''

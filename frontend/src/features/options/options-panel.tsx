@@ -18,11 +18,6 @@ import { graphqlRequest } from "@/lib/api/client"
 import { OPTIONS_QUERY, PATCH_OPTION_MUTATION, type OptionNode } from "@/lib/api/queries"
 import { getToken } from "@/lib/api/session"
 
-export interface OptionsPanelProps {
-  /** 表格标题为空时只渲染表格，供嵌套页签使用。 */
-  showHeader?: boolean
-}
-
 /** 选项按分组聚合成卡片，组内按展示顺序排列。 */
 function groupOptions(options: OptionNode[]): { name: string; items: OptionNode[] }[] {
   const groups = new Map<string, OptionNode[]>()
@@ -35,16 +30,15 @@ function groupOptions(options: OptionNode[]): { name: string; items: OptionNode[
       groups.set(name, [option])
     }
   }
-  return [...groups.entries()]
-    .map(([name, items]) => ({
-      name,
-      items: items.sort((a, b) => a.SortOrder - b.SortOrder || a.Name.localeCompare(b.Name)),
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name))
+  // 接口已按 sort_order 排好序，分组保持首次出现的顺序，组内也按 sort_order 排。
+  return [...groups.entries()].map(([name, items]) => ({
+    name,
+    items: items.sort((a, b) => a.SortOrder - b.SortOrder || a.Name.localeCompare(b.Name)),
+  }))
 }
 
-/** 平台参数：按分组展示，只读项灰显，可写项就地编辑。 */
-export function OptionsPanel({ showHeader = true }: OptionsPanelProps) {
+/** 平台参数：每个分组一张卡片，只读项灰显，可写项就地编辑。 */
+export function OptionsPanel() {
   const remote = useGraphQL<{ options: OptionNode[] }>(OPTIONS_QUERY, undefined, { options: [] })
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState<string | null>(null)
@@ -87,30 +81,6 @@ export function OptionsPanel({ showHeader = true }: OptionsPanelProps) {
     setSecretValue("")
     if (secretValue === "") return
     await patch(target, secretValue)
-  }
-
-  if (!showHeader) {
-    return (
-      <div className="flex flex-col">
-        {error ? (
-          <p className="mb-3 rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
-        ) : null}
-        {groups.map((group) => (
-          <OptionGroup
-            key={group.name}
-            name={group.name}
-            items={group.items}
-            enabled={enabled}
-            saving={saving}
-            onPatch={patch}
-            onEditSecret={(option) => {
-              setSecret(option)
-              setSecretValue("")
-            }}
-          />
-        ))}
-      </div>
-    )
   }
 
   return (

@@ -20,9 +20,11 @@
 
 **选项的展示元数据由数据库行承载，Go 侧不再维护注册表。**
 
-1. **新增五列**：`group_name`（分组标题）、`sort_order`（组内顺序）、
+1. **新增五列**：`group_name`（分组标题）、`sort_order`（展示顺序）、
    `depends_on`（依赖的选项名）、`min_value` / `max_value`（数值范围）。
    不新增表，分组信息在同组行上冗余，避免为了一个标题引入关联表。
+   `sort_order` 一列管两件事：组内按它排序，跨组时它也决定分组的先后，
+   所以接口只要按 `sort_order` 返回，前端分组的顺序就自然确定。
 2. **`element` 成为唯一事实来源**：API 不再覆盖它；历史行的值由迁移
    `0011_option_metadata.sql` 修正（`smtp.enabled`→switch、
    `smtp.password`→password、`retention.*`→number 等）。控件类型只支持
@@ -31,8 +33,12 @@
    逻辑不再查注册表。
 4. **依赖语义**：`depends_on` 指向另一个选项名，被依赖项的值不为 `true`
    时，依赖它的选项不可编辑。**服务端同时拒绝写入**，不只在前端置灰。
-5. **展示**：设置页按 `group_name` 分卡片，组内按 `sort_order` 排列；
-   只读项灰显带锁；`number` 用 `min_value` / `max_value` 前后端各校验一次。
+5. **展示**：设置页按 `group_name` 分组，**每组一张卡片**，组内按
+   `sort_order` 排列；只读项灰显带锁；`number` 用 `min_value` / `max_value`
+   前后端各校验一次。
+6. **开关在首位**：像 `mail.enabled` 这样的总开关排在所在分组的第一位，
+   由 `sort_order` 表达，不靠界面特判。历史遗留的 SMTP 与 LDAP 各自成组，
+   开关也各在首位（迁移 `0012_regroup_options.sql`）。
 
 ## 后果
 
