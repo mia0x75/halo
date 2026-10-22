@@ -24,7 +24,13 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { CursorPagination } from "@/components/ui/cursor-pagination"
 import { Input } from "@/components/ui/input"
-import { Select } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Tabs } from "@/components/ui/tabs"
 import { useGraphQL } from "@/hooks/use-graphql"
 import { graphqlRequest } from "@/lib/api/client"
@@ -257,19 +263,22 @@ export function MessagesPage({ onOpenTicket }: MessagesPageProps) {
           </div>
           <Select
             value={category}
-            onChange={(event) => {
-              setCategory(event.target.value)
+            onValueChange={(value) => {
+              setCategory(value)
               resetPage()
             }}
-            aria-label="按分类筛选"
-            className="w-32"
           >
-            <option value="all">全部分类</option>
-            {availableCategories.map((item) => (
-              <option key={item} value={item}>
-                {categoryMeta(item).label}
-              </option>
-            ))}
+            <SelectTrigger aria-label="按分类筛选" className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">全部分类</SelectItem>
+              {availableCategories.map((item) => (
+                <SelectItem key={item} value={item}>
+                  {categoryMeta(item).label}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
         </div>
 

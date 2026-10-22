@@ -4,7 +4,15 @@ import { IconSend } from "@tabler/icons-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { SqlEditor, type SqlDialect } from "@/components/ui/sql-editor"
 import { useGraphQL } from "@/hooks/use-graphql"
 import { graphqlRequest } from "@/lib/api/client"
@@ -80,14 +88,35 @@ export function TicketForm({
     const options = edges.map((edge) => ({
       uuid: edge.node.UUID,
       type: edge.node.Type,
+      group: edge.node.Group ?? "",
       label: `${edge.node.Alias} · ${edge.node.Type} (${edge.node.IP}:${edge.node.Port})`,
     }))
     // 原工单的群集可能不在当前可选列表里，补一条免得回填的值丢失。
     if (initial?.clusterUUID && !options.some((option) => option.uuid === initial.clusterUUID)) {
-      options.unshift({ uuid: initial.clusterUUID, type: "mysql", label: "原工单群集" })
+      options.unshift({
+        uuid: initial.clusterUUID,
+        type: "mysql",
+        group: "",
+        label: "原工单群集",
+      })
     }
     return options
   }, [remoteClusters.data, initial])
+
+  // 群集按分组归类，对应下拉里的 optgroup。
+  const clusterGroups = useMemo(() => {
+    const groups = new Map<string, typeof clusterOptions>()
+    for (const option of clusterOptions) {
+      const key = option.group
+      const bucket = groups.get(key)
+      if (bucket) {
+        bucket.push(option)
+      } else {
+        groups.set(key, [option])
+      }
+    }
+    return [...groups.entries()]
+  }, [clusterOptions])
 
   const reviewerOptions = useMemo(() => {
     const reviewers = remoteReviewers.data?.me?.Reviewers ?? []
@@ -165,17 +194,30 @@ export function TicketForm({
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="ticket-cluster">目标群集</Label>
           <Select
-            id="ticket-cluster"
-            value={selectedCluster}
-            onChange={(event) => setClusterUUID(event.target.value)}
+            value={selectedCluster || "none"}
+            onValueChange={(value) => setClusterUUID(value === "none" ? "" : value)}
             disabled={clusterOptions.length === 0}
           >
-            {clusterOptions.length === 0 ? <option value="">没有可用群集</option> : null}
-            {clusterOptions.map((option) => (
-              <option key={option.uuid} value={option.uuid}>
-                {option.label}
-              </option>
-            ))}
+            <SelectTrigger id="ticket-cluster">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {clusterOptions.length === 0 ? (
+                <SelectItem value="none" disabled>
+                  没有可用群集
+                </SelectItem>
+              ) : null}
+              {clusterGroups.map(([group, options]) => (
+                <SelectGroup key={group || "ungrouped"}>
+                  <SelectLabel>{group || "未分组"}</SelectLabel>
+                  {options.map((option) => (
+                    <SelectItem key={option.uuid} value={option.uuid}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              ))}
+            </SelectContent>
           </Select>
         </div>
         <div className="flex flex-col gap-1.5">
@@ -214,15 +256,24 @@ export function TicketForm({
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="ticket-reviewer">审核人</Label>
         <Select
-          id="ticket-reviewer"
-          value={selectedReviewer}
-          onChange={(event) => setReviewerUUID(event.target.value)}
+          value={selectedReviewer || "none"}
+          onValueChange={(value) => setReviewerUUID(value === "none" ? "" : value)}
         >
-          {reviewerOptions.map((option) => (
-            <option key={option.uuid} value={option.uuid}>
-              {option.label}
-            </option>
-          ))}
+          <SelectTrigger id="ticket-reviewer">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {reviewerOptions.length === 0 ? (
+              <SelectItem value="none" disabled>
+                没有可用审核人
+              </SelectItem>
+            ) : null}
+            {reviewerOptions.map((option) => (
+              <SelectItem key={option.uuid} value={option.uuid}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
         </Select>
       </div>
 

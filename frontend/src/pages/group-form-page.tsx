@@ -6,7 +6,13 @@ import { SectionCard } from "@/components/shared/section-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useGraphQL } from "@/hooks/use-graphql"
 import { graphqlRequest } from "@/lib/api/client"
 import {
@@ -96,13 +102,14 @@ function GroupForm({ initial, mode, uuid, onSaved }: GroupFormProps) {
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="group-status">状态</Label>
-          <Select
-            id="group-status"
-            value={status}
-            onChange={(event) => setStatus(event.target.value)}
-          >
-            <option value="1">正常</option>
-            <option value="2">停用</option>
+          <Select value={status} onValueChange={(value) => setStatus(value)}>
+            <SelectTrigger id="group-status">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1">正常</SelectItem>
+              <SelectItem value="2">停用</SelectItem>
+            </SelectContent>
           </Select>
         </div>
         <div className="flex flex-col gap-1.5 sm:col-span-2">

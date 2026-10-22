@@ -4,7 +4,13 @@ import { IconCheck, IconPencil, IconX } from "@tabler/icons-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Select } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -92,14 +98,17 @@ export function OptionsPanel({ showHeader = true }: OptionsPanelProps) {
                 {editing === option.UUID ? (
                   <div className="flex items-center gap-2">
                     {option.Element === "switch" ? (
-                      <Select
-                        value={draft}
-                        onChange={(event) => setDraft(event.target.value)}
-                        aria-label={`${option.Name} 的值`}
-                        className="h-8 max-w-32"
-                      >
-                        <option value="true">开启</option>
-                        <option value="false">关闭</option>
+                      <Select value={draft} onValueChange={(value) => setDraft(value)}>
+                        <SelectTrigger
+                          aria-label={`${option.Name} 的值`}
+                          className="h-8 max-w-32"
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="true">开启</SelectItem>
+                          <SelectItem value="false">关闭</SelectItem>
+                        </SelectContent>
                       </Select>
                     ) : (
                       <Input

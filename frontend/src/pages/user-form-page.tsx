@@ -7,7 +7,13 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useGraphQL } from "@/hooks/use-graphql"
 import { graphqlRequest } from "@/lib/api/client"
 import {
@@ -191,14 +197,15 @@ function UserForm({ mode, uuid, initial, onSaved }: UserFormProps) {
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="user-status">状态</Label>
-          <Select
-            id="user-status"
-            value={status}
-            onChange={(event) => setStatus(event.target.value)}
-          >
-            <option value="1">正常</option>
-            <option value="2">禁用</option>
-            <option value="3">待验证</option>
+          <Select value={status} onValueChange={(value) => setStatus(value)}>
+            <SelectTrigger id="user-status">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1">正常</SelectItem>
+              <SelectItem value="2">禁用</SelectItem>
+              <SelectItem value="3">待验证</SelectItem>
+            </SelectContent>
           </Select>
         </div>
         <div className="flex flex-col gap-1.5 sm:col-span-2">

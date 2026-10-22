@@ -6,7 +6,13 @@ import { SectionCard } from "@/components/shared/section-card"
 import { CursorPagination } from "@/components/ui/cursor-pagination"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -126,13 +132,18 @@ export function LogsPage() {
           </div>
           <div className="flex flex-col gap-1.5 sm:w-48">
             <Label htmlFor="log-actor">操作人</Label>
-            <Select id="log-actor" value={actor} onChange={(event) => setActor(event.target.value)}>
-              <option value="all">全部操作人</option>
-              {actors.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
+            <Select value={actor} onValueChange={(value) => setActor(value)}>
+              <SelectTrigger id="log-actor">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部操作人</SelectItem>
+                {actors.map((item) => (
+                  <SelectItem key={item} value={item}>
+                    {item}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
         </div>

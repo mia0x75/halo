@@ -6,7 +6,13 @@ import { SectionCard } from "@/components/shared/section-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { graphqlRequest } from "@/lib/api/client"
 import { CREATE_CRON_MUTATION } from "@/lib/api/queries"
 import { getToken } from "@/lib/api/session"
@@ -84,12 +90,17 @@ export function CronCreatePage({ onBack, onSaved }: CronCreatePageProps) {
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="cron-job">作业类型</Label>
-            <Select id="cron-job" value={job} onChange={(event) => setJob(event.target.value)}>
-              {jobOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
+            <Select value={job} onValueChange={(value) => setJob(value)}>
+              <SelectTrigger id="cron-job">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {jobOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
           <div className="flex flex-col gap-1.5">

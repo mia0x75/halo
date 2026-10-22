@@ -7,7 +7,13 @@ import { Badge } from "@/components/ui/badge"
 import { CursorPagination } from "@/components/ui/cursor-pagination"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -145,35 +151,43 @@ export function ViolationsPage() {
           <div className="flex flex-col gap-1.5 sm:w-40">
             <Label htmlFor="hit-level">级别</Label>
             <Select
-              id="hit-level"
               value={level}
-              onChange={(event) => {
-                setLevel(event.target.value)
+              onValueChange={(value) => {
+                setLevel(value)
                 reset()
               }}
             >
-              <option value="all">全部级别</option>
-              <option value="错误">错误</option>
-              <option value="警告">警告</option>
-              <option value="提示">提示</option>
+              <SelectTrigger id="hit-level">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部级别</SelectItem>
+                <SelectItem value="错误">错误</SelectItem>
+                <SelectItem value="警告">警告</SelectItem>
+                <SelectItem value="提示">提示</SelectItem>
+              </SelectContent>
             </Select>
           </div>
           <div className="flex flex-col gap-1.5 sm:w-48">
             <Label htmlFor="hit-rule">规则</Label>
             <Select
-              id="hit-rule"
               value={rule}
-              onChange={(event) => {
-                setRule(event.target.value)
+              onValueChange={(value) => {
+                setRule(value)
                 reset()
               }}
             >
-              <option value="all">全部规则</option>
-              {ruleNames.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
+              <SelectTrigger id="hit-rule">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部规则</SelectItem>
+                {ruleNames.map((item) => (
+                  <SelectItem key={item} value={item}>
+                    {item}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
         </div>

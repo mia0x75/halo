@@ -5,7 +5,13 @@ import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
-import { Select } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -56,16 +62,17 @@ export function DatabasesPage() {
         <div className="flex flex-wrap items-end gap-3 border-b border-border px-5 py-4">
           <div className="flex flex-col gap-1.5 sm:w-72">
             <Label htmlFor="database-cluster">目标群集</Label>
-            <Select
-              id="database-cluster"
-              value={selected}
-              onChange={(event) => setClusterUUID(event.target.value)}
-            >
-              {clusters.clusters.map((cluster) => (
-                <option key={cluster.uuid} value={cluster.uuid}>
-                  {cluster.alias} · {cluster.type} ({cluster.ip}:{cluster.port})
-                </option>
-              ))}
+            <Select value={selected} onValueChange={(value) => setClusterUUID(value)}>
+              <SelectTrigger id="database-cluster">
+                <SelectValue placeholder="选择群集" />
+              </SelectTrigger>
+              <SelectContent>
+                {clusters.clusters.map((cluster) => (
+                  <SelectItem key={cluster.uuid} value={cluster.uuid}>
+                    {cluster.alias} · {cluster.type} ({cluster.ip}:{cluster.port})
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
         </div>

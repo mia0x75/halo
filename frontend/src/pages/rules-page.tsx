@@ -7,7 +7,13 @@ import { Badge } from "@/components/ui/badge"
 import { CursorPagination } from "@/components/ui/cursor-pagination"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -133,35 +139,43 @@ export function RulesPage() {
           <div className="flex flex-col gap-1.5 sm:w-40">
             <Label htmlFor="rule-level">级别</Label>
             <Select
-              id="rule-level"
               value={level}
-              onChange={(event) => {
-                setLevel(event.target.value)
+              onValueChange={(value) => {
+                setLevel(value)
                 reset()
               }}
             >
-              <option value="all">全部级别</option>
-              <option value="错误">错误</option>
-              <option value="警告">警告</option>
-              <option value="提示">提示</option>
+              <SelectTrigger id="rule-level">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部级别</SelectItem>
+                <SelectItem value="错误">错误</SelectItem>
+                <SelectItem value="警告">警告</SelectItem>
+                <SelectItem value="提示">提示</SelectItem>
+              </SelectContent>
             </Select>
           </div>
           <div className="flex flex-col gap-1.5 sm:w-44">
             <Label htmlFor="rule-group">分组</Label>
             <Select
-              id="rule-group"
               value={group}
-              onChange={(event) => {
-                setGroup(event.target.value)
+              onValueChange={(value) => {
+                setGroup(value)
                 reset()
               }}
             >
-              <option value="all">全部分组</option>
-              {groups.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
+              <SelectTrigger id="rule-group">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部分组</SelectItem>
+                {groups.map((item) => (
+                  <SelectItem key={item} value={item}>
+                    {item}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
         </div>

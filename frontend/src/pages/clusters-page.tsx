@@ -31,7 +31,13 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { StatusDot } from "@/components/ui/status-dot"
 import {
   Table,
@@ -157,34 +163,42 @@ export function ClustersPage({ onCreate, onEdit }: ClustersPageProps) {
           <div className="flex flex-col gap-1.5 sm:w-40">
             <Label htmlFor="cluster-type">类型</Label>
             <Select
-              id="cluster-type"
               value={type}
-              onChange={(event) => {
-                setType(event.target.value)
+              onValueChange={(value) => {
+                setType(value)
                 page.reset()
               }}
             >
-              <option value="all">全部类型</option>
-              <option value="mysql">MySQL</option>
-              <option value="postgres">PostgreSQL</option>
+              <SelectTrigger id="cluster-type">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部类型</SelectItem>
+                <SelectItem value="mysql">MySQL</SelectItem>
+                <SelectItem value="postgres">PostgreSQL</SelectItem>
+              </SelectContent>
             </Select>
           </div>
           <div className="flex flex-col gap-1.5 sm:w-44">
             <Label htmlFor="cluster-group">分组</Label>
             <Select
-              id="cluster-group"
               value={group}
-              onChange={(event) => {
-                setGroup(event.target.value)
+              onValueChange={(value) => {
+                setGroup(value)
                 page.reset()
               }}
             >
-              <option value="all">全部分组</option>
-              {groups.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
+              <SelectTrigger id="cluster-group">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部分组</SelectItem>
+                {groups.map((item) => (
+                  <SelectItem key={item} value={item}>
+                    {item}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
         </div>

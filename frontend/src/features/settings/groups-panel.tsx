@@ -13,7 +13,13 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Select } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -223,18 +229,26 @@ export function GroupsPanel({ onCreate, onEdit }: GroupsPanelProps) {
                 <TableCell className="text-muted-foreground">{cluster.Type}</TableCell>
                 <TableCell>
                   <Select
-                    value={cluster.GroupUUID ?? ""}
+                    value={cluster.GroupUUID ?? "none"}
                     disabled={movingUUID === cluster.UUID}
-                    onChange={(event) => void moveCluster(cluster, event.target.value)}
-                    aria-label={`${cluster.Alias} 的分组`}
-                    className="h-8 max-w-40"
+                    onValueChange={(value) =>
+                      void moveCluster(cluster, value === "none" ? "" : value)
+                    }
                   >
-                    <option value="">未分组</option>
-                    {groups.map((group) => (
-                      <option key={group.UUID} value={group.UUID}>
-                        {group.Name}
-                      </option>
-                    ))}
+                    <SelectTrigger
+                      aria-label={`${cluster.Alias} 的分组`}
+                      className="h-8 max-w-40"
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">未分组</SelectItem>
+                      {groups.map((group) => (
+                        <SelectItem key={group.UUID} value={group.UUID}>
+                          {group.Name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                 </TableCell>
               </TableRow>

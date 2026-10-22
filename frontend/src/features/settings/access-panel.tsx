@@ -7,7 +7,13 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { Select } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useGraphQL } from "@/hooks/use-graphql"
 import { graphqlRequest } from "@/lib/api/client"
 import {
@@ -197,22 +203,26 @@ export function AccessPanel({ scope }: AccessPanelProps) {
               {scope === "role" ? "角色" : "用户"}
             </Label>
             <Select
-              id="access-target"
-              value={targetUUID}
-              onChange={(event) => switchTarget(event.target.value)}
+              value={targetUUID || "none"}
+              onValueChange={(value) => switchTarget(value === "none" ? "" : value)}
             >
-              <option value="">请选择</option>
-              {scope === "role"
-                ? roleList.map((role) => (
-                    <option key={role.UUID} value={role.UUID}>
-                      {role.Name}（{role.Description || "无说明"}）
-                    </option>
-                  ))
-                : userList.map((user) => (
-                    <option key={user.UUID} value={user.UUID}>
-                      {user.Name || user.Email}
-                    </option>
-                  ))}
+              <SelectTrigger id="access-target">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">请选择</SelectItem>
+                {scope === "role"
+                  ? roleList.map((role) => (
+                      <SelectItem key={role.UUID} value={role.UUID}>
+                        {role.Name}（{role.Description || "无说明"}）
+                      </SelectItem>
+                    ))
+                  : userList.map((user) => (
+                      <SelectItem key={user.UUID} value={user.UUID}>
+                        {user.Name || user.Email}
+                      </SelectItem>
+                    ))}
+              </SelectContent>
             </Select>
           </div>
 

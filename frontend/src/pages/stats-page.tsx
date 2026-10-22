@@ -7,7 +7,13 @@ import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
-import { Select } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -113,15 +119,15 @@ export function StatsPage() {
             <Label htmlFor="stats-range" className="text-muted-foreground">
               区间
             </Label>
-            <Select
-              id="stats-range"
-              value={range}
-              onChange={(event) => setRange(event.target.value)}
-              className="h-8 w-32"
-            >
-              <option value="7">近 7 天</option>
-              <option value="30">近 30 天</option>
-              <option value="90">近 90 天</option>
+            <Select value={range} onValueChange={(value) => setRange(value)}>
+              <SelectTrigger id="stats-range" className="h-8 w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">近 7 天</SelectItem>
+                <SelectItem value="30">近 30 天</SelectItem>
+                <SelectItem value="90">近 90 天</SelectItem>
+              </SelectContent>
             </Select>
           </div>
         }

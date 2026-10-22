@@ -4,7 +4,13 @@ import { IconDeviceFloppy, IconPlugConnected } from "@tabler/icons-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useGraphQL } from "@/hooks/use-graphql"
 import { graphqlRequest } from "@/lib/api/client"
 import {
@@ -185,39 +191,48 @@ export function ClusterForm({ mode, initial, onSaved, onCancel }: ClusterFormPro
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="cluster-type">目标库类型</Label>
-          <Select
-            id="cluster-type"
-            value={values.type}
-            onChange={(event) => set("type", event.target.value)}
-          >
-            <option value="mysql">MySQL</option>
-            <option value="postgres">PostgreSQL</option>
+          <Select value={values.type} onValueChange={(value) => set("type", value)}>
+            <SelectTrigger id="cluster-type">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="mysql">MySQL</SelectItem>
+              <SelectItem value="postgres">PostgreSQL</SelectItem>
+            </SelectContent>
           </Select>
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="cluster-group">所属分组</Label>
           <Select
-            id="cluster-group"
-            value={values.groupUUID}
-            onChange={(event) => set("groupUUID", event.target.value)}
+            value={values.groupUUID || "none"}
+            onValueChange={(value) => set("groupUUID", value === "none" ? "" : value)}
           >
-            <option value="">未分组</option>
-            {(groups.data?.groups ?? []).map((group) => (
-              <option key={group.UUID} value={group.UUID}>
-                {group.Name}
-              </option>
-            ))}
+            <SelectTrigger id="cluster-group">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">未分组</SelectItem>
+              {(groups.data?.groups ?? []).map((group) => (
+                <SelectItem key={group.UUID} value={group.UUID}>
+                  {group.Name}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="cluster-status">状态</Label>
           <Select
-            id="cluster-status"
             value={String(values.status)}
-            onChange={(event) => set("status", Number(event.target.value))}
+            onValueChange={(value) => set("status", Number(value))}
           >
-            <option value="1">正常</option>
-            <option value="2">禁用</option>
+            <SelectTrigger id="cluster-status">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1">正常</SelectItem>
+              <SelectItem value="2">禁用</SelectItem>
+            </SelectContent>
           </Select>
         </div>
       </div>

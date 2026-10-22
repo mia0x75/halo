@@ -8,7 +8,13 @@ import { Button } from "@/components/ui/button"
 import { CursorPagination } from "@/components/ui/cursor-pagination"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -108,19 +114,23 @@ export function TicketsPage({ onOpenTicket, onCreateTicket, initialKeyword }: Ti
           <div className="flex flex-col gap-1.5 sm:w-52">
             <Label htmlFor="ticket-status">状态</Label>
             <Select
-              id="ticket-status"
               value={status}
-              onChange={(event) => {
-                setStatus(event.target.value as TicketStatus | "all")
+              onValueChange={(value) => {
+                setStatus(value as TicketStatus | "all")
                 reset()
               }}
             >
-              <option value="all">全部状态</option>
-              {Object.entries(ticketStatusMeta).map(([key, meta]) => (
-                <option key={key} value={key}>
-                  {meta.label}
-                </option>
-              ))}
+              <SelectTrigger id="ticket-status">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部状态</SelectItem>
+                {Object.entries(ticketStatusMeta).map(([key, meta]) => (
+                  <SelectItem key={key} value={key}>
+                    {meta.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
         </div>
