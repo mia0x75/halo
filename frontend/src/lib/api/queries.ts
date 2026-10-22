@@ -864,6 +864,11 @@ export const OPTIONS_QUERY = `
       Writable
       Description
       Element
+      GroupName
+      SortOrder
+      DependsOn
+      MinValue
+      MaxValue
     }
   }
 `
@@ -960,5 +965,13 @@ export interface OptionNode {
   Writable: number
   Description: string
   Element: string
+  /** 所属分组，同组共用一个标题。 */
+  GroupName: string
+  /** 组内展示顺序。 */
+  SortOrder: number
+  /** 依赖的选项名，为空表示无依赖。 */
+  DependsOn: string
+  MinValue: number | null
+  MaxValue: number | null
 }
 

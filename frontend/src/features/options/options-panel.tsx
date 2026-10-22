@@ -1,24 +1,18 @@
 import { useMemo, useState } from "react"
-import { IconCheck, IconPencil, IconX } from "@tabler/icons-react"
+import { IconKey, IconLock, IconPencil } from "@tabler/icons-react"
 
+import { SectionCard } from "@/components/shared/section-card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import { useGraphQL } from "@/hooks/use-graphql"
 import { graphqlRequest } from "@/lib/api/client"
 import { OPTIONS_QUERY, PATCH_OPTION_MUTATION, type OptionNode } from "@/lib/api/queries"
@@ -29,141 +23,349 @@ export interface OptionsPanelProps {
   showHeader?: boolean
 }
 
-/** 平台参数表格：只读项由服务端固定，可写项能在这里改值。 */
+/** 选项按分组聚合成卡片，组内按展示顺序排列。 */
+function groupOptions(options: OptionNode[]): { name: string; items: OptionNode[] }[] {
+  const groups = new Map<string, OptionNode[]>()
+  for (const option of options) {
+    const name = option.GroupName || "其它"
+    const bucket = groups.get(name)
+    if (bucket) {
+      bucket.push(option)
+    } else {
+      groups.set(name, [option])
+    }
+  }
+  return [...groups.entries()]
+    .map(([name, items]) => ({
+      name,
+      items: items.sort((a, b) => a.SortOrder - b.SortOrder || a.Name.localeCompare(b.Name)),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name))
+}
+
+/** 平台参数：按分组展示，只读项灰显，可写项就地编辑。 */
 export function OptionsPanel({ showHeader = true }: OptionsPanelProps) {
   const remote = useGraphQL<{ options: OptionNode[] }>(OPTIONS_QUERY, undefined, { options: [] })
-  const [editing, setEditing] = useState<string | null>(null)
-  const [draft, setDraft] = useState("")
   const [error, setError] = useState<string | null>(null)
-  const [saving, setSaving] = useState(false)
+  const [saving, setSaving] = useState<string | null>(null)
+  const [secret, setSecret] = useState<OptionNode | null>(null)
+  const [secretValue, setSecretValue] = useState("")
 
   const options = useMemo(() => remote.data?.options ?? [], [remote.data])
+  const groups = useMemo(() => groupOptions(options), [options])
 
-  const startEdit = (option: OptionNode) => {
-    setEditing(option.UUID)
-    setDraft(option.Parameter)
-    setError(null)
-  }
+  // 依赖项没打开时，依赖它的选项不可编辑。
+  const enabled = useMemo(() => {
+    const map = new Map<string, boolean>()
+    for (const option of options) {
+      map.set(option.Name, option.Parameter === "true")
+    }
+    return map
+  }, [options])
 
-  const cancel = () => {
-    setEditing(null)
-    setDraft("")
-  }
-
-  const save = async (option: OptionNode) => {
-    setSaving(true)
+  const patch = async (option: OptionNode, value: string) => {
+    setSaving(option.UUID)
     setError(null)
     try {
       await graphqlRequest(
         PATCH_OPTION_MUTATION,
-        { input: { OptionUUID: option.UUID, Parameter: draft } },
+        { input: { OptionUUID: option.UUID, Parameter: value } },
         getToken(),
       )
-      cancel()
       remote.refetch()
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))
     } finally {
-      setSaving(false)
+      setSaving(null)
     }
   }
 
+  const saveSecret = async () => {
+    if (!secret) return
+    const target = secret
+    setSecret(null)
+    setSecretValue("")
+    if (secretValue === "") return
+    await patch(target, secretValue)
+  }
+
+  if (!showHeader) {
+    return (
+      <div className="flex flex-col">
+        {error ? (
+          <p className="mb-3 rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
+        ) : null}
+        {groups.map((group) => (
+          <OptionGroup
+            key={group.name}
+            name={group.name}
+            items={group.items}
+            enabled={enabled}
+            saving={saving}
+            onPatch={patch}
+            onEditSecret={(option) => {
+              setSecret(option)
+              setSecretValue("")
+            }}
+          />
+        ))}
+      </div>
+    )
+  }
+
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-4">
       {error ? (
-        <p className="mb-3 rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
+        <p className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
       ) : null}
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>配置项</TableHead>
-            <TableHead>值</TableHead>
-            <TableHead>说明</TableHead>
-            <TableHead>可写</TableHead>
-            <TableHead className="w-24"></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {options.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={5} className="py-8 text-center text-sm text-muted-foreground">
-                没有可读的系统选项。
-              </TableCell>
-            </TableRow>
-          ) : null}
-          {options.map((option) => (
-            <TableRow key={option.UUID}>
-              <TableCell className="font-mono text-xs font-medium">{option.Name}</TableCell>
-              <TableCell>
-                {editing === option.UUID ? (
-                  <div className="flex items-center gap-2">
-                    {option.Element === "switch" ? (
-                      <Select value={draft} onValueChange={(value) => setDraft(value)}>
-                        <SelectTrigger
-                          aria-label={`${option.Name} 的值`}
-                          className="h-8 max-w-32"
-                        >
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="true">开启</SelectItem>
-                          <SelectItem value="false">关闭</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <Input
-                        value={draft}
-                        onChange={(event) => setDraft(event.target.value)}
-                        type={
-                          option.Element === "password"
-                            ? "password"
-                            : option.Element === "number"
-                              ? "number"
-                              : "text"
-                        }
-                        className="h-8 max-w-64"
-                        aria-label={`${option.Name} 的值`}
-                      />
-                    )}
-                    <Button
-                      size="icon-sm"
-                      aria-label="保存"
-                      disabled={saving}
-                      onClick={() => void save(option)}
-                    >
-                      <IconCheck size={16} stroke={1.5} />
-                    </Button>
-                    <Button size="icon-sm" aria-label="取消" onClick={cancel}>
-                      <IconX size={16} stroke={1.5} />
-                    </Button>
-                  </div>
-                ) : (
-                  <span className="font-mono text-xs">{option.Parameter}</span>
-                )}
-              </TableCell>
-              <TableCell className="text-muted-foreground">{option.Description || "-"}</TableCell>
-              <TableCell>
-                <Badge variant={option.Writable === 1 ? "success" : "muted"}>
-                  {option.Writable === 1 ? "可写" : "只读"}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                {option.Writable === 1 && editing !== option.UUID ? (
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={`编辑 ${option.Name}`}
-                    onClick={() => startEdit(option)}
-                  >
-                    <IconPencil size={16} stroke={1.5} />
-                  </Button>
+      {groups.map((group) => (
+        <OptionGroup
+          key={group.name}
+          name={group.name}
+          items={group.items}
+          enabled={enabled}
+          saving={saving}
+          onPatch={patch}
+          onEditSecret={(option) => {
+            setSecret(option)
+            setSecretValue("")
+          }}
+        />
+      ))}
+      <Dialog
+        open={secret !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSecret(null)
+            setSecretValue("")
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogTitle className="text-base font-medium text-strong">
+            修改 {secret?.Name}
+          </DialogTitle>
+          <DialogDescription className="mt-1 text-sm text-muted-foreground">
+            密码加密后存储，保存后不再回显。
+          </DialogDescription>
+          <div className="mt-4 flex flex-col gap-1.5">
+            <Label htmlFor="option-secret">新值</Label>
+            <Input
+              id="option-secret"
+              type="password"
+              value={secretValue}
+              onChange={(event) => setSecretValue(event.target.value)}
+              autoComplete="new-password"
+            />
+          </div>
+          <div className="mt-5 flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setSecret(null)}>
+              取消
+            </Button>
+            <Button disabled={secretValue === ""} onClick={() => void saveSecret()}>
+              保存
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
+
+interface OptionGroupProps {
+  name: string
+  items: OptionNode[]
+  enabled: Map<string, boolean>
+  saving: string | null
+  onPatch: (option: OptionNode, value: string) => Promise<void>
+  onEditSecret: (option: OptionNode) => void
+}
+
+/** 一个分组的卡片。 */
+function OptionGroup({
+  name,
+  items,
+  enabled,
+  saving,
+  onPatch,
+  onEditSecret,
+}: OptionGroupProps) {
+  return (
+    <SectionCard title={name} description={`${items.length} 项`} bodyClassName="p-0">
+      <ul className="divide-y divide-border">
+        {items.map((option) => {
+          const writable = option.Writable === 1
+          const blocked = option.DependsOn !== "" && enabled.get(option.DependsOn) !== true
+          const disabled = !writable || blocked
+          return (
+            <li
+              key={option.UUID}
+              className="flex flex-wrap items-center gap-3 px-5 py-3"
+            >
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs font-medium">{option.Name}</span>
+                  {!writable ? (
+                    <Badge variant="muted">
+                      <IconLock size={12} stroke={1.5} />
+                      只读
+                    </Badge>
+                  ) : null}
+                </div>
+                <span className="truncate text-xs text-muted-foreground">
+                  {option.Description || "-"}
+                </span>
+                {blocked ? (
+                  <span className="text-xs text-warning">
+                    需先开启 {option.DependsOn}
+                  </span>
                 ) : null}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {showHeader ? null : null}
+              </div>
+              <OptionControl
+                option={option}
+                disabled={disabled}
+                saving={saving === option.UUID}
+                onPatch={onPatch}
+                onEditSecret={onEditSecret}
+              />
+            </li>
+          )
+        })}
+      </ul>
+    </SectionCard>
+  )
+}
+
+interface OptionControlProps {
+  option: OptionNode
+  disabled: boolean
+  saving: boolean
+  onPatch: (option: OptionNode, value: string) => Promise<void>
+  onEditSecret?: (option: OptionNode) => void
+}
+
+/** 按 element 渲染对应控件。 */
+function OptionControl({
+  option,
+  disabled,
+  saving,
+  onPatch,
+  onEditSecret,
+}: OptionControlProps) {
+  if (option.Writable !== 1) {
+    // 只读项直接展示取值。
+    return <span className="font-mono text-xs text-muted-foreground">{option.Parameter}</span>
+  }
+
+  switch (option.Element) {
+    case "switch":
+      return (
+        <Switch
+          checked={option.Parameter === "true"}
+          disabled={disabled || saving}
+          aria-label={option.Name}
+          onCheckedChange={(checked) => void onPatch(option, checked ? "true" : "false")}
+        />
+      )
+    case "password":
+      return (
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={disabled || saving}
+          onClick={() => onEditSecret?.(option)}
+        >
+          <IconKey size={14} stroke={1.5} />
+          修改
+        </Button>
+      )
+    case "number":
+      return (
+        <NumberControl option={option} disabled={disabled} saving={saving} onPatch={onPatch} />
+      )
+    default:
+      return (
+        <TextControl option={option} disabled={disabled} saving={saving} onPatch={onPatch} />
+      )
+  }
+}
+
+/** 文本输入：回车或失焦保存。 */
+function TextControl({
+  option,
+  disabled,
+  saving,
+  onPatch,
+}: OptionControlProps) {
+  const [draft, setDraft] = useState(option.Parameter)
+  const dirty = draft !== option.Parameter
+  return (
+    <div className="flex items-center gap-2">
+      <Input
+        value={draft}
+        disabled={disabled || saving}
+        onChange={(event) => setDraft(event.target.value)}
+        onBlur={() => {
+          if (dirty && !disabled) void onPatch(option, draft)
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" && dirty && !disabled) void onPatch(option, draft)
+        }}
+        className="h-8 w-56"
+        aria-label={option.Name}
+      />
+      {dirty ? (
+        <Button
+          size="icon-sm"
+          aria-label={`保存 ${option.Name}`}
+          disabled={disabled || saving}
+          onClick={() => void onPatch(option, draft)}
+        >
+          <IconPencil size={16} stroke={1.5} />
+        </Button>
+      ) : null}
+    </div>
+  )
+}
+
+/** 数值输入：按 min/max 限制，回车或失焦保存。 */
+function NumberControl({
+  option,
+  disabled,
+  saving,
+  onPatch,
+}: OptionControlProps) {
+  const [draft, setDraft] = useState(option.Parameter)
+  const dirty = draft !== option.Parameter
+  const invalid =
+    option.MinValue !== null && Number(draft) < option.MinValue
+      ? true
+      : option.MaxValue !== null && Number(draft) > option.MaxValue
+        ? true
+        : false
+  return (
+    <div className="flex items-center gap-2">
+      <Input
+        type="number"
+        value={draft}
+        min={option.MinValue ?? undefined}
+        max={option.MaxValue ?? undefined}
+        disabled={disabled || saving}
+        onChange={(event) => setDraft(event.target.value)}
+        onBlur={() => {
+          if (dirty && !disabled && !invalid) void onPatch(option, draft)
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" && dirty && !disabled && !invalid) void onPatch(option, draft)
+        }}
+        className="h-8 w-32"
+        aria-label={option.Name}
+      />
+      {invalid ? (
+        <span className="text-xs text-danger">
+          取值范围 {option.MinValue ?? "-"} ~ {option.MaxValue ?? "-"}
+        </span>
+      ) : null}
     </div>
   )
 }

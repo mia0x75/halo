@@ -479,28 +479,41 @@ function buildCrons(): { crons: CronNode[]; tasks: CronNode[]; executions: TaskE
 }
 
 function buildOptions(): OptionNode[] {
-  const seeds = [
-    ["site-name", "Halo", 1, "站点名称", "input"],
-    ["ticket-auto-close-days", "30", 1, "工单自动关闭天数", "input"],
-    ["ticket-max-statements", "200", 1, "单工单语句上限", "input"],
-    ["execute-timeout", "600", 1, "执行超时（秒）", "input"],
-    ["review-required", "true", 0, "是否强制人工审核", "switch"],
-    ["metrics-retention", "90", 0, "指标保留天数", "input"],
-    ["mail-notify", "false", 1, "邮件通知开关", "switch"],
-    ["danger-keywords", "DROP,TRUNCATE", 1, "危险关键字", "input"],
-    ["backup-before-execute", "true", 0, "执行前备份", "switch"],
-    ["session-timeout", "7200", 1, "登录会话有效期（秒）", "input"],
-    ["cluster-default-port", "3306", 1, "群集默认端口", "input"],
-    ["audit-log-retention", "180", 0, "审计日志保留天数", "input"],
-  ] as const
-  return seeds.map(([name, parameter, writable, description, element], index) => ({
-    UUID: demoUUID(0xc0000000, index),
-    Name: name,
-    Parameter: parameter,
-    Writable: writable,
-    Description: description,
-    Element: element,
-  }))
+  const seeds: [string, string, number, string, string, string, number, string, number | null, number | null][] = [
+    ["site-name", "Halo", 1, "站点名称", "input", "站点信息", 1, "", null, null],
+    ["ticket-auto-close-days", "30", 1, "工单自动关闭天数", "number", "工单设置", 1, "", 1, 3650],
+    ["ticket-max-statements", "200", 1, "单工单语句上限", "number", "工单设置", 1, "", 1, 1000],
+    ["execute-timeout", "600", 1, "执行超时（秒）", "number", "工单设置", 2, "", 30, 7200],
+    ["review-required", "true", 0, "是否强制人工审核", "switch", "工单设置", 3, "", null, null],
+    ["metrics-retention", "90", 0, "指标保留天数", "number", "数据保留期", 1, "", 1, 3650],
+    ["audit-log-retention", "180", 0, "审计日志保留天数", "number", "数据保留期", 2, "", 1, 3650],
+    ["mail-notify", "false", 1, "邮件通知开关", "switch", "邮件通知", 1, "", null, null],
+    ["mail-addr", "", 1, "SMTP 服务器（host:port）", "input", "邮件通知", 2, "mail-notify", null, null],
+    ["mail-user", "", 1, "SMTP 账号", "input", "邮件通知", 3, "mail-notify", null, null],
+    ["mail-password", "", 1, "SMTP 密码（加密存储）", "password", "邮件通知", 4, "mail-notify", null, null],
+    ["danger-keywords", "DROP,TRUNCATE", 1, "危险关键字", "input", "安全策略", 1, "", null, null],
+    ["backup-before-execute", "true", 0, "执行前备份", "switch", "安全策略", 2, "", null, null],
+    ["session-timeout", "7200", 1, "登录会话有效期（秒）", "number", "安全策略", 3, "", 60, 604800],
+    ["cluster-default-port", "3306", 1, "群集默认端口", "number", "安全策略", 4, "", 1, 65535],
+  ]
+  return seeds.map(
+    (
+      [name, parameter, writable, description, element, groupName, sortOrder, dependsOn, minValue, maxValue],
+      index,
+    ) => ({
+      UUID: demoUUID(0xc0000000, index),
+      Name: name,
+      Parameter: parameter,
+      Writable: writable,
+      Description: description,
+      Element: element,
+      GroupName: groupName,
+      SortOrder: sortOrder,
+      DependsOn: dependsOn,
+      MinValue: minValue,
+      MaxValue: maxValue,
+    }),
+  )
 }
 
 function buildMetrics(): { Name: string; Bucket: string; Value: number }[] {
