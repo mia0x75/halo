@@ -9,6 +9,9 @@ const (
 	StatementStatusVldFailure    StatementStatus = 2
 	StatementStatusVldWarning    StatementStatus = 3
 	StatementStatusWaitingForMrv StatementStatus = 4
+	// 执行结果沿用工单状态的编号，便于两个层面直接对照。
+	StatementStatusDone        StatementStatus = 7
+	StatementStatusExecFailure StatementStatus = 8
 )
 
 // StatementType is the SQL operation of a statement. Stored in mm_statements.type.

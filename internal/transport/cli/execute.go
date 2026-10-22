@@ -10,12 +10,11 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/mia0x75/halo/internal/bridge"
+	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/event"
-	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/platform/config"
 	"github.com/mia0x75/halo/internal/platform/crypto"
 	"github.com/mia0x75/halo/internal/service"
-	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 	"github.com/mia0x75/halo/internal/worker"
 )
 
@@ -63,53 +62,52 @@ func execute(cmd *cobra.Command, args []string) {
 		buf.WriteString("\n")
 		buf.WriteString(ticketUUID)
 
-		domainTicket, tkErr := application.Services.Ticket.GetByUUID(ctx, ticketUUID)
+		ticket, tkErr := application.Services.Ticket.GetByUUID(ctx, ticketUUID)
 		if tkErr != nil {
 			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", tkErr.Error())
 			break
 		}
-		ticket := bridge.TicketFromDomain(domainTicket)
 
 		// 工单当前状态是LGTM才允许执行
-		if ticket.Status != gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumLgtm] {
+		if ticket.Status != domain.TicketStatusLgtm {
 			err = fmt.Errorf("错误代码: 1500, 错误信息: 只有审核通过等待上线执行的工单才可以执行。")
 			break
 		}
 
-		domainStmts, stErr := application.Services.Statement.ListByTicket(ctx, ticket.TicketID)
+		stmts, stErr := application.Services.Statement.ListByTicket(ctx, ticket.TicketID)
 		if stErr != nil {
 			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", stErr.Error())
 			break
 		}
-		stmts := make([]*models.Statement, 0, len(domainStmts))
-		for _, s := range domainStmts {
-			stmts = append(stmts, bridge.StatementFromDomain(s))
-		}
 
-		domainCluster, clErr := application.Services.Cluster.Get(ctx, ticket.ClusterID)
+		target, clErr := application.Services.Cluster.Get(ctx, ticket.ClusterID)
 		if clErr != nil {
 			err = fmt.Errorf("错误代码: 1500, 错误信息: %s", clErr.Error())
 			break
 		}
-		cluster := bridge.ClusterFromDomain(domainCluster)
-
-		password, _ := crypto.DecryptAES(cluster.Password, config.Config().Secret.Crypto)
-		target := bridge.ClusterToDomain(cluster)
 		target.Database = ticket.Database
 
-		ticket.Status = gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumDone]
+		password, decErr := crypto.DecryptAES(target.Password, config.Config().Secret.Crypto)
+		if decErr != nil {
+			err = fmt.Errorf("错误代码: 1500, 错误信息: 群集(uuid=%s)的密码无法解密，请重新接入该群集。", target.UUID)
+			break
+		}
+
+		ticket.Status = domain.TicketStatusDone
 		for _, stmt := range stmts {
 			result, execErr := application.Agent.Execute(ctx, target, string(password), stmt.Content)
 			if execErr != nil {
-				stmt.Status = gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumExecFailure]
-				stmt.Results = execErr.Error()
-				ticket.Status = gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumExecFailure]
+				stmt.Status = domain.StatementStatusExecFailure
+				message := execErr.Error()
+				stmt.Results = &message
+				ticket.Status = domain.TicketStatusExecFailure
 				buf.WriteString(stmt.Content)
 				err = fmt.Errorf("错误代码: 1500, 错误信息: %s", execErr.Error())
 				break
 			}
-			stmt.Status = gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumDone]
-			stmt.RowsAffected = uint(result.RowsAffected)
+			stmt.Status = domain.StatementStatusDone
+			rows := uint(result.RowsAffected)
+			stmt.RowsAffected = &rows
 		}
 		// Execution is audited as the system user, since the CLI acts on its
 		// own rather than on behalf of a logged-in operator.
@@ -118,25 +116,29 @@ func execute(cmd *cobra.Command, args []string) {
 			actorID = sysUser.UserID
 		}
 
+		// The event bus speaks the legacy DTO, so the conversion happens only
+		// at this boundary; the execution path itself stays on domain types.
+		eventTicket := bridge.TicketFromDomain(ticket)
+		eventCluster := bridge.ClusterFromDomain(target)
 		if err != nil {
 			event.FireSync(event.EventTicketFailed, &event.TicketFailed{
 				UserID:  actorID,
-				Ticket:  *ticket,
-				Cluster: *cluster,
+				Ticket:  *eventTicket,
+				Cluster: *eventCluster,
 			})
 		} else {
 			event.FireSync(event.EventTicketExecuted, &event.TicketExecuted{
 				UserID:  actorID,
-				Ticket:  *ticket,
-				Cluster: *cluster,
+				Ticket:  *eventTicket,
+				Cluster: *eventCluster,
 			})
 		}
 		err = application.Tx.WithTx(ctx, func(ctx context.Context, repos service.Repos) error {
-			if err := repos.Ticket.Update(ctx, bridge.TicketToDomain(ticket)); err != nil {
+			if err := repos.Ticket.Update(ctx, ticket); err != nil {
 				return err
 			}
 			for _, stmt := range stmts {
-				if err := repos.Statement.Update(ctx, bridge.StatementToDomain(stmt)); err != nil {
+				if err := repos.Statement.Update(ctx, stmt); err != nil {
 					return err
 				}
 			}
