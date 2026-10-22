@@ -11,9 +11,9 @@ import (
 
 	"github.com/mia0x75/halo/internal/auth"
 	"github.com/mia0x75/halo/internal/cache"
+	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/platform/config"
-	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 )
 
 // Credential is the resolved session principal attached to a request context.
@@ -68,7 +68,7 @@ func Authenticate(input string) (*Credential, error) {
 	}
 
 	edges := cache.EdgesMap.Filter(func(elem *models.Edge) bool {
-		return elem.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToRole] &&
+		return elem.Type == uint(domain.EdgeTypeUserToRole) &&
 			elem.AncestorID == user.UserID
 	})
 	if edges == nil {

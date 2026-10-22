@@ -34,7 +34,7 @@
 ### 1. 角色用名字而不是自增 ID 表达
 
 - `internal/transport/auth/roles.go` 维护「枚举 → 角色名」的映射：
-  `ADMIN → {Root, Admin}`、`REVIEWER → {Reviewer}`、`DEVELOPER → {Developer}`、
+  `ADMIN → {Root}`、`REVIEWER → {Reviewer}`、`DEVELOPER → {Developer}`、
   `USER → {User, Viewer}`、`GUEST → {Guest}`。
 - `@auth` 指令、WebSocket 鉴权、SQL 管理指令的判断都改走
   `transportauth.HasAnyRole` / `IsAdmin`。

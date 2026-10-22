@@ -2,8 +2,8 @@ package auth
 
 import (
 	"github.com/mia0x75/halo/internal/cache"
+	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/models"
-	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 )
 
 // ClusterAccessible reports whether the user may operate on the cluster.
@@ -16,7 +16,7 @@ func ClusterAccessible(user *models.User, roles []*models.Role, cluster *models.
 		return false
 	}
 	for _, edge := range edges {
-		if edge.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToCluster] &&
+		if edge.Type == uint(domain.EdgeTypeUserToCluster) &&
 			edge.AncestorID == user.UserID &&
 			edge.DescendantID == cluster.ClusterID {
 			return true
@@ -30,7 +30,7 @@ func ClusterAccessible(user *models.User, roles []*models.Role, cluster *models.
 		roleIDs[role.RoleID] = true
 	}
 	for _, edge := range edges {
-		if edge.Type != gqlapi.EdgeEnumMap[gqlapi.EdgeEnumRoleToGroup] {
+		if edge.Type != uint(domain.EdgeTypeRoleToGroup) {
 			continue
 		}
 		if edge.DescendantID != cluster.GroupID {
@@ -86,7 +86,7 @@ func ClusterGrants(
 
 	direct := make(map[uint]bool)
 	for _, edge := range edges {
-		if edge.Type == gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToCluster] && edge.AncestorID == user.UserID {
+		if edge.Type == uint(domain.EdgeTypeUserToCluster) && edge.AncestorID == user.UserID {
 			direct[edge.DescendantID] = true
 		}
 	}
@@ -94,7 +94,7 @@ func ClusterGrants(
 	// groupID -> 角色名列表，先按分组聚合继承来源。
 	inherited := make(map[uint][]string)
 	for _, edge := range edges {
-		if edge.Type != gqlapi.EdgeEnumMap[gqlapi.EdgeEnumRoleToGroup] {
+		if edge.Type != uint(domain.EdgeTypeRoleToGroup) {
 			continue
 		}
 		name, ok := roleNames[edge.AncestorID]

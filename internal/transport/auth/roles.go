@@ -7,37 +7,42 @@ import (
 
 	"github.com/mia0x75/halo/internal/cache"
 	"github.com/mia0x75/halo/internal/models"
-	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 )
 
-// roleNames maps the wire enum to seeded role names. The enum integers are
-// historical and do not line up with mm_roles.role_id, so permissions are
-// resolved by name instead of by id.
-var roleNames = map[gqlapi.RoleEnum][]string{
-	gqlapi.RoleEnumAdmin:     {"Root", "Admin"},
-	gqlapi.RoleEnumReviewer:  {"Reviewer"},
-	gqlapi.RoleEnumDeveloper: {"Developer"},
-	gqlapi.RoleEnumUser:      {"User", "Viewer"},
-	gqlapi.RoleEnumGuest:     {"Guest"},
+// Seeded role names. Permissions are resolved by name because the wire enum
+// integers do not line up with mm_roles.role_id.
+const (
+	RoleRoot      = "Root"
+	RoleReviewer  = "Reviewer"
+	RoleDeveloper = "Developer"
+	RoleUser      = "User"
+	RoleViewer    = "Viewer"
+	RoleGuest     = "Guest"
+)
+
+// AdminRoleNames carry the ADMIN requirement. The seed data has a single
+// administrator role, Root; there is no "Admin" role in mm_roles.
+var AdminRoleNames = []string{RoleRoot}
+
+// allRoleNames is every role name the permission mapping understands.
+var allRoleNames = []string{
+	RoleRoot, RoleReviewer, RoleDeveloper, RoleUser, RoleViewer, RoleGuest,
 }
 
-// HasRole reports whether one of the roles satisfies the required enum.
-func HasRole(roles []*models.Role, required gqlapi.RoleEnum) bool {
-	names := roleNames[required]
+// HasRoleName reports whether the roles include one with the given name.
+func HasRoleName(roles []*models.Role, name string) bool {
 	for _, role := range roles {
-		for _, name := range names {
-			if strings.EqualFold(strings.TrimSpace(role.Name), name) {
-				return true
-			}
+		if strings.EqualFold(strings.TrimSpace(role.Name), name) {
+			return true
 		}
 	}
 	return false
 }
 
-// HasAnyRole reports whether one of the roles satisfies any requirement.
-func HasAnyRole(roles []*models.Role, required []gqlapi.RoleEnum) bool {
-	for _, item := range required {
-		if HasRole(roles, item) {
+// HasAnyRoleName reports whether the roles include any of the given names.
+func HasAnyRoleName(roles []*models.Role, names []string) bool {
+	for _, name := range names {
+		if HasRoleName(roles, name) {
 			return true
 		}
 	}
@@ -46,22 +51,19 @@ func HasAnyRole(roles []*models.Role, required []gqlapi.RoleEnum) bool {
 
 // IsAdmin reports whether the roles include the platform administrator.
 func IsAdmin(roles []*models.Role) bool {
-	return HasRole(roles, gqlapi.RoleEnumAdmin)
+	return HasAnyRoleName(roles, AdminRoleNames)
 }
 
 // FindRoleByName looks up a seeded role by its display name.
 func FindRoleByName(name string) *models.Role {
 	return cache.RolesMap.Any(func(elem *models.Role) bool {
-		return strings.EqualFold(strings.TrimSpace(elem.Name), name)
+		return strings.EqualFold(strings.TrimSpace(elem.Name), strings.TrimSpace(name))
 	})
 }
 
 // KnownRoleNames returns every role name the permission mapping understands.
 func KnownRoleNames() []string {
-	names := make([]string, 0, 8)
-	for _, group := range roleNames {
-		names = append(names, group...)
-	}
+	names := append([]string(nil), allRoleNames...)
 	sort.Strings(names)
 	return names
 }
@@ -72,8 +74,8 @@ func KnownRoleNames() []string {
 // name carries its permissions. Renaming one in the database would silently
 // strip every permission it grants, so the server refuses to start instead.
 func ValidateRoles(roles []*models.Role) error {
-	known := make(map[string]bool, 8)
-	for _, name := range KnownRoleNames() {
+	known := make(map[string]bool, len(allRoleNames))
+	for _, name := range allRoleNames {
 		known[strings.ToLower(name)] = true
 	}
 	var unknown []string

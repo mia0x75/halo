@@ -23,6 +23,7 @@ import (
 	"github.com/mia0x75/halo/internal/platform/crypto"
 	"github.com/mia0x75/halo/internal/tools"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
+	"github.com/mia0x75/halo/internal/transport/graphql/authz"
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 )
 
@@ -226,7 +227,7 @@ L:
 		switch stmt.(type) {
 		case *ast.SelectStmt, *ast.ShowStmt:
 		case *ast.KillStmt, *ast.AlterUserStmt, *ast.CreateUserStmt, *ast.ExplainStmt, *ast.GrantStmt, *ast.SetPwdStmt, *ast.SetStmt, *ast.FlushStmt:
-			if !transportauth.IsAdmin(credential.Roles) {
+			if !authz.IsAdmin(credential.Roles) {
 				rc = gqlapi.ReturnCodeUnknowError
 				err = fmt.Errorf("错误代码: %s, 错误信息: 权限不足，无法执行管理类指令，请联系管理员。", rc)
 			}

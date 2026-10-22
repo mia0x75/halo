@@ -5,8 +5,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/models"
-	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 )
 
 func TestClusterAccessible(t *testing.T) {
@@ -16,12 +16,12 @@ func TestClusterAccessible(t *testing.T) {
 	ungrouped := &models.Cluster{ClusterID: 11, GroupID: 0}
 
 	direct := &models.Edge{
-		Type:         gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToCluster],
+		Type:         uint(domain.EdgeTypeUserToCluster),
 		AncestorID:   1,
 		DescendantID: 10,
 	}
 	groupGrant := &models.Edge{
-		Type:         gqlapi.EdgeEnumMap[gqlapi.EdgeEnumRoleToGroup],
+		Type:         uint(domain.EdgeTypeRoleToGroup),
 		AncestorID:   2,
 		DescendantID: 5,
 	}

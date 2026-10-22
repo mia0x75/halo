@@ -29,6 +29,7 @@ import (
 	"github.com/mia0x75/halo/internal/service"
 	"github.com/mia0x75/halo/internal/tools"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
+	"github.com/mia0x75/halo/internal/transport/graphql/authz"
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 	"github.com/mia0x75/halo/internal/validate"
 	"github.com/mia0x75/halo/internal/worker"
@@ -469,7 +470,7 @@ func (r *mutationRootResolver) PatchTicketStatus(ctx context.Context, input mode
 			break
 		}
 
-		isAdmin := transportauth.IsAdmin(credential.Roles)
+		isAdmin := authz.IsAdmin(credential.Roles)
 		t, patchErr := r.app.Services.Ticket.PatchStatus(
 			ctx, input.TicketUUID, domain.TicketStatus(statusValue), user.UserID, isAdmin)
 		if patchErr != nil {

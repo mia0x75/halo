@@ -5,8 +5,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/models"
-	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 )
 
 func TestClusterGrants(t *testing.T) {
@@ -17,8 +17,8 @@ func TestClusterGrants(t *testing.T) {
 		{ClusterID: 11, GroupID: 0},
 	}
 	edges := []*models.Edge{
-		{Type: gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToCluster], AncestorID: 1, DescendantID: 10},
-		{Type: gqlapi.EdgeEnumMap[gqlapi.EdgeEnumRoleToGroup], AncestorID: 2, DescendantID: 5},
+		{Type: uint(domain.EdgeTypeUserToCluster), AncestorID: 1, DescendantID: 10},
+		{Type: uint(domain.EdgeTypeRoleToGroup), AncestorID: 2, DescendantID: 5},
 	}
 	groupName := func(groupID uint) string {
 		if groupID == 5 {
@@ -43,7 +43,7 @@ func TestClusterGrantsIgnoresOtherUsersEdges(t *testing.T) {
 	user := &models.User{UserID: 1}
 	clusters := []*models.Cluster{{ClusterID: 10, GroupID: 0}}
 	edges := []*models.Edge{
-		{Type: gqlapi.EdgeEnumMap[gqlapi.EdgeEnumUserToCluster], AncestorID: 99, DescendantID: 10},
+		{Type: uint(domain.EdgeTypeUserToCluster), AncestorID: 99, DescendantID: 10},
 	}
 
 	grants := ClusterGrants(user, nil, clusters, edges, func(uint) string { return "" })
