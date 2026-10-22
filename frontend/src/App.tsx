@@ -11,7 +11,6 @@ import { LogsPage } from "@/pages/logs-page"
 import { MessagesPage } from "@/pages/messages-page"
 import { SettingsPage, type SettingsTab } from "@/pages/settings-page"
 import { GroupFormPage } from "@/pages/group-form-page"
-import { StatementsPage } from "@/pages/statements-page"
 import { StatsPage } from "@/pages/stats-page"
 import { RulesPage } from "@/pages/rules-page"
 import { TicketCreatePage } from "@/pages/ticket-create-page"
@@ -285,7 +284,6 @@ export default function App() {
       {page === "pending-review" ? (
         <TicketQueuePage mode="review" onOpenTicket={openTicket} />
       ) : null}
-      {page === "statements" ? <StatementsPage /> : null}
       {page === "crons" ? (
         <CronsPage onCreate={() => setView({ kind: "cron-create" })} />
       ) : null}

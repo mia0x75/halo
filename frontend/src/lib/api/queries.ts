@@ -962,31 +962,3 @@ export interface OptionNode {
   Element: string
 }
 
-export const STATEMENTS_QUERY = `
-  query Statements($first: Int, $after: String) {
-    statements(first: $first, after: $after) {
-      totalCount
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-        startCursor
-        endCursor
-      }
-      edges {
-        cursor
-        node {
-          UUID
-          TicketID
-          Sequence
-          Content
-          TypeDesc
-          Status
-          Report
-          RowsAffected
-          CreateAt
-          UpdateAt
-        }
-      }
-    }
-  }
-`

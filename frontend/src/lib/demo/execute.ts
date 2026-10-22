@@ -111,12 +111,6 @@ function newTicketID(): number {
   return state.tickets.reduce((max, item) => Math.max(max, item.TicketID), 0) + 1
 }
 
-function statementNodes(): StatementNode[] {
-  return state.tickets
-    .flatMap((ticket) => ticket.Statements)
-    .sort((a, b) => b.CreateAt - a.CreateAt || b.TicketID - a.TicketID)
-}
-
 function buildRuleHitLevels(): { RuleName: string | null; Level: number; Count: number }[] {
   const buckets = new Map<string, { RuleName: string | null; Level: number; Count: number }>()
   for (const hit of state.hits) {
@@ -687,9 +681,6 @@ export function demoExecute(query: string, variables?: Variables): Record<string
       const option = state.options.find((item) => item.UUID === text(input.OptionUUID))
       if (option) option.Parameter = text(input.Parameter) ?? option.Parameter
       return { patchOptionParameters: true }
-    }
-    case "Statements": {
-      return { statements: paginate(statementNodes(), source) }
     }
     default:
       throw new Error(`演示环境暂不支持该操作：${operation || "未知"}`)

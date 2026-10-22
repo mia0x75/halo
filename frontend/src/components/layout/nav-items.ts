@@ -22,7 +22,6 @@ export type NavKey =
   | "my-tickets"
   | "pending-review"
   | "tickets"
-  | "statements"
   | "crons"
   | "clusters"
   | "databases"
@@ -61,7 +60,6 @@ export const navSections: NavSection[] = [
     title: "变更管理",
     items: [
       { key: "tickets", label: "工单列表", icon: IconFileText },
-      { key: "statements", label: "语句管理", icon: IconDatabase },
       { key: "crons", label: "定时任务", icon: IconCalendarTime },
     ],
   },
