@@ -88,7 +88,7 @@ halo/
 ```
 
 **依赖方向（轻量 Clean）**：
-- `graphql → service → domain ← repository`。禁止反向。
+- `transport/* → service → domain ← repository`。禁止反向；`transport/auth` 不依赖 GraphQL 生成层。
 - `domain` 不 import 任何外部库（无 `database/sql` / `echo` / `zap` / `json`），仅标准库。
 - 接口定义在 `domain`，实现在 `repository`。
 - `repository` 是唯一 import `database/sql` 的地方。

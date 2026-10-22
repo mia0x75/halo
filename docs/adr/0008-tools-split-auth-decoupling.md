@@ -30,3 +30,8 @@ Accepted
 - `internal/auth` 成为可独立测试的纯 JWT 层
 - `Credential` 值类型在 context 中统一传递（middleware 存 `*credential` 解引用值）
 - `FromContext` 零引用已删
+
+## 修订
+
+- 2026-10：`internal/transport/auth` 已去掉对 `gqlapi` 的依赖，边类型改用
+  `domain.EdgeType*`，枚举→角色名映射迁至 `internal/transport/graphql/authz`。

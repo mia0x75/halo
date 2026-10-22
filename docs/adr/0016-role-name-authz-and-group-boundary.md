@@ -33,11 +33,11 @@
 
 ### 1. 角色用名字而不是自增 ID 表达
 
-- `internal/transport/auth/roles.go` 维护「枚举 → 角色名」的映射：
+- `internal/transport/graphql/authz` 维护「枚举 → 角色名」的映射：
   `ADMIN → {Root}`、`REVIEWER → {Reviewer}`、`DEVELOPER → {Developer}`、
   `USER → {User, Viewer}`、`GUEST → {Guest}`。
-- `@auth` 指令、WebSocket 鉴权、SQL 管理指令的判断都改走
-  `transportauth.HasAnyRole` / `IsAdmin`。
+- `internal/transport/auth` 只按角色名判断（`HasRoleName` / `HasAnyRoleName` /
+  `IsAdmin`），不依赖 GraphQL 生成层；`@auth` 指令与 resolver 经 `authz` 取映射。
 - 原因：角色表是可运维的（可读、可展示），自增 ID 只是存储细节；
   用名字表达权限，管理员调整角色表也不会悄悄改掉权限语义。
 - 注册账号的默认角色按名字取 `User`，取不到就报错，不再硬编码 ID。
@@ -72,7 +72,7 @@
   角色集合由种子固定。角色名不是可编辑字段，而是**权限常量**。
 - 由此，「改名等于改权限」的风险不复存在：角色名不变，权限就不变。
 - 代价是**角色集合被冻结**：将来要新增「审计员」「只读运维」这类角色，
-  必须走代码变更（种子 + `internal/transport/auth/roles.go` 的名字映射），
+  必须走代码变更（种子 + `internal/transport/graphql/authz` 的名字映射），
   不能在界面上点出来。
 - 为防止有人直接改库里的角色名导致权限**静默失效**（名字对不上 → 该角色
   所有接口 403，而不是报错），**启动时校验角色表**：
