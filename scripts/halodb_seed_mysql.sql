@@ -221,17 +221,7 @@ INSERT INTO `mm_options` VALUES
 ('ldap.user','55720a44-f204-4d5f-8ab4-12665d840540','127.0.0.1','','-',0,2, FROM_UNIXTIME(1545013963), UTC_TIMESTAMP()),
 ('ldap.password','32f77401-0b1f-40e5-b6a8-bdebfb219ce2','127.0.0.1','','-',0,2, FROM_UNIXTIME(1545013963), UTC_TIMESTAMP()),
 ('ldap.sc','6e200836-4cb7-4088-8b7f-ea8c110692c3','127.0.0.1','','-',0,2, FROM_UNIXTIME(1545013963), UTC_TIMESTAMP()),
-('ldap.ou','43549a0d-aa4c-43ea-848a-41cc41517277','127.0.0.1','','-',0,2, FROM_UNIXTIME(1545013963), UTC_TIMESTAMP()),
-('retention.metrics-days','7c1f4a10-0001-4a10-9a01-000000000001','90','','input',1,1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-('retention.hits-days','7c1f4a10-0002-4a10-9a01-000000000002','90','','input',1,1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-('retention.logs-days','7c1f4a10-0003-4a10-9a01-000000000003','180','','input',1,1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-('retention.messages-days','7c1f4a10-0004-4a10-9a01-000000000004','90','','input',1,1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-('retention.tasks-days','7c1f4a10-0005-4a10-9a01-000000000005','30','','input',1,1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-('mail.enabled','9d2f1b10-0001-4b10-8b01-000000000001','false','邮件通知开关','switch',1,1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-('mail.addr','9d2f1b10-0002-4b10-8b01-000000000002','','SMTP 服务器（host:port）','input',1,1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-('mail.user','9d2f1b10-0003-4b10-8b01-000000000003','','SMTP 账号','input',1,1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-('mail.password','9d2f1b10-0004-4b10-8b01-000000000004','','SMTP 密码（加密存储）','password',1,1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
-('mail.insecure-skip-verify','9d2f1b10-0005-4b10-8b01-000000000005','false','跳过 SMTP 证书校验','switch',1,1, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+('ldap.ou','43549a0d-aa4c-43ea-848a-41cc41517277','127.0.0.1','','-',0,2, FROM_UNIXTIME(1545013963), UTC_TIMESTAMP());
 UNLOCK TABLES;
 
 LOCK TABLES `mm_edges` WRITE;
