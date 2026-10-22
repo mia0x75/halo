@@ -73,9 +73,12 @@ func (c *SafeMap[T]) All() []*T {
 }
 
 // Filter 返回一个包含所有满足条件的元素的新切片。
+// 无匹配时返回空切片而不是 nil：GraphQL 列表字段据此序列化为 []，
+// 避免客户端把 null 当成数组处理。
 func (c *SafeMap[T]) Filter(f func(*T) bool) (L []*T) {
 	c.RLock()
 	defer c.RUnlock()
+	L = make([]*T, 0, len(c.M))
 	for _, v := range c.M {
 		if f(v) {
 			L = append(L, v)

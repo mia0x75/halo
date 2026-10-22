@@ -15,6 +15,8 @@ export interface ApexChartProps {
   className?: string
   /** DOM id，刷选图通过它指向主图 */
   id?: string
+  /** 图表挂载完成回调，供依赖它的刷选图延后初始化 */
+  onReady?: () => void
 }
 
 /**
@@ -22,8 +24,13 @@ export interface ApexChartProps {
  * Grid, axis and tooltip colors follow the theme through CSS overrides in
  * index.css, therefore re-rendering on theme change is unnecessary.
  */
-export function ApexChart({ type, series, options, height = 240, className, id }: ApexChartProps) {
+export function ApexChart({ type, series, options, height = 240, className, id, onReady }: ApexChartProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  // 回调每次渲染可能是新引用，不能放进 effect 依赖，否则图表会重建。
+  const onReadyRef = useRef(onReady)
+  useEffect(() => {
+    onReadyRef.current = onReady
+  }, [onReady])
 
   useEffect(() => {
     const container = containerRef.current
@@ -38,17 +45,23 @@ export function ApexChart({ type, series, options, height = 240, className, id }
         fontFamily:
           '"寒蝉团圆体 Round", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
         ...options?.chart,
+        // brush 通过 chart.id 查找目标实例，DOM id 并不参与查找。
+        ...(id ? { id } : {}),
         type,
         height,
       },
     })
 
-    void chart.render()
+    let cancelled = false
+    void chart.render().then(() => {
+      if (!cancelled) onReadyRef.current?.()
+    })
 
     return () => {
+      cancelled = true
       chart.destroy()
     }
-  }, [options, series, type, height])
+  }, [options, series, type, height, id])
 
   return <div id={id} ref={containerRef} className={cn("w-full", className)} />
 }

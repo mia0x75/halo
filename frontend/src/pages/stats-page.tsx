@@ -50,7 +50,7 @@ const TREND_CHART_ID = "chart-stats-trend"
 export function StatsPage() {
   const [range, setRange] = useState("30")
 
-  const remote = useGraphQL<{ metrics: MetricNode[] }, { Scope: number; Names: string[] }>(
+  const remote = useGraphQL<{ metrics: MetricNode[] | null }, { Scope: number; Names: string[] }>(
     METRICS_QUERY,
     { Scope: 1, Names: metricNames },
     { metrics: [] },

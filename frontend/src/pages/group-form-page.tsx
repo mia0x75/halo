@@ -138,11 +138,11 @@ function GroupForm({ initial, mode, uuid, onSaved }: GroupFormProps) {
 
 /** 群集分组新建/编辑页。表单是整页，不是弹窗。 */
 export function GroupFormPage({ mode, uuid, onBack, onSaved }: GroupFormPageProps) {
-  const remote = useGraphQL<{ groups: GroupNode[] }>(GROUPS_QUERY, undefined, { groups: [] })
+  const remote = useGraphQL<{ groups: GroupNode[] | null }>(GROUPS_QUERY, undefined, { groups: [] })
 
   const initial = useMemo(() => {
     if (mode !== "edit" || !uuid) return undefined
-    return remote.data?.groups.find((group) => group.UUID === uuid)
+    return (remote.data?.groups ?? []).find((group) => group.UUID === uuid)
   }, [mode, remote.data, uuid])
 
   return (

@@ -15,6 +15,8 @@ export interface TrendChartProps {
   selectable?: boolean
   /** 初始显示区间：末尾 N 个点，不传则显示全部 */
   range?: number
+  /** 图表挂载完成回调，供刷选图延后初始化 */
+  onReady?: () => void
 }
 
 /** 趋势图：面积折线，多系列。 */
@@ -26,6 +28,7 @@ export function TrendChart({
   id,
   selectable = false,
   range,
+  onReady,
 }: TrendChartProps) {
   const options = useMemo<ApexOptions>(
     () => ({
@@ -82,6 +85,7 @@ export function TrendChart({
       options={options}
       height={height}
       className={className}
+      onReady={onReady}
     />
   )
 }

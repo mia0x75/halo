@@ -21,6 +21,7 @@ func (r *queryRootResolver) RuleHits(ctx context.Context, ticketID *uint, ruleNa
 		return nil, err
 	}
 
+	L = make([]*models.RuleHit, 0, len(hits))
 	for _, hit := range hits {
 		if ruleName != nil && hit.RuleName != *ruleName {
 			continue
@@ -40,6 +41,7 @@ func (r *queryRootResolver) RuleHitLevels(ctx context.Context, from *uint, to *u
 	if err != nil {
 		return nil, err
 	}
+	L = make([]*gqlapi.RuleHitCount, 0, len(counts))
 	for _, count := range counts {
 		L = append(L, &gqlapi.RuleHitCount{Level: count.Level, Count: uint(count.Count)})
 	}
@@ -57,6 +59,7 @@ func (r *queryRootResolver) RuleHitRules(ctx context.Context, from *uint, to *ui
 	if err != nil {
 		return nil, err
 	}
+	L = make([]*gqlapi.RuleHitCount, 0, len(counts))
 	for _, count := range counts {
 		L = append(L, &gqlapi.RuleHitCount{RuleName: &count.Rule, Count: uint(count.Count)})
 	}

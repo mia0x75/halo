@@ -110,6 +110,16 @@ func TestFilter(t *testing.T) {
 	if len(filtered) != 1 {
 		t.Errorf("Expected filter to return 1 element, but got %d", len(filtered))
 	}
+
+	empty := cache.Filter(func(item *TestType) bool {
+		return *item == 3
+	})
+	if empty == nil {
+		t.Error("Expected filter to return an empty slice, but got nil")
+	}
+	if len(empty) != 0 {
+		t.Errorf("Expected filter to return 0 elements, but got %d", len(empty))
+	}
 }
 
 // 提示：Map方法的测试用例可以考虑添加错误处理和边界条件的测试

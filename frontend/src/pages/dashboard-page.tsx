@@ -29,6 +29,11 @@ import type { SeverityPoint, TopRulePoint } from "@/lib/model"
 /** 趋势主图的 DOM id，刷选图按它驱动缩放。 */
 const TREND_CHART_ID = "chart-ticket-trend"
 
+/** 指标列表在 schema 里可为 null，空结果不能当成数组直接用。 */
+interface MetricsPayload {
+  metrics: MetricNode[] | null
+}
+
 /** 后端的命中级别：0 提示 / 1 错误 / 2 警告。 */
 const levelLabels: Record<number, string> = { 0: "提示", 1: "错误", 2: "警告" }
 
@@ -40,18 +45,17 @@ export interface DashboardPageProps {
 
 export function DashboardPage({ onOpenTicket, onCreateTicket, onViewTickets }: DashboardPageProps) {
   const [period, setPeriod] = useState<Period>(7)
+  // 刷选图初始化时必须能找到主图的 DOM id，等主图挂载完成再渲染它。
+  const [trendReady, setTrendReady] = useState(false)
   const clusterPage = useClusters(50)
 
-  const metrics = useGraphQL<{ metrics: MetricNode[] }, { scope: number }>(
-    METRICS_QUERY,
-    { scope: 1 },
-    { metrics: [] },
-  )
-  const metricValue = (name: string) => metrics.data?.metrics.find((item) => item.Name === name)?.Value ?? 0
+  const metrics = useGraphQL<MetricsPayload, { scope: number }>(METRICS_QUERY, { scope: 1 }, { metrics: [] })
+  const metricBuckets = useMemo(() => metrics.data?.metrics ?? [], [metrics.data])
+  const metricValue = (name: string) => metricBuckets.find((item) => item.Name === name)?.Value ?? 0
 
   // 刷选图固定展示较长区间（最多一年），主图跟随选中的窗口。
   const fullPoints = useMemo(() => {
-    const buckets = metrics.data?.metrics ?? []
+    const buckets = metricBuckets
     if (buckets.length === 0) return []
 
     const byDay = new Map<string, { created: number; executed: number; failed: number }>()
@@ -78,7 +82,7 @@ export function DashboardPage({ onOpenTicket, onCreateTicket, onViewTickets }: D
     if (points.length <= max) return points
     const step = Math.ceil(points.length / max)
     return points.filter((_, index) => index % step === 0)
-  }, [metrics.data])
+  }, [metricBuckets])
 
   // 主图默认显示最近 period 天，拖动刷选滑块可切换到别的窗口
   const visiblePoints = useMemo(() => fullPoints.slice(-period), [fullPoints, period])
@@ -177,6 +181,7 @@ export function DashboardPage({ onOpenTicket, onCreateTicket, onViewTickets }: D
             id={TREND_CHART_ID}
             selectable
             range={period}
+            onReady={() => setTrendReady(true)}
             categories={fullPoints.map((point) => point.date)}
             series={[
               { name: "提交", data: fullPoints.map((point) => point.submitted) },
@@ -184,11 +189,15 @@ export function DashboardPage({ onOpenTicket, onCreateTicket, onViewTickets }: D
               { name: "失败", data: fullPoints.map((point) => point.failed) },
             ]}
           />
-          <BrushChart
-            target={TREND_CHART_ID}
-            categories={fullPoints.map((point) => point.date)}
-            series={[{ name: "提交", data: fullPoints.map((point) => point.submitted) }]}
-          />
+          {trendReady ? (
+            <BrushChart
+              target={TREND_CHART_ID}
+              categories={fullPoints.map((point) => point.date)}
+              series={[{ name: "提交", data: fullPoints.map((point) => point.submitted) }]}
+            />
+          ) : (
+            <div className="h-24" />
+          )}
         </SectionCard>
 
         <SectionCard
