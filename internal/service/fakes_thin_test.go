@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strings"
 
 	"github.com/mia0x75/halo/internal/domain"
 )
@@ -306,6 +307,7 @@ func newFakeRuleHitRepo() *stubRuleHitRepo {
 type stubGroupRepo struct {
 	domain.GroupRepository
 	existing *domain.Group
+	others   []*domain.Group
 	created  []*domain.Group
 	updated  []*domain.Group
 	deleted  []string
@@ -320,12 +322,23 @@ func (s *stubGroupRepo) GetByUUID(_ context.Context, uuid string) (*domain.Group
 	if s.existing != nil && s.existing.UUID == uuid {
 		return s.existing, nil
 	}
+	for _, group := range s.others {
+		if group.UUID == uuid {
+			return group, nil
+		}
+	}
 	return nil, domain.ErrNotFound
 }
 
+// GetByName 按数据库的 case-insensitive 排序规则比较，与 MySQL 侧一致。
 func (s *stubGroupRepo) GetByName(_ context.Context, name string) (*domain.Group, error) {
-	if s.existing != nil && s.existing.Name == name {
+	if s.existing != nil && strings.EqualFold(s.existing.Name, name) {
 		return s.existing, nil
+	}
+	for _, group := range s.others {
+		if strings.EqualFold(group.Name, name) {
+			return group, nil
+		}
 	}
 	return nil, domain.ErrNotFound
 }

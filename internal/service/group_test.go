@@ -57,6 +57,32 @@ func TestGroupServiceUpdate(t *testing.T) {
 	require.Equal(t, "group.update|group:g1|机房 B", logs.entries[0].Operation)
 }
 
+func TestGroupServiceUpdateAllowsCaseChange(t *testing.T) {
+	ctx := context.Background()
+	repo := &stubGroupRepo{existing: &domain.Group{UUID: "g1", Name: "Dev", Version: 1}}
+	logs := &fakeLogRepo{}
+	svc := NewGroupService(&fakeTx{repos: Repos{Group: repo, Log: logs}}, repo, newFakeClusterRepo(), NewLogService(logs))
+
+	group := &domain.Group{UUID: "g1", Name: "dev", Status: domain.GroupStatusNormal}
+	require.NoError(t, svc.Update(ctx, group, 7))
+	require.Equal(t, "dev", group.Name)
+	require.Len(t, repo.updated, 1)
+}
+
+func TestGroupServiceUpdateRejectsOtherGroupName(t *testing.T) {
+	ctx := context.Background()
+	repo := &stubGroupRepo{
+		existing: &domain.Group{UUID: "g1", Name: "Dev", Version: 1},
+		others:   []*domain.Group{{UUID: "g2", Name: "Core"}},
+	}
+	logs := &fakeLogRepo{}
+	svc := NewGroupService(&fakeTx{repos: Repos{Group: repo, Log: logs}}, repo, newFakeClusterRepo(), NewLogService(logs))
+
+	err := svc.Update(ctx, &domain.Group{UUID: "g1", Name: "core"}, 7)
+	require.ErrorIs(t, err, domain.ErrConflict)
+	require.Empty(t, repo.updated)
+}
+
 func TestGroupServiceDelete(t *testing.T) {
 	ctx := context.Background()
 	repo := &stubGroupRepo{existing: &domain.Group{UUID: "g1", Name: "机房 A"}}

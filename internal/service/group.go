@@ -79,9 +79,11 @@ func (s *GroupService) Update(ctx context.Context, g *domain.Group, operatorID u
 		return fmt.Errorf("%w: 分组名称不能为空", domain.ErrInvalidInput)
 	}
 	if name != current.Name {
-		if _, err := s.groups.GetByName(ctx, name); err == nil {
+		existing, err := s.groups.GetByName(ctx, name)
+		switch {
+		case err == nil && existing.UUID != g.UUID:
 			return fmt.Errorf("%w: 分组名称(name=%s)已存在", domain.ErrConflict, name)
-		} else if !isNotFound(err) {
+		case err != nil && !isNotFound(err):
 			return err
 		}
 	}
