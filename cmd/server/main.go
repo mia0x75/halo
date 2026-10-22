@@ -28,7 +28,7 @@ import (
 
 	// "github.com/mia0x75/halo/internal/platform/log"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
-	server "github.com/mia0x75/halo/internal/transport/http"
+	"github.com/mia0x75/halo/internal/transport/server"
 )
 
 var lg = logrus.New()
