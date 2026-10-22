@@ -12,7 +12,7 @@ import (
 // without touching /etc or the executable directory.
 func writeConfig(t *testing.T, body string) string {
 	t.Helper()
-	path := filepath.Join(t.TempDir(), "cfg.json")
+	path := filepath.Join(t.TempDir(), "config.json")
 	require.NoError(t, os.WriteFile(path, []byte(body), 0o600))
 	return path
 }
@@ -41,7 +41,7 @@ func TestParseConfigLoadsFields(t *testing.T) {
 // TestParseConfigWithoutFileUsesDefaults covers the no-config-file start: the
 // server boots on the defaults and the wizard writes the file later.
 func TestParseConfigWithoutFileUsesDefaults(t *testing.T) {
-	missing := filepath.Join(t.TempDir(), "cfg.json")
+	missing := filepath.Join(t.TempDir(), "config.json")
 	ParseConfig(missing)
 
 	cfg := Config()

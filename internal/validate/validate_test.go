@@ -30,7 +30,7 @@ func TestMain(m *testing.M) {
 		os.Getenv("HALO_TEST_CONFIG"),
 		"bin/config.test.json",
 		"../../bin/config.test.json",
-		"/etc/halo/cfg.json",
+		"/etc/halo/config.json",
 	}
 	for _, path := range candidates {
 		if path == "" {

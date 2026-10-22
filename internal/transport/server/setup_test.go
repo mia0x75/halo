@@ -17,7 +17,7 @@ import (
 
 func setupRouter(t *testing.T) *mux.Router {
 	t.Helper()
-	path := filepath.Join(t.TempDir(), "cfg.json")
+	path := filepath.Join(t.TempDir(), "config.json")
 	require.NoError(t, os.WriteFile(path, []byte(`{"listen": ":8443"}`), 0o600))
 	config.ParseConfig(path)
 

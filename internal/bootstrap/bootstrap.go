@@ -180,7 +180,7 @@ func Run(ctx context.Context, request Request) (*app.App, error) {
 // anything, so the wizard can verify the connection before the setup runs.
 func TestConnection(ctx context.Context, request DatabaseRequest) error {
 	if strings.TrimSpace(request.Addr) == "" {
-		return errors.New("请填写元数据库连接串")
+		return errors.New("metadata database address is required")
 	}
 	pool, err := db.New(ctx, db.Config{
 		Addr:           request.Addr,
@@ -190,7 +190,8 @@ func TestConnection(ctx context.Context, request DatabaseRequest) error {
 		Driver:         request.Driver,
 	})
 	if err != nil {
-		return fmt.Errorf("连接元数据库失败: %w", err)
+		// 日志给运维看，用英文。
+		return fmt.Errorf("connect metadata database failed: %w", err)
 	}
 	return pool.Close()
 }

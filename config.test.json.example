@@ -12,20 +12,6 @@
     "max_connections": 100,
     "wait_timeout": 300
   },
-  "backup": {
-    "driver": "mysql",
-    "addr": "root:test@tcp(127.0.0.1:3307)/halo_test?charset=utf8mb4&parseTime=true&loc=UTC&time_zone=%27%2B00%3A00%27",
-    "max_idle": 5,
-    "max_connections": 20,
-    "wait_timeout": 300
-  },
-  "mail": {
-    "enabled": false,
-    "addr": "smtp.example.com:465",
-    "user": "noreply@example.com",
-    "password": "change-me",
-    "encryption": "ssl"
-  },
   "secret": {
     "jwt": {
       "token_name": "Authentication",

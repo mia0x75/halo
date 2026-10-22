@@ -97,7 +97,9 @@ func (h *SetupHandler) test(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := bootstrap.TestConnection(r.Context(), request); err != nil {
-		writeSetupError(w, http.StatusBadRequest, err.Error())
+		// 细节写日志，页面只显示一句提示。
+		log.Errorf("[E] setup: test connection failed: %v", err)
+		writeSetupError(w, http.StatusBadRequest, "连接失败，请检查日志")
 		return
 	}
 	writeSetupJSON(w, http.StatusOK, map[string]any{"ok": true})

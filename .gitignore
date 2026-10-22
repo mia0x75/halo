@@ -2,7 +2,7 @@
 bin/
 .idea
 *.exe
-cfg.json
+config.json
 .Makefile.swp
 docs/review/
 

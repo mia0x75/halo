@@ -70,7 +70,7 @@ func Config() *GlobalConfig {
 
 // ParseConfig 从配置文件读取配置，反序列化成配置对象。
 //
-// 查找顺序：-c 指定的文件 → 运行目录的 cfg.json → /etc/halo/cfg.json。
+// 查找顺序：-c 指定的文件 → 运行目录的 config.json → /etc/halo/config.json。
 // 都没有就用默认值启动，由 /welcome 向导写出配置文件。
 func ParseConfig(cfg string) {
 	configLock.Lock()
@@ -83,9 +83,9 @@ func ParseConfig(cfg string) {
 		candidates = append(candidates, trimmed)
 	} else {
 		if cwd, err := os.Getwd(); err == nil {
-			candidates = append(candidates, filepath.Join(cwd, "cfg.json"))
+			candidates = append(candidates, filepath.Join(cwd, "config.json"))
 		}
-		candidates = append(candidates, "/etc/halo/cfg.json")
+		candidates = append(candidates, "/etc/halo/config.json")
 	}
 
 	for _, candidate := range candidates {
@@ -235,7 +235,7 @@ func Save(mutate func(*GlobalConfig)) error {
 	if err := os.MkdirAll(dir, 0o750); err != nil {
 		return fmt.Errorf("config: 创建配置目录失败: %w", err)
 	}
-	tmp, err := os.CreateTemp(dir, ".cfg-*.json")
+	tmp, err := os.CreateTemp(dir, ".config-*.json")
 	if err != nil {
 		return fmt.Errorf("config: 无法在 %s 写入配置文件，该目录不可写，请用 -c 指定可写路径: %w", dir, err)
 	}

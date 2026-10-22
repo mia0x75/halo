@@ -29,7 +29,7 @@ var LoginData struct {
 // 纯函数用例照常执行。
 var serverReady bool
 
-var cfg = flag.String("c", "../../../cfg.json", "configuration file")
+var cfg = flag.String("c", "../../../config.json", "configuration file")
 
 // TestMain wires the integration suite: it needs a config file and a live
 // server. When either is missing the whole package is skipped rather than

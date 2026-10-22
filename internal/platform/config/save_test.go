@@ -62,7 +62,7 @@ func TestSaveKeepsFilePermissions(t *testing.T) {
 
 func TestSaveReplacesFileAtomically(t *testing.T) {
 	dir := t.TempDir()
-	path := filepath.Join(dir, "cfg.json")
+	path := filepath.Join(dir, "config.json")
 	require.NoError(t, os.WriteFile(path, []byte(`{"listen": ":8443"}`), 0o600))
 	ParseConfig(path)
 

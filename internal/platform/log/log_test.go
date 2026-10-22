@@ -13,7 +13,7 @@ import (
 
 func loadConfig(t *testing.T, body string) {
 	t.Helper()
-	path := filepath.Join(t.TempDir(), "cfg.json")
+	path := filepath.Join(t.TempDir(), "config.json")
 	require.NoError(t, os.WriteFile(path, []byte(body), 0o600))
 	config.ParseConfig(path)
 }
