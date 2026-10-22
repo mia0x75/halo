@@ -173,6 +173,8 @@ func (r *queryRootResolver) Tasks(ctx context.Context) (L []*models.Cron, err er
 type cronJob struct {
 	cmd    string
 	params []string
+	// days 表示调用方可以覆盖最后一段参数为保留天数。
+	days bool
 }
 
 // cronJobs maps the public job types to their fixed commands.
@@ -184,6 +186,12 @@ var cronJobs = map[gqlapi.CronJobEnum]cronJob{
 	gqlapi.CronJobEnumMetricsCleanup: {
 		cmd:    "halocli",
 		params: []string{"metrics", "cleanup", "--days=90"},
+		days:   true,
+	},
+	// 保留期来自 mm_options，作业本身不接受天数参数。
+	gqlapi.CronJobEnumRetentionCleanup: {
+		cmd:    "halocli",
+		params: []string{"retention", "cleanup"},
 	},
 }
 
@@ -196,7 +204,7 @@ func resolveCronJob(jobType gqlapi.CronJobEnum, days *int) (cronJob, error) {
 	}
 
 	params := append([]string{}, job.params...)
-	if days != nil && *days > 0 {
+	if job.days && days != nil && *days > 0 {
 		// 清理作业的保留天数由调用方决定。
 		params[len(params)-1] = fmt.Sprintf("--days=%d", *days)
 	}

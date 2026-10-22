@@ -87,6 +87,15 @@ func (r *TaskRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 	return wrap("task.DeleteByUUID", r.q.DeleteTaskByUUID(ctx, uuid))
 }
 
+// DeleteBefore removes the task executions created before the given time.
+func (r *TaskRepo) DeleteBefore(ctx context.Context, before uint) (int64, error) {
+	rows, err := r.q.DeleteTasksBefore(ctx, time.Unix(int64(before), 0).UTC())
+	if err != nil {
+		return 0, wrap("task.DeleteBefore", err)
+	}
+	return rows, nil
+}
+
 func (r *TaskRepo) List(ctx context.Context, cursor string, limit int) ([]*domain.Task, error) {
 	rows, err := r.q.ListTasks(ctx, ListTasksParams{
 		Uuid:  cursor,

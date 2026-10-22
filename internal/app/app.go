@@ -56,6 +56,8 @@ type Services struct {
 	Task      *service.TaskService
 	Template  *service.TemplateService
 	User      *service.UserService
+	// Retention 按保留期清理会持续增长的数据。
+	Retention *service.RetentionService
 }
 
 // New opens the metadata pool and wires repositories and services.
@@ -158,7 +160,9 @@ func New(ctx context.Context, cfg db.Config) (*App, error) {
 		Group:     service.NewGroupService(tx, repos.Group, repos.Cluster, logSvc),
 		Task:      service.NewTaskService(repos.Task),
 		Template:  service.NewTemplateService(tx, repos.Template),
-		User:      service.NewUserService(tx, repos.User),
+		Retention: service.NewRetentionService(
+			tx, repos.Option, repos.Metric, repos.RuleHit, repos.Log, repos.Message, repos.Task),
+		User: service.NewUserService(tx, repos.User),
 	}
 
 	a := &App{DB: database, Repos: repos, Tx: tx, Agent: agent.LocalExecutor{}, Services: services}

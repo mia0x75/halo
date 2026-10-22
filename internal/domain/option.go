@@ -1,6 +1,9 @@
 package domain
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 // Option is a row of mm_options. The primary key is name; UUID is the stable
 // lookup key used by the repository.
@@ -30,6 +33,9 @@ type OptionSpec struct {
 	Secret bool
 	// Default is the value used when the stored parameter is empty.
 	Default string
+	// Min and Max bound the integer values of a number option.
+	Min int
+	Max int
 }
 
 // optionSpecs pins the behaviour of the known option names.
@@ -48,6 +54,12 @@ var optionSpecs = map[string]OptionSpec{
 	"ldap.password":   {Element: "password", Writable: false, Secret: true},
 	"ldap.sc":         {Element: "input", Writable: false},
 	"ldap.ou":         {Element: "input", Writable: false},
+	// 保留期以天为单位，由 halocli retention cleanup 读取。
+	"retention.metrics-days":  {Element: "number", Writable: true, Default: "90", Min: 1, Max: 3650},
+	"retention.hits-days":     {Element: "number", Writable: true, Default: "90", Min: 1, Max: 3650},
+	"retention.logs-days":     {Element: "number", Writable: true, Default: "180", Min: 1, Max: 3650},
+	"retention.messages-days": {Element: "number", Writable: true, Default: "90", Min: 1, Max: 3650},
+	"retention.tasks-days":    {Element: "number", Writable: true, Default: "30", Min: 1, Max: 3650},
 }
 
 // OptionSpecFor returns the spec of an option name. Unknown names fall back to
@@ -66,6 +78,14 @@ func ValidateOptionValue(name, value string) error {
 	case "switch":
 		if value != "true" && value != "false" {
 			return fmt.Errorf("%w: 选项 %s 只接受 true 或 false", ErrInvalidInput, name)
+		}
+	case "number":
+		n, err := strconv.Atoi(value)
+		if err != nil {
+			return fmt.Errorf("%w: 选项 %s 的值必须是整数", ErrInvalidInput, name)
+		}
+		if spec.Max > spec.Min && (n < spec.Min || n > spec.Max) {
+			return fmt.Errorf("%w: 选项 %s 的值必须在 %d 到 %d 之间", ErrInvalidInput, name, spec.Min, spec.Max)
 		}
 	case "input", "password":
 		if len(value) > 75 {

@@ -89,6 +89,18 @@ func (q *Queries) DeleteTaskByUUID(ctx context.Context, uuid string) error {
 	return err
 }
 
+const deleteTasksBefore = `-- name: DeleteTasksBefore :execrows
+DELETE FROM mm_tasks WHERE create_at < ?
+`
+
+func (q *Queries) DeleteTasksBefore(ctx context.Context, createAt time.Time) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteTasksBefore, createAt)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 const getLatestTaskByCron = `-- name: GetLatestTaskByCron :one
 SELECT task_id, uuid, name, type, payload, status, priority, attempt, max_attempt, cron_id, scheduled_at, started_at, finished_at, error, version, update_at, create_at FROM mm_tasks WHERE cron_id = ? ORDER BY task_id DESC LIMIT 1
 `

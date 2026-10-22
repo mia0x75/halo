@@ -2,6 +2,7 @@ package mysqlrepo
 
 import (
 	"context"
+	"time"
 
 	"github.com/mia0x75/halo/internal/domain"
 )
@@ -73,6 +74,15 @@ func (r *LogRepo) Delete(ctx context.Context, id int64) error {
 
 func (r *LogRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 	return wrap("log.DeleteByUUID", r.q.DeleteLogByUUID(ctx, uuid))
+}
+
+// DeleteBefore removes the logs created before the given time.
+func (r *LogRepo) DeleteBefore(ctx context.Context, before uint) (int64, error) {
+	rows, err := r.q.DeleteLogsBefore(ctx, time.Unix(int64(before), 0).UTC())
+	if err != nil {
+		return 0, wrap("log.DeleteBefore", err)
+	}
+	return rows, nil
 }
 
 func (r *LogRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain.Log, error) {

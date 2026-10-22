@@ -125,6 +125,10 @@ func (f *fakeLogRepo) GetByUUID(_ context.Context, _ string) (*domain.Log, error
 }
 func (f *fakeLogRepo) Update(_ context.Context, _ *domain.Log) error { return nil }
 func (f *fakeLogRepo) Delete(_ context.Context, _ int64) error       { return nil }
+
+func (f *fakeLogRepo) DeleteBefore(_ context.Context, _ uint) (int64, error) {
+	return 0, f.err
+}
 func (f *fakeLogRepo) DeleteByUUID(_ context.Context, _ string) error {
 	return domain.ErrNotFound
 }

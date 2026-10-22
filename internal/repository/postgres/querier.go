@@ -54,7 +54,9 @@ type Querier interface {
 	DeleteGroupByUUID(ctx context.Context, uuid string) error
 	DeleteLogByID(ctx context.Context, logID int64) error
 	DeleteLogByUUID(ctx context.Context, uuid string) error
+	DeleteLogsBefore(ctx context.Context, createAt time.Time) (int64, error)
 	DeleteMessageByUUID(ctx context.Context, arg DeleteMessageByUUIDParams) (int64, error)
+	DeleteMessagesBefore(ctx context.Context, createAt time.Time) (int64, error)
 	DeleteMetricBucketsBefore(ctx context.Context, bucket string) (int64, error)
 	DeleteMetricByUUID(ctx context.Context, uuid string) error
 	DeleteOptionByUUID(ctx context.Context, uuid string) error
@@ -70,6 +72,7 @@ type Querier interface {
 	DeleteStatementByUUID(ctx context.Context, uuid string) error
 	DeleteStatementsByTicket(ctx context.Context, ticketID int64) error
 	DeleteTaskByUUID(ctx context.Context, uuid string) error
+	DeleteTasksBefore(ctx context.Context, createAt time.Time) (int64, error)
 	DeleteTemplateByUUID(ctx context.Context, uuid string) error
 	DeleteTicketByID(ctx context.Context, ticketID int64) error
 	DeleteTicketByUUID(ctx context.Context, uuid string) error

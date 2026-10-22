@@ -7,6 +7,7 @@ package mysqlrepo
 
 import (
 	"context"
+	"time"
 )
 
 const createLog = `-- name: CreateLog :execlastid
@@ -49,6 +50,18 @@ DELETE FROM mm_logs WHERE uuid = ?
 func (q *Queries) DeleteLogByUUID(ctx context.Context, uuid string) error {
 	_, err := q.db.ExecContext(ctx, deleteLogByUUID, uuid)
 	return err
+}
+
+const deleteLogsBefore = `-- name: DeleteLogsBefore :execrows
+DELETE FROM mm_logs WHERE create_at < ?
+`
+
+func (q *Queries) DeleteLogsBefore(ctx context.Context, createAt time.Time) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteLogsBefore, createAt)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }
 
 const getLogByID = `-- name: GetLogByID :one

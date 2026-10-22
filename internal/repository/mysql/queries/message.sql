@@ -32,3 +32,6 @@ UPDATE mm_messages SET read_at = CURRENT_TIMESTAMP WHERE user_id = ? AND read_at
 
 -- name: DeleteMessageByUUID :execrows
 DELETE FROM mm_messages WHERE uuid = ? AND user_id = ?;
+
+-- name: DeleteMessagesBefore :execrows
+DELETE FROM mm_messages WHERE create_at < ?;

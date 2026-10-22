@@ -44,6 +44,10 @@ func (f *fakeMessageRepo) Delete(_ context.Context, _ string, _ uint) error {
 	return f.err
 }
 
+func (f *fakeMessageRepo) DeleteBefore(_ context.Context, _ uint) (int64, error) {
+	return 0, f.err
+}
+
 func (f *fakeMessageRepo) CountUnread(_ context.Context, _ uint) (uint, error) {
 	return 0, f.err
 }

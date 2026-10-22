@@ -249,6 +249,11 @@ enum CronJobEnum {
 	清理过期指标与命中明细
 	"""
 	METRICS_CLEANUP @enumInt(value: 2)
+
+	"""
+	按平台选项配置的保留期清理增长数据
+	"""
+	RETENTION_CLEANUP @enumInt(value: 3)
 }
 
 enum TicketStatusEnum {

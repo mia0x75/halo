@@ -7,6 +7,7 @@ package mysqlrepo
 
 import (
 	"context"
+	"time"
 )
 
 const countMessagesByUser = `-- name: CountMessagesByUser :one
@@ -86,6 +87,18 @@ type DeleteMessageByUUIDParams struct {
 
 func (q *Queries) DeleteMessageByUUID(ctx context.Context, arg DeleteMessageByUUIDParams) (int64, error) {
 	result, err := q.db.ExecContext(ctx, deleteMessageByUUID, arg.Uuid, arg.UserID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const deleteMessagesBefore = `-- name: DeleteMessagesBefore :execrows
+DELETE FROM mm_messages WHERE create_at < ?
+`
+
+func (q *Queries) DeleteMessagesBefore(ctx context.Context, createAt time.Time) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteMessagesBefore, createAt)
 	if err != nil {
 		return 0, err
 	}

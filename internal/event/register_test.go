@@ -20,6 +20,7 @@ func (f *fakeLogRepo) Update(context.Context, *domain.Log) error               {
 func (f *fakeLogRepo) Delete(context.Context, int64) error                     { return nil }
 func (f *fakeLogRepo) DeleteByUUID(context.Context, string) error              { return nil }
 func (f *fakeLogRepo) List(context.Context, int64, int) ([]*domain.Log, error) { return nil, nil }
+func (f *fakeLogRepo) DeleteBefore(context.Context, uint) (int64, error)       { return 0, nil }
 
 type fakeMetricRepo struct {
 	keys    []string

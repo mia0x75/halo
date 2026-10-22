@@ -21,3 +21,6 @@ SELECT status, COUNT(*) AS count FROM mm_tasks GROUP BY status ORDER BY status;
 
 -- name: GetLatestTaskByCron :one
 SELECT task_id, uuid, name, type, payload, status, priority, attempt, max_attempt, cron_id, scheduled_at, started_at, finished_at, error, version, update_at, create_at FROM mm_tasks WHERE cron_id = ? ORDER BY task_id DESC LIMIT 1;
+
+-- name: DeleteTasksBefore :execrows
+DELETE FROM mm_tasks WHERE create_at < ?;

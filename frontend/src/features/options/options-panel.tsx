@@ -105,7 +105,13 @@ export function OptionsPanel({ showHeader = true }: OptionsPanelProps) {
                       <Input
                         value={draft}
                         onChange={(event) => setDraft(event.target.value)}
-                        type={option.Element === "password" ? "password" : "text"}
+                        type={
+                          option.Element === "password"
+                            ? "password"
+                            : option.Element === "number"
+                              ? "number"
+                              : "text"
+                        }
                         className="h-8 max-w-64"
                         aria-label={`${option.Name} 的值`}
                       />

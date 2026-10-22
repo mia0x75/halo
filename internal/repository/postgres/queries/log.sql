@@ -19,3 +19,5 @@ DELETE FROM mm_logs WHERE uuid = $1;
 -- name: ListLogs :many
 SELECT log_id, uuid, user_id, operation, version, create_at FROM mm_logs WHERE log_id < $1 ORDER BY log_id DESC LIMIT $2;
 
+-- name: DeleteLogsBefore :execrows
+DELETE FROM mm_logs WHERE create_at < $1;

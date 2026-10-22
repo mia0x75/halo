@@ -52,6 +52,8 @@ type TaskRepository interface {
 	GetLatestByCron(ctx context.Context, cronID uint) (*Task, error)
 	// CountByStatus counts the task executions per status.
 	CountByStatus(ctx context.Context) ([]TaskStatusCount, error)
+	// DeleteBefore removes the task executions created before the given time.
+	DeleteBefore(ctx context.Context, before uint) (int64, error)
 }
 
 // TaskStatusCount counts the task executions of one status.

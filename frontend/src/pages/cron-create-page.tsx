@@ -20,6 +20,7 @@ export interface CronCreatePageProps {
 const jobOptions = [
   { value: "METRICS_ROLLUP", label: "每日汇总工单与规则命中" },
   { value: "METRICS_CLEANUP", label: "清理过期指标与命中明细" },
+  { value: "RETENTION_CLEANUP", label: "按保留期清理日志/站内信/任务记录" },
 ]
 
 /** 新建系统作业页。 */

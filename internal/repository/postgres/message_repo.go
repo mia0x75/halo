@@ -2,6 +2,7 @@ package postgresrepo
 
 import (
 	"context"
+	"time"
 
 	"github.com/mia0x75/halo/internal/domain"
 )
@@ -101,6 +102,15 @@ func (r *MessageRepo) Delete(ctx context.Context, uuid string, userID uint) erro
 		return domain.ErrNotFound
 	}
 	return nil
+}
+
+// DeleteBefore removes the message rows created before the given time.
+func (r *MessageRepo) DeleteBefore(ctx context.Context, before uint) (int64, error) {
+	rows, err := r.q.DeleteMessagesBefore(ctx, time.Unix(int64(before), 0).UTC())
+	if err != nil {
+		return 0, wrap("message.DeleteBefore", err)
+	}
+	return rows, nil
 }
 
 func (r *MessageRepo) CountUnread(ctx context.Context, userID uint) (uint, error) {

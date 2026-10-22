@@ -61,6 +61,8 @@ type LogRepository interface {
 	Delete(ctx context.Context, id int64) error
 	DeleteByUUID(ctx context.Context, uuid string) error
 	List(ctx context.Context, cursor int64, limit int) ([]*Log, error)
+	// DeleteBefore removes the logs created before the given time.
+	DeleteBefore(ctx context.Context, before uint) (int64, error)
 }
 
 type QueryRepository interface {

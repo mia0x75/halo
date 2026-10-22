@@ -452,16 +452,19 @@ const (
 	CronJobEnumMetricsRollup CronJobEnum = "METRICS_ROLLUP"
 	// 清理过期指标与命中明细
 	CronJobEnumMetricsCleanup CronJobEnum = "METRICS_CLEANUP"
+	// 按平台选项配置的保留期清理增长数据
+	CronJobEnumRetentionCleanup CronJobEnum = "RETENTION_CLEANUP"
 )
 
 var AllCronJobEnum = []CronJobEnum{
 	CronJobEnumMetricsRollup,
 	CronJobEnumMetricsCleanup,
+	CronJobEnumRetentionCleanup,
 }
 
 func (e CronJobEnum) IsValid() bool {
 	switch e {
-	case CronJobEnumMetricsRollup, CronJobEnumMetricsCleanup:
+	case CronJobEnumMetricsRollup, CronJobEnumMetricsCleanup, CronJobEnumRetentionCleanup:
 		return true
 	}
 	return false
