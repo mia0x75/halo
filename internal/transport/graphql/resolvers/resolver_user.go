@@ -440,6 +440,21 @@ L:
 	return
 }
 
+// loginMismatchError keeps the submitted password out of client-visible errors.
+func loginMismatchError(email string) error {
+	return fmt.Errorf("错误代码: %s, 错误信息: 账号(email=%s)和密码(password=********)不匹配。", gqlapi.ReturnCodeEmailPasswordMismatch, email)
+}
+
+// samePasswordError never echoes the submitted passwords.
+func samePasswordError() error {
+	return fmt.Errorf("错误代码: %s, 错误信息: 新密码和旧密码相同。", gqlapi.ReturnCodeOK)
+}
+
+// wrongOldPasswordError never echoes the submitted password.
+func wrongOldPasswordError() error {
+	return fmt.Errorf("错误代码: %s, 错误信息: 旧密码不正确。", gqlapi.ReturnCodeWrongPassword)
+}
+
 // Login 用户登陆
 func (r *mutationRootResolver) Login(ctx context.Context, input models.UserLoginInput) (payload *gqlapi.LoginPayload, err error) {
 L:
@@ -452,7 +467,7 @@ L:
 
 		if user == nil {
 			rc = gqlapi.ReturnCodeEmailPasswordMismatch
-			err = fmt.Errorf("错误代码: %s, 错误信息: 账号(email=%s)和密码(password=%s)不匹配。", rc, input.Email, input.Password)
+			err = loginMismatchError(input.Email)
 			break L
 		}
 		switch user.Status {
@@ -472,7 +487,7 @@ L:
 		}
 		if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
 			rc = gqlapi.ReturnCodeEmailPasswordMismatch
-			err = fmt.Errorf("错误代码: %s, 错误信息: 账号(email=%s)和密码(password=%s)不匹配。", rc, input.Email, input.Password)
+			err = loginMismatchError(input.Email)
 			break L
 		}
 
@@ -571,7 +586,7 @@ L:
 		if strings.EqualFold(strings.TrimSpace(input.OldPassword), strings.TrimSpace(input.NewPassword)) {
 			// TODO:
 			// rc = gqlapi.
-			err = fmt.Errorf("错误代码: %s, 错误信息: 新密码(password=%s)和旧密码(password=%s)相同。", rc, input.NewPassword, input.OldPassword)
+			err = samePasswordError()
 			break L
 		}
 
@@ -580,7 +595,7 @@ L:
 
 		if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.OldPassword)); err != nil {
 			rc = gqlapi.ReturnCodeWrongPassword
-			err = fmt.Errorf("错误代码: %s, 错误信息: 旧密码(password=%s)不正确。", rc, input.OldPassword)
+			err = wrongOldPasswordError()
 			break L
 		}
 		bs, _ := bcrypt.GenerateFromPassword([]byte(input.NewPassword), bcrypt.DefaultCost)

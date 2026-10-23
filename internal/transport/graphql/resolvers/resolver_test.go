@@ -1767,9 +1767,9 @@ func TestUpdatePassword(t *testing.T) {
 
 			switch k {
 			case "root1":
-				require.Equal(t, fmt.Sprintf("graphql: 错误代码: 1200, 错误信息: 新密码(password=%s)和旧密码(password=%s)相同。", k, v), err.Error())
+				require.Equal(t, "graphql: 错误代码: 1200, 错误信息: 新密码和旧密码相同。", err.Error())
 			case "wrong":
-				require.Equal(t, fmt.Sprintf("graphql: 错误代码: 2010, 错误信息: 旧密码(password=%s)不正确。", v), err.Error())
+				require.Equal(t, "graphql: 错误代码: 2010, 错误信息: 旧密码不正确。", err.Error())
 			default:
 				require.Equal(t, true, *respData.UpdatePassword, k)
 			}
