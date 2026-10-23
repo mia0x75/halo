@@ -102,7 +102,7 @@ func main() {
 		application = built
 		handler.Set(normalRouter(application))
 	} else {
-		lg.Warnf("[W] 尚未配置元数据库与密钥，请访问 /welcome 完成初始化。")
+		lg.Warnf("[W] metadata database is not configured; open /welcome to finish setup")
 		setup := server.NewSetupHandler(func(built *app.App) error {
 			application = built
 			configureAuth()
@@ -119,7 +119,7 @@ func main() {
 	keyFile := config.Config().Key
 	for _, path := range []string{certFile, keyFile} {
 		if _, err := os.Stat(path); err != nil {
-			lg.Fatalf("[F] 缺少 TLS 证书 %s（相对当前工作目录）。请把证书放到该路径，或用 -c 指定配置里的 cert/key。", path)
+			lg.Fatalf("[F] missing TLS certificate %s (relative to working directory); place it there or set cert/key in the config given to -c", path)
 		}
 	}
 	lg.Infof("[I] http listening %s", addr)
@@ -137,7 +137,7 @@ func main() {
 	// Run our server in a goroutine so that it doesn't block.
 	go func() {
 		if err := srv.ListenAndServeTLS(certFile, keyFile); err != http.ErrServerClosed {
-			lg.Fatalf("错误代码: 1500, 错误信息: %s", err.Error())
+			lg.Fatalf("code: 1500, message: %s", err.Error())
 		}
 	}()
 

@@ -108,7 +108,7 @@ func ParseConfig(cfg string) {
 
 	if ConfigFile == "" {
 		// 没有配置文件：先用默认值跑起来，向导完成后再落盘。
-		log.Infof("[I] 未找到配置文件，使用默认配置，初始化向导会把配置写入 %s", SavePath)
+		log.Infof("[I] no config file found, using defaults; setup will write %s", SavePath)
 		configLock.Lock()
 		config = &GlobalConfig{}
 		configLock.Unlock()
@@ -118,13 +118,13 @@ func ParseConfig(cfg string) {
 
 	content, err := file.ToTrimString(ConfigFile)
 	if err != nil {
-		log.Fatalf("[F] 读取配置文件 \"%s\" 错误: %s", ConfigFile, err.Error())
+		log.Fatalf("[F] read config file %q: %s", ConfigFile, err.Error())
 	}
 
 	var c GlobalConfig
 	err = json.Unmarshal([]byte(content), &c)
 	if err != nil {
-		log.Fatalf("[F] 解析配置文件 \"%s\" 错误: %s", ConfigFile, err.Error())
+		log.Fatalf("[F] parse config file %q: %s", ConfigFile, err.Error())
 	}
 
 	configLock.Lock()
@@ -133,7 +133,7 @@ func ParseConfig(cfg string) {
 
 	applyDefaults()
 
-	log.Debugf("[D] 读取配置文件 \"%s\" 成功。", ConfigFile)
+	log.Debugf("[D] loaded config file %q", ConfigFile)
 }
 
 // writable reports whether the directory accepts new files.
