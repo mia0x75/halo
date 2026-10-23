@@ -25,8 +25,8 @@
    不新增表，分组信息在同组行上冗余，避免为了一个标题引入关联表。
    `sort_order` 一列管两件事：组内按它排序，跨组时它也决定分组的先后，
    所以接口只要按 `sort_order` 返回，前端分组的顺序就自然确定。
-2. **`element` 成为唯一事实来源**：API 不再覆盖它；历史行的值由迁移
-   `0011_option_metadata.sql` 修正（`smtp.enabled`→switch、
+2. **`element` 成为唯一事实来源**：API 不再覆盖它；历史行的控件类型直接写在
+   种子脚本 `halodb_seed_*.sql` 里（`smtp.enabled`→switch、
    `smtp.password`→password、`retention.*`→number 等）。控件类型只支持
    `input` / `number` / `switch` / `password`。
 3. **密文由 element 决定**：`element = password` 即为密文，掩码与加密
@@ -38,7 +38,7 @@
    前后端各校验一次。
 6. **开关在首位**：像 `mail.enabled` 这样的总开关排在所在分组的第一位，
    由 `sort_order` 表达，不靠界面特判。历史遗留的 SMTP 与 LDAP 各自成组，
-   开关也各在首位（迁移 `0012_regroup_options.sql`）。
+   开关也各在首位（初始数据见种子脚本 `halodb_seed_*.sql`）。
 
 ## 后果
 

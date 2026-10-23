@@ -33,7 +33,8 @@
 
 - service 层不再设置 `CreateAt`/`UpdateAt`（删 6 文件相关代码）；
   内存实体的写入后时间戳以 DB 为准，不再回填。
-- 存量迁移 `migrations/mysql/0003_timestamp_to_datetime.sql`：
+- 存量时间列由 UNIX 秒转 DATETIME 的迁移已折叠进 `0001_init.sql` 基线
+  （项目未发布，基线直接按 DATETIME 建列）：转换用
   `FROM_UNIXTIME(NULLIF(col,0))`（Unix 0 表示"未更新"→NULL），
   `create_at` 遇 0 回退 `UTC_TIMESTAMP()` 以满足 NOT NULL；
   0 值在严格 sql_mode 下直接 `FROM_UNIXTIME(0)` 会报 1292。

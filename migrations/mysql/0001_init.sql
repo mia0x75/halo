@@ -98,6 +98,12 @@ CREATE TABLE IF NOT EXISTS `mm_crons` (
               COMMENT '执行间隔',
   `duration`  VARCHAR(20)
               COMMENT '执行耗时',
+  `user_id`   INT UNSIGNED
+              NOT NULL DEFAULT 0
+              COMMENT '创建人',
+  `cluster_id` INT UNSIGNED
+              NOT NULL DEFAULT 0
+              COMMENT '目标群集，0 表示不限定',
   `recurrent` TINYINT UNSIGNED
               COMMENT '是否周期运行',
   `hash`      VARCHAR(60)
@@ -181,10 +187,14 @@ CREATE TABLE IF NOT EXISTS `mm_clusters` (
                 NOT NULL
                 DEFAULT 'mysql'
                 COMMENT '数据库类型',
+  `group_id`    INT UNSIGNED
+                NOT NULL
+                DEFAULT 0
+                COMMENT '所属分组，0 表示未分组',
   `password`    VARBINARY(48)
                 NOT NULL
                 COMMENT '密码',
-  `fingerprint` VARBINARY(20)
+  `fingerprint` VARBINARY(32)
                 NOT NULL
                 COMMENT '指纹',
   `status`      TINYINT UNSIGNED
@@ -269,6 +279,22 @@ CREATE TABLE IF NOT EXISTS `mm_options` (
                 COMMENT '修改时间',
   `create_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                 COMMENT '创建时间',
+  `group_name`  VARCHAR(50)
+                NOT NULL
+                DEFAULT ''
+                COMMENT '所属分组，同组共用一个标题',
+  `sort_order`  INT
+                NOT NULL
+                DEFAULT 0
+                COMMENT '展示顺序：组内按此排序，跨组时也决定分组的先后',
+  `depends_on`  VARCHAR(50)
+                NOT NULL
+                DEFAULT ''
+                COMMENT '依赖的选项名，为空表示无依赖',
+  `min_value`   INT NULL
+                COMMENT '数值下界',
+  `max_value`   INT NULL
+                COMMENT '数值上界',
 
   PRIMARY KEY (`name`),
   UNIQUE KEY `unique_1` (`uuid`)
@@ -491,34 +517,48 @@ COLLATE = utf8mb4_unicode_ci
 COMMENT = '工单分解表'
 ;
 
-CREATE TABLE IF NOT EXISTS `mm_statistics` (
-  `group`        VARCHAR(36)
-                 NOT NULL
-                 COMMENT '分组',
-  `key`          VARCHAR(50)
-                 NOT NULL
-                 COMMENT '键',
-  `uuid`         CHAR(36)
-                 NOT NULL
-                 COMMENT 'UUID',
-  `value`        DECIMAL(18,4)
-                 NOT NULL
-                 COMMENT '值',
-  `version`      INT UNSIGNED
-                 NOT NULL
-                 COMMENT '版本',
-  `update_at`    DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
-                 COMMENT '修改时间',
-  `create_at`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-                 COMMENT '创建时间',
+CREATE TABLE IF NOT EXISTS `mm_metrics` (
+  `metric_id`   INT UNSIGNED
+                NOT NULL
+                AUTO_INCREMENT
+                COMMENT '自增主键',
+  `uuid`        CHAR(36)
+                NOT NULL
+                COMMENT 'UUID',
+  `name`        VARCHAR(75)
+                NOT NULL
+                COMMENT '指标名称',
+  `scope`       TINYINT UNSIGNED
+                NOT NULL DEFAULT 0
+                COMMENT '作用域：0 全局 1 按天 2 用户 3 群集 4 分组',
+  `scope_id`    CHAR(36)
+                NOT NULL DEFAULT ''
+                COMMENT '作用域实体 UUID，全局作用域为空串',
+  `type`        TINYINT UNSIGNED
+                NOT NULL DEFAULT 0
+                COMMENT '类型：0 counter 累加 1 gauge 覆盖',
+  `bucket`      VARCHAR(20)
+                NOT NULL DEFAULT ''
+                COMMENT '时间桶，如 2026-10-20',
+  `value`       DECIMAL(18,4)
+                NOT NULL DEFAULT 0
+                COMMENT '指标值',
+  `version`     INT UNSIGNED
+                NOT NULL DEFAULT 0
+                COMMENT '版本',
+  `update_at`   DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+                COMMENT '修改时间',
+  `create_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                COMMENT '创建时间',
 
-  PRIMARY KEY (`group`, `key`),
-  UNIQUE KEY `unique_1` (`uuid`)
+  PRIMARY KEY (`metric_id`),
+  UNIQUE KEY `unique_1` (`uuid`),
+  UNIQUE KEY `unique_2` (`name`, `scope`, `scope_id`, `bucket`)
 )
 ENGINE = InnoDB
 CHARSET = utf8mb4
 COLLATE = utf8mb4_unicode_ci
-COMMENT = '统计表'
+COMMENT = '指标表'
 ;
 
 
@@ -673,4 +713,176 @@ ENGINE = InnoDB
 CHARSET = utf8mb4
 COLLATE = utf8mb4_unicode_ci
 COMMENT = '迁移版本台账'
+;
+
+CREATE TABLE IF NOT EXISTS `mm_violations` (
+  `violation_id` INT UNSIGNED
+                  NOT NULL
+                  AUTO_INCREMENT
+                  COMMENT '自增主键',
+  `uuid`         CHAR(36)
+                  NOT NULL
+                  COMMENT 'UUID',
+  `ticket_id`    INT UNSIGNED
+                  NOT NULL
+                  COMMENT '对应工单',
+  `sequence`     SMALLINT UNSIGNED
+                  NOT NULL DEFAULT 0
+                  COMMENT '语句序号',
+  `rule_name`    VARCHAR(75)
+                  NOT NULL
+                  COMMENT '命中规则名',
+  `level`        TINYINT UNSIGNED
+                  NOT NULL
+                  COMMENT '严重程度：0 提示 1 错误 2 警告',
+  `message`      VARCHAR(150)
+                  NOT NULL
+                  COMMENT '命中提示',
+  `create_at`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                  COMMENT '创建时间',
+
+  PRIMARY KEY (`violation_id`),
+  UNIQUE KEY `unique_1` (`uuid`),
+  KEY `idx_ticket` (`ticket_id`),
+  KEY `idx_rule` (`rule_name`),
+  KEY `idx_level_create` (`level`, `create_at`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '规则命中明细表'
+;
+
+CREATE TABLE IF NOT EXISTS `mm_messages` (
+  `message_id` INT UNSIGNED
+                 NOT NULL
+                 AUTO_INCREMENT
+                 COMMENT '自增主键',
+  `uuid`       CHAR(36)
+                 NOT NULL
+                 COMMENT 'UUID',
+  `user_id`    INT UNSIGNED
+                 NOT NULL
+                 COMMENT '接收人',
+  `category`   VARCHAR(30)
+                 NOT NULL DEFAULT ''
+                 COMMENT '消息分类',
+  `title`      VARCHAR(75)
+                 NOT NULL
+                 COMMENT '标题',
+  `content`    TEXT
+                 NOT NULL
+                 COMMENT '内容',
+  `link`       VARCHAR(150)
+                 NOT NULL DEFAULT ''
+                 COMMENT '跳转链接',
+  `read_at`    DATETIME NULL DEFAULT NULL
+                 COMMENT '已读时间',
+  `create_at`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                 COMMENT '创建时间',
+
+  PRIMARY KEY (`message_id`),
+  UNIQUE KEY `unique_1` (`uuid`),
+  KEY `idx_user_read` (`user_id`, `read_at`),
+  KEY `idx_user_create` (`user_id`, `create_at`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '站内消息表'
+;
+
+CREATE TABLE IF NOT EXISTS `mm_groups` (
+  `group_id`    INT UNSIGNED
+                NOT NULL
+                AUTO_INCREMENT
+                COMMENT '自增主键',
+  `uuid`        CHAR(36)
+                NOT NULL
+                COMMENT 'UUID',
+  `name`        VARCHAR(75)
+                NOT NULL
+                COMMENT '分组名称',
+  `description` VARCHAR(150)
+                NOT NULL DEFAULT ''
+                COMMENT '分组说明',
+  `status`      TINYINT UNSIGNED
+                NOT NULL DEFAULT 1
+                COMMENT '状态：1 正常 2 停用',
+  `version`     INT UNSIGNED
+                NOT NULL DEFAULT 0
+                COMMENT '版本',
+  `update_at`   DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+                COMMENT '修改时间',
+  `create_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                COMMENT '创建时间',
+
+  PRIMARY KEY (`group_id`),
+  UNIQUE KEY `unique_1` (`uuid`),
+  UNIQUE KEY `unique_2` (`name`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '群集分组表'
+;
+
+CREATE TABLE IF NOT EXISTS `mm_tasks` (
+  `task_id`      INT UNSIGNED
+                 NOT NULL
+                 AUTO_INCREMENT
+                 COMMENT '自增主键',
+  `uuid`         CHAR(36)
+                 NOT NULL
+                 COMMENT 'UUID',
+  `name`         VARCHAR(75)
+                 NOT NULL
+                 COMMENT '任务名称',
+  `type`         VARCHAR(30)
+                 NOT NULL DEFAULT ''
+                 COMMENT '任务类型',
+  `payload`      TEXT
+                 NOT NULL
+                 COMMENT '任务参数（JSON）',
+  `status`       TINYINT UNSIGNED
+                 NOT NULL DEFAULT 0
+                 COMMENT '状态：0 待执行 1 执行中 2 成功 3 失败 4 取消',
+  `priority`     TINYINT UNSIGNED
+                 NOT NULL DEFAULT 0
+                 COMMENT '优先级，数值越小越优先',
+  `attempt`      TINYINT UNSIGNED
+                 NOT NULL DEFAULT 0
+                 COMMENT '已尝试次数',
+  `max_attempt`  TINYINT UNSIGNED
+                 NOT NULL DEFAULT 3
+                 COMMENT '最大尝试次数',
+  `cron_id`      INT UNSIGNED
+                 NOT NULL DEFAULT 0
+                 COMMENT '来源定时任务，0 表示无',
+  `scheduled_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                 COMMENT '计划执行时间',
+  `started_at`   DATETIME NULL DEFAULT NULL
+                 COMMENT '开始执行时间',
+  `finished_at`  DATETIME NULL DEFAULT NULL
+                 COMMENT '结束执行时间',
+  `error`        TEXT
+                 NOT NULL
+                 COMMENT '失败原因',
+  `version`      INT UNSIGNED
+                 NOT NULL DEFAULT 0
+                 COMMENT '版本',
+  `update_at`    DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+                 COMMENT '修改时间',
+  `create_at`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                 COMMENT '创建时间',
+
+  PRIMARY KEY (`task_id`),
+  UNIQUE KEY `unique_1` (`uuid`),
+  KEY `idx_status_scheduled` (`status`, `scheduled_at`),
+  KEY `idx_type` (`type`)
+)
+ENGINE = InnoDB
+CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci
+COMMENT = '异步任务执行表'
 ;

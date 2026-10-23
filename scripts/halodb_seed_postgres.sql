@@ -201,6 +201,16 @@ INSERT INTO mm_glossaries VALUES
 ('users.status',2,'禁用','f97cb12f-5082-45bb-b0b5-52510859a53e','禁用',1, to_timestamp(1552357174), NOW());
 
 INSERT INTO mm_options (name, uuid, parameter, description, element, writable, version, group_name, sort_order, depends_on, min_value, max_value, update_at, create_at) VALUES
+('mail.enabled','9d2f1b10-0001-4b10-8b01-000000000001','false','邮件通知开关','switch',1,1,'邮件通知',1,'',NULL,NULL, NOW(), NOW()),
+('mail.addr','9d2f1b10-0002-4b10-8b01-000000000002','','SMTP 服务器（host:port）','input',1,1,'邮件通知',2,'mail.enabled',NULL,NULL, NOW(), NOW()),
+('mail.user','9d2f1b10-0003-4b10-8b01-000000000003','','SMTP 账号','input',1,1,'邮件通知',3,'mail.enabled',NULL,NULL, NOW(), NOW()),
+('mail.password','9d2f1b10-0004-4b10-8b01-000000000004','','SMTP 密码（加密存储）','password',1,1,'邮件通知',4,'mail.enabled',NULL,NULL, NOW(), NOW()),
+('mail.insecure-skip-verify','9d2f1b10-0005-4b10-8b01-000000000005','false','跳过 SMTP 证书校验','switch',1,1,'邮件通知',5,'mail.enabled',NULL,NULL, NOW(), NOW()),
+('retention.metrics-days','7c1f4a10-0001-4a10-9a01-000000000001','90','','number',1,1,'数据保留期',6,'',1,3650, NOW(), NOW()),
+('retention.hits-days','7c1f4a10-0002-4a10-9a01-000000000002','90','','number',1,1,'数据保留期',7,'',1,3650, NOW(), NOW()),
+('retention.logs-days','7c1f4a10-0003-4a10-9a01-000000000003','180','','number',1,1,'数据保留期',8,'',1,3650, NOW(), NOW()),
+('retention.messages-days','7c1f4a10-0004-4a10-9a01-000000000004','90','','number',1,1,'数据保留期',9,'',1,3650, NOW(), NOW()),
+('retention.tasks-days','7c1f4a10-0005-4a10-9a01-000000000005','30','','number',1,1,'数据保留期',10,'',1,3650, NOW(), NOW()),
 ('smtp.enabled','0b66b11d-fc6b-44cc-84e1-852c8cb09b7b','127.0.0.1','','switch',0,2,'SMTP（历史配置）',11,'',NULL,NULL, to_timestamp(1545013963), NOW()),
 ('smtp.host','766efa82-6c66-4b5e-b3e4-7d633a09839c','127.0.0.1','','input',0,2,'SMTP（历史配置）',12,'',NULL,NULL, to_timestamp(1545013963), NOW()),
 ('smtp.port','39cd3a0e-355d-4494-9b9b-e288a26bf3a2','127.0.0.1','','input',0,2,'SMTP（历史配置）',13,'',NULL,NULL, to_timestamp(1545013963), NOW()),

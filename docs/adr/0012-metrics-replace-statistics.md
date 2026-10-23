@@ -54,8 +54,8 @@ ON DUPLICATE KEY UPDATE value = value + VALUES(value)
 - GraphQL 契约 `type Statistic` → `type Metric`，`User.Statistics` → `User.Metrics`，
   `QueryRoot.statistics(groups)` → `QueryRoot.metrics(scope, names)`（未发布，可破坏性变更）；
 - CLI `halocli statistics` → `halocli metrics`；
-- 迁移 `0004_metrics_replace_statistics.sql` 在两个引擎各一份：建表 → 搬迁旧数据 →
-  删旧表，可重复执行（目标库已按权威 schema 建好时只补台账）。
+- 迁移（项目未发布，已全部折叠进两引擎的 `0001_init.sql` 基线）：基线直接建
+  `mm_metrics`、不再有 `mm_statistics`，因此不需要搬迁旧数据。
 
 ## 后果
 

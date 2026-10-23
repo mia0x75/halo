@@ -41,10 +41,11 @@
      迁移保持「待执行」可安全重试；
    - MySQL 的 DDL 隐式提交，无法回滚，失败时写入 `success=0` 的台账记录，
      后续执行会拒绝继续，必须人工修复数据库并清理该记录。
-6. **基线折叠**：项目尚未发布，`0002_add_cluster_type.sql`、
-   `0003_timestamp_to_datetime.sql` 的变更已经包含在基线快照里，从未在任何库
-   执行过。这两个文件加上 `-- migrate:folded-into-baseline` 标记，迁移器只登记
-   台账、不执行语句——既保留迁移历史（每个文件一条台账记录），又不会重复执行。
+6. **基线折叠**：项目尚未发布，所有历史增量迁移（`0002` 起）的变更都已
+   包含在基线快照里，从未在任何库执行过，因此已全部合并进 `0001_init.sql`，
+   迁移目录每个引擎只保留这一份基线。迁移器仍支持在每个文件上写
+   `-- migrate:folded-into-baseline` 标记：遇到时只登记台账、不执行语句，
+   供将来把中间版本折叠进基线时使用。
 7. **基线同步校验**：`scripts/check_migrations_sync.sh` 比较基线与权威 schema
    脚本（忽略 DROP 语句、`IF NOT EXISTS` 差异与注释），防止两者分叉。
 8. **不自动迁移**：`db.New` 的注释已经写明「caller 自行迁移，避免 schema 漂移
@@ -69,4 +70,6 @@
 
 - 新增表/字段一律：先写 `migrations/<engine>/NNNN_*.sql`（两引擎各一份），
   再同步 `scripts/halodb_schema_*.sql`，最后跑 `scripts/check_migrations_sync.sh`。
+- 未发布阶段一个版本只维护一份基线 `0001_init.sql`；等首个版本发布后再启用
+  「一个版本一份增量迁移」的节奏，已发布的迁移文件不可修改。
 - 目标库（用户业务库）的 schema 演进不由 Halo 接管，不在目标库建台账。
