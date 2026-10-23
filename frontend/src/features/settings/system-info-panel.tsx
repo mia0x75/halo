@@ -93,6 +93,7 @@ export function SystemInfoPanel() {
           />
           <Button
             size="sm"
+            className="h-8"
             disabled={sending || testEmail.trim() === ""}
             onClick={() => void sendTestMail()}
           >
