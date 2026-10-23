@@ -59,10 +59,6 @@ const (
 	EventRoleRevoked            = "OnRoleRevoked"            // 收回角色成功
 )
 
-// SystemUserUUID is the seeded system account used as the actor of automated
-// actions such as ticket execution.
-const SystemUserUUID = "00000000-0000-0000-0000-000000000000"
-
 // defaultBus is the process-wide bus set by Register. The package-level Fire
 // helpers keep the ~39 call sites unchanged; they are only valid after the app
 // container has been built.

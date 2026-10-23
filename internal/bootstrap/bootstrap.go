@@ -273,9 +273,12 @@ func ensureAdmin(ctx context.Context, application *app.App, admin AdminRequest) 
 			Name:     admin.Name,
 			Version:  1,
 		}
-		if _, err := application.Services.User.Create(ctx, created, 0); err != nil {
+		id, err := application.Services.User.Create(ctx, created, 0)
+		if err != nil {
 			return fmt.Errorf("创建管理员失败: %w", err)
 		}
+		created.UserID = uint(id)
+		user = created
 	default:
 		user.Email = admin.Email
 		user.Password = string(hashed)
@@ -287,11 +290,42 @@ func ensureAdmin(ctx context.Context, application *app.App, admin AdminRequest) 
 		}
 	}
 
+	// 种子不再预置账号，管理员与 Root 角色的授权关系由这里建立。
+	if err := ensureAdminRoleEdge(ctx, application, user, role); err != nil {
+		return err
+	}
+
 	if err := cache.UsersInit(); err != nil {
 		return fmt.Errorf("刷新用户缓存失败: %w", err)
 	}
 	if err := cache.EdgesInit(); err != nil {
 		return fmt.Errorf("刷新授权缓存失败: %w", err)
+	}
+	return nil
+}
+
+// ensureAdminRoleEdge grants the admin user the Root role unless the edge is
+// already there, so a freshly initialized instance is usable without seeds.
+func ensureAdminRoleEdge(ctx context.Context, application *app.App, user *domain.User, role *domain.Role) error {
+	edges, err := application.Services.Edge.List(ctx, math.MaxUint32, 1000)
+	if err != nil {
+		return fmt.Errorf("读取授权关系失败: %w", err)
+	}
+	for _, edge := range edges {
+		if edge.Type == domain.EdgeTypeUserToRole && edge.AncestorID == user.UserID && edge.DescendantID == role.RoleID {
+			return nil
+		}
+	}
+
+	edge := &domain.Edge{
+		UUID:         uuid.NewString(),
+		Type:         domain.EdgeTypeUserToRole,
+		AncestorID:   user.UserID,
+		DescendantID: role.RoleID,
+		Version:      1,
+	}
+	if _, err := application.Services.Edge.Create(ctx, edge, 0); err != nil {
+		return fmt.Errorf("授权管理员 Root 角色失败: %w", err)
 	}
 	return nil
 }

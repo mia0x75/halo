@@ -3,11 +3,13 @@ package event
 import (
 	"context"
 	"runtime"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/mia0x75/halo/internal/domain"
+	"github.com/mia0x75/halo/internal/models"
 )
 
 // testEvent is a minimal Event for bus tests.
@@ -49,6 +51,16 @@ func TestFireNoDeadlockNoLeak(t *testing.T) {
 	}
 	if got := atomic.LoadInt64(&calls); got != 5000 {
 		t.Fatalf("audit handler ran %d times, want 5000", got)
+	}
+}
+
+func TestTicketExecutedAuditUsesSystemText(t *testing.T) {
+	log := (&TicketExecuted{Ticket: models.Ticket{UUID: "t1"}}).AuditRecord()
+	if log.UserID != 0 {
+		t.Errorf("UserID = %d, want 0", log.UserID)
+	}
+	if !strings.Contains(log.Operation, "系统执行工单(uuid=t1)成功") {
+		t.Errorf("unexpected operation: %q", log.Operation)
 	}
 }
 

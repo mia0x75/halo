@@ -216,14 +216,7 @@ INSERT INTO mm_options (name, uuid, parameter, description, element, writable, v
 ('ldap.sc','6e200836-4cb7-4088-8b7f-ea8c110692c3','127.0.0.1','','input',0,2,'LDAP（历史配置）',23,'',NULL,NULL, to_timestamp(1545013963), NOW()),
 ('ldap.ou','43549a0d-aa4c-43ea-848a-41cc41517277','127.0.0.1','','input',0,2,'LDAP（历史配置）',24,'',NULL,NULL, to_timestamp(1545013963), NOW());
 
-INSERT INTO mm_edges VALUES
-(1, 'dfd02e74-cd54-4ca8-984a-42dcfc2f4d35', 3, 1, 1,  1, NULL, NOW()),
-(2, '6483249c-3fe9-48c1-9ba9-520f89f2db07', 2, 1, 1,  1, NULL, NOW()),
-(3, 'dd98a7d7-3d69-4161-b45b-d090b019acf7', 2, 1, 2,  1, NULL, NOW()),
-(4, 'eea7ef37-47e8-444d-b1bd-459d6bc99354', 2, 1, 3,  1, NULL, NOW()),
-(5, '716989c1-ad05-4d06-98e2-9f59c9cdbd90', 3, 1, 5,  1, NULL, NOW()),
-(6, '45970fc3-bde6-4fa5-a81f-758391bee397', 1, 1, 1,  0, NULL, NOW()),
-(7, '4742b7f2-e270-4906-b2c1-08850e3e7512', 1, 1, 21, 0, NULL, NOW());
+-- 初始管理员的用户与角色授权由安装向导创建，种子不再预置任何账号。
 
 INSERT INTO mm_roles VALUES
 (1, '97452ae1-17b9-4791-bc29-62aad89e2dbb', 'Root',      '系统管理员', 1, NULL, NOW()),
@@ -483,16 +476,6 @@ INSERT INTO mm_rules VALUES
 ('MTB-L3-024','6fbf9776-124a-4611-be8b-3d8acbd2130c',12,'修改表注解信息时不可为空',1,120,'none','nil',5,'CommentRequired','修改表注解信息时不可为空。','none',1, NULL, NOW()),
 ('MTB-L3-025','8ab2018c-efc3-40ee-89a4-6b90be6b63cb',12,'索引数量超过允许的阈值',1,120,'lte','5',5,'IndexCountLimit','表"%s"中定义了%d个索引，数量超过允许的阈值%d。','number',1, NULL, NOW());
 
--- Admin123#! default password, will remove before release
-INSERT INTO mm_users VALUES
-(DEFAULT,'00000000-0000-0000-0000-000000000000','系统用户','$2a$10$z6w5ZlrjNrWBus2HckZeTOOj1Kj0/rGMyHROSF.q5Py.YpxzAAQ4W',1,'系统用户',0,1,3, NULL, NOW());
-
-UPDATE mm_users SET user_id = 0;
-
-INSERT INTO mm_users VALUES
-(1,'e70e78bb-9d08-405d-a0ed-266ec703de19','root@163.com','$2a$10$z6w5ZlrjNrWBus2HckZeTOOj1Kj0/rGMyHROSF.q5Py.YpxzAAQ4W',1,'root',0,1,3, NULL, NOW());
-
-
 -- 工单创建成功
 INSERT INTO mm_templates VALUES ('b5c5ac9c-2071-4dd3-af5c-69ec149ee682', '工单〔{{.Ticket.Subject}}〕创建成功通知', '{{with .User -}}Dear {{.Name}},{{- end}}
 
@@ -715,6 +698,6 @@ Halo Service', '预约执行的工单被取消后，工单改为取消，同时�
 
 
 -- Advance identity sequences past explicitly seeded ids.
-SELECT setval('mm_edges_edge_id_seq', (SELECT max(edge_id) FROM mm_edges));
+SELECT setval('mm_edges_edge_id_seq', COALESCE((SELECT max(edge_id) FROM mm_edges), 0) + 1, false);
 SELECT setval('mm_roles_role_id_seq', (SELECT max(role_id) FROM mm_roles));
-SELECT setval('mm_users_user_id_seq', (SELECT max(user_id) FROM mm_users));
+SELECT setval('mm_users_user_id_seq', COALESCE((SELECT max(user_id) FROM mm_users), 0) + 1, false);

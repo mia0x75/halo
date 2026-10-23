@@ -71,8 +71,8 @@ func (e *TicketRemoved) Topic() string { return EventTicketRemoved }
 // (Operation: "ticket.remove"). See service.TicketService.
 func (e *TicketRemoved) AuditRecord() *domain.Log { return nil }
 
-// TicketExecuted 工单执行成功事件。UserID is the actor resolved by the CLI
-// (the seeded system user); the CLI path has no service-level audit.
+// TicketExecuted 工单执行成功事件。UserID is 0 because the CLI acts on its own;
+// the CLI path has no service-level audit.
 type TicketExecuted struct {
 	UserID  uint
 	Ticket  models.Ticket
@@ -85,7 +85,7 @@ func (e *TicketExecuted) Topic() string { return EventTicketExecuted }
 // AuditRecord records the execution; the CLI execution path does not go through
 // any service that writes an audit row.
 func (e *TicketExecuted) AuditRecord() *domain.Log {
-	return newAudit(e.UserID, fmt.Sprintf("用户(uuid=%s)执行工单(uuid=%s)成功。\n", SystemUserUUID, e.Ticket.UUID))
+	return newAudit(e.UserID, fmt.Sprintf("系统执行工单(uuid=%s)成功。\n", e.Ticket.UUID))
 }
 
 // TicketFailed 工单执行失败事件
@@ -100,7 +100,7 @@ func (e *TicketFailed) Topic() string { return EventTicketFailed }
 
 // AuditRecord records the failure; the CLI execution path has no service audit.
 func (e *TicketFailed) AuditRecord() *domain.Log {
-	return newAudit(e.UserID, fmt.Sprintf("用户(uuid=%s)执行工单(uuid=%s)失败。\n", SystemUserUUID, e.Ticket.UUID))
+	return newAudit(e.UserID, fmt.Sprintf("系统执行工单(uuid=%s)失败。\n", e.Ticket.UUID))
 }
 
 // TicketScheduled 工单预约成功事件

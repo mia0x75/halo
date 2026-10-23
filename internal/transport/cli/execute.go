@@ -109,12 +109,9 @@ func execute(cmd *cobra.Command, args []string) {
 			rows := uint(result.RowsAffected)
 			stmt.RowsAffected = &rows
 		}
-		// Execution is audited as the system user, since the CLI acts on its
-		// own rather than on behalf of a logged-in operator.
+		// Execution is audited as user 0: the CLI acts on its own rather than
+		// on behalf of a logged-in operator.
 		actorID := uint(0)
-		if sysUser, sysErr := application.Repos.User.GetByUUID(ctx, event.SystemUserUUID); sysErr == nil {
-			actorID = sysUser.UserID
-		}
 
 		// The event bus speaks the legacy DTO, so the conversion happens only
 		// at this boundary; the execution path itself stays on domain types.

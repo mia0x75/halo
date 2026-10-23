@@ -224,16 +224,7 @@ INSERT INTO `mm_options` (name, uuid, parameter, description, element, writable,
 ('ldap.ou','43549a0d-aa4c-43ea-848a-41cc41517277','127.0.0.1','','input',0,2,'LDAP（历史配置）',24,'',NULL,NULL, FROM_UNIXTIME(1545013963), UTC_TIMESTAMP());
 UNLOCK TABLES;
 
-LOCK TABLES `mm_edges` WRITE;
-INSERT INTO `mm_edges` VALUES
-(1, 'dfd02e74-cd54-4ca8-984a-42dcfc2f4d35', 3, 1, 1,  1, NULL, UTC_TIMESTAMP()),
-(2, '6483249c-3fe9-48c1-9ba9-520f89f2db07', 2, 1, 1,  1, NULL, UTC_TIMESTAMP()),
-(3, 'dd98a7d7-3d69-4161-b45b-d090b019acf7', 2, 1, 2,  1, NULL, UTC_TIMESTAMP()),
-(4, 'eea7ef37-47e8-444d-b1bd-459d6bc99354', 2, 1, 3,  1, NULL, UTC_TIMESTAMP()),
-(5, '716989c1-ad05-4d06-98e2-9f59c9cdbd90', 3, 1, 5,  1, NULL, UTC_TIMESTAMP()),
-(6, '45970fc3-bde6-4fa5-a81f-758391bee397', 1, 1, 1,  0, NULL, UTC_TIMESTAMP()),
-(7, '4742b7f2-e270-4906-b2c1-08850e3e7512', 1, 1, 21, 0, NULL, UTC_TIMESTAMP());
-UNLOCK TABLES;
+-- 初始管理员的用户与角色授权由安装向导创建，种子不再预置任何账号。
 
 LOCK TABLES `mm_roles` WRITE;
 INSERT INTO `mm_roles` VALUES
@@ -497,18 +488,6 @@ INSERT INTO `mm_rules` VALUES
 ('MTB-L3-025','8ab2018c-efc3-40ee-89a4-6b90be6b63cb',12,'索引数量超过允许的阈值',1,120,'lte','5',5,'IndexCountLimit','表\"%s\"中定义了%d个索引，数量超过允许的阈值%d。','number',1, NULL, UTC_TIMESTAMP());
 UNLOCK TABLES;
 
-
-LOCK TABLES `mm_users` WRITE;
-
-# Admin123#! default password, will remove before release
-INSERT INTO `mm_users` VALUES
-(0,'00000000-0000-0000-0000-000000000000','系统用户','$2a$10$z6w5ZlrjNrWBus2HckZeTOOj1Kj0/rGMyHROSF.q5Py.YpxzAAQ4W',1,'系统用户',0,1,3, NULL, UTC_TIMESTAMP());
-
-UPDATE `mm_users` SET `user_id` = 0;
-
-INSERT INTO `mm_users` VALUES
-(1,'e70e78bb-9d08-405d-a0ed-266ec703de19','root@163.com','$2a$10$z6w5ZlrjNrWBus2HckZeTOOj1Kj0/rGMyHROSF.q5Py.YpxzAAQ4W',1,'root',0,1,3, NULL, UTC_TIMESTAMP());
-UNLOCK TABLES;
 
 
 LOCK TABLES `mm_templates` WRITE;
