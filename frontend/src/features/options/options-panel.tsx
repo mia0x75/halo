@@ -88,20 +88,22 @@ export function OptionsPanel() {
       {error ? (
         <p className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
       ) : null}
-      {groups.map((group) => (
-        <OptionGroup
-          key={group.name}
-          name={group.name}
-          items={group.items}
-          enabled={enabled}
-          saving={saving}
-          onPatch={patch}
-          onEditSecret={(option) => {
-            setSecret(option)
-            setSecretValue("")
-          }}
-        />
-      ))}
+      <div className="grid gap-4 md:grid-cols-2">
+        {groups.map((group) => (
+          <OptionGroup
+            key={group.name}
+            name={group.name}
+            items={group.items}
+            enabled={enabled}
+            saving={saving}
+            onPatch={patch}
+            onEditSecret={(option) => {
+              setSecret(option)
+              setSecretValue("")
+            }}
+          />
+        ))}
+      </div>
       <Dialog
         open={secret !== null}
         onOpenChange={(open) => {
@@ -185,11 +187,6 @@ function OptionGroup({
                 <span className="truncate text-xs text-muted-foreground">
                   {option.Description || "-"}
                 </span>
-                {blocked ? (
-                  <span className="text-xs text-warning">
-                    需先开启 {option.DependsOn}
-                  </span>
-                ) : null}
               </div>
               <OptionControl
                 option={option}
