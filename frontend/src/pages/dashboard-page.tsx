@@ -20,7 +20,7 @@ import { PeriodSelect } from "@/features/dashboard/period-select"
 import { type Period } from "@/features/dashboard/periods"
 import { StatCard } from "@/features/dashboard/stat-card"
 
-import { TopRules } from "@/features/dashboard/top-rules"
+import { SeverityBody, TopRulesBody } from "@/features/dashboard/top-rules"
 import { mapTicket, formatUnix } from "@/lib/api/mappers"
 import { LOGS_QUERY, TICKETS_QUERY, type LogConnectionNode, type TicketConnectionNode } from "@/lib/api/queries"
 import { parseLogOperation } from "@/lib/labels"
@@ -170,42 +170,45 @@ export function DashboardPage({ onOpenTicket, onCreateTicket, onViewTickets }: D
         <StatCard label="接入群集" value={String(clusterPage.total)} />
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-3">
-        <SectionCard
-          title="工单趋势"
-          className="xl:col-span-2"
-          bodyClassName="p-0"
-          action={<PeriodSelect value={period} onChange={setPeriod} />}
-        >
-          <TrendChart
-            id={TREND_CHART_ID}
-            selectable
-            range={period}
-            onReady={() => setTrendReady(true)}
+      <SectionCard
+        title="工单趋势"
+        bodyClassName="p-0"
+        action={<PeriodSelect value={period} onChange={setPeriod} />}
+      >
+        <TrendChart
+          id={TREND_CHART_ID}
+          selectable
+          range={period}
+          onReady={() => setTrendReady(true)}
+          categories={fullPoints.map((point) => point.date)}
+          series={[
+            { name: "提交", data: fullPoints.map((point) => point.submitted) },
+            { name: "执行", data: fullPoints.map((point) => point.executed) },
+            { name: "失败", data: fullPoints.map((point) => point.failed) },
+          ]}
+        />
+        {trendReady ? (
+          <BrushChart
+            target={TREND_CHART_ID}
             categories={fullPoints.map((point) => point.date)}
-            series={[
-              { name: "提交", data: fullPoints.map((point) => point.submitted) },
-              { name: "执行", data: fullPoints.map((point) => point.executed) },
-              { name: "失败", data: fullPoints.map((point) => point.failed) },
-            ]}
+            series={[{ name: "提交", data: fullPoints.map((point) => point.submitted) }]}
           />
-          {trendReady ? (
-            <BrushChart
-              target={TREND_CHART_ID}
-              categories={fullPoints.map((point) => point.date)}
-              series={[{ name: "提交", data: fullPoints.map((point) => point.submitted) }]}
-            />
-          ) : (
-            <div className="h-24" />
-          )}
-        </SectionCard>
+        ) : (
+          <div className="h-24" />
+        )}
+      </SectionCard>
 
+      <div className="grid gap-4 lg:grid-cols-2">
         <SectionCard
           title="风险分级"
           bodyClassName="p-0"
           action={<PeriodSelect value={period} onChange={setPeriod} />}
         >
-          <TopRules levels={levelRows} rules={ruleRows} />
+          <SeverityBody levels={levelRows} />
+        </SectionCard>
+
+        <SectionCard title="命中最多的规则" bodyClassName="p-0">
+          <TopRulesBody rules={ruleRows} />
         </SectionCard>
       </div>
 
