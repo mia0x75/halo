@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react"
 import { IconPencil, IconPlus, IconSearch, IconUsers } from "@tabler/icons-react"
 
 import { PageHeader } from "@/components/layout/page-header"
+import { SectionCard } from "@/components/shared/section-card"
 import { Tabs } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -139,8 +140,8 @@ export function UsersPage({ onCreateUser, onEditUser }: UsersPageProps) {
       />
 
       {tab === "users" ? (
-        <>
-          <div className="flex flex-wrap items-end gap-3 px-1">
+        <SectionCard bodyClassName="p-0">
+          <div className="flex flex-wrap items-end gap-3 border-b border-border px-5 py-4">
             <div className="flex flex-col gap-1.5 sm:w-64">
               <Label htmlFor="user-keyword">关键词</Label>
               <div className="relative">
@@ -237,35 +238,37 @@ export function UsersPage({ onCreateUser, onEditUser }: UsersPageProps) {
             onPrevious={previousPage}
             onNext={nextPage}
           />
-        </>
+        </SectionCard>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>角色</TableHead>
-              <TableHead>说明</TableHead>
-              <TableHead>可管理的分组</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {roleList.map((role) => (
-              <TableRow key={role.UUID}>
-                <TableCell className="font-medium">{role.Name}</TableCell>
-                <TableCell className="text-muted-foreground">{role.Description || "-"}</TableCell>
-                <TableCell>
-                  <div className="flex flex-wrap gap-1">
-                    {(role.Groups ?? []).map((group) => (
-                      <Badge key={group.UUID} variant="muted">
-                        {group.Name}
-                      </Badge>
-                    ))}
-                    {(role.Groups ?? []).length === 0 ? "-" : null}
-                  </div>
-                </TableCell>
+        <SectionCard bodyClassName="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>角色</TableHead>
+                <TableHead>说明</TableHead>
+                <TableHead>可管理的分组</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {roleList.map((role) => (
+                <TableRow key={role.UUID}>
+                  <TableCell className="font-medium">{role.Name}</TableCell>
+                  <TableCell className="text-muted-foreground">{role.Description || "-"}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {(role.Groups ?? []).map((group) => (
+                        <Badge key={group.UUID} variant="muted">
+                          {group.Name}
+                        </Badge>
+                      ))}
+                      {(role.Groups ?? []).length === 0 ? "-" : null}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </SectionCard>
       )}
     </>
   )
