@@ -7,6 +7,8 @@ package mysqlrepo
 
 import (
 	"context"
+	"database/sql"
+	"time"
 )
 
 const createOption = `-- name: CreateOption :exec
@@ -49,9 +51,26 @@ const getOptionByName = `-- name: GetOptionByName :one
 SELECT name, uuid, parameter, description, element, writable, group_name, sort_order, depends_on, min_value, max_value, version, update_at, create_at FROM mm_options WHERE name = ? LIMIT 1
 `
 
-func (q *Queries) GetOptionByName(ctx context.Context, name string) (MmOption, error) {
+type GetOptionByNameRow struct {
+	Name        string
+	Uuid        string
+	Parameter   string
+	Description string
+	Element     string
+	Writable    uint8
+	GroupName   string
+	SortOrder   int64
+	DependsOn   string
+	MinValue    sql.NullInt32
+	MaxValue    sql.NullInt32
+	Version     uint32
+	UpdateAt    sql.NullTime
+	CreateAt    time.Time
+}
+
+func (q *Queries) GetOptionByName(ctx context.Context, name string) (GetOptionByNameRow, error) {
 	row := q.db.QueryRowContext(ctx, getOptionByName, name)
-	var i MmOption
+	var i GetOptionByNameRow
 	err := row.Scan(
 		&i.Name,
 		&i.Uuid,
@@ -75,9 +94,26 @@ const getOptionByUUID = `-- name: GetOptionByUUID :one
 SELECT name, uuid, parameter, description, element, writable, group_name, sort_order, depends_on, min_value, max_value, version, update_at, create_at FROM mm_options WHERE uuid = ? LIMIT 1
 `
 
-func (q *Queries) GetOptionByUUID(ctx context.Context, uuid string) (MmOption, error) {
+type GetOptionByUUIDRow struct {
+	Name        string
+	Uuid        string
+	Parameter   string
+	Description string
+	Element     string
+	Writable    uint8
+	GroupName   string
+	SortOrder   int64
+	DependsOn   string
+	MinValue    sql.NullInt32
+	MaxValue    sql.NullInt32
+	Version     uint32
+	UpdateAt    sql.NullTime
+	CreateAt    time.Time
+}
+
+func (q *Queries) GetOptionByUUID(ctx context.Context, uuid string) (GetOptionByUUIDRow, error) {
 	row := q.db.QueryRowContext(ctx, getOptionByUUID, uuid)
-	var i MmOption
+	var i GetOptionByUUIDRow
 	err := row.Scan(
 		&i.Name,
 		&i.Uuid,
@@ -101,15 +137,32 @@ const listOptions = `-- name: ListOptions :many
 SELECT name, uuid, parameter, description, element, writable, group_name, sort_order, depends_on, min_value, max_value, version, update_at, create_at FROM mm_options ORDER BY sort_order, name LIMIT ?
 `
 
-func (q *Queries) ListOptions(ctx context.Context, limit int32) ([]MmOption, error) {
+type ListOptionsRow struct {
+	Name        string
+	Uuid        string
+	Parameter   string
+	Description string
+	Element     string
+	Writable    uint8
+	GroupName   string
+	SortOrder   int64
+	DependsOn   string
+	MinValue    sql.NullInt32
+	MaxValue    sql.NullInt32
+	Version     uint32
+	UpdateAt    sql.NullTime
+	CreateAt    time.Time
+}
+
+func (q *Queries) ListOptions(ctx context.Context, limit int32) ([]ListOptionsRow, error) {
 	rows, err := q.db.QueryContext(ctx, listOptions, limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []MmOption{}
+	items := []ListOptionsRow{}
 	for rows.Next() {
-		var i MmOption
+		var i ListOptionsRow
 		if err := rows.Scan(
 			&i.Name,
 			&i.Uuid,

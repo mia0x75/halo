@@ -2,6 +2,8 @@ package postgresrepo
 
 import (
 	"context"
+	"database/sql"
+	"time"
 
 	"github.com/mia0x75/halo/internal/domain"
 )
@@ -16,7 +18,28 @@ func NewOptionRepo(q *Queries) *OptionRepo {
 	return &OptionRepo{q: q}
 }
 
-func optionFromRow(r MmOption) *domain.Option {
+// optionRow is the shared shape of the option queries' result rows. The
+// conversion below accepts every generated row struct through a struct
+// conversion. Convertible structs must repeat every field, so the
+// duplication is deliberate.
+type optionRow struct {
+	Name        string
+	Uuid        string
+	Parameter   string
+	Description string
+	Element     string
+	Writable    int16
+	GroupName   string
+	SortOrder   int32
+	DependsOn   string
+	MinValue    sql.NullInt32
+	MaxValue    sql.NullInt32
+	Version     int64
+	UpdateAt    sql.NullTime
+	CreateAt    time.Time
+}
+
+func optionFromRow(r optionRow) *domain.Option {
 	return &domain.Option{
 		Name:        r.Name,
 		UUID:        r.Uuid,
@@ -24,6 +47,11 @@ func optionFromRow(r MmOption) *domain.Option {
 		Description: r.Description,
 		Element:     r.Element,
 		Writable:    uint8(r.Writable),
+		GroupName:   r.GroupName,
+		SortOrder:   int(r.SortOrder),
+		DependsOn:   r.DependsOn,
+		MinValue:    intFromNull(r.MinValue),
+		MaxValue:    intFromNull(r.MaxValue),
 		Version:     int(r.Version),
 		UpdateAt:    timeFromNull(r.UpdateAt),
 		CreateAt:    timeToUnix(r.CreateAt),
@@ -47,7 +75,7 @@ func (r *OptionRepo) GetByUUID(ctx context.Context, uuid string) (*domain.Option
 	if err != nil {
 		return nil, wrap("option.GetByUUID", err)
 	}
-	return optionFromRow(row), nil
+	return optionFromRow(optionRow(row)), nil
 }
 
 // GetByName resolves the row by its natural key.
@@ -56,7 +84,7 @@ func (r *OptionRepo) GetByName(ctx context.Context, name string) (*domain.Option
 	if err != nil {
 		return nil, wrap("option.GetByName", err)
 	}
-	return optionFromRow(row), nil
+	return optionFromRow(optionRow(row)), nil
 }
 
 func (r *OptionRepo) Update(ctx context.Context, o *domain.Option) error {
@@ -81,7 +109,7 @@ func (r *OptionRepo) List(ctx context.Context, limit int) ([]*domain.Option, err
 	}
 	out := make([]*domain.Option, 0, len(rows))
 	for _, row := range rows {
-		out = append(out, optionFromRow(row))
+		out = append(out, optionFromRow(optionRow(row)))
 	}
 	return out, nil
 }

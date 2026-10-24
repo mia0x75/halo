@@ -163,14 +163,14 @@ type MmOption struct {
 	Description string
 	Element     string
 	Writable    int16
+	Version     int64
+	UpdateAt    sql.NullTime
+	CreateAt    time.Time
 	GroupName   string
 	SortOrder   int32
 	DependsOn   string
 	MinValue    sql.NullInt32
 	MaxValue    sql.NullInt32
-	Version     int64
-	UpdateAt    sql.NullTime
-	CreateAt    time.Time
 }
 
 // 查询表
