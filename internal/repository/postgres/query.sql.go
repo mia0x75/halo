@@ -9,6 +9,17 @@ import (
 	"context"
 )
 
+const countQueries = `-- name: CountQueries :one
+SELECT COUNT(*) FROM mm_queries
+`
+
+func (q *Queries) CountQueries(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countQueries)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createQuery = `-- name: CreateQuery :one
 INSERT INTO mm_queries (uuid, "type", cluster_id, "database", content, plan, user_id, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING query_id
 `

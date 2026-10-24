@@ -39,6 +39,8 @@ type CronRepository interface {
 	DeleteByUUID(ctx context.Context, uuid string) error
 	List(ctx context.Context, cursor int64, limit int) ([]*Cron, error)
 	ListSchedulable(ctx context.Context) ([]*Cron, error)
+	// Count returns the total number of rows, independent of any page cursor.
+	Count(ctx context.Context) (int64, error)
 }
 
 type ClusterRepository interface {
@@ -73,6 +75,8 @@ type QueryRepository interface {
 	Delete(ctx context.Context, id int64) error
 	DeleteByUUID(ctx context.Context, uuid string) error
 	List(ctx context.Context, cursor int64, limit int) ([]*Query, error)
+	// Count returns the total number of rows, independent of any page cursor.
+	Count(ctx context.Context) (int64, error)
 	ListByUser(ctx context.Context, userID uint) ([]*Query, error)
 }
 
@@ -109,6 +113,9 @@ type TicketRepository interface {
 	// ListFiltered lists the tickets matching the filters. A zero status means
 	// every status, an empty keyword matches every subject and database.
 	ListFiltered(ctx context.Context, cursor int64, limit int, status uint8, keyword string) ([]*Ticket, error)
+	// CountFiltered counts the tickets matching the same filters as
+	// ListFiltered, independent of any page cursor.
+	CountFiltered(ctx context.Context, status uint8, keyword string) (int64, error)
 	ListByUser(ctx context.Context, userID uint) ([]*Ticket, error)
 	// ListByReviewer returns every ticket the user reviews, oldest first.
 	ListByReviewer(ctx context.Context, userID uint) ([]*Ticket, error)
@@ -124,6 +131,8 @@ type UserRepository interface {
 	Delete(ctx context.Context, id int64) error
 	DeleteByUUID(ctx context.Context, uuid string) error
 	List(ctx context.Context, cursor int64, limit int) ([]*User, error)
+	// Count returns the total number of rows, independent of any page cursor.
+	Count(ctx context.Context) (int64, error)
 }
 
 type GlossaryRepository interface {

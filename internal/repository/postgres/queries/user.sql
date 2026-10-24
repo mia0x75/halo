@@ -19,3 +19,6 @@ DELETE FROM mm_users WHERE uuid = $1;
 -- name: ListUsers :many
 SELECT user_id, uuid, email, password, status, name, phone, avatar_id, version, update_at, create_at FROM mm_users WHERE user_id < $1 ORDER BY user_id DESC LIMIT $2;
 
+
+-- name: CountUsers :one
+SELECT COUNT(*) FROM mm_users;

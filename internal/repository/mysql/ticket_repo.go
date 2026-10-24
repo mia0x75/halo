@@ -182,3 +182,19 @@ func (r *TicketRepo) CountByStatus(ctx context.Context, from, to uint) ([]domain
 	}
 	return out, nil
 }
+
+// CountFiltered counts the tickets matching the same filters as ListFiltered.
+// A zero status means every status; the pattern matches the subject and the
+// database name. The page cursor does not affect the count.
+func (r *TicketRepo) CountFiltered(ctx context.Context, status uint8, pattern string) (int64, error) {
+	n, err := r.q.CountTicketsFiltered(ctx, CountTicketsFilteredParams{
+		Status:   status,
+		Column2:  int64(status),
+		Subject:  pattern,
+		Database: pattern,
+	})
+	if err != nil {
+		return 0, wrap("ticket.CountFiltered", err)
+	}
+	return n, nil
+}

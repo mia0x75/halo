@@ -48,6 +48,26 @@ func (q *Queries) CountTicketsByStatus(ctx context.Context, arg CountTicketsBySt
 	return items, nil
 }
 
+const countTicketsFiltered = `-- name: CountTicketsFiltered :one
+SELECT COUNT(*) FROM mm_tickets
+WHERE (status = $1 OR $2 = 0)
+  AND (subject LIKE $3 OR "database" LIKE $3)
+`
+
+type CountTicketsFilteredParams struct {
+	Status  int16
+	Column2 interface{}
+	Subject string
+}
+
+// 与 ListTicketsFiltered 同一口径；cursor 不参与计数，统计全部匹配行
+func (q *Queries) CountTicketsFiltered(ctx context.Context, arg CountTicketsFilteredParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countTicketsFiltered, arg.Status, arg.Column2, arg.Subject)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createTicket = `-- name: CreateTicket :one
 INSERT INTO mm_tickets (uuid, cluster_id, "database", subject, content, status, user_id, reviewer_id, cron_id, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING ticket_id
 `

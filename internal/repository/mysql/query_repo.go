@@ -115,3 +115,12 @@ func (r *QueryRepo) ListByUser(ctx context.Context, userID uint) ([]*domain.Quer
 	}
 	return out, nil
 }
+
+// Count returns the total number of queries.
+func (r *QueryRepo) Count(ctx context.Context) (int64, error) {
+	n, err := r.q.CountQueries(ctx)
+	if err != nil {
+		return 0, wrap("query.Count", err)
+	}
+	return n, nil
+}

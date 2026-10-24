@@ -12,12 +12,17 @@ import (
 
 type Querier interface {
 	CountClustersByGroup(ctx context.Context, groupID int64) (int64, error)
+	CountCrons(ctx context.Context) (int64, error)
 	CountMessagesByUser(ctx context.Context, arg CountMessagesByUserParams) (int64, error)
+	CountQueries(ctx context.Context) (int64, error)
 	CountRuleHitsByLevel(ctx context.Context, arg CountRuleHitsByLevelParams) ([]CountRuleHitsByLevelRow, error)
 	CountRuleHitsByRule(ctx context.Context, arg CountRuleHitsByRuleParams) ([]CountRuleHitsByRuleRow, error)
 	CountTasksByStatus(ctx context.Context) ([]CountTasksByStatusRow, error)
 	CountTicketsByStatus(ctx context.Context, arg CountTicketsByStatusParams) ([]CountTicketsByStatusRow, error)
+	// 与 ListTicketsFiltered 同一口径；cursor 不参与计数，统计全部匹配行
+	CountTicketsFiltered(ctx context.Context, arg CountTicketsFilteredParams) (int64, error)
 	CountUnreadMessages(ctx context.Context, userID int64) (int64, error)
+	CountUsers(ctx context.Context) (int64, error)
 	CreateAvatar(ctx context.Context, arg CreateAvatarParams) (int64, error)
 	CreateCluster(ctx context.Context, arg CreateClusterParams) (int64, error)
 	CreateComment(ctx context.Context, arg CreateCommentParams) (int64, error)

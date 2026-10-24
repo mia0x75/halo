@@ -22,3 +22,6 @@ SELECT query_id, uuid, "type", cluster_id, "database", content, plan, user_id, v
 -- name: ListQueriesByUser :many
 SELECT query_id, uuid, "type", cluster_id, "database", content, plan, user_id, version, update_at, create_at FROM mm_queries WHERE user_id = $1 ORDER BY query_id;
 
+
+-- name: CountQueries :one
+SELECT COUNT(*) FROM mm_queries;

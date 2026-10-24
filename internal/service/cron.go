@@ -28,6 +28,11 @@ func (s *CronService) List(ctx context.Context, cursor int64, limit int) ([]*dom
 	return s.crons.List(ctx, cursor, limit)
 }
 
+// Count returns the total number of crons, independent of any page cursor.
+func (s *CronService) Count(ctx context.Context) (int64, error) {
+	return s.crons.Count(ctx)
+}
+
 func (s *CronService) Create(ctx context.Context, c *domain.Cron, operatorID uint) (uint, error) {
 	var id uint
 	// 创建人取操作者，定时任务因此可追溯到人。

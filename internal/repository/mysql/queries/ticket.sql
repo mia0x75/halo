@@ -38,3 +38,9 @@ SELECT ticket_id, uuid, cluster_id, `database`, subject, content, status, user_i
 
 -- name: CountTicketsByStatus :many
 SELECT status, COUNT(*) AS count FROM mm_tickets WHERE create_at >= ? AND create_at < ? GROUP BY status ORDER BY status;
+
+-- name: CountTicketsFiltered :one
+-- 与 ListTicketsFiltered 同一口径；cursor 不参与计数，统计全部匹配行
+SELECT COUNT(*) FROM mm_tickets
+WHERE (status = ? OR ? = 0)
+  AND (subject LIKE ? OR `database` LIKE ?);

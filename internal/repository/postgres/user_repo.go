@@ -118,3 +118,12 @@ func (r *UserRepo) List(ctx context.Context, cursor int64, limit int) ([]*domain
 	}
 	return out, nil
 }
+
+// Count returns the total number of users.
+func (r *UserRepo) Count(ctx context.Context) (int64, error) {
+	n, err := r.q.CountUsers(ctx)
+	if err != nil {
+		return 0, wrap("user.Count", err)
+	}
+	return n, nil
+}

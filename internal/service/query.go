@@ -28,6 +28,11 @@ func (s *QueryService) List(ctx context.Context, cursor int64, limit int) ([]*do
 	return s.queries.List(ctx, cursor, limit)
 }
 
+// Count returns the total number of queries, independent of any page cursor.
+func (s *QueryService) Count(ctx context.Context) (int64, error) {
+	return s.queries.Count(ctx)
+}
+
 // ListByUser returns every query logged for one user.
 func (s *QueryService) ListByUser(ctx context.Context, userID uint) ([]*domain.Query, error) {
 	return s.queries.ListByUser(ctx, userID)

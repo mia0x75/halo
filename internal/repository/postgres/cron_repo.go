@@ -134,3 +134,12 @@ func (r *CronRepo) ListSchedulable(ctx context.Context) ([]*domain.Cron, error) 
 	}
 	return out, nil
 }
+
+// Count returns the total number of crons.
+func (r *CronRepo) Count(ctx context.Context) (int64, error) {
+	n, err := r.q.CountCrons(ctx)
+	if err != nil {
+		return 0, wrap("cron.Count", err)
+	}
+	return n, nil
+}

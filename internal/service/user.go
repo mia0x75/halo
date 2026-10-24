@@ -28,6 +28,11 @@ func (s *UserService) List(ctx context.Context, cursor int64, limit int) ([]*dom
 	return s.users.List(ctx, cursor, limit)
 }
 
+// Count returns the total number of users, independent of any page cursor.
+func (s *UserService) Count(ctx context.Context) (int64, error) {
+	return s.users.Count(ctx)
+}
+
 func (s *UserService) Create(ctx context.Context, u *domain.User, operatorID uint) (uint, error) {
 	var id uint
 	err := s.tx.WithTx(ctx, func(ctx context.Context, repos Repos) error {

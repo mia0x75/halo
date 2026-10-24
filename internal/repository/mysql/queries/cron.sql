@@ -21,3 +21,6 @@ SELECT cron_id, uuid, status, name, cmd, params, last_run, next_run, `interval`,
 
 -- name: ListSchedulableCrons :many
 SELECT cron_id, uuid, status, name, cmd, params, last_run, next_run, `interval`, duration, user_id, cluster_id, recurrent, hash, version, update_at, create_at FROM mm_crons WHERE recurrent = 1 OR (recurrent <> 1 AND status IN ('P', 'H'));
+
+-- name: CountCrons :one
+SELECT COUNT(*) FROM mm_crons;

@@ -139,6 +139,13 @@ func (s *TicketService) ListFiltered(ctx context.Context, filter TicketFilter) (
 	return s.tickets.ListFiltered(ctx, cursor, limit, filter.Status, pattern)
 }
 
+// CountFiltered returns how many tickets match the filter, independent of any
+// page cursor. It uses the same status and keyword handling as ListFiltered.
+func (s *TicketService) CountFiltered(ctx context.Context, filter TicketFilter) (int64, error) {
+	pattern := "%" + strings.TrimSpace(filter.Keyword) + "%"
+	return s.tickets.CountFiltered(ctx, filter.Status, pattern)
+}
+
 // ListPendingReviews returns the tickets waiting for the user's manual
 // review. Only the tickets that already passed the automated review are in
 // the queue.
@@ -461,8 +468,14 @@ func (s *TicketService) transition(ctx context.Context, ticketID uint, to domain
 		if err := repos.Ticket.Update(ctx, tk); err != nil {
 			return err
 		}
+		// Automatic transitions (actor 0) are attributed to the submitter, so
+		// every audit row keeps a real owner.
+		owner := actor
+		if owner == 0 {
+			owner = tk.UserID
+		}
 		return NewLogService(repos.Log).Log(ctx, LogEntry{
-			UserID:    actor,
+			UserID:    owner,
 			Operation: op,
 			Target:    "ticket:" + tk.UUID,
 			Detail:    detail,

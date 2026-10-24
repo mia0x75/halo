@@ -10,6 +10,17 @@ import (
 	"database/sql"
 )
 
+const countCrons = `-- name: CountCrons :one
+SELECT COUNT(*) FROM mm_crons
+`
+
+func (q *Queries) CountCrons(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countCrons)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createCron = `-- name: CreateCron :execlastid
 INSERT INTO mm_crons (uuid, status, name, cmd, params, last_run, next_run, ` + "`" + `interval` + "`" + `, duration, recurrent, hash, version, user_id, cluster_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
