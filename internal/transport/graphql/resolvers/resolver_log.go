@@ -16,17 +16,16 @@ import (
 
 type logResolver struct{ *Resolver }
 
-// User 操作日志的发起人（委托人）
-func (r *logResolver) User(ctx context.Context, obj *models.Log) (user *models.User, err error) {
-	rc := gqlapi.ReturnCodeOK
-	user = cache.UsersMap.Any(func(elem *models.User) bool {
+// User 操作日志的发起人（委托人）。
+// 用户被删除后日志仍要能翻出来，理由同 deletedUserPlaceholder。
+func (r *logResolver) User(ctx context.Context, obj *models.Log) (*models.User, error) {
+	user := cache.UsersMap.Any(func(elem *models.User) bool {
 		return elem.UserID == obj.UserID
 	})
-	if user == nil {
-		rc = gqlapi.ReturnCodeNotFound
-		err = fmt.Errorf("错误代码: %s, 错误信息: 用户不存在。", rc)
+	if user != nil {
+		return user, nil
 	}
-	return
+	return deletedUserPlaceholder(obj.UserID), nil
 }
 
 // Logs 操作日志分页查看
@@ -64,40 +63,32 @@ L:
 			}
 			from = i
 		}
-		hasPreviousPage := true
-		hasNextPage := true
+		hasPreviousPage := from != math.MaxInt64
+		limit := *first
 
-		if from == math.MaxInt64 {
-			hasPreviousPage = false
-		}
-		// 获取edges
-		edges := []*gqlapi.LogEdge{}
-		domainLogs, listErr := r.app.Services.Log.List(ctx, int64(from), *first)
+		// 纯游标分页：多取一条探测是否有下一页，不统计全表总数（日志有
+		// 保留期清理，总数既贵又会跳动）。
+		domainLogs, listErr := r.app.Services.Log.List(ctx, int64(from), probeLimit(limit))
 		if listErr != nil {
 			return nil, listErr
 		}
-		logs := make([]*models.Log, 0, len(domainLogs))
-		for _, l := range domainLogs {
-			logs = append(logs, bridge.LogFromDomain(l))
-		}
+		pageLogs, hasNextPage := trimKeysetPage(domainLogs, limit)
 
-		for _, log := range logs {
+		edges := []*gqlapi.LogEdge{}
+		for _, l := range pageLogs {
+			log := bridge.LogFromDomain(l)
 			edges = append(edges, &gqlapi.LogEdge{
 				Node:   log,
 				Cursor: EncodeCursor(fmt.Sprintf("%d", log.LogID)),
 			})
 		}
 
-		if len(edges) < *first {
-			hasNextPage = false
-		}
-
 		if len(edges) == 0 {
 			return nil, nil
 		}
 		// 获取pageInfo
-		startCursor := EncodeCursor(fmt.Sprintf("%d", logs[0].LogID))
-		endCursor := EncodeCursor(fmt.Sprintf("%d", logs[len(logs)-1].LogID))
+		startCursor := edges[0].Cursor
+		endCursor := edges[len(edges)-1].Cursor
 		pageInfo := &gqlapi.PageInfo{
 			HasPreviousPage: hasPreviousPage,
 			HasNextPage:     hasNextPage,

@@ -42,17 +42,22 @@ func (r *queryRootResolver) Messages(
 	}
 	filter.BeforeID = beforeID
 
+	// Probe one extra row for hasNextPage. CountByUser ignores Limit, so the
+	// probe row never leaks into the totals.
+	pageLimit := filter.Limit
+	filter.Limit = probeLimit(pageLimit)
 	messages, err := r.app.Services.Message.ListByUser(ctx, credential.User.UserID, filter)
 	if err != nil {
 		return nil, err
 	}
+	pageMessages, hasNextPage := trimKeysetPage(messages, pageLimit)
 	total, err := r.app.Services.Message.CountByUser(ctx, credential.User.UserID, filter)
 	if err != nil {
 		return nil, err
 	}
 
-	edges := make([]*gqlapi.MessageEdge, 0, len(messages))
-	for _, message := range messages {
+	edges := make([]*gqlapi.MessageEdge, 0, len(pageMessages))
+	for _, message := range pageMessages {
 		edges = append(edges, &gqlapi.MessageEdge{
 			Cursor: EncodeCursor(strconv.FormatUint(uint64(message.MessageID), 10)),
 			Node: &gqlapi.Message{
@@ -68,7 +73,7 @@ func (r *queryRootResolver) Messages(
 	}
 
 	pageInfo := &gqlapi.PageInfo{
-		HasNextPage:     len(edges) == filter.Limit && filter.Limit > 0,
+		HasNextPage:     hasNextPage,
 		HasPreviousPage: after != nil && *after != "",
 		StartCursor:     "",
 		EndCursor:       "",

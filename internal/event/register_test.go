@@ -73,6 +73,7 @@ func (fakeUserRepo) Update(context.Context, *domain.User) error               { 
 func (fakeUserRepo) Delete(context.Context, int64) error                      { return nil }
 func (fakeUserRepo) DeleteByUUID(context.Context, string) error               { return nil }
 func (fakeUserRepo) List(context.Context, int64, int) ([]*domain.User, error) { return nil, nil }
+func (fakeUserRepo) Count(context.Context) (int64, error)                     { return 0, nil }
 
 // TestRegisterAuditGating verifies that GlobalAuditLogWriter persists a row for
 // events with a non-nil AuditRecord and skips events whose record is nil

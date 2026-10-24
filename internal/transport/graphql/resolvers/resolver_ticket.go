@@ -757,17 +757,11 @@ func (r *queryRootResolver) Tickets(ctx context.Context, after *string, before *
 		}
 		from = i
 	}
-	hasPreviousPage := true
-	hasNextPage := true
-
-	if from == math.MaxInt64 {
-		hasPreviousPage = false
-	}
-	// 获取edges
-	edges := []*gqlapi.TicketEdge{}
+	hasPreviousPage := from != math.MaxInt64
+	limit := *first
 
 	// 列表不允许查询Content内容
-	filter := service.TicketFilter{CursorID: int64(from), Limit: *first}
+	filter := service.TicketFilter{CursorID: int64(from), Limit: probeLimit(limit)}
 	if status != nil {
 		filter.Status = *status
 	}
@@ -778,30 +772,30 @@ func (r *queryRootResolver) Tickets(ctx context.Context, after *string, before *
 	if err != nil {
 		return nil, err
 	}
-	tickets := make([]*models.Ticket, 0, len(domainTickets))
-	for _, t := range domainTickets {
+	// 多取一条探测下一页，避免「刚好填满一页」被误判成还有下一页。
+	pageTickets, hasNextPage := trimKeysetPage(domainTickets, limit)
+
+	edges := []*gqlapi.TicketEdge{}
+	for _, t := range pageTickets {
 		m := bridge.TicketFromDomain(t)
 		m.Content = ""
-		tickets = append(tickets, m)
-	}
-
-	for _, ticket := range tickets {
 		edges = append(edges, &gqlapi.TicketEdge{
-			Node:   ticket,
-			Cursor: EncodeCursor(fmt.Sprintf("%d", ticket.TicketID)),
+			Node:   m,
+			Cursor: EncodeCursor(fmt.Sprintf("%d", m.TicketID)),
 		})
-	}
-
-	if len(edges) < *first {
-		hasNextPage = false
 	}
 
 	if len(edges) == 0 {
 		return nil, nil
 	}
+	// 概览页依赖 totalCount 显示待审核数量，必须按同一过滤条件统计全表。
+	total, err := r.app.Services.Ticket.CountFiltered(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
 	// 获取pageInfo
-	startCursor := EncodeCursor(fmt.Sprintf("%d", tickets[0].TicketID))
-	endCursor := EncodeCursor(fmt.Sprintf("%d", tickets[len(tickets)-1].TicketID))
+	startCursor := edges[0].Cursor
+	endCursor := edges[len(edges)-1].Cursor
 	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: hasPreviousPage,
 		HasNextPage:     hasNextPage,
@@ -812,7 +806,7 @@ func (r *queryRootResolver) Tickets(ctx context.Context, after *string, before *
 	return &gqlapi.TicketConnection{
 		PageInfo:   pageInfo,
 		Edges:      edges,
-		TotalCount: len(edges),
+		TotalCount: int(total),
 	}, nil
 }
 
@@ -834,45 +828,39 @@ func (r *queryRootResolver) TicketSearch(ctx context.Context, search string, aft
 
 type ticketResolver struct{ *Resolver }
 
-// Cluster 工单的目标群集
-func (r *ticketResolver) Cluster(ctx context.Context, obj *models.Ticket) (cluster *models.Cluster, err error) {
-	rc := gqlapi.ReturnCodeOK
-	cluster = cache.ClustersMap.Any(func(elem *models.Cluster) bool {
+// Cluster 工单的目标群集。
+// 群集被删除后工单仍要能列出来，而 Ticket.Cluster 是非空字段：报错会让整条
+// 工单变 null，列表跟着空行甚至整页空白，所以用占位群集兜底。
+func (r *ticketResolver) Cluster(ctx context.Context, obj *models.Ticket) (*models.Cluster, error) {
+	cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 		return elem.ClusterID == obj.ClusterID
 	})
-	if cluster == nil {
-		rc = gqlapi.ReturnCodeNotFound
-		err = fmt.Errorf("错误代码: %s, 错误信息: 工单(uuid=%s)依赖的群集不存在。", rc, obj.UUID)
+	if cluster != nil {
+		return cluster, nil
 	}
-	return
+	return deletedClusterPlaceholder(obj.ClusterID), nil
 }
 
-// User 工单的发起人
-func (r *ticketResolver) User(ctx context.Context, obj *models.Ticket) (user *models.User, err error) {
-	rc := gqlapi.ReturnCodeOK
-	user = cache.UsersMap.Any(func(elem *models.User) bool {
+// User 工单的发起人。用户被删除时返回占位账号，理由同 Cluster。
+func (r *ticketResolver) User(ctx context.Context, obj *models.Ticket) (*models.User, error) {
+	user := cache.UsersMap.Any(func(elem *models.User) bool {
 		return elem.UserID == obj.UserID
 	})
-
-	if user == nil {
-		rc = gqlapi.ReturnCodeNotFound
-		err = fmt.Errorf("错误代码: %s, 错误信息: 工单(uuid=%s)的发起人不存在。", rc, obj.UUID)
+	if user != nil {
+		return user, nil
 	}
-	return
+	return deletedUserPlaceholder(obj.UserID), nil
 }
 
-// Reviewer 工单的审核人
-func (r *ticketResolver) Reviewer(ctx context.Context, obj *models.Ticket) (user *models.User, err error) {
-	rc := gqlapi.ReturnCodeOK
-	user = cache.UsersMap.Any(func(elem *models.User) bool {
+// Reviewer 工单的审核人。用户被删除时返回占位账号，理由同 Cluster。
+func (r *ticketResolver) Reviewer(ctx context.Context, obj *models.Ticket) (*models.User, error) {
+	user := cache.UsersMap.Any(func(elem *models.User) bool {
 		return elem.UserID == obj.ReviewerID
 	})
-
-	if user == nil {
-		rc = gqlapi.ReturnCodeNotFound
-		err = fmt.Errorf("错误代码: %s, 错误信息: 工单(uuid=%s)的审核人不存在。", rc, obj.UUID)
+	if user != nil {
+		return user, nil
 	}
-	return
+	return deletedUserPlaceholder(obj.ReviewerID), nil
 }
 
 // Cron 执行预约信息

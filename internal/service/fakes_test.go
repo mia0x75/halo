@@ -92,6 +92,10 @@ func (f *fakeTicketRepo) ListFiltered(_ context.Context, _ int64, _ int, _ uint8
 	return f.reviewer, nil
 }
 
+func (f *fakeTicketRepo) CountFiltered(_ context.Context, _ uint8, _ string) (int64, error) {
+	return int64(len(f.reviewer)), nil
+}
+
 func (f *fakeTicketRepo) ListByUser(_ context.Context, _ uint) ([]*domain.Ticket, error) {
 	return nil, nil
 }

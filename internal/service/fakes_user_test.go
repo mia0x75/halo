@@ -71,3 +71,7 @@ func (f *fakeUserRepo) DeleteByUUID(_ context.Context, uuid string) error {
 func (f *fakeUserRepo) List(_ context.Context, _ int64, _ int) ([]*domain.User, error) {
 	return nil, nil
 }
+
+func (f *fakeUserRepo) Count(_ context.Context) (int64, error) {
+	return int64(len(f.byID)), nil
+}

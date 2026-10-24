@@ -111,42 +111,35 @@ func (r *queryRootResolver) Crons(ctx context.Context, after *string, before *st
 		}
 		from = i
 	}
-	hasPreviousPage := true
-	hasNextPage := true
+	hasPreviousPage := from != math.MaxInt64
+	limit := *first
 
-	if from == math.MaxInt64 {
-		hasPreviousPage = false
-	}
-	// 获取edges
-	edges := []*gqlapi.CronEdge{}
-
-	// 列表不允许查询Content内容
-	domainCrons, err := r.app.Services.Cron.List(ctx, int64(from), *first)
+	// 多取一条探测下一页；总数走独立 COUNT，不受游标影响。
+	domainCrons, err := r.app.Services.Cron.List(ctx, int64(from), probeLimit(limit))
 	if err != nil {
 		return nil, err
 	}
-	crons := make([]*models.Cron, 0, len(domainCrons))
-	for _, c := range domainCrons {
-		crons = append(crons, bridge.CronFromDomain(c))
-	}
+	pageCrons, hasNextPage := trimKeysetPage(domainCrons, limit)
 
-	for _, cron := range crons {
+	edges := []*gqlapi.CronEdge{}
+	for _, c := range pageCrons {
+		cron := bridge.CronFromDomain(c)
 		edges = append(edges, &gqlapi.CronEdge{
 			Node:   cron,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", cron.CronID)),
 		})
 	}
 
-	if len(edges) < *first {
-		hasNextPage = false
-	}
-
 	if len(edges) == 0 {
 		return nil, nil
 	}
+	total, err := r.app.Services.Cron.Count(ctx)
+	if err != nil {
+		return nil, err
+	}
 	// 获取pageInfo
-	startCursor := EncodeCursor(fmt.Sprintf("%d", crons[0].CronID))
-	endCursor := EncodeCursor(fmt.Sprintf("%d", crons[len(crons)-1].CronID))
+	startCursor := edges[0].Cursor
+	endCursor := edges[len(edges)-1].Cursor
 	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: hasPreviousPage,
 		HasNextPage:     hasNextPage,
@@ -157,7 +150,7 @@ func (r *queryRootResolver) Crons(ctx context.Context, after *string, before *st
 	return &gqlapi.CronConnection{
 		PageInfo:   pageInfo,
 		Edges:      edges,
-		TotalCount: len(edges),
+		TotalCount: int(total),
 	}, nil
 }
 

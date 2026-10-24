@@ -74,47 +74,37 @@ func (r *queryRootResolver) Users(ctx context.Context, after *string, before *st
 		}
 		from = i
 	}
-	hasPreviousPage := true
-	hasNextPage := true
+	hasPreviousPage := from != math.MaxInt64
+	limit := *first
 
-	if from == math.MaxInt64 {
-		hasPreviousPage = false
-	}
-	// 获取edges
-	edges := []*gqlapi.UserEdge{}
-
-	// TODO: 一次从数据库查出足够的数据
-	// TODO: 对于分页中下一页的处理：
-	//       如果不需要记录总数或者说总页数，假设页大小为n，那么总是查n+1是否可行
-	//       如果需要查记录总数或者说总页数，假设页大小为n，那么用offset+n和记录总数判断是否可行
-	//       在Edge.Cursor中包含offset是否可行
-	domainUsers, err := r.app.Services.User.List(ctx, int64(from), *first)
+	// Probe one extra row for hasNextPage; the total comes from a COUNT that
+	// is independent of the page cursor.
+	domainUsers, err := r.app.Services.User.List(ctx, int64(from), probeLimit(limit))
 	if err != nil {
 		return nil, err
 	}
-	users := make([]*models.User, 0, len(domainUsers))
-	for _, u := range domainUsers {
-		users = append(users, bridge.UserFromDomain(u))
-	}
+	pageUsers, hasNextPage := trimKeysetPage(domainUsers, limit)
 
-	for _, user := range users {
+	edges := []*gqlapi.UserEdge{}
+	for _, u := range pageUsers {
+		user := bridge.UserFromDomain(u)
 		edges = append(edges, &gqlapi.UserEdge{
 			Node:   user,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", user.UserID)),
 		})
 	}
 
-	if len(edges) < *first {
-		hasNextPage = false
-	}
-
 	if len(edges) == 0 {
 		return nil, nil
 	}
+	total, err := r.app.Services.User.Count(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	// 获取pageInfo
-	startCursor := EncodeCursor(fmt.Sprintf("%d", users[0].UserID))
-	endCursor := EncodeCursor(fmt.Sprintf("%d", users[len(users)-1].UserID))
+	startCursor := edges[0].Cursor
+	endCursor := edges[len(edges)-1].Cursor
 	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: hasPreviousPage,
 		HasNextPage:     hasNextPage,
@@ -125,7 +115,7 @@ func (r *queryRootResolver) Users(ctx context.Context, after *string, before *st
 	return &gqlapi.UserConnection{
 		PageInfo:   pageInfo,
 		Edges:      edges,
-		TotalCount: len(edges),
+		TotalCount: int(total),
 	}, nil
 }
 
@@ -1493,92 +1483,53 @@ func (r *userResolver) ClusterGrants(ctx context.Context, obj *models.User) ([]*
 	return out, nil
 }
 
-// Clusters 用户可以访问的群集，TODO: 分页未完成
+// Clusters 用户可以访问的群集
 func (r *userResolver) Clusters(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*gqlapi.ClusterConnection, error) {
-	rc := gqlapi.ReturnCodeOK
-	// 参数判断，只允许 first/before first/after last/before last/after 模式
-	if first != nil && last != nil {
-		rc = gqlapi.ReturnCodeInvalidParams
-		return &gqlapi.ClusterConnection{}, fmt.Errorf("错误代码: %s, 错误信息: 参数`first`和`last`只能选择一种。", rc)
-	}
-	if after != nil && before != nil {
-		rc = gqlapi.ReturnCodeInvalidParams
-		return &gqlapi.ClusterConnection{}, fmt.Errorf("错误代码: %s, 错误信息: 参数`after`和`before`只能选择一种。", rc)
-	}
-
 	roles := userRoles(obj.UserID)
 	clusters := cache.ClustersMap.Filter(func(elem *models.Cluster) bool {
 		return transportauth.CanAccessCluster(obj, roles, elem)
 	})
-	clusterEdges := []*gqlapi.ClusterEdge{}
-	for _, cluster := range clusters {
+	page, hasNextPage, hasPreviousPage, err := pageInMemory(
+		clusters,
+		func(cluster *models.Cluster) int { return int(cluster.ClusterID) },
+		after, before, first, last,
+	)
+	if err != nil {
+		return nil, err
+	}
+	if len(page) == 0 {
+		return &gqlapi.ClusterConnection{}, nil
+	}
+
+	clusterEdges := make([]*gqlapi.ClusterEdge, 0, len(page))
+	for _, cluster := range page {
 		clusterEdges = append(clusterEdges, &gqlapi.ClusterEdge{
 			Node:   cluster,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", cluster.ClusterID)),
 		})
 	}
-	if len(clusterEdges) == 0 {
-		return &gqlapi.ClusterConnection{}, nil
-	}
 	// 获取pageInfo
 	pageInfo := &gqlapi.PageInfo{
-		HasPreviousPage: false,
-		HasNextPage:     false,
-		StartCursor:     "",
-		EndCursor:       "",
+		HasPreviousPage: hasPreviousPage,
+		HasNextPage:     hasNextPage,
+		StartCursor:     clusterEdges[0].Cursor,
+		EndCursor:       clusterEdges[len(clusterEdges)-1].Cursor,
 	}
 
 	return &gqlapi.ClusterConnection{
 		PageInfo:   pageInfo,
 		Edges:      clusterEdges,
-		TotalCount: len(clusterEdges),
+		TotalCount: len(clusters),
 	}, nil
 }
 
-// Tickets 用户发起的工单，TODO: 分页未完成
+// Tickets 用户发起的工单
 func (r *userResolver) Tickets(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*gqlapi.TicketConnection, error) {
-	rc := gqlapi.ReturnCodeOK
-	// 参数判断，只允许 first/before first/after last/before last/after 模式
-	if first != nil && last != nil {
-		rc = gqlapi.ReturnCodeInvalidParams
-		return nil, fmt.Errorf("错误代码: %s, 错误信息: 参数`first`和`last`只能选择一种。", rc)
-	}
-	if after != nil && before != nil {
-		rc = gqlapi.ReturnCodeInvalidParams
-		return nil, fmt.Errorf("错误代码: %s, 错误信息: 参数`after`和`before`只能选择一种。", rc)
-	}
-
 	domainTickets, err := r.app.Services.Ticket.ListByUser(ctx, obj.UserID)
 	if err != nil {
-		return &gqlapi.TicketConnection{}, err
+		return nil, err
 	}
-	tickets := make([]*models.Ticket, 0, len(domainTickets))
-	for _, t := range domainTickets {
-		tickets = append(tickets, bridge.TicketFromDomain(t))
-	}
-	edges := []*gqlapi.TicketEdge{}
-	for _, ticket := range tickets {
-		edges = append(edges, &gqlapi.TicketEdge{
-			Node:   ticket,
-			Cursor: EncodeCursor(fmt.Sprintf("%d", ticket.TicketID)),
-		})
-	}
-	if len(edges) == 0 {
-		return &gqlapi.TicketConnection{}, nil
-	}
-	// 获取pageInfo
-	pageInfo := &gqlapi.PageInfo{
-		HasPreviousPage: false,
-		HasNextPage:     false,
-		StartCursor:     "",
-		EndCursor:       "",
-	}
-
-	return &gqlapi.TicketConnection{
-		PageInfo:   pageInfo,
-		Edges:      edges,
-		TotalCount: len(edges),
-	}, nil
+	return ticketConnection(domainTickets, after, before, first, last)
 }
 
 // MyTickets 我提交的工单
@@ -1599,49 +1550,44 @@ func (r *userResolver) PendingReviews(ctx context.Context, obj *models.User, aft
 	return ticketConnection(tickets, after, before, first, last)
 }
 
-// Queries 用户发起的查询，TODO: 分页未完成
+// Queries 用户发起的查询
 func (r *userResolver) Queries(ctx context.Context, obj *models.User, after *string, before *string, first *int, last *int) (*gqlapi.QueryConnection, error) {
-	rc := gqlapi.ReturnCodeOK
-	// 参数判断，只允许 first/before first/after last/before last/after 模式
-	if first != nil && last != nil {
-		rc = gqlapi.ReturnCodeInvalidParams
-		return nil, fmt.Errorf("错误代码: %s, 错误信息: 参数`first`和`last`只能选择一种。", rc)
-	}
-	if after != nil && before != nil {
-		rc = gqlapi.ReturnCodeInvalidParams
-		return nil, fmt.Errorf("错误代码: %s, 错误信息: 参数`after`和`before`只能选择一种。", rc)
-	}
-
 	domainQueries, err := r.app.Services.Query.ListByUser(ctx, obj.UserID)
 	if err != nil {
 		return nil, err
 	}
-	queries := make([]*models.Query, 0, len(domainQueries))
-	for _, q := range domainQueries {
-		queries = append(queries, bridge.QueryFromDomain(q))
+	page, hasNextPage, hasPreviousPage, err := pageInMemory(
+		domainQueries,
+		func(query *domain.Query) int { return int(query.QueryID) },
+		after, before, first, last,
+	)
+	if err != nil {
+		return nil, err
 	}
-	edges := []*gqlapi.QueryEdge{}
-	for _, query := range queries {
+	if len(page) == 0 {
+		return &gqlapi.QueryConnection{}, nil
+	}
+
+	edges := make([]*gqlapi.QueryEdge, 0, len(page))
+	for _, q := range page {
+		query := bridge.QueryFromDomain(q)
 		edges = append(edges, &gqlapi.QueryEdge{
 			Node:   query,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", query.QueryID)),
 		})
 	}
-	if len(edges) == 0 {
-		return &gqlapi.QueryConnection{}, nil
-	}
 	// 获取pageInfo
 	pageInfo := &gqlapi.PageInfo{
-		HasPreviousPage: false,
-		HasNextPage:     false,
-		StartCursor:     "",
-		EndCursor:       "",
+		HasPreviousPage: hasPreviousPage,
+		HasNextPage:     hasNextPage,
+		StartCursor:     edges[0].Cursor,
+		EndCursor:       edges[len(edges)-1].Cursor,
 	}
 
 	return &gqlapi.QueryConnection{
 		PageInfo:   pageInfo,
 		Edges:      edges,
-		TotalCount: len(edges),
+		TotalCount: len(domainQueries),
 	}, nil
 }
 

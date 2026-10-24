@@ -71,40 +71,36 @@ func (r *queryRootResolver) Queries(ctx context.Context, after *string, before *
 		}
 		from = i
 	}
-	hasPreviousPage := true
-	hasNextPage := true
+	hasPreviousPage := from != math.MaxInt64
+	limit := *first
 
-	if from == math.MaxInt64 {
-		hasPreviousPage = false
-	}
-	// 获取edges
-	edges := []*gqlapi.QueryEdge{}
-	domainQueries, err := r.app.Services.Query.List(ctx, int64(from), *first)
+	// Probe one extra row for hasNextPage; the total comes from a COUNT that
+	// is independent of the page cursor.
+	domainQueries, err := r.app.Services.Query.List(ctx, int64(from), probeLimit(limit))
 	if err != nil {
 		return nil, err
 	}
-	queries := make([]*models.Query, 0, len(domainQueries))
-	for _, q := range domainQueries {
-		queries = append(queries, bridge.QueryFromDomain(q))
-	}
+	pageQueries, hasNextPage := trimKeysetPage(domainQueries, limit)
 
-	for _, query := range queries {
+	edges := []*gqlapi.QueryEdge{}
+	for _, q := range pageQueries {
+		query := bridge.QueryFromDomain(q)
 		edges = append(edges, &gqlapi.QueryEdge{
 			Node:   query,
 			Cursor: EncodeCursor(fmt.Sprintf("%d", query.QueryID)),
 		})
 	}
 
-	if len(edges) < *first {
-		hasNextPage = false
-	}
-
 	if len(edges) == 0 {
 		return nil, nil
 	}
+	total, err := r.app.Services.Query.Count(ctx)
+	if err != nil {
+		return nil, err
+	}
 	// 获取pageInfo
-	startCursor := EncodeCursor(fmt.Sprintf("%d", queries[0].QueryID))
-	endCursor := EncodeCursor(fmt.Sprintf("%d", queries[len(queries)-1].QueryID))
+	startCursor := edges[0].Cursor
+	endCursor := edges[len(edges)-1].Cursor
 	pageInfo := &gqlapi.PageInfo{
 		HasPreviousPage: hasPreviousPage,
 		HasNextPage:     hasNextPage,
@@ -115,7 +111,7 @@ func (r *queryRootResolver) Queries(ctx context.Context, after *string, before *
 	return &gqlapi.QueryConnection{
 		PageInfo:   pageInfo,
 		Edges:      edges,
-		TotalCount: len(edges),
+		TotalCount: int(total),
 	}, nil
 }
 
@@ -462,29 +458,25 @@ L:
 
 type queryResolver struct{ *Resolver }
 
-// Cluster 查询发起的目标群集信息
-func (r *queryResolver) Cluster(ctx context.Context, obj *models.Query) (cluster *models.Cluster, err error) {
-	rc := gqlapi.ReturnCodeOK
-	cluster = cache.ClustersMap.Any(func(elem *models.Cluster) bool {
+// Cluster 查询发起的目标群集信息。群集被删除时用占位群集兜底，
+// 否则整条查询会变 null，前端列表整页空白。
+func (r *queryResolver) Cluster(ctx context.Context, obj *models.Query) (*models.Cluster, error) {
+	cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 		return elem.ClusterID == obj.ClusterID
 	})
-	if cluster == nil {
-		rc = gqlapi.ReturnCodeNotFound
-		err = fmt.Errorf("错误代码: %s, 错误信息: 查询(uuid=%s)依赖的群集不存在。", rc, obj.UUID)
+	if cluster != nil {
+		return cluster, nil
 	}
-	return
+	return deletedClusterPlaceholder(obj.ClusterID), nil
 }
 
-// User 查询发起的用户
-func (r *queryResolver) User(ctx context.Context, obj *models.Query) (user *models.User, err error) {
-	rc := gqlapi.ReturnCodeOK
-	user = cache.UsersMap.Any(func(elem *models.User) bool {
+// User 查询发起的用户。用户被删除时用占位账号兜底，理由同 Cluster。
+func (r *queryResolver) User(ctx context.Context, obj *models.Query) (*models.User, error) {
+	user := cache.UsersMap.Any(func(elem *models.User) bool {
 		return elem.UserID == obj.UserID
 	})
-
-	if user == nil {
-		rc = gqlapi.ReturnCodeNotFound
-		err = fmt.Errorf("错误代码: %s, 错误信息: 查询(uuid=%s)的发起人不存在。", rc, obj.UUID)
+	if user != nil {
+		return user, nil
 	}
-	return
+	return deletedUserPlaceholder(obj.UserID), nil
 }

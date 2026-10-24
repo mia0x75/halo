@@ -79,13 +79,16 @@ func (r *queryRootResolver) Statements(ctx context.Context, after *string, first
 		return nil, err
 	}
 
-	domainStmts, err := r.app.Services.Statement.List(ctx, cursor, limit)
+	// Probe one extra row for hasNextPage; a page merely filling the limit is
+	// the last one.
+	domainStmts, err := r.app.Services.Statement.List(ctx, cursor, probeLimit(limit))
 	if err != nil {
 		return nil, err
 	}
+	pageStmts, hasNextPage := trimKeysetPage(domainStmts, limit)
 
 	edges := []*gqlapi.StatementEdge{}
-	for _, stmt := range domainStmts {
+	for _, stmt := range pageStmts {
 		edges = append(edges, &gqlapi.StatementEdge{
 			Node:   bridge.StatementFromDomain(stmt),
 			Cursor: encodeStatementCursor(stmt.UUID),
@@ -96,7 +99,7 @@ func (r *queryRootResolver) Statements(ctx context.Context, after *string, first
 	if len(edges) > 0 {
 		pageInfo = &gqlapi.PageInfo{
 			HasPreviousPage: after != nil && *after != "",
-			HasNextPage:     len(edges) == limit,
+			HasNextPage:     hasNextPage,
 			StartCursor:     edges[0].Cursor,
 			EndCursor:       edges[len(edges)-1].Cursor,
 		}
