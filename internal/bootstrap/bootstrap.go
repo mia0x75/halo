@@ -23,6 +23,7 @@ import (
 	"github.com/mia0x75/halo/internal/platform/db"
 	"github.com/mia0x75/halo/internal/platform/migrate"
 	"github.com/mia0x75/halo/internal/platform/seed"
+	"github.com/mia0x75/halo/internal/service"
 	"github.com/mia0x75/halo/migrations"
 )
 
@@ -273,7 +274,7 @@ func ensureAdmin(ctx context.Context, application *app.App, admin AdminRequest) 
 			Name:     admin.Name,
 			Version:  1,
 		}
-		id, err := application.Services.User.Create(ctx, created, 0)
+		id, err := createUserWithoutAudit(ctx, application, created)
 		if err != nil {
 			return fmt.Errorf("创建管理员失败: %w", err)
 		}
@@ -324,10 +325,41 @@ func ensureAdminRoleEdge(ctx context.Context, application *app.App, user *domain
 		DescendantID: role.RoleID,
 		Version:      1,
 	}
-	if _, err := application.Services.Edge.Create(ctx, edge, 0); err != nil {
+	if _, err := createEdgeWithoutAudit(ctx, application, edge); err != nil {
 		return fmt.Errorf("授权管理员 Root 角色失败: %w", err)
 	}
 	return nil
+}
+
+// createUserWithoutAudit inserts the first administrator without an audit row.
+// The wizard runs before any account exists, so there is no operator to
+// attribute the write to; going through UserService would leave a user_id=0
+// entry that no one owns and that the log page cannot resolve.
+func createUserWithoutAudit(ctx context.Context, application *app.App, user *domain.User) (uint, error) {
+	var id uint
+	err := application.Tx.WithTx(ctx, func(ctx context.Context, repos service.Repos) error {
+		newID, createErr := repos.User.Create(ctx, user)
+		if createErr != nil {
+			return createErr
+		}
+		id = uint(newID)
+		return nil
+	})
+	return id, err
+}
+
+// createEdgeWithoutAudit is the same deal for the admin's role grant.
+func createEdgeWithoutAudit(ctx context.Context, application *app.App, edge *domain.Edge) (uint, error) {
+	var id uint
+	err := application.Tx.WithTx(ctx, func(ctx context.Context, repos service.Repos) error {
+		newID, createErr := repos.Edge.Create(ctx, edge)
+		if createErr != nil {
+			return createErr
+		}
+		id = uint(newID)
+		return nil
+	})
+	return id, err
 }
 
 // findAdmin returns the user that already holds the Root role.

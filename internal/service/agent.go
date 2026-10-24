@@ -24,12 +24,16 @@ func NewAgentService(tx TxManager, executor agent.Executor) *AgentService {
 func (s *AgentService) Execute(ctx context.Context, ticketID uint) error {
 	var cluster *domain.Cluster
 	var stmts []*domain.Statement
+	// The executor acts on behalf of the submitter, so the audit trail keeps a
+	// human owner even though the transition itself is automatic.
+	var ownerID uint
 
 	err := s.tx.WithTx(ctx, func(ctx context.Context, repos Repos) error {
 		tk, err := repos.Ticket.GetByID(ctx, int64(ticketID))
 		if err != nil {
 			return err
 		}
+		ownerID = tk.UserID
 		if tk.Status != domain.TicketStatusLgtm {
 			return fmt.Errorf("%w: ticket %d is not approved (status %d)", domain.ErrInvalidInput, ticketID, tk.Status)
 		}
@@ -85,6 +89,7 @@ func (s *AgentService) Execute(ctx context.Context, ticketID uint) error {
 			_ = log.Log(ctx, LogEntry{
 				Operation: "statement.execute",
 				Target:    fmt.Sprintf("statement:%d:%d", st.TicketID, st.Sequence),
+				UserID:    ownerID,
 			})
 		}
 
@@ -107,6 +112,7 @@ func (s *AgentService) Execute(ctx context.Context, ticketID uint) error {
 		return log.Log(ctx, LogEntry{
 			Operation: "ticket.execute",
 			Target:    "ticket:" + tk.UUID,
+			UserID:    ownerID,
 		})
 	})
 }

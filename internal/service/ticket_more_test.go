@@ -49,6 +49,27 @@ func TestTicketServiceReject(t *testing.T) {
 	require.Contains(t, logs.entries[0].Operation, "needs work")
 }
 
+func TestTicketServiceMarkExecutedAttributesSubmitter(t *testing.T) {
+	ctx := context.Background()
+
+	tickets, logs := ticketFixture(t, domain.TicketStatusLgtm)
+	svc := NewTicketService(&fakeTx{repos: Repos{Ticket: tickets, Log: logs}}, tickets)
+	require.NoError(t, svc.MarkExecuted(ctx, 1))
+
+	// The executor has no account, so the audit row belongs to the submitter.
+	require.Len(t, logs.entries, 1)
+	require.Equal(t, uint(5), logs.entries[0].UserID)
+}
+
+func TestLogServiceWritesWithoutOperator(t *testing.T) {
+	// Only the wizard path skips auditing now, and it bypasses the service;
+	// the service itself still records whatever it is handed.
+	logs := &fakeLogRepo{}
+	svc := NewLogService(logs)
+	require.NoError(t, svc.Log(context.Background(), LogEntry{UserID: 0, Operation: "x"}))
+	require.Len(t, logs.entries, 1)
+}
+
 func TestTicketServiceCloseAndMark(t *testing.T) {
 	ctx := context.Background()
 
