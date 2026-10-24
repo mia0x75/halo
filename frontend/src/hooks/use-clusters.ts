@@ -28,6 +28,8 @@ export interface ClusterPage {
   hasPrevious: boolean
   startCursor: string
   endCursor: string
+  /** 1-based page number for the current position */
+  pageNumber: number
   next: () => void
   previous: () => void
   reset: () => void
@@ -83,6 +85,7 @@ export function useClusters(pageSize = 8): ClusterPage {
     hasPrevious: connection?.pageInfo.hasPreviousPage ?? false,
     startCursor: connection?.pageInfo.startCursor ?? "",
     endCursor: connection?.pageInfo.endCursor ?? "",
+    pageNumber: stack.length + 1,
     next,
     previous,
     reset,

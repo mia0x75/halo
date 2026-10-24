@@ -11,6 +11,8 @@ export function useCursorPagination<T extends { id: number }>(
   pageSize: number,
 ): {
   page: CursorPage<T>
+  /** 1-based page number for the current position */
+  pageNumber: number
   reset: () => void
   next: () => void
   previous: () => void
@@ -36,5 +38,5 @@ export function useCursorPagination<T extends { id: number }>(
     setCursor(previousCursor)
   }, [history])
 
-  return { page, reset, next, previous }
+  return { page, pageNumber: history.length + 1, reset, next, previous }
 }

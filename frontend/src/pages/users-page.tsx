@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react"
-import { IconPencil, IconPlus, IconSearch, IconUsers } from "@tabler/icons-react"
+import { IconPencil, IconPlus, IconSearch } from "@tabler/icons-react"
 
 import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
@@ -106,22 +106,21 @@ export function UsersPage({ onCreateUser, onEditUser }: UsersPageProps) {
     setAfter(previousCursor)
   }, [stack])
 
+  const resetPage = useCallback(() => {
+    setAfter(null)
+    setStack([])
+  }, [])
+
   return (
     <>
       <PageHeader
         title="用户与角色"
         description="角色决定能做什么，审核关系决定能审谁的工单"
         action={
-          <div className="flex items-center gap-2">
-            <Badge variant="default" className="px-2 py-1">
-              <IconUsers size={14} stroke={1.5} className="mr-1" />
-              {userList.length} 个账号 / {roleList.length} 个角色
-            </Badge>
-            <Button onClick={onCreateUser}>
-              <IconPlus size={16} stroke={1.5} />
-              新建账号
-            </Button>
-          </div>
+          <Button onClick={onCreateUser}>
+            <IconPlus size={16} stroke={1.5} />
+            新建账号
+          </Button>
         }
       />
 
@@ -177,13 +176,6 @@ export function UsersPage({ onCreateUser, onEditUser }: UsersPageProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {userList.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="py-8 text-center text-sm text-muted-foreground">
-                    没有匹配的账号。
-                  </TableCell>
-                </TableRow>
-              ) : null}
               {userList.map((user) => (
                 <TableRow key={user.UUID}>
                   <TableCell className="font-medium">{user.Email}</TableCell>
@@ -232,11 +224,13 @@ export function UsersPage({ onCreateUser, onEditUser }: UsersPageProps) {
           </Table>
 
           <CursorPagination
-            total={connection?.totalCount ?? 0}
+            page={stack.length + 1}
+            empty={userList.length === 0}
             hasPreviousPage={connection?.pageInfo.hasPreviousPage ?? false}
             hasNextPage={connection?.pageInfo.hasNextPage ?? false}
             onPrevious={previousPage}
             onNext={nextPage}
+            onReset={resetPage}
           />
         </SectionCard>
       ) : (

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { IconSearch, IconShieldCheck } from "@tabler/icons-react"
+import { IconSearch } from "@tabler/icons-react"
 
 import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
@@ -95,19 +95,13 @@ export function RulesPage() {
     })
   }, [views, keyword, level, group])
 
-  const { page, reset, next, previous } = useCursorPagination(filtered, pageSize)
+  const { page, pageNumber, reset, next, previous } = useCursorPagination(filtered, pageSize)
 
   return (
     <>
       <PageHeader
         title="规则库"
         description="校验规则的清单，命中明细按规则与级别聚合"
-        action={
-          <Badge variant="default" className="px-2 py-1">
-            <IconShieldCheck size={14} stroke={1.5} className="mr-1" />
-            共 {views.length} 条规则
-          </Badge>
-        }
       />
 
       <SectionCard bodyClassName="p-0">
@@ -210,11 +204,13 @@ export function RulesPage() {
         </Table>
 
         <CursorPagination
-          total={filtered.length}
+          page={pageNumber}
+          empty={filtered.length === 0}
           hasPreviousPage={page.pageInfo.hasPreviousPage}
           hasNextPage={page.pageInfo.hasNextPage}
           onPrevious={previous}
           onNext={next}
+          onReset={reset}
         />
       </SectionCard>
     </>

@@ -51,7 +51,6 @@ export function TicketQueuePage({ mode, onOpenTicket, onCreateTicket }: TicketQu
     [connection],
   )
 
-  const total = connection?.totalCount ?? rows.length
   const hasNext = connection?.pageInfo.hasNextPage ?? false
   const hasPrevious = connection?.pageInfo.hasPreviousPage ?? false
   const endCursor = connection?.pageInfo.endCursor ?? ""
@@ -108,7 +107,8 @@ export function TicketQueuePage({ mode, onOpenTicket, onCreateTicket }: TicketQu
         </Table>
 
         <CursorPagination
-          total={total}
+          page={stack.length + 1}
+          empty={rows.length === 0}
           hasPreviousPage={hasPrevious}
           hasNextPage={hasNext}
           onPrevious={() => {
@@ -119,6 +119,10 @@ export function TicketQueuePage({ mode, onOpenTicket, onCreateTicket }: TicketQu
           onNext={() => {
             setStack((items) => [...items, after])
             setAfter(endCursor || null)
+          }}
+          onReset={() => {
+            setAfter(null)
+            setStack([])
           }}
         />
       </SectionCard>

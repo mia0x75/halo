@@ -291,11 +291,13 @@ export function ClustersPage({ onCreate, onEdit }: ClustersPageProps) {
         )}
 
         <CursorPagination
-          total={page.total}
+          page={page.pageNumber}
+          empty={page.clusters.length === 0}
           hasPreviousPage={page.hasPrevious}
           hasNextPage={page.hasNext}
           onPrevious={page.previous}
           onNext={page.next}
+          onReset={page.reset}
         />
       </SectionCard>
 

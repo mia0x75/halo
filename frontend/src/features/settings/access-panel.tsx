@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react"
 import { IconCheck, IconInfoCircle, IconUsers } from "@tabler/icons-react"
 
-import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -173,15 +172,6 @@ export function AccessPanel({ scope }: AccessPanelProps) {
 
   return (
     <>
-      <PageHeader
-        title={scope === "role" ? "角色授权" : "用户群集授权"}
-        description={
-          scope === "role"
-            ? "角色获得分组授权后，持有该角色的成员才能在这些分组的群集上提交工单"
-            : "生效权限 = 直接授权 + 角色继承的分组权限，两者取并集"
-        }
-      />
-
       {error ? (
         <p className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
       ) : null}
@@ -190,13 +180,19 @@ export function AccessPanel({ scope }: AccessPanelProps) {
       ) : null}
 
       <SectionCard
+        title={scope === "role" ? "角色授权" : "用户群集授权"}
         description={
           scope === "role"
-            ? "先选角色，再勾选它能管理的分组"
-            : "勾选的是「直接授权」；继承自角色分组的权限由「角色授权」决定"
+            ? "角色获得分组授权后，持有该角色的成员才能在这些分组的群集上提交工单"
+            : "生效权限 = 直接授权 + 角色继承的分组权限，两者取并集"
         }
       >
         <div className="flex flex-col gap-4">
+          <p className="text-xs text-muted-foreground">
+            {scope === "role"
+              ? "先选角色，再勾选它能管理的分组"
+              : "勾选的是「直接授权」；继承自角色分组的权限由「角色授权」决定"}
+          </p>
           <div className="flex flex-col gap-1.5 sm:w-96">
             <Label htmlFor="access-target">
               {scope === "role" ? "角色" : "用户"}

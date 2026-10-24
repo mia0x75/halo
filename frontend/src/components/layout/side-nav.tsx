@@ -1,18 +1,11 @@
 import { useEffect } from "react"
-import { IconChevronsLeft, IconChevronsRight, IconLogout } from "@tabler/icons-react"
+import { IconChevronsLeft, IconChevronsRight, IconDatabase } from "@tabler/icons-react"
 
 import { navSections, type NavKey } from "@/components/layout/nav-items"
-import { Avatar } from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { Badge } from "@/components/ui/badge"
 import { useGraphQL } from "@/hooks/use-graphql"
 import { isAdmin } from "@/lib/api/roles"
+import { isDemoSession } from "@/lib/api/session"
 import { subscribeMessagesChanged } from "@/lib/api/message-events"
 import {
   MY_TICKETS_QUERY,
@@ -29,13 +22,10 @@ export interface SideNavProps {
   collapsed: boolean
   onToggle: () => void
   user: MeUser
-  onSignOut: () => void
 }
 
 /** 侧边栏：15rem 宽（收起后 4rem 只留图标），顶部是当前用户，底部是帮助入口。 */
-export function SideNav({ active, onSelect, collapsed, onToggle, user, onSignOut }: SideNavProps) {
-  const userName = user.Name?.trim() || user.Email
-  const roleName = user.Roles?.[0]?.Name ?? ""
+export function SideNav({ active, onSelect, collapsed, onToggle, user }: SideNavProps) {
 
   // 侧栏徽标用接口里的真实数量。
   const myTickets = useGraphQL<
@@ -77,39 +67,17 @@ export function SideNav({ active, onSelect, collapsed, onToggle, user, onSignOut
           collapsed ? "justify-center px-0" : "px-4",
         )}
       >
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className={cn(
-                "flex min-w-0 items-center gap-2 rounded-md px-1 py-1 text-left transition-colors hover:bg-surface-secondary",
-                collapsed && "px-0",
-              )}
-              aria-label="当前用户"
-            >
-              <Avatar label={userName.slice(0, 1)} size="md" />
-              {collapsed ? null : (
-                <span className="flex min-w-0 flex-col leading-tight">
-                  <span className="truncate text-sm font-medium">{userName}</span>
-                  <span className="truncate text-sm text-muted-foreground">{roleName}</span>
-                </span>
-              )}
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-48">
-            <DropdownMenuLabel className="flex flex-col gap-0.5">
-              <span className="truncate text-sm font-medium">{userName}</span>
-              <span className="truncate text-xs font-normal text-muted-foreground">
-                {user.Email}
-              </span>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={onSignOut}>
-              <IconLogout size={16} stroke={1.5} />
-              退出登录
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+            <IconDatabase size={18} stroke={1.5} />
+          </span>
+          {collapsed ? null : (
+            <>
+              <span className="text-xl font-semibold tracking-tight text-strong">Halo</span>
+              {isDemoSession() ? <Badge variant="warning">演示</Badge> : null}
+            </>
+          )}
+        </div>
 
         {collapsed ? null : (
           <button

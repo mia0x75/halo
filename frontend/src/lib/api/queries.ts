@@ -583,7 +583,6 @@ export const RULE_HITS_QUERY = `
 export const LOGS_QUERY = `
   query Logs($first: Int, $after: String) {
     logs(first: $first, after: $after) {
-      totalCount
       pageInfo {
         hasNextPage
         hasPreviousPage
@@ -631,14 +630,16 @@ export interface RuleHitNode {
 export interface LogNode {
   UUID: string
   LogID: number
-  User: { Name: string | null; Email: string }
+  /** 记录发起人；用户被删除后后端返回占位账号 */
+  User: { Name: string | null; Email: string } | null
   /** 形如 "ticket.update|ticket:<uuid>|" 的结构化日志 */
   Operation: string
   CreateAt: number
 }
 
+// Logs are pure cursor pages: the server does not count the whole table, so
+// there is no totalCount to render.
 export interface LogConnectionNode {
-  totalCount: number
   edges: { cursor: string; node: LogNode }[]
   pageInfo: {
     hasNextPage: boolean

@@ -24,6 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { useCursorPagination } from "@/hooks/use-cursor-pagination"
 import { useGraphQL } from "@/hooks/use-graphql"
 import { formatUnix } from "@/lib/api/mappers"
 import { graphqlRequest } from "@/lib/api/client"
@@ -73,6 +74,20 @@ export function CronsPage({ onCreate }: CronsPageProps) {
     { first: number }
   >(TASK_EXECUTIONS_QUERY, { first: 50 }, { taskExecutions: [], taskExecutionSummary: [] })
 
+  // Both tabs get the whole list from the API, so paging them client-side
+  // keeps a long queue or history from rendering in one block.
+  const taskRows = useMemo(
+    () => (tasks.data?.tasks ?? []).map((task, index) => ({ ...task, id: index })),
+    [tasks.data],
+  )
+  const taskPage = useCursorPagination(taskRows, 10)
+
+  const executionRows = useMemo(
+    () => (executions.data?.taskExecutions ?? []).map((item, index) => ({ ...item, id: index })),
+    [executions.data],
+  )
+  const executionPage = useCursorPagination(executionRows, 10)
+
   const cronList = crons.data?.crons?.edges.map((edge) => edge.node) ?? []
   const connection = crons.data?.crons ?? null
 
@@ -100,6 +115,11 @@ export function CronsPage({ onCreate }: CronsPageProps) {
     setStack((items) => items.slice(0, -1))
     setAfter(previousCursor)
   }, [stack])
+
+  const resetPage = useCallback(() => {
+    setAfter(null)
+    setStack([])
+  }, [])
 
   const summary = useMemo(
     () =>
@@ -152,13 +172,6 @@ export function CronsPage({ onCreate }: CronsPageProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {cronList.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="py-8 text-center text-sm text-muted-foreground">
-                    还没有计划任务，点右上角新建一个系统作业。
-                  </TableCell>
-                </TableRow>
-              ) : null}
               {cronList.map((cron) => (
                 <TableRow key={cron.UUID}>
                   <TableCell className="font-medium">{cron.Name}</TableCell>
@@ -190,11 +203,13 @@ export function CronsPage({ onCreate }: CronsPageProps) {
           </Table>
 
           <CursorPagination
-            total={connection?.totalCount ?? 0}
+            page={stack.length + 1}
+            empty={cronList.length === 0}
             hasPreviousPage={connection?.pageInfo.hasPreviousPage ?? false}
             hasNextPage={connection?.pageInfo.hasNextPage ?? false}
             onPrevious={previousPage}
             onNext={nextPage}
+            onReset={resetPage}
           />
         </SectionCard>
       ) : null}
@@ -212,14 +227,7 @@ export function CronsPage({ onCreate }: CronsPageProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {(tasks.data?.tasks ?? []).length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="py-8 text-center text-sm text-muted-foreground">
-                    当前没有等待执行的任务。
-                  </TableCell>
-                </TableRow>
-              ) : null}
-              {(tasks.data?.tasks ?? []).map((task) => (
+              {taskPage.page.edges.map((task) => (
                 <TableRow key={task.UUID}>
                   <TableCell className="font-medium">{task.Name}</TableCell>
                   <TableCell className="font-mono text-xs text-muted-foreground">
@@ -239,6 +247,16 @@ export function CronsPage({ onCreate }: CronsPageProps) {
               ))}
             </TableBody>
           </Table>
+
+          <CursorPagination
+            page={taskPage.pageNumber}
+            empty={taskRows.length === 0}
+            hasPreviousPage={taskPage.page.pageInfo.hasPreviousPage}
+            hasNextPage={taskPage.page.pageInfo.hasNextPage}
+            onPrevious={taskPage.previous}
+            onNext={taskPage.next}
+            onReset={taskPage.reset}
+          />
         </SectionCard>
       ) : null}
 
@@ -265,14 +283,7 @@ export function CronsPage({ onCreate }: CronsPageProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {(executions.data?.taskExecutions ?? []).length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="py-8 text-center text-sm text-muted-foreground">
-                    还没有执行记录。
-                  </TableCell>
-                </TableRow>
-              ) : null}
-              {(executions.data?.taskExecutions ?? []).map((item) => (
+              {executionPage.page.edges.map((item) => (
                 <TableRow key={item.UUID}>
                   <TableCell className="font-medium">{item.Name}</TableCell>
                   <TableCell className="text-muted-foreground">{item.Type}</TableCell>
@@ -298,6 +309,16 @@ export function CronsPage({ onCreate }: CronsPageProps) {
               ))}
             </TableBody>
           </Table>
+
+          <CursorPagination
+            page={executionPage.pageNumber}
+            empty={executionRows.length === 0}
+            hasPreviousPage={executionPage.page.pageInfo.hasPreviousPage}
+            hasNextPage={executionPage.page.pageInfo.hasNextPage}
+            onPrevious={executionPage.previous}
+            onNext={executionPage.next}
+            onReset={executionPage.reset}
+          />
         </SectionCard>
       ) : null}
 

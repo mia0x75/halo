@@ -1,11 +1,9 @@
 import { useMemo, useState } from "react"
-import { IconChartBar } from "@tabler/icons-react"
 
 import { BrushChart } from "@/components/charts/brush-chart"
 import { TrendChart } from "@/components/charts/trend-chart"
 import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
-import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -103,12 +101,6 @@ export function StatsPage() {
       <PageHeader
         title="统计报表"
         description="按天汇总的工单量与规则命中"
-        action={
-          <Badge variant="default" className="px-2 py-1">
-            <IconChartBar size={14} stroke={1.5} className="mr-1" />
-            {buckets.length} 天
-          </Badge>
-        }
       />
 
       <SectionCard

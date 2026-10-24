@@ -2,7 +2,6 @@ import { useState } from "react"
 import { useEffect } from "react"
 import {
   IconBell,
-  IconDatabase,
   IconInbox,
   IconMoon,
   IconSearch,
@@ -10,7 +9,6 @@ import {
 } from "@tabler/icons-react"
 
 import { ConnectionMenu } from "@/components/layout/connection-menu"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -34,7 +32,7 @@ import {
   type MessageConnectionNode,
   type MessageNode,
 } from "@/lib/api/queries"
-import { getToken, isDemoSession } from "@/lib/api/session"
+import { getToken } from "@/lib/api/session"
 
 export interface TopNavProps {
   user: MeUser
@@ -94,14 +92,6 @@ export function TopNav({
 
   return (
     <header className="flex h-14 items-center gap-4 border-b border-border bg-card px-4">
-      <div className="flex items-center gap-2">
-        <span className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-          <IconDatabase size={18} stroke={1.5} />
-        </span>
-        <span className="text-xl font-semibold tracking-tight text-strong">Halo</span>
-        {isDemoSession() ? <Badge variant="warning">演示</Badge> : null}
-      </div>
-
       <form
         className="relative w-full max-w-md"
         onSubmit={(event) => {

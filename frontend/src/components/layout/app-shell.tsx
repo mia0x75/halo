@@ -38,7 +38,6 @@ export function AppShell({
           collapsed={collapsed}
           onToggle={() => setCollapsed((value) => !value)}
           user={user}
-          onSignOut={onSignOut}
         />
         <div className="flex min-w-0 flex-1 flex-col">
           <TopNav

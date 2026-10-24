@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react"
-import { IconHistory, IconSearch } from "@tabler/icons-react"
+import { IconSearch } from "@tabler/icons-react"
 
 import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
@@ -46,7 +46,6 @@ export function LogsPage() {
   const remote = useGraphQL<
     {
       logs: {
-        totalCount: number
         pageInfo: { hasNextPage: boolean; hasPreviousPage: boolean; startCursor: string; endCursor: string }
         edges: { cursor: string; node: LogNode }[]
       } | null
@@ -58,17 +57,20 @@ export function LogsPage() {
 
   const views = useMemo<LogView[]>(
     () =>
-      (connection?.edges ?? []).map((edge, index) => {
-        const parsed = parseLogOperation(edge.node.Operation)
-        return {
-          id: edge.node.LogID || index,
-          actor: edge.node.User.Name || edge.node.User.Email,
-          label: parsed.label,
-          target: parsed.target,
-          raw: edge.node.Operation,
-          createdAt: edge.node.CreateAt,
-        }
-      }),
+      (connection?.edges ?? [])
+        // A single malformed edge must not blank the whole page.
+        .filter((edge): edge is { cursor: string; node: LogNode } => edge?.node != null)
+        .map((edge, index) => {
+          const parsed = parseLogOperation(edge.node.Operation)
+          return {
+            id: edge.node.LogID || index,
+            actor: edge.node.User?.Name || edge.node.User?.Email || "已删除用户",
+            label: parsed.label,
+            target: parsed.target,
+            raw: edge.node.Operation,
+            createdAt: edge.node.CreateAt,
+          }
+        }),
     [connection],
   )
 
@@ -98,17 +100,23 @@ export function LogsPage() {
     setAfter(previousCursor)
   }, [stack])
 
+  // Page number tracks how many times the user paged forward in this session.
+  // No COUNT(*) is issued: it would be slow on a large filtered table.
+  const page = stack.length + 1
+
+  const reset = useCallback(() => {
+    setAfter(null)
+    setStack([])
+  }, [])
+
+  const filteredEmpty = filtered.length === 0
+  const hasFilter = keyword.trim() !== "" || actor !== "all"
+
   return (
     <>
       <PageHeader
         title="操作日志"
         description="系统里的关键操作都留了痕，登录、提交、审核、执行都在内"
-        action={
-          <div className="flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground">
-            <IconHistory size={16} stroke={1.5} />
-            共 {connection?.totalCount ?? 0} 条
-          </div>
-        }
       />
 
       <SectionCard bodyClassName="p-0">
@@ -168,15 +176,24 @@ export function LogsPage() {
                 <TableCell className="text-muted-foreground">{formatUnix(log.createdAt)}</TableCell>
               </TableRow>
             ))}
+            {filteredEmpty ? (
+              <TableRow>
+                <TableCell colSpan={4} className="py-10 text-center text-sm text-muted-foreground">
+                  {hasFilter ? "没有符合条件的记录，试试调整筛选条件" : "暂无操作记录"}
+                </TableCell>
+              </TableRow>
+            ) : null}
           </TableBody>
         </Table>
 
         <CursorPagination
-          total={connection?.totalCount ?? 0}
+          page={page}
+          empty={views.length === 0}
           hasPreviousPage={connection?.pageInfo.hasPreviousPage ?? false}
           hasNextPage={connection?.pageInfo.hasNextPage ?? false}
           onPrevious={previous}
           onNext={next}
+          onReset={reset}
         />
       </SectionCard>
     </>

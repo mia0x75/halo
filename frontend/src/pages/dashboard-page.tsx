@@ -256,15 +256,20 @@ export function DashboardPage({ onOpenTicket, onCreateTicket, onViewTickets }: D
             {recentLogs.map((edge) => {
               const display = parseLogOperation(edge.node.Operation)
               return (
-                <li key={edge.node.UUID} className="px-5 py-3">
-                  <p className="text-sm">
+                <li
+                  key={edge.node.UUID}
+                  className="flex items-center gap-2 overflow-hidden px-5 py-3 text-sm"
+                >
+                  <span className="min-w-0 flex-1 truncate" title={display.label}>
                     {display.label}
                     {display.target ? ` · ${display.target}` : ""}
-                  </p>
-                  <p className="mt-0.5 text-sm text-muted-foreground">
-                    {edge.node.User?.Name || edge.node.User?.Email || "-"} ·{" "}
+                  </span>
+                  <span className="shrink-0 text-muted-foreground">
+                    {edge.node.User?.Name || edge.node.User?.Email || "-"}
+                  </span>
+                  <span className="shrink-0 text-muted-foreground">
                     {formatUnix(edge.node.CreateAt)}
-                  </p>
+                  </span>
                 </li>
               )
             })}

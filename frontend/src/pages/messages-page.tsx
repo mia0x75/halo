@@ -125,7 +125,6 @@ export function MessagesPage({ onOpenTicket }: MessagesPageProps) {
     [readOverrides, remote.data],
   )
 
-  const total = remote.data?.messages.totalCount ?? 0
   const pageInfo = remote.data?.messages.pageInfo
 
   // 未读数取全局计数，不受当前筛选影响。
@@ -350,7 +349,8 @@ export function MessagesPage({ onOpenTicket }: MessagesPageProps) {
             )}
             <CursorPagination
               divided={false}
-              total={total}
+              page={stack.length + 1}
+              empty={messages.length === 0}
               hasPreviousPage={pageInfo?.hasPreviousPage ?? false}
               hasNextPage={pageInfo?.hasNextPage ?? false}
               onPrevious={() => {
@@ -361,6 +361,10 @@ export function MessagesPage({ onOpenTicket }: MessagesPageProps) {
               onNext={() => {
                 setStack((items) => [...items, after])
                 setAfter(pageInfo?.endCursor || null)
+              }}
+              onReset={() => {
+                setAfter(null)
+                setStack([])
               }}
             />
           </div>

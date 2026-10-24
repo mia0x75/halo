@@ -1,9 +1,7 @@
 import { useMemo, useState } from "react"
-import { IconDatabase } from "@tabler/icons-react"
 
 import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
-import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -50,12 +48,6 @@ export function DatabasesPage() {
       <PageHeader
         title="数据库"
         description="目标实例上的用户库与字符集"
-        action={
-          <Badge variant="default" className="px-2 py-1">
-            <IconDatabase size={14} stroke={1.5} className="mr-1" />
-            {databases.length} 个库
-          </Badge>
-        }
       />
 
       <SectionCard bodyClassName="p-0">

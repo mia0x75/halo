@@ -112,18 +112,13 @@ export function ViolationsPage() {
     })
   }, [views, keyword, level, rule])
 
-  const { page, reset, next, previous } = useCursorPagination(filtered, pageSize)
+  const { page, pageNumber, reset, next, previous } = useCursorPagination(filtered, pageSize)
 
   return (
     <>
       <PageHeader
         title="命中记录"
         description="规则命中的明细，按时间倒序"
-        action={
-          <Badge variant="default" className="px-2 py-1">
-            共 {views.length} 条命中
-          </Badge>
-        }
       />
 
       <SectionCard bodyClassName="p-0">
@@ -233,11 +228,13 @@ export function ViolationsPage() {
         </Table>
 
         <CursorPagination
-          total={filtered.length}
+          page={pageNumber}
+          empty={filtered.length === 0}
           hasPreviousPage={page.pageInfo.hasPreviousPage}
           hasNextPage={page.pageInfo.hasNextPage}
           onPrevious={previous}
           onNext={next}
+          onReset={reset}
         />
       </SectionCard>
     </>

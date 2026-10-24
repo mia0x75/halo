@@ -66,7 +66,6 @@ export function TicketsPage({ onOpenTicket, onCreateTicket, initialKeyword }: Ti
     [connection],
   )
 
-  const total = connection?.totalCount ?? rows.length
   const hasNext = connection?.pageInfo.hasNextPage ?? false
   const hasPrevious = connection?.pageInfo.hasPreviousPage ?? false
   const endCursor = connection?.pageInfo.endCursor ?? ""
@@ -167,7 +166,8 @@ export function TicketsPage({ onOpenTicket, onCreateTicket, initialKeyword }: Ti
         </Table>
 
         <CursorPagination
-          total={total}
+          page={stack.length + 1}
+          empty={rows.length === 0}
           hasPreviousPage={hasPrevious}
           hasNextPage={hasNext}
           onPrevious={() => {
@@ -178,6 +178,10 @@ export function TicketsPage({ onOpenTicket, onCreateTicket, initialKeyword }: Ti
           onNext={() => {
             setStack((items) => [...items, after])
             setAfter(endCursor || null)
+          }}
+          onReset={() => {
+            setAfter(null)
+            setStack([])
           }}
         />
       </SectionCard>
