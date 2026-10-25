@@ -33,12 +33,16 @@ export function ConnectionMenu({ user, onSignOut }: ConnectionMenuProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
-        <DropdownMenuLabel className="flex flex-col gap-0.5">
-          <span className="truncate text-sm font-medium text-strong">{name}</span>
-          <span className="truncate text-xs font-normal text-muted-foreground">{user.Email}</span>
+        {/* The label has no built-in padding, so without it the name and email
+            sit flush in the corner while the items below are inset. */}
+        <DropdownMenuLabel className="flex items-baseline gap-2 px-3 pt-2 pb-1">
+          <span className="min-w-0 truncate text-sm font-medium text-strong">{name}</span>
+          <span className="min-w-0 truncate text-xs font-normal text-muted-foreground">
+            {user.Email}
+          </span>
         </DropdownMenuLabel>
         {roles.length > 0 ? (
-          <div className="px-2 pb-1 text-xs text-muted-foreground">
+          <div className="px-3 pb-2 text-xs text-muted-foreground">
             {roles.map((role) => role.Name).join(" · ")}
           </div>
         ) : null}
