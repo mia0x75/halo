@@ -128,7 +128,7 @@ export function TopNav({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-80">
-            <DropdownMenuLabel>未读消息</DropdownMenuLabel>
+            <DropdownMenuLabel className="px-3 pt-2 pb-1">未读消息</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {items.length === 0 ? (
               <div className="px-2 py-3 text-sm text-muted-foreground">暂无未读消息</div>
