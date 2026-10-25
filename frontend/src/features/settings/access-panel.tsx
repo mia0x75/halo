@@ -89,6 +89,11 @@ export function AccessPanel({ scope }: AccessPanelProps) {
     return map
   }, [selectedUser])
 
+  const roleGroups = useMemo(
+    () => new Set((selectedRole?.Groups ?? []).map((group) => group.UUID)),
+    [selectedRole],
+  )
+
   const optionItems = useMemo(
     () =>
       scope === "role"
@@ -96,7 +101,9 @@ export function AccessPanel({ scope }: AccessPanelProps) {
             uuid: group.UUID,
             name: group.Name,
             extra: group.Description || "-",
-            effective: false,
+            // Role→group has no inheritance layer: the grant itself is what
+            // makes the group effective, so read it back from the saved role.
+            effective: roleGroups.has(group.UUID),
             sources: [] as string[],
           }))
         : clusterList.map((cluster) => {
@@ -109,7 +116,7 @@ export function AccessPanel({ scope }: AccessPanelProps) {
               sources: grant?.Sources ?? [],
             }
           }),
-    [clusterList, grantsByCluster, groupList, scope],
+    [clusterList, grantsByCluster, groupList, roleGroups, scope],
   )
   const current =
     scope === "role"
