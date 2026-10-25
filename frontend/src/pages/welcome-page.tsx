@@ -5,13 +5,13 @@ import {
   IconCheck,
   IconChevronDown,
   IconChevronRight,
-  IconDatabase,
   IconEye,
   IconEyeOff,
   IconKey,
   IconPlugConnected,
 } from "@tabler/icons-react"
 
+import { LogoMark } from "@/components/shared/logo-mark"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -274,16 +274,17 @@ export function WelcomePage({ onDone }: WelcomePageProps) {
 
   return (
     <div className="min-h-svh bg-background px-4 py-8 text-foreground">
-      <div className="mx-auto flex w-full max-w-xl flex-col gap-6">
+      {/* Root font size is 14px, so rem here maps to 14px: 30rem is ~420px.
+          Fields are stacked one per row, so the card stays narrower than the
+          old 576px one without squeezing any input. */}
+      <div className="mx-auto flex w-full max-w-[30rem] flex-col gap-6">
         <div className="flex flex-col items-center gap-3 text-center">
-          <span className="flex size-11 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <IconDatabase size={24} stroke={1.5} />
-          </span>
+          <LogoMark size={48} className="shrink-0" />
           <h1 className="text-xl font-medium text-strong">欢迎使用 Halo</h1>
         </div>
 
         <section className="overflow-hidden rounded-lg border border-border bg-card shadow-xs">
-          <div className="flex items-center justify-between gap-3 border-b border-border px-6 py-4">
+          <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3.5">
             <h2 className="text-base font-medium text-strong">
               第 {step + 1} 步 · {STEPS[step].title}
             </h2>
@@ -300,10 +301,10 @@ export function WelcomePage({ onDone }: WelcomePageProps) {
             ) : null}
           </div>
 
-          <div className="flex flex-col gap-4 px-6 py-5">
+          <div className="flex flex-col gap-4 px-5 py-4">
             {step === 0 ? (
               <>
-                <div className="grid gap-4 sm:grid-cols-[2fr_1fr_1fr]">
+                <div className="grid grid-cols-[minmax(0,1fr)_6rem] gap-3">
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor="setup-db-host">地址</Label>
                     <Input
@@ -321,14 +322,35 @@ export function WelcomePage({ onDone }: WelcomePageProps) {
                       onChange={(event) => setDbPort(event.target.value)}
                     />
                   </div>
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="setup-db-name">数据库</Label>
-                    <Input
-                      id="setup-db-name"
-                      value={dbName}
-                      onChange={(event) => setDbName(event.target.value)}
-                    />
-                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="setup-db-name">数据库</Label>
+                  <Input
+                    id="setup-db-name"
+                    value={dbName}
+                    onChange={(event) => setDbName(event.target.value)}
+                    placeholder="halodb"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="setup-db-user">用户</Label>
+                  <Input
+                    id="setup-db-user"
+                    value={dbUser}
+                    onChange={(event) => setDbUser(event.target.value)}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="setup-db-password">密码</Label>
+                  <Input
+                    id="setup-db-password"
+                    type="password"
+                    value={dbPassword}
+                    onChange={(event) => setDbPassword(event.target.value)}
+                  />
                 </div>
 
                 <div className="flex flex-col gap-1">
@@ -345,7 +367,7 @@ export function WelcomePage({ onDone }: WelcomePageProps) {
                     连接池参数
                   </button>
                   {showPool ? (
-                    <div className="grid gap-4 pt-1 sm:grid-cols-3">
+                    <div className="grid grid-cols-3 gap-3 pt-1">
                       <div className="flex flex-col gap-1.5">
                         <Label htmlFor="setup-max-idle">最大空闲连接</Label>
                         <Input
@@ -375,26 +397,6 @@ export function WelcomePage({ onDone }: WelcomePageProps) {
                       </div>
                     </div>
                   ) : null}
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="setup-db-user">用户</Label>
-                    <Input
-                      id="setup-db-user"
-                      value={dbUser}
-                      onChange={(event) => setDbUser(event.target.value)}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="setup-db-password">密码</Label>
-                    <Input
-                      id="setup-db-password"
-                      type="password"
-                      value={dbPassword}
-                      onChange={(event) => setDbPassword(event.target.value)}
-                    />
-                  </div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
@@ -530,11 +532,11 @@ export function WelcomePage({ onDone }: WelcomePageProps) {
             ) : null}
           </div>
 
-          <div className="flex items-center justify-between gap-4 border-t border-border bg-surface-secondary px-6 py-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border bg-surface-secondary px-5 py-4">
             {/* 进度信息在左下角 */}
-            <div className="flex w-40 flex-col gap-1.5">
+            <div className="flex shrink-0 flex-col gap-1.5">
               <div
-                className="h-2 w-full overflow-hidden rounded-full bg-border"
+                className="h-2 w-24 overflow-hidden rounded-full bg-border"
                 role="progressbar"
                 aria-valuenow={percent}
                 aria-valuemin={0}
@@ -546,7 +548,7 @@ export function WelcomePage({ onDone }: WelcomePageProps) {
                   style={{ width: `${percent}%` }}
                 />
               </div>
-              <span className="text-xs text-muted-foreground">
+              <span className="whitespace-nowrap text-xs text-muted-foreground">
                 {step + 1} / {STEPS.length} · {STEPS[step].title} · {percent}%
               </span>
             </div>

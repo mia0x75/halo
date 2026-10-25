@@ -1,5 +1,6 @@
-import { IconDatabase, IconMoon, IconPlayerPlay, IconSun } from "@tabler/icons-react"
+import { IconMoon, IconPlayerPlay, IconSun } from "@tabler/icons-react"
 
+import { LogoMark } from "@/components/shared/logo-mark"
 import { LoginForm } from "@/features/auth/login-form"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "@/hooks/use-theme"
@@ -25,14 +26,10 @@ export function LoginPage() {
       </div>
       <main className="flex flex-1 items-center justify-center px-4 pb-12">
         <div className="flex w-full max-w-sm flex-col gap-6">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-2">
-              <span className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                <IconDatabase size={20} stroke={1.5} />
-              </span>
-              <span className="text-2xl font-semibold tracking-tight text-strong">Halo</span>
-            </div>
-            <div className="flex flex-col gap-1">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <LogoMark size={120} className="shrink-0" />
+            <span className="text-2xl font-semibold tracking-tight text-strong">Halo</span>
+            <div className="flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1">
               <h1 className="text-xl font-medium text-strong">登录</h1>
               <p className="text-sm text-muted-foreground">SQL 变更工单与审计平台</p>
             </div>
@@ -56,8 +53,6 @@ export function LoginPage() {
               演示数据保存在浏览器内，每天重置一次，不连接真实数据库。
             </p>
           </div>
-
-          <p className="text-xs text-muted-foreground">请使用平台账号登录，未登录无法访问任何页面。</p>
         </div>
       </main>
     </div>
