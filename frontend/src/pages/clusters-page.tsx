@@ -70,7 +70,7 @@ export function ClustersPage({ onCreate, onEdit }: ClustersPageProps) {
   const [removing, setRemoving] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const page = useClusters(8)
+  const page = useClusters()
 
   const groups = useMemo(
     () => Array.from(new Set(page.clusters.map((cluster) => cluster.group))),

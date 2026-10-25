@@ -27,8 +27,6 @@ import { useGraphQL } from "@/hooks/use-graphql"
 import { RULES_QUERY, RULE_HIT_RULES_QUERY, type RuleNode } from "@/lib/api/queries"
 import { ruleGroupOf, ruleLevelLabels, ruleScopeOf } from "@/lib/labels"
 
-const pageSize = 10
-
 const levelTone = {
   错误: "danger",
   警告: "warning",
@@ -95,7 +93,7 @@ export function RulesPage() {
     })
   }, [views, keyword, level, group])
 
-  const { page, pageNumber, reset, next, previous } = useCursorPagination(filtered, pageSize)
+  const { page, pageNumber, reset, next, previous } = useCursorPagination(filtered)
 
   return (
     <>

@@ -38,6 +38,7 @@ import {
   type TaskExecutionNode,
 } from "@/lib/api/queries"
 import { getToken } from "@/lib/api/session"
+import { PAGE_SIZE } from "@/lib/cursor"
 
 type Tab = "crons" | "tasks" | "executions"
 
@@ -63,7 +64,7 @@ export function CronsPage({ onCreate }: CronsPageProps) {
       } | null
     },
     { first: number; after?: string }
-  >(CRONS_QUERY, { first: 10, after: after ?? undefined }, { crons: null })
+  >(CRONS_QUERY, { first: PAGE_SIZE, after: after ?? undefined }, { crons: null })
 
   const tasks = useGraphQL<{ tasks: CronNode[] }>(PENDING_TASKS_QUERY, undefined, { tasks: [] })
 
@@ -81,13 +82,13 @@ export function CronsPage({ onCreate }: CronsPageProps) {
     () => (tasks.data?.tasks ?? []).map((task, index) => ({ ...task, id: index })),
     [tasks.data],
   )
-  const taskPage = useCursorPagination(taskRows, 10)
+  const taskPage = useCursorPagination(taskRows)
 
   const executionRows = useMemo(
     () => (executions.data?.taskExecutions ?? []).map((item, index) => ({ ...item, id: index })),
     [executions.data],
   )
-  const executionPage = useCursorPagination(executionRows, 10)
+  const executionPage = useCursorPagination(executionRows)
 
   const cronList = crons.data?.crons?.edges.map((edge) => edge.node) ?? []
   const connection = crons.data?.crons ?? null

@@ -46,8 +46,7 @@ import {
   type MessageNode,
 } from "@/lib/api/queries"
 import { getToken } from "@/lib/api/session"
-
-const pageSize = 20
+import { PAGE_SIZE } from "@/lib/cursor"
 
 interface CategoryMeta {
   label: string
@@ -108,7 +107,7 @@ export function MessagesPage({ onOpenTicket }: MessagesPageProps) {
       unreadOnly: tab === "unread",
       category: category === "all" ? "" : category,
       keyword: search,
-      first: pageSize,
+      first: PAGE_SIZE,
       after: after ?? undefined,
     },
     { messages: { totalCount: 0, pageInfo: { hasNextPage: false, hasPreviousPage: false, startCursor: "", endCursor: "" }, edges: [] } },

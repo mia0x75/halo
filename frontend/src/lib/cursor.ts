@@ -3,6 +3,9 @@
  * 的页面（规则库、命中记录）用，编码格式与后端 EncodeCursor 保持一致。
  */
 
+// Keep paginated lists consistent without changing lookup or preview limits.
+export const PAGE_SIZE = 10
+
 export interface CursorPage<T> {
   edges: T[]
   pageInfo: {

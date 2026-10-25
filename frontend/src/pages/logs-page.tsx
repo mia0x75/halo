@@ -24,9 +24,8 @@ import {
 import { useGraphQL } from "@/hooks/use-graphql"
 import { formatUnix } from "@/lib/api/mappers"
 import { LOGS_QUERY, type LogNode } from "@/lib/api/queries"
+import { PAGE_SIZE } from "@/lib/cursor"
 import { parseLogOperation } from "@/lib/labels"
-
-const pageSize = 10
 
 interface LogView {
   id: number
@@ -51,7 +50,7 @@ export function LogsPage() {
       } | null
     },
     { first: number; after?: string }
-  >(LOGS_QUERY, { first: pageSize, after: after ?? undefined }, { logs: null })
+  >(LOGS_QUERY, { first: PAGE_SIZE, after: after ?? undefined }, { logs: null })
 
   const connection = remote.data?.logs ?? null
 

@@ -28,6 +28,7 @@ import {
   type UserNode,
 } from "@/lib/api/queries"
 import { getToken } from "@/lib/api/session"
+import { PAGE_SIZE } from "@/lib/cursor"
 
 type Tab = "users" | "roles"
 
@@ -61,7 +62,7 @@ export function UsersPage({ onCreateUser, onEditUser }: UsersPageProps) {
       } | null
     },
     { first: number; after?: string }
-  >(USERS_QUERY, { first: 10, after: after ?? undefined }, { users: null })
+  >(USERS_QUERY, { first: PAGE_SIZE, after: after ?? undefined }, { users: null })
 
   const roles = useGraphQL<{ roles: RoleNode[] }>(ROLES_QUERY, undefined, { roles: [] })
 

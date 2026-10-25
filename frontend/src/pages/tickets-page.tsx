@@ -27,10 +27,9 @@ import { useGraphQL } from "@/hooks/use-graphql"
 
 import { mapTicket } from "@/lib/api/mappers"
 import { TICKETS_QUERY, type TicketConnectionNode } from "@/lib/api/queries"
+import { PAGE_SIZE } from "@/lib/cursor"
 import { ticketStatusMeta } from "@/lib/labels"
 import type { Ticket, TicketStatus } from "@/lib/model"
-
-const pageSize = 8
 
 export interface TicketsPageProps {
   onOpenTicket: (uuid: string) => void
@@ -51,7 +50,7 @@ export function TicketsPage({ onOpenTicket, onCreateTicket, initialKeyword }: Ti
   >(
     TICKETS_QUERY,
     {
-      first: pageSize,
+      first: PAGE_SIZE,
       after: after ?? undefined,
       status: status === "all" ? 0 : statusCode(status),
       keyword: keyword.trim() || undefined,

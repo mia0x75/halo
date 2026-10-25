@@ -33,8 +33,6 @@ import {
 } from "@/lib/api/queries"
 import { ruleLevelLabels } from "@/lib/labels"
 
-const pageSize = 10
-
 const levelTone = {
   错误: "danger",
   警告: "warning",
@@ -112,7 +110,7 @@ export function ViolationsPage() {
     })
   }, [views, keyword, level, rule])
 
-  const { page, pageNumber, reset, next, previous } = useCursorPagination(filtered, pageSize)
+  const { page, pageNumber, reset, next, previous } = useCursorPagination(filtered)
 
   return (
     <>

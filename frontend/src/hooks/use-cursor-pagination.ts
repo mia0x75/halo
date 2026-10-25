@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react"
 
-import { paginate, type CursorPage } from "@/lib/cursor"
+import { PAGE_SIZE, paginate, type CursorPage } from "@/lib/cursor"
 
 /**
  * 游标分页状态：只保留当前位置的游标与回退栈，翻页不重算偏移。
@@ -8,7 +8,7 @@ import { paginate, type CursorPage } from "@/lib/cursor"
  */
 export function useCursorPagination<T extends { id: number }>(
   items: T[],
-  pageSize: number,
+  pageSize = PAGE_SIZE,
 ): {
   page: CursorPage<T>
   /** 1-based page number for the current position */

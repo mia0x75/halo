@@ -22,9 +22,8 @@ import {
   PENDING_REVIEWS_QUERY,
   type TicketConnectionNode,
 } from "@/lib/api/queries"
+import { PAGE_SIZE } from "@/lib/cursor"
 import type { Ticket } from "@/lib/model"
-
-const pageSize = 8
 
 export interface TicketQueuePageProps {
   /** 我的工单 / 待我审核 */
@@ -42,7 +41,7 @@ export function TicketQueuePage({ mode, onOpenTicket, onCreateTicket }: TicketQu
   const remote = useGraphQL<
     { me: { MyTickets?: TicketConnectionNode | null; PendingReviews?: TicketConnectionNode | null } | null },
     { first: number; after?: string }
-  >(query, { first: pageSize, after: after ?? undefined }, { me: null })
+  >(query, { first: PAGE_SIZE, after: after ?? undefined }, { me: null })
 
   const connection = mode === "mine" ? remote.data?.me?.MyTickets : remote.data?.me?.PendingReviews
 

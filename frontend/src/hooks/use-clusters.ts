@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react"
 
 import { useGraphQL } from "@/hooks/use-graphql"
 import { CLUSTERS_QUERY, type ClusterNode } from "@/lib/api/queries"
+import { PAGE_SIZE } from "@/lib/cursor"
 import type { Cluster } from "@/lib/model"
 
 /** 接口返回的群集节点转成页面模型。 */
@@ -40,7 +41,7 @@ export interface ClusterPage {
 /**
  * 群集列表。群集管理、数据库页与新建工单的群集下拉共用同一份分页数据。
  */
-export function useClusters(pageSize = 8): ClusterPage {
+export function useClusters(pageSize = PAGE_SIZE): ClusterPage {
   const [after, setAfter] = useState<string | null>(null)
   const [stack, setStack] = useState<(string | null)[]>([])
 
