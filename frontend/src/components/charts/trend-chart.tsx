@@ -58,12 +58,13 @@ export function TrendChart({
         position: "top",
         horizontalAlign: "right",
         fontSize: "12px",
+        labels: { colors: "var(--halo-text)" },
         // 图例用小圆点，圆点与文字之间留出间距
         markers: { size: 4, shape: "circle" },
         itemMargin: { horizontal: 8, vertical: 0 },
       },
       // 紧凑提示框：单行展示，缩小行距
-      tooltip: { compact: true, intersect: false, shared: true },
+      tooltip: { compact: true, intersect: false, shared: true, style: { fontSize: "11px" } },
       grid: { borderColor: "transparent", padding: { left: 4, right: 4 } },
       xaxis: {
         categories,
