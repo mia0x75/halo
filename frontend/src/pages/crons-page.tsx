@@ -91,6 +91,13 @@ export function CronsPage({ onCreate }: CronsPageProps) {
   const cronList = crons.data?.crons?.edges.map((edge) => edge.node) ?? []
   const connection = crons.data?.crons ?? null
 
+  // The execution list is capped by first, so the badge counts the summary
+  // instead: that is the whole history, not just the fetched slice.
+  const executionTotal = useMemo(
+    () => (executions.data?.taskExecutionSummary ?? []).reduce((sum, item) => sum + item.Count, 0),
+    [executions.data],
+  )
+
   const remove = async () => {
     if (!removing) return
     setError(null)
@@ -152,9 +159,11 @@ export function CronsPage({ onCreate }: CronsPageProps) {
         value={tab}
         onChange={(key) => setTab(key as Tab)}
         items={[
-          { key: "crons", label: "计划任务", badge: cronList.length },
+          // The tables page through the API, so a page length would pin the
+          // badge at the page size once the list grows past one page.
+          { key: "crons", label: "计划任务", badge: crons.data?.crons?.totalCount ?? 0 },
           { key: "tasks", label: "等待执行", badge: tasks.data?.tasks?.length ?? 0 },
-          { key: "executions", label: "执行记录", badge: executions.data?.taskExecutions?.length ?? 0 },
+          { key: "executions", label: "执行记录", badge: executionTotal },
         ]}
       />
 

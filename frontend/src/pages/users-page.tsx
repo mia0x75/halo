@@ -133,7 +133,9 @@ export function UsersPage({ onCreateUser, onEditUser }: UsersPageProps) {
         value={tab}
         onChange={(key) => setTab(key as Tab)}
         items={[
-          { key: "users", label: "用户", badge: userList.length },
+          // Users page through the API, so the badge has to be the total
+          // count; a page length would stick at the page size.
+          { key: "users", label: "用户", badge: connection?.totalCount ?? 0 },
           { key: "roles", label: "角色", badge: roleList.length },
         ]}
       />
