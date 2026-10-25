@@ -14,6 +14,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { StatusBadge } from "@/components/shared/status-badge"
+import { BlockNote, InlineNote } from "@/components/shared/status-note"
+import { isInlineNote } from "@/lib/status-note"
 import { useGraphQL } from "@/hooks/use-graphql"
 import { graphqlRequest } from "@/lib/api/client"
 import { notifyDataChanged } from "@/lib/api/data-events"
@@ -119,6 +121,7 @@ export function TicketDetailView({
     [ticket],
   )
 
+  const reviewErrorInline = reviewError ? isInlineNote(reviewError) : false
   const isReviewer = Boolean(viewerUUID && ticket && ticket.Reviewer?.UUID === viewerUUID)
   const canReview = ticket?.Status === 4 && isReviewer
 
@@ -213,13 +216,12 @@ export function TicketDetailView({
               ) : null}
             </>
           ) : null}
+          {reviewError && reviewErrorInline ? (
+            <InlineNote className="ml-1">{reviewError}</InlineNote>
+          ) : null}
         </div>
-        {reviewError ? (
-          <p role="alert" className="mt-3 rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">
-            {reviewError}
-          </p>
-        ) : null}
       </div>
+      {reviewError && !reviewErrorInline ? <BlockNote>{reviewError}</BlockNote> : null}
 
       <div className="rounded-lg border border-border bg-card shadow-xs">
         <div className="flex gap-4 border-b border-border px-5 pt-3">

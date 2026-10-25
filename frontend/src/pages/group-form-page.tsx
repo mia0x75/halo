@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 import { IconArrowLeft } from "@tabler/icons-react"
 
 import { PageHeader } from "@/components/layout/page-header"
+import { InlineNote } from "@/components/shared/status-note"
 import { SectionCard } from "@/components/shared/section-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -123,11 +124,8 @@ function GroupForm({ initial, mode, uuid, onSaved }: GroupFormProps) {
         </div>
       </div>
 
-      {error ? (
-        <p className="mt-4 rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
-      ) : null}
-
-      <div className="mt-5 flex justify-end gap-2">
+      <div className="mt-5 flex flex-wrap items-center justify-end gap-2">
+        {error ? <InlineNote className="mr-auto">{error}</InlineNote> : null}
         <Button onClick={() => void submit()} disabled={saving}>
           {mode === "create" ? "创建" : "保存"}
         </Button>

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 import { IconSend } from "@tabler/icons-react"
 
 import { Button } from "@/components/ui/button"
+import { InlineNote } from "@/components/shared/status-note"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -280,11 +281,8 @@ export function TicketForm({
         </Select>
       </div>
 
-      {error ? (
-        <p className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
-      ) : null}
-
-      <div className="flex justify-end gap-2">
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        {error ? <InlineNote className="mr-auto">{error}</InlineNote> : null}
         <Button variant="outline" onClick={onCancel}>
           取消
         </Button>

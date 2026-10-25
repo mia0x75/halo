@@ -3,6 +3,7 @@ import { IconPencil, IconPlus, IconSearch } from "@tabler/icons-react"
 
 import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
+import { BlockNote } from "@/components/shared/status-note"
 import { Tabs } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -123,10 +124,6 @@ export function UsersPage({ onCreateUser, onEditUser }: UsersPageProps) {
           </Button>
         }
       />
-
-      {actionError ? (
-        <p className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{actionError}</p>
-      ) : null}
 
       <Tabs
         className="px-1"
@@ -266,6 +263,7 @@ export function UsersPage({ onCreateUser, onEditUser }: UsersPageProps) {
           </Table>
         </SectionCard>
       )}
+      {actionError ? <BlockNote>{actionError}</BlockNote> : null}
     </>
   )
 }

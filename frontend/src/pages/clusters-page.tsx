@@ -10,6 +10,7 @@ import {
 
 import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
+import { BlockNote } from "@/components/shared/status-note"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -137,10 +138,6 @@ export function ClustersPage({ onCreate, onEdit }: ClustersPageProps) {
           </div>
         }
       />
-
-      {error ? (
-        <p className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
-      ) : null}
 
       <SectionCard bodyClassName="p-0">
         <div className="flex flex-wrap items-end gap-3 border-b border-border px-5 py-4">
@@ -323,6 +320,7 @@ export function ClustersPage({ onCreate, onEdit }: ClustersPageProps) {
           </div>
         </AlertDialogContent>
       </AlertDialog>
+      {error ? <BlockNote>{error}</BlockNote> : null}
     </>
   )
 }

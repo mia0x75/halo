@@ -3,6 +3,7 @@ import { IconClock, IconPlus, IconTrash } from "@tabler/icons-react"
 
 import { PageHeader } from "@/components/layout/page-header"
 import { SectionCard } from "@/components/shared/section-card"
+import { BlockNote } from "@/components/shared/status-note"
 import { Tabs } from "@/components/ui/tabs"
 import {
   AlertDialog,
@@ -149,10 +150,6 @@ export function CronsPage({ onCreate }: CronsPageProps) {
           </Button>
         }
       />
-
-      {error ? (
-        <p className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
-      ) : null}
 
       <Tabs
         className="px-1"
@@ -351,6 +348,7 @@ export function CronsPage({ onCreate }: CronsPageProps) {
           </div>
         </AlertDialogContent>
       </AlertDialog>
+      {error ? <BlockNote>{error}</BlockNote> : null}
     </>
   )
 }

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 import { IconKey, IconLock, IconPencil } from "@tabler/icons-react"
 
 import { SectionCard } from "@/components/shared/section-card"
+import { BlockNote } from "@/components/shared/status-note"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -85,9 +86,6 @@ export function OptionsPanel() {
 
   return (
     <div className="flex flex-col gap-4">
-      {error ? (
-        <p className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
-      ) : null}
       <div className="grid gap-4 md:grid-cols-2">
         {groups.map((group) => (
           <OptionGroup
@@ -140,6 +138,7 @@ export function OptionsPanel() {
           </div>
         </DialogContent>
       </Dialog>
+      {error ? <BlockNote>{error}</BlockNote> : null}
     </div>
   )
 }

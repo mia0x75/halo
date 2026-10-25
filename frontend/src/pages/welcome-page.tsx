@@ -12,6 +12,8 @@ import {
 } from "@tabler/icons-react"
 
 import { LogoMark } from "@/components/shared/logo-mark"
+import { BlockNote, InlineNote } from "@/components/shared/status-note"
+import { isInlineNote } from "@/lib/status-note"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -270,6 +272,7 @@ export function WelcomePage({ onDone }: WelcomePageProps) {
     }
   }
 
+  const errorInline = error ? isInlineNote(error) : false
   const percent = Math.round(((step + 1) / STEPS.length) * 100)
 
   return (
@@ -527,9 +530,6 @@ export function WelcomePage({ onDone }: WelcomePageProps) {
               </>
             ) : null}
 
-            {error ? (
-              <p className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
-            ) : null}
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border bg-surface-secondary px-5 py-4">
@@ -554,6 +554,7 @@ export function WelcomePage({ onDone }: WelcomePageProps) {
             </div>
             {/* 步骤按钮在右下角 */}
             <div className="flex items-center gap-2">
+              {error && errorInline ? <InlineNote className="mr-1">{error}</InlineNote> : null}
               <Button onClick={goBack} disabled={step === 0 || submitting}>
                 <IconArrowLeft size={16} stroke={1.5} />
                 上一步
@@ -572,6 +573,7 @@ export function WelcomePage({ onDone }: WelcomePageProps) {
             </div>
           </div>
         </section>
+        {error && !errorInline ? <BlockNote>{error}</BlockNote> : null}
       </div>
     </div>
   )

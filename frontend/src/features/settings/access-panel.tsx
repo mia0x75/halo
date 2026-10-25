@@ -2,6 +2,8 @@ import { useMemo, useState } from "react"
 import { IconCheck, IconInfoCircle, IconUsers } from "@tabler/icons-react"
 
 import { SectionCard } from "@/components/shared/section-card"
+import { BlockNote, InlineNote } from "@/components/shared/status-note"
+import { isInlineNote } from "@/lib/status-note"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -177,15 +179,15 @@ export function AccessPanel({ scope }: AccessPanelProps) {
     return before.length !== after.length || before.some((item, index) => item !== after[index])
   }, [checked, current])
 
+  const note = error
+    ? { tone: "danger" as const, text: error }
+    : saved
+      ? { tone: "success" as const, text: "授权已保存" }
+      : null
+  const noteInline = note ? isInlineNote(note.text) : false
+
   return (
     <>
-      {error ? (
-        <p className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
-      ) : null}
-      {saved && !error ? (
-        <p className="rounded-md bg-success/10 px-3 py-2 text-sm text-success">授权已保存</p>
-      ) : null}
-
       <SectionCard
         title={scope === "role" ? "角色授权" : "用户群集授权"}
         description={
@@ -274,6 +276,7 @@ export function AccessPanel({ scope }: AccessPanelProps) {
                 {dirty ? (
                   <span className="text-sm text-muted-foreground">有未保存的改动</span>
                 ) : null}
+                {note && noteInline ? <InlineNote tone={note.tone}>{note.text}</InlineNote> : null}
               </div>
               {scope === "user" ? (
                 <p className="flex items-start gap-2 rounded-md bg-surface-secondary px-3 py-2 text-xs text-muted-foreground">
@@ -293,6 +296,7 @@ export function AccessPanel({ scope }: AccessPanelProps) {
           )}
         </div>
       </SectionCard>
+      {note && !noteInline ? <BlockNote tone={note.tone}>{note.text}</BlockNote> : null}
     </>
   )
 }

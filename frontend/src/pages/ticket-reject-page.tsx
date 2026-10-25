@@ -2,6 +2,7 @@ import { useState } from "react"
 import { IconArrowLeft, IconX } from "@tabler/icons-react"
 
 import { PageHeader } from "@/components/layout/page-header"
+import { InlineNote } from "@/components/shared/status-note"
 import { SectionCard } from "@/components/shared/section-card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -70,13 +71,8 @@ export function TicketRejectPage({ uuid, onBack, onDone }: TicketRejectPageProps
           />
         </div>
 
-        {error ? (
-          <p role="alert" className="mt-4 rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">
-            {error}
-          </p>
-        ) : null}
-
-        <div className="mt-5 flex justify-end gap-2">
+        <div className="mt-5 flex flex-wrap items-center justify-end gap-2">
+          {error ? <InlineNote className="mr-auto">{error}</InlineNote> : null}
           <Button variant="outline" onClick={onBack}>
             取消
           </Button>
