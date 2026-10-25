@@ -57,7 +57,7 @@ export function TicketQueuePage({ mode, onOpenTicket, onCreateTicket }: TicketQu
 
   const title = mode === "mine" ? "我的工单" : "待我审核"
   const description =
-    mode === "mine" ? "我提交与参与处理的变更工单" : "等待我人工审核的工单"
+    mode === "mine" ? "由我发起的变更工单" : "等待我人工审核的工单"
 
   return (
     <>
