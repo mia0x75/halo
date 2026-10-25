@@ -23,7 +23,7 @@ import { graphqlRequest } from "@/lib/api/client"
 import { useGraphQL } from "@/hooks/use-graphql"
 import { useTheme } from "@/hooks/use-theme"
 import { formatUnix } from "@/lib/api/mappers"
-import { notifyMessagesChanged, subscribeMessagesChanged } from "@/lib/api/message-events"
+import { notifyDataChanged, subscribeDataChanged } from "@/lib/api/data-events"
 import type { MeUser } from "@/lib/api/queries"
 import {
   MARK_MESSAGE_READ_MUTATION,
@@ -68,7 +68,7 @@ export function TopNav({
 
   useEffect(
     () =>
-      subscribeMessagesChanged(() => {
+      subscribeDataChanged("messages", () => {
         refetchMessages()
         refetchUnread()
       }),
@@ -84,7 +84,7 @@ export function TopNav({
         getToken(),
       )
     } finally {
-      notifyMessagesChanged()
+      notifyDataChanged("messages")
       if (linked) onOpenTicket(linked)
       else onViewMessages()
     }

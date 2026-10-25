@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { useGraphQL } from "@/hooks/use-graphql"
 import { isAdmin } from "@/lib/api/roles"
 import { isDemoSession } from "@/lib/api/session"
-import { subscribeMessagesChanged } from "@/lib/api/message-events"
+import { subscribeDataChanged } from "@/lib/api/data-events"
 import {
   MY_TICKETS_QUERY,
   PENDING_REVIEWS_QUERY,
@@ -39,6 +39,8 @@ export function SideNav({ active, onSelect, collapsed, onToggle, user }: SideNav
   >(PENDING_REVIEWS_QUERY, { first: 1 }, { me: null })
   const unread = useGraphQL<{ unreadMessageCount: number }>(UNREAD_MESSAGE_COUNT_QUERY)
   const refetchUnread = unread.refetch
+  const refetchTickets = myTickets.refetch
+  const refetchReviews = pendingReviews.refetch
   const admin = isAdmin(user.Roles)
 
   const badgeCounts: Record<string, number | undefined> = {
@@ -47,12 +49,15 @@ export function SideNav({ active, onSelect, collapsed, onToggle, user }: SideNav
     "pending-review": pendingReviews.data?.me?.PendingReviews?.totalCount,
   }
 
+  useEffect(() => subscribeDataChanged("messages", refetchUnread), [refetchUnread])
+
   useEffect(
     () =>
-      subscribeMessagesChanged(() => {
-        refetchUnread()
+      subscribeDataChanged("tickets", () => {
+        refetchTickets()
+        refetchReviews()
       }),
-    [refetchUnread],
+    [refetchTickets, refetchReviews],
   )
 
   return (

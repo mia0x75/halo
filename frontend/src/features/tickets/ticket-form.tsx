@@ -16,6 +16,7 @@ import {
 import { SqlEditor, type SqlDialect } from "@/components/ui/sql-editor"
 import { useGraphQL } from "@/hooks/use-graphql"
 import { graphqlRequest } from "@/lib/api/client"
+import { notifyDataChanged } from "@/lib/api/data-events"
 import {
   CREATE_TICKET_MUTATION,
   ME_CLUSTERS_QUERY,
@@ -163,6 +164,7 @@ export function TicketForm({
           getToken(),
         )
         onSubmitted(ticketUUID ?? "")
+        notifyDataChanged("tickets")
         return
       }
       const data = await graphqlRequest<
@@ -177,6 +179,7 @@ export function TicketForm({
           }
         }
       >(CREATE_TICKET_MUTATION, { input }, getToken())
+      notifyDataChanged("tickets")
       onSubmitted(data.createTicket.UUID)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))

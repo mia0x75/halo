@@ -35,7 +35,7 @@ import { Tabs } from "@/components/ui/tabs"
 import { useGraphQL } from "@/hooks/use-graphql"
 import { graphqlRequest } from "@/lib/api/client"
 import { formatUnix } from "@/lib/api/mappers"
-import { notifyMessagesChanged } from "@/lib/api/message-events"
+import { notifyDataChanged, subscribeDataChanged } from "@/lib/api/data-events"
 import {
   MARK_ALL_MESSAGES_READ_MUTATION,
   MARK_MESSAGE_READ_MUTATION,
@@ -131,6 +131,19 @@ export function MessagesPage({ onOpenTicket }: MessagesPageProps) {
   const unread = useGraphQL<{ unreadMessageCount: number }>(UNREAD_MESSAGE_COUNT_QUERY)
   const unreadCount = unread.data?.unreadMessageCount ?? 0
 
+  // 顶栏弹窗与消息页都可能改动已读状态，页面跟着主题事件一起重取，
+  // 否则「未读」标签上的数字会一直停在挂载时的值。
+  const refetchMessages = remote.refetch
+  const refetchUnread = unread.refetch
+  useEffect(
+    () =>
+      subscribeDataChanged("messages", () => {
+        refetchMessages()
+        refetchUnread()
+      }),
+    [refetchMessages, refetchUnread],
+  )
+
   const availableCategories = useMemo(
     () => Array.from(new Set(messages.map((message) => message.Category))).filter(Boolean),
     [messages],
@@ -151,8 +164,7 @@ export function MessagesPage({ onOpenTicket }: MessagesPageProps) {
         [message.UUID]: Math.floor(Date.now() / 1000),
       }))
       setActionError(null)
-      notifyMessagesChanged()
-      remote.refetch()
+      notifyDataChanged("messages")
     } catch (cause) {
       setActionError(cause instanceof Error ? cause.message : String(cause))
     }
@@ -174,8 +186,7 @@ export function MessagesPage({ onOpenTicket }: MessagesPageProps) {
         return next
       })
       setActionError(null)
-      notifyMessagesChanged()
-      remote.refetch()
+      notifyDataChanged("messages")
     } catch (cause) {
       setActionError(cause instanceof Error ? cause.message : String(cause))
     }
@@ -190,8 +201,7 @@ export function MessagesPage({ onOpenTicket }: MessagesPageProps) {
       )
       setRemoving(null)
       if (selectedUUID === message.UUID) setSelectedUUID(null)
-      notifyMessagesChanged()
-      remote.refetch()
+      notifyDataChanged("messages")
     } catch (cause) {
       setActionError(cause instanceof Error ? cause.message : String(cause))
     }

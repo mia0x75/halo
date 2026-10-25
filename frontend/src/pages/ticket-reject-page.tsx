@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { graphqlRequest } from "@/lib/api/client"
+import { notifyDataChanged } from "@/lib/api/data-events"
 import { REVIEW_TICKET_MUTATION } from "@/lib/api/queries"
 import { getToken } from "@/lib/api/session"
 
@@ -35,6 +36,7 @@ export function TicketRejectPage({ uuid, onBack, onDone }: TicketRejectPageProps
         { input: { TicketUUID: uuid, Outcome: "REJECTED", Reason: reason.trim() } },
         getToken(),
       )
+      notifyDataChanged("tickets")
       onDone()
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))

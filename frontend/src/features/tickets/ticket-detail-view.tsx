@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input"
 import { StatusBadge } from "@/components/shared/status-badge"
 import { useGraphQL } from "@/hooks/use-graphql"
 import { graphqlRequest } from "@/lib/api/client"
+import { notifyDataChanged } from "@/lib/api/data-events"
 import { formatUnix } from "@/lib/api/mappers"
 import {
   CREATE_COMMENT_MUTATION,
@@ -133,6 +134,7 @@ export function TicketDetailView({
       )
       setApproving(false)
       detail.refetch()
+      notifyDataChanged("tickets")
     } catch (cause) {
       setReviewError(cause instanceof Error ? cause.message : String(cause))
     } finally {
