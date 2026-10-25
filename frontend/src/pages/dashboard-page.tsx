@@ -41,9 +41,15 @@ export interface DashboardPageProps {
   onOpenTicket: (uuid: string) => void
   onCreateTicket: () => void
   onViewTickets: () => void
+  onViewLogs: () => void
 }
 
-export function DashboardPage({ onOpenTicket, onCreateTicket, onViewTickets }: DashboardPageProps) {
+export function DashboardPage({
+  onOpenTicket,
+  onCreateTicket,
+  onViewTickets,
+  onViewLogs,
+}: DashboardPageProps) {
   const [period, setPeriod] = useState<Period>(7)
   // 刷选图初始化时必须能找到主图的 DOM id，等主图挂载完成再渲染它。
   const [trendReady, setTrendReady] = useState(false)
@@ -248,7 +254,15 @@ export function DashboardPage({ onOpenTicket, onCreateTicket, onViewTickets }: D
           </ul>
         </SectionCard>
 
-        <SectionCard title="操作日志" bodyClassName="p-0">
+        <SectionCard
+          title="操作日志"
+          bodyClassName="p-0"
+          action={
+            <Button variant="ghost" size="sm" onClick={onViewLogs}>
+              查看全部
+            </Button>
+          }
+        >
           <ul className="divide-y divide-border">
             {recentLogs.length === 0 ? (
               <li className="px-5 py-6 text-center text-sm text-muted-foreground">暂无审计记录</li>

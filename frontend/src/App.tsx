@@ -95,6 +95,7 @@ export default function App() {
     setView({ kind: "nav", key: "tickets" })
   }, [])
   const viewTickets = useCallback(() => setView({ kind: "nav", key: "tickets" }), [])
+  const viewLogs = useCallback(() => setView({ kind: "nav", key: "logs" }), [])
   const viewMessages = useCallback(() => setView({ kind: "nav", key: "messages" }), [])
   const createUser = useCallback(() => setView({ kind: "user-form", mode: "create" }), [])
   const editUser = useCallback(
@@ -318,6 +319,7 @@ export default function App() {
           onOpenTicket={(uuid) => openTicket(uuid, "dashboard")}
           onCreateTicket={() => createTicket("dashboard")}
           onViewTickets={viewTickets}
+          onViewLogs={viewLogs}
         />
       ) : null}
       {page === "messages" ? (
