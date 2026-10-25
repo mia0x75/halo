@@ -261,10 +261,16 @@ export function TicketDetailView({
                 <pre className="overflow-x-auto px-3 py-2 font-mono text-xs whitespace-pre-wrap">
                   {statement.content}
                 </pre>
+                {/* Level 1 is a hard failure; keeping it amber made errors look
+                    like warnings at a glance. */}
                 {parseReport(statement.report).map((hit, index) => (
                   <p
                     key={`${statement.uuid}-hit-${index}`}
-                    className="border-t border-border px-3 py-2 text-xs text-warning"
+                    className={
+                      hit.level === 1
+                        ? "border-t border-border px-3 py-2 text-xs text-danger"
+                        : "border-t border-border px-3 py-2 text-xs text-warning"
+                    }
                   >
                     <span className="mr-1 font-medium">[{reportLevelLabel(hit.level)}]</span>
                     {hit.description}
