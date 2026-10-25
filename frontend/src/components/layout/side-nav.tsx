@@ -1,7 +1,8 @@
 import { useEffect } from "react"
-import { IconChevronsLeft, IconChevronsRight, IconDatabase } from "@tabler/icons-react"
+import { IconChevronsLeft, IconChevronsRight } from "@tabler/icons-react"
 
 import { navSections, type NavKey } from "@/components/layout/nav-items"
+import { LogoMark } from "@/components/shared/logo-mark"
 import { Badge } from "@/components/ui/badge"
 import { useGraphQL } from "@/hooks/use-graphql"
 import { isAdmin } from "@/lib/api/roles"
@@ -68,9 +69,7 @@ export function SideNav({ active, onSelect, collapsed, onToggle, user }: SideNav
         )}
       >
         <div className="flex min-w-0 items-center gap-2">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <IconDatabase size={18} stroke={1.5} />
-          </span>
+          <LogoMark size={36} className="shrink-0" />
           {collapsed ? null : (
             <>
               <span className="text-xl font-semibold tracking-tight text-strong">Halo</span>

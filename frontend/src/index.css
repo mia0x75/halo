@@ -87,6 +87,10 @@
   --halo-radius-xl: 16px;
   --halo-shadow: 0 1px 2px 0 rgb(18 18 23 / 0.05);
 
+  /* 品牌标识：深色底面配白字，浅色主题下对比度足够 */
+  --halo-logo-disc: #1a1a1a;
+  --halo-logo-glyph: #ffffff;
+
   color-scheme: light;
 }
 
@@ -101,6 +105,10 @@
   --halo-border: oklch(34.86% 0 0);
   --halo-border-muted: color-mix(in oklab, oklch(92.19% 0 0) 11.9%, transparent);
   --halo-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+
+  /* 原配色是深底白字，放在深色背景上几乎看不见，改为亮底深字 */
+  --halo-logo-disc: #f5f5f5;
+  --halo-logo-glyph: #1a1a1a;
 
   color-scheme: dark;
 }
