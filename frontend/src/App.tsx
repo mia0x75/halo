@@ -30,14 +30,17 @@ import { fetchSetupStatus } from "@/lib/api/setup"
 
 type View =
   | { kind: "nav"; key: NavKey }
-  | { kind: "ticket"; uuid: string }
-  | { kind: "ticket-create" }
-  | { kind: "ticket-edit"; uuid: string }
+  // Ticket screens remember the list they were opened from, so the sidebar
+  // keeps highlighting it and 返回列表 goes back there instead of always
+  // landing on the full ticket list.
+  | { kind: "ticket"; uuid: string; from?: NavKey }
+  | { kind: "ticket-create"; from?: NavKey }
+  | { kind: "ticket-edit"; uuid: string; from?: NavKey }
   | { kind: "cron-create" }
   | { kind: "cluster-form"; mode: "create" | "edit"; uuid?: string }
   | { kind: "group-form"; mode: "create" | "edit"; uuid?: string }
   | { kind: "user-form"; mode: "create" | "edit"; uuid?: string }
-  | { kind: "ticket-reject"; uuid: string }
+  | { kind: "ticket-reject"; uuid: string; from?: NavKey }
 
 type SetupState =
   | { status: "checking" }
@@ -77,8 +80,11 @@ export default function App() {
     setView({ kind: "nav", key: "dashboard" })
   }, [])
 
-  const openTicket = useCallback((uuid: string) => setView({ kind: "ticket", uuid }), [])
-  const createTicket = useCallback(() => setView({ kind: "ticket-create" }), [])
+  const openTicket = useCallback(
+    (uuid: string, from?: NavKey) => setView({ kind: "ticket", uuid, from }),
+    [],
+  )
+  const createTicket = useCallback((from?: NavKey) => setView({ kind: "ticket-create", from }), [])
   const createCluster = useCallback(() => setView({ kind: "cluster-form", mode: "create" }), [])
   const editCluster = useCallback(
     (uuid: string) => setView({ kind: "cluster-form", mode: "edit", uuid }),
@@ -104,7 +110,17 @@ export default function App() {
     setView({ kind: "group-form", mode: "edit", uuid })
   }, [])
 
-  const page = view.kind === "nav" ? view.key : "tickets"
+  // Ticket screens carry the list they came from; the other detail screens
+  // keep highlighting their own section.
+  const page: NavKey =
+    view.kind === "nav"
+      ? view.key
+      : view.kind === "ticket" ||
+          view.kind === "ticket-create" ||
+          view.kind === "ticket-edit" ||
+          view.kind === "ticket-reject"
+        ? (view.from ?? "tickets")
+        : "tickets"
 
   if (setup.status === "checking") {
     return (
@@ -144,7 +160,7 @@ export default function App() {
   if (view.kind === "ticket-edit") {
     return (
       <AppShell
-        active="tickets"
+        active={page}
         onSelect={(key) => setView({ kind: "nav", key })}
         user={session.user}
         onSignOut={signOut}
@@ -154,8 +170,8 @@ export default function App() {
       >
         <TicketEditPage
           uuid={view.uuid}
-          onBack={() => setView({ kind: "ticket", uuid: view.uuid })}
-          onSaved={(uuid) => setView({ kind: "ticket", uuid })}
+          onBack={() => setView({ kind: "ticket", uuid: view.uuid, from: view.from })}
+          onSaved={(uuid) => setView({ kind: "ticket", uuid, from: view.from })}
         />
       </AppShell>
     )
@@ -164,7 +180,7 @@ export default function App() {
   if (view.kind === "ticket-create") {
     return (
       <AppShell
-        active="tickets"
+        active={page}
         onSelect={(key) => setView({ kind: "nav", key })}
         user={session.user}
         onSignOut={signOut}
@@ -173,9 +189,9 @@ export default function App() {
         onOpenTicket={openTicket}
       >
         <TicketCreatePage
-          onBack={() => setView({ kind: "nav", key: "tickets" })}
+          onBack={() => setView({ kind: "nav", key: page })}
           onCreated={(uuid) => {
-            setView({ kind: "ticket", uuid })
+            setView({ kind: "ticket", uuid, from: view.from })
           }}
         />
       </AppShell>
@@ -206,7 +222,7 @@ export default function App() {
   if (view.kind === "ticket-reject") {
     return (
       <AppShell
-        active="tickets"
+        active={page}
         onSelect={(key) => setView({ kind: "nav", key })}
         user={session.user}
         onSignOut={signOut}
@@ -216,8 +232,8 @@ export default function App() {
       >
         <TicketRejectPage
           uuid={view.uuid}
-          onBack={() => setView({ kind: "ticket", uuid: view.uuid })}
-          onDone={() => setView({ kind: "ticket", uuid: view.uuid })}
+          onBack={() => setView({ kind: "ticket", uuid: view.uuid, from: view.from })}
+          onDone={() => setView({ kind: "ticket", uuid: view.uuid, from: view.from })}
         />
       </AppShell>
     )
@@ -268,7 +284,7 @@ export default function App() {
   if (view.kind === "ticket") {
     return (
       <AppShell
-        active="tickets"
+        active={page}
         onSelect={(key) => setView({ kind: "nav", key })}
         user={session.user}
         onSignOut={signOut}
@@ -278,10 +294,10 @@ export default function App() {
       >
         <TicketDetailPage
           uuid={view.uuid}
-          onBack={() => setView({ kind: "nav", key: "tickets" })}
-          onEdit={() => setView({ kind: "ticket-edit", uuid: view.uuid })}
+          onBack={() => setView({ kind: "nav", key: page })}
+          onEdit={() => setView({ kind: "ticket-edit", uuid: view.uuid, from: view.from })}
           viewerUUID={session.user.UUID}
-          onReject={(uuid) => setView({ kind: "ticket-reject", uuid })}
+          onReject={(uuid) => setView({ kind: "ticket-reject", uuid, from: view.from })}
         />
       </AppShell>
     )
@@ -295,22 +311,24 @@ export default function App() {
       onSignOut={signOut}
       onSearch={searchTickets}
       onViewMessages={viewMessages}
-      onOpenTicket={openTicket}
+      onOpenTicket={(uuid) => openTicket(uuid, page)}
     >
       {page === "dashboard" ? (
         <DashboardPage
-          onOpenTicket={openTicket}
-          onCreateTicket={createTicket}
+          onOpenTicket={(uuid) => openTicket(uuid, "dashboard")}
+          onCreateTicket={() => createTicket("dashboard")}
           onViewTickets={viewTickets}
         />
       ) : null}
-      {page === "messages" ? <MessagesPage onOpenTicket={openTicket} /> : null}
+      {page === "messages" ? (
+        <MessagesPage onOpenTicket={(uuid) => openTicket(uuid, "messages")} />
+      ) : null}
       {page === "tickets" ? (
         <TicketsPage
           key={searchKeyword}
           initialKeyword={searchKeyword}
-          onOpenTicket={openTicket}
-          onCreateTicket={createTicket}
+          onOpenTicket={(uuid) => openTicket(uuid, "tickets")}
+          onCreateTicket={() => createTicket("tickets")}
         />
       ) : null}
       {page === "clusters" ? (
@@ -320,10 +338,17 @@ export default function App() {
       {page === "violations" ? <ViolationsPage /> : null}
       {page === "logs" ? <LogsPage /> : null}
       {page === "my-tickets" ? (
-        <TicketQueuePage mode="mine" onOpenTicket={openTicket} onCreateTicket={createTicket} />
+        <TicketQueuePage
+          mode="mine"
+          onOpenTicket={(uuid) => openTicket(uuid, "my-tickets")}
+          onCreateTicket={() => createTicket("my-tickets")}
+        />
       ) : null}
       {page === "pending-review" ? (
-        <TicketQueuePage mode="review" onOpenTicket={openTicket} />
+        <TicketQueuePage
+          mode="review"
+          onOpenTicket={(uuid) => openTicket(uuid, "pending-review")}
+        />
       ) : null}
       {page === "crons" ? (
         <CronsPage onCreate={() => setView({ kind: "cron-create" })} />
