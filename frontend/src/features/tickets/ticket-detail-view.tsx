@@ -453,7 +453,7 @@ export function TicketDetailView({
               审核通过
             </AlertDialogTitle>
             <AlertDialogDescription className="mt-1 text-sm text-muted-foreground">
-              通过后工单进入待执行状态，可以立即执行或预约执行。确认通过？
+              通过后工单进入待上线执行状态，可以立即执行或预约执行。确认通过？
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="mt-5 flex justify-end gap-2">

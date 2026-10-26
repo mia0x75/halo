@@ -12,6 +12,7 @@ import (
 
 type Querier interface {
 	CountClustersByGroup(ctx context.Context, groupID int64) (int64, error)
+	// 与 ListCrons 同一口径：排除工单预约
 	CountCrons(ctx context.Context) (int64, error)
 	// 与 ListExecutionTickets 同一口径；cursor 不参与计数
 	CountExecutionTickets(ctx context.Context, arg CountExecutionTicketsParams) (int64, error)
@@ -129,6 +130,7 @@ type Querier interface {
 	ListClusters(ctx context.Context, arg ListClustersParams) ([]MmCluster, error)
 	ListComments(ctx context.Context, arg ListCommentsParams) ([]MmComment, error)
 	ListCommentsByTicket(ctx context.Context, ticketID int64) ([]MmComment, error)
+	// params 以 ["execute" 开头的是工单预约，归执行计划页管，定时任务页不展示
 	ListCrons(ctx context.Context, arg ListCronsParams) ([]MmCron, error)
 	ListEdges(ctx context.Context, arg ListEdgesParams) ([]MmEdge, error)
 	// status 由调用方固定为 LGTM；reviewer_id 传 0 表示不限审核人；scheduled 传 1 只看已预约

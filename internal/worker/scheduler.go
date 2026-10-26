@@ -373,11 +373,14 @@ func (s *Scheduler) persist(task *Task) (err error) {
 	return
 }
 
-// Crons 返回队列中的任务列表，并转化成models.Cron
-func (s *Scheduler) Crons() (L []*models.Cron, err error) {
+// JobCrons 返回队列中的系统作业列表（不含工单预约），并转化成models.Cron
+func (s *Scheduler) JobCrons() (L []*models.Cron, err error) {
 	s.Lock()
 	defer s.Unlock()
 	for _, task := range s.tasks {
+		if task.IsTicketBooking() {
+			continue
+		}
 		L = append(L, task.ToCron())
 	}
 	return

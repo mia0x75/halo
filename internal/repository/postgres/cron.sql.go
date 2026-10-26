@@ -11,9 +11,10 @@ import (
 )
 
 const countCrons = `-- name: CountCrons :one
-SELECT COUNT(*) FROM mm_crons
+SELECT COUNT(*) FROM mm_crons WHERE params NOT LIKE '["execute"%'
 `
 
+// 与 ListCrons 同一口径：排除工单预约
 func (q *Queries) CountCrons(ctx context.Context) (int64, error) {
 	row := q.db.QueryRowContext(ctx, countCrons)
 	var count int64
@@ -141,7 +142,7 @@ func (q *Queries) GetCronByUUID(ctx context.Context, uuid string) (MmCron, error
 }
 
 const listCrons = `-- name: ListCrons :many
-SELECT cron_id, uuid, status, name, cmd, params, last_run, next_run, "interval", duration, user_id, cluster_id, recurrent, hash, version, update_at, create_at FROM mm_crons WHERE cron_id < $1 ORDER BY cron_id DESC LIMIT $2
+SELECT cron_id, uuid, status, name, cmd, params, last_run, next_run, "interval", duration, user_id, cluster_id, recurrent, hash, version, update_at, create_at FROM mm_crons WHERE cron_id < $1 AND params NOT LIKE '["execute"%' ORDER BY cron_id DESC LIMIT $2
 `
 
 type ListCronsParams struct {
@@ -149,6 +150,7 @@ type ListCronsParams struct {
 	Limit  int32
 }
 
+// params 以 ["execute" 开头的是工单预约，归执行计划页管，定时任务页不展示
 func (q *Queries) ListCrons(ctx context.Context, arg ListCronsParams) ([]MmCron, error) {
 	rows, err := q.db.QueryContext(ctx, listCrons, arg.CronID, arg.Limit)
 	if err != nil {

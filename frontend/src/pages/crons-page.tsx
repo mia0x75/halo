@@ -143,7 +143,7 @@ export function CronsPage({ onCreate }: CronsPageProps) {
     <>
       <PageHeader
         title="定时任务"
-        description="系统作业按固定间隔运行，命令由服务端固定；也包含工单预约与执行记录"
+        description="系统作业按固定间隔运行，命令由服务端固定；工单预约请到执行计划页查看"
         action={
           <Button onClick={onCreate}>
             <IconPlus size={16} stroke={1.5} />

@@ -98,7 +98,7 @@ export function ExecutionPlanPage({ onOpenTicket }: ExecutionPlanPageProps) {
           setStack([])
         }}
         items={[
-          { key: "pending", label: "待执行", badge: pending.data?.executionTickets?.totalCount ?? 0 },
+          { key: "pending", label: "待上线", badge: pending.data?.executionTickets?.totalCount ?? 0 },
           { key: "scheduled", label: "已预约", badge: scheduled.data?.executionTickets?.totalCount ?? 0 },
         ]}
       />

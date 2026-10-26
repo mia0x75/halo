@@ -193,10 +193,10 @@ func (r *queryRootResolver) Crons(ctx context.Context, after *string, before *st
 	}, nil
 }
 
-// Tasks 返回所有正在等待执行的计划任务
+// Tasks 返回所有正在等待执行的系统作业（工单预约归执行计划页，不在此列）
 func (r *queryRootResolver) Tasks(ctx context.Context) (L []*models.Cron, err error) {
 	s := worker.NewScheduler()
-	return s.Crons()
+	return s.JobCrons()
 }
 
 // cronJob is one schedulable system job. The command is fixed by the server:

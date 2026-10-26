@@ -17,11 +17,13 @@ DELETE FROM mm_crons WHERE cron_id = $1;
 DELETE FROM mm_crons WHERE uuid = $1;
 
 -- name: ListCrons :many
-SELECT cron_id, uuid, status, name, cmd, params, last_run, next_run, "interval", duration, user_id, cluster_id, recurrent, hash, version, update_at, create_at FROM mm_crons WHERE cron_id < $1 ORDER BY cron_id DESC LIMIT $2;
+-- params 以 ["execute" 开头的是工单预约，归执行计划页管，定时任务页不展示
+SELECT cron_id, uuid, status, name, cmd, params, last_run, next_run, "interval", duration, user_id, cluster_id, recurrent, hash, version, update_at, create_at FROM mm_crons WHERE cron_id < $1 AND params NOT LIKE '["execute"%' ORDER BY cron_id DESC LIMIT $2;
 
 -- name: ListSchedulableCrons :many
 SELECT cron_id, uuid, status, name, cmd, params, last_run, next_run, "interval", duration, user_id, cluster_id, recurrent, hash, version, update_at, create_at FROM mm_crons WHERE recurrent = 1 OR (recurrent <> 1 AND status IN ('P', 'H'));
 
 
 -- name: CountCrons :one
-SELECT COUNT(*) FROM mm_crons;
+-- 与 ListCrons 同一口径：排除工单预约
+SELECT COUNT(*) FROM mm_crons WHERE params NOT LIKE '["execute"%';

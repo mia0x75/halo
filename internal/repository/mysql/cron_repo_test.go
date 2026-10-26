@@ -63,6 +63,37 @@ func TestCronRepo(t *testing.T) {
 	require.ErrorIs(t, err, domain.ErrNotFound)
 }
 
+// Ticket bookings must stay out of the system job list and its count.
+func TestCronRepoSkipsTicketBookings(t *testing.T) {
+	repo := NewCronRepo(setupTestDB(t))
+	ctx := context.Background()
+
+	base, err := repo.Count(ctx)
+	require.NoError(t, err)
+
+	oneShot := uint8(0)
+	booking := &domain.Cron{
+		UUID:      newUUID(),
+		Status:    domain.CronStatusPending,
+		Name:      "booking-" + newSuffix(),
+		Cmd:       "halocli",
+		Params:    `["execute","-T","some-ticket"]`,
+		Recurrent: &oneShot,
+		Version:   1,
+		CreateAt:  nowUnix(),
+	}
+	_, err = repo.Create(ctx, booking)
+	require.NoError(t, err)
+
+	list, err := repo.List(ctx, int64(math.MaxUint32), 1000)
+	require.NoError(t, err)
+	require.False(t, hasCron(list, booking.UUID))
+
+	after, err := repo.Count(ctx)
+	require.NoError(t, err)
+	require.Equal(t, base, after)
+}
+
 func hasCron(list []*domain.Cron, uuid string) bool {
 	for _, it := range list {
 		if it.UUID == uuid {

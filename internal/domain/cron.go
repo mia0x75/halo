@@ -12,6 +12,11 @@ const (
 	CronStatusCancelled CronStatus = "C"
 )
 
+// TicketExecuteCmd is the halocli subcommand ScheduleTicket puts at the head
+// of a booking's params. Crons carrying it belong to the execution plan page,
+// not the system job pages.
+const TicketExecuteCmd = "execute"
+
 // Cron is a row of mm_crons.
 type Cron struct {
 	CronID    uint       `db:"cron_id"`

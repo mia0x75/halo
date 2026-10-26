@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/mia0x75/halo/internal/domain"
 	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/tools"
 )
@@ -88,6 +89,14 @@ func (t *Task) Run() {
 		return
 	}
 	t.NextRun = t.NextRun.Add(t.Interval)
+}
+
+// IsTicketBooking reports whether the task is a one-off ticket execution
+// booked via ScheduleTicket; those belong to the execution plan page.
+func (t *Task) IsTicketBooking() bool {
+	t.Lock()
+	defer t.Unlock()
+	return len(t.Params) > 0 && t.Params[0] == domain.TicketExecuteCmd
 }
 
 // ToCron 将task结构转成models.Cron
