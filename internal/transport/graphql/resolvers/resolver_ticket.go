@@ -581,14 +581,11 @@ func ticketStatusName(s domain.TicketStatus) gqlapi.TicketStatusEnum {
 	return ""
 }
 
-// ExecuteTicket 执行一个工单，公用ScheduleTicket，所有错误由ScheduleTicket处理
+// ExecuteTicket 立刻执行一个工单：等价于把执行时间设为当前时刻的预约，
+// 真正的执行由调度器在下一秒的 tick 中异步完成。
 func (r *mutationRootResolver) ExecuteTicket(ctx context.Context, id string) (ok bool, err error) {
-	input := models.ScheduleTicketInput{
-		TicketUUID: id,
-		Schedule:   time.Now().UTC().Format("2006-01-02 15:04:05"),
-	}
-
-	if _, err = r.ScheduleTicket(ctx, input); err == nil {
+	// 调度器按秒触发，留一秒余量，避免刚写入就被判定为「不是未来时间」。
+	if _, err = r.scheduleTicket(ctx, id, time.Now().Add(time.Second)); err == nil {
 		ok = true
 	}
 
@@ -597,6 +594,24 @@ func (r *mutationRootResolver) ExecuteTicket(ctx context.Context, id string) (ok
 
 // ScheduleTicket 预约执行一个工单
 func (r *mutationRootResolver) ScheduleTicket(ctx context.Context, input models.ScheduleTicketInput) (cron *models.Cron, err error) {
+	local, zoneErr := time.LoadLocation("Local")
+	if zoneErr != nil {
+		local = time.Local
+	}
+	when, parseErr := time.ParseInLocation("2006-01-02 15:04:05", strings.TrimSpace(input.Schedule), local)
+	if parseErr != nil {
+		return nil, fmt.Errorf("错误代码: %s, 错误信息: 预约时间(schedule=%s)无效，格式应为 YYYY-MM-DD HH:mm:ss。", gqlapi.ReturnCodeInvalidParams, input.Schedule)
+	}
+	if !when.After(time.Now()) {
+		return nil, fmt.Errorf("错误代码: %s, 错误信息: 预约时间必须晚于当前时间。", gqlapi.ReturnCodeInvalidParams)
+	}
+
+	return r.scheduleTicket(ctx, input.TicketUUID, when)
+}
+
+// scheduleTicket 是 ExecuteTicket 与 ScheduleTicket 的共同实现：校验工单可执行、
+// 建立一次性调度、把预约回写工单。错误信息已带返回码，调用方直接透传。
+func (r *mutationRootResolver) scheduleTicket(ctx context.Context, ticketUUID string, when time.Time) (cron *models.Cron, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
 		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
@@ -608,11 +623,11 @@ func (r *mutationRootResolver) ScheduleTicket(ctx context.Context, input models.
 			break
 		}
 
-		t, getErr := r.app.Services.Ticket.GetByUUID(ctx, input.TicketUUID)
+		t, getErr := r.app.Services.Ticket.GetByUUID(ctx, ticketUUID)
 		if getErr != nil {
 			if errors.Is(getErr, domain.ErrNotFound) {
 				rc = gqlapi.ReturnCodeNotFound
-				err = fmt.Errorf("错误代码: %s, 错误信息: 工单(uuid=%s)不存在。", rc, input.TicketUUID)
+				err = fmt.Errorf("错误代码: %s, 错误信息: 工单(uuid=%s)不存在。", rc, ticketUUID)
 			} else {
 				rc = gqlapi.ReturnCodeUnknowError
 				err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, getErr.Error())
@@ -621,27 +636,27 @@ func (r *mutationRootResolver) ScheduleTicket(ctx context.Context, input models.
 		}
 		ticket := bridge.TicketFromDomain(t)
 
-		// 判断工单的状态，只有系统审核成功的状态才允许执行
+		// 只有审核通过等待上线执行的工单才可以执行或预约
 		if ticket.Status != gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumLgtm] {
-			// TODO: 处理rc，处理错误信息
+			rc = gqlapi.ReturnCodeInvalidParams
 			err = fmt.Errorf("错误代码: %s, 错误信息: 工单(uuid=%s)当前不可执行。", rc, ticket.UUID)
 			break
 		}
 
-		// 不判断用户状态，因为这个用户是从Context中获取的，前面的代码已经做了判断
-		if ticket.ReviewerID != user.UserID {
-			// TODO: 处理rc，处理错误信息
-			err = fmt.Errorf("错误代码: %s, 错误信息: xxxx。", rc)
+		// 执行权属于工单指定的审核人，管理员可代为执行
+		if ticket.ReviewerID != user.UserID && !authz.IsAdmin(credential.Roles) {
+			rc = gqlapi.ReturnCodeForbidden
+			err = fmt.Errorf("错误代码: %s, 错误信息: 用户(uuid=%s)不是工单(uuid=%s)的审核人。", rc, user.UUID, ticket.UUID)
 			break
 		}
 
-		// 工单当前状态是LGTM才允许执行
-		if ticket.Status != gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumLgtm] {
-			err = fmt.Errorf("错误代码: %s, 错误信息: xxxx。", rc)
+		// 已有预约的工单必须先取消，否则一次变更会产生多条调度
+		if ticket.CronID.Valid {
+			rc = gqlapi.ReturnCodeInvalidParams
+			err = fmt.Errorf("错误代码: %s, 错误信息: 工单(uuid=%s)已存在预约，请先取消预约。", rc, ticket.UUID)
 			break
 		}
 
-		// 是否需要判断群集的状态
 		cluster := cache.ClustersMap.Any(func(elem *models.Cluster) bool {
 			return elem.ClusterID == ticket.ClusterID
 		})
@@ -659,13 +674,17 @@ func (r *mutationRootResolver) ScheduleTicket(ctx context.Context, input models.
 
 		// 启动一个计划
 		s := worker.NewScheduler()
-		local, _ := time.LoadLocation("Local")
-		when, _ := time.ParseInLocation("2006-01-02 15:04:05", input.Schedule, local)
-		cronUUID, _ := s.RunAt(when, ticket.Subject, "execute", "-T", ticket.UUID)
+		cronUUID, runErr := s.RunAt(when, ticket.Subject, "execute", "-T", ticket.UUID)
+		if runErr != nil {
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, runErr.Error())
+			break
+		}
 
 		domainCron, cronErr := r.app.Services.Cron.GetByUUID(ctx, cronUUID)
 		if cronErr != nil {
 			cron = nil
+			r.cancelSchedule(cronUUID)
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, cronErr.Error())
 			break
@@ -675,13 +694,16 @@ func (r *mutationRootResolver) ScheduleTicket(ctx context.Context, input models.
 		domainCron.ClusterID = ticket.ClusterID
 		if updErr := r.app.Services.Cron.Update(ctx, domainCron, user.UserID); updErr != nil {
 			cron = nil
+			r.cancelSchedule(cronUUID)
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, updErr.Error())
 			break
 		}
 		cron = bridge.CronFromDomain(domainCron)
 
-		if updErr := r.app.Services.Ticket.UpdateCron(ctx, input.TicketUUID, cron.CronID); updErr != nil {
+		if updErr := r.app.Services.Ticket.UpdateCron(ctx, ticket.UUID, cron.CronID); updErr != nil {
+			cron = nil
+			r.cancelSchedule(cronUUID)
 			rc = gqlapi.ReturnCodeUnknowError
 			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, updErr.Error())
 			break
@@ -702,6 +724,13 @@ func (r *mutationRootResolver) ScheduleTicket(ctx context.Context, input models.
 	}
 
 	return
+}
+
+// cancelSchedule 回滚一次失败的预约：调度已经落库，不能留下没人认领的孤儿任务。
+func (r *mutationRootResolver) cancelSchedule(cronUUID string) {
+	if cancelErr := worker.NewScheduler().Cancel(cronUUID); cancelErr != nil {
+		log.Errorf("[E] Failed to cancel schedule(uuid=%s) after a failed ticket schedule, err: %s", cronUUID, cancelErr.Error())
+	}
 }
 
 // Ticket 查看一个工单
@@ -810,6 +839,85 @@ func (r *queryRootResolver) Tickets(ctx context.Context, after *string, before *
 	}, nil
 }
 
+// ExecutionTickets 分页查看待上线执行的工单：审核人只看分派给自己的，管理员看全部。
+func (r *queryRootResolver) ExecutionTickets(ctx context.Context, after *string, before *string, first *int, last *int, scheduled *bool) (*gqlapi.TicketConnection, error) {
+	// 参数判断，只允许 first/before first/after last/before last/after 模式
+	if first != nil && last != nil {
+		return nil, fmt.Errorf("错误代码: %s, 错误信息: 参数`first`和`last`只能选择一种。", gqlapi.ReturnCodeInvalidParams)
+	}
+	if after != nil && before != nil {
+		return nil, fmt.Errorf("错误代码: %s, 错误信息: 参数`after`和`before`只能选择一种。", gqlapi.ReturnCodeInvalidParams)
+	}
+
+	from := math.MaxInt64
+	if after != nil {
+		b, err := base64.StdEncoding.DecodeString(*after)
+		if err != nil {
+			return nil, err
+		}
+		i, err := strconv.Atoi(strings.TrimPrefix(string(b), "cursor"))
+		if err != nil {
+			return nil, err
+		}
+		from = i
+	}
+	hasPreviousPage := from != math.MaxInt64
+	limit := defaultPageSize
+	if first != nil && *first > 0 {
+		limit = *first
+	}
+
+	credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
+	// 审核人只能执行分派给自己的工单，管理员不受限制（reviewerID=0 表示不限）。
+	var reviewerID uint
+	if !authz.IsAdmin(credential.Roles) {
+		reviewerID = credential.User.UserID
+	}
+	scheduledOnly := scheduled != nil && *scheduled
+
+	// 列表不允许查询Content内容
+	domainTickets, err := r.app.Services.Ticket.ListExecutionTickets(ctx, reviewerID, scheduledOnly, int64(from), probeLimit(limit))
+	if err != nil {
+		return nil, err
+	}
+	// 多取一条探测下一页，避免「刚好填满一页」被误判成还有下一页。
+	pageTickets, hasNextPage := trimKeysetPage(domainTickets, limit)
+
+	edges := []*gqlapi.TicketEdge{}
+	for _, t := range pageTickets {
+		m := bridge.TicketFromDomain(t)
+		m.Content = ""
+		edges = append(edges, &gqlapi.TicketEdge{
+			Node:   m,
+			Cursor: EncodeCursor(fmt.Sprintf("%d", m.TicketID)),
+		})
+	}
+
+	if len(edges) == 0 {
+		return nil, nil
+	}
+	// 执行计划页依赖 totalCount 显示数量，必须按同一过滤条件统计全表。
+	total, err := r.app.Services.Ticket.CountExecutionTickets(ctx, reviewerID, scheduledOnly)
+	if err != nil {
+		return nil, err
+	}
+	// 获取pageInfo
+	startCursor := edges[0].Cursor
+	endCursor := edges[len(edges)-1].Cursor
+	pageInfo := &gqlapi.PageInfo{
+		HasPreviousPage: hasPreviousPage,
+		HasNextPage:     hasNextPage,
+		StartCursor:     startCursor,
+		EndCursor:       endCursor,
+	}
+
+	return &gqlapi.TicketConnection{
+		PageInfo:   pageInfo,
+		Edges:      edges,
+		TotalCount: int(total),
+	}, nil
+}
+
 // TicketSearch 工单搜索，TODO: 下一个版本考虑实现
 func (r *queryRootResolver) TicketSearch(ctx context.Context, search string, after *string, before *string, first *int, last *int) (*gqlapi.TicketConnection, error) {
 	rc := gqlapi.ReturnCodeOK
@@ -863,18 +971,19 @@ func (r *ticketResolver) Reviewer(ctx context.Context, obj *models.Ticket) (*mod
 	return deletedUserPlaceholder(obj.ReviewerID), nil
 }
 
-// Cron 执行预约信息
+// Cron 执行预约信息。
+// RemoveCron 删除预约行时不会清掉工单上的 cron_id，悬空引用要按「没有预约」
+// 处理：Cron 是可空字段，报错会让整条工单在列表里变 null。
 func (r *ticketResolver) Cron(ctx context.Context, obj *models.Ticket) (cron *models.Cron, err error) {
-	rc := gqlapi.ReturnCodeOK
 	if !obj.CronID.Valid {
 		return
 	}
 	c, getErr := r.app.Services.Cron.Get(ctx, uint(obj.CronID.Int64))
 	if getErr != nil {
-		cron = nil
-		rc = gqlapi.ReturnCodeUnknowError
-		err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, getErr.Error())
-		return
+		if errors.Is(getErr, domain.ErrNotFound) {
+			return nil, nil
+		}
+		return nil, getErr
 	}
 	cron = bridge.CronFromDomain(c)
 

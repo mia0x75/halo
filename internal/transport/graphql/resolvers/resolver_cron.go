@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"strconv"
@@ -18,37 +19,75 @@ import (
 	"github.com/mia0x75/halo/internal/models"
 	"github.com/mia0x75/halo/internal/platform/config"
 	transportauth "github.com/mia0x75/halo/internal/transport/auth"
+	"github.com/mia0x75/halo/internal/transport/graphql/authz"
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 	"github.com/mia0x75/halo/internal/worker"
 )
 
-// CancelCron 取消一个预约（工单关闭）
+// CancelCron 取消一个工单预约：调度标记为已取消，工单回到待上线执行队列
 func (r *mutationRootResolver) CancelCron(ctx context.Context, id string) (ok bool, err error) {
 	for {
 		rc := gqlapi.ReturnCodeOK
-		s := worker.NewScheduler()
-		if err = s.Cancel(id); err != nil {
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, err.Error())
-			break
-		}
-
 		credential := ctx.Value(config.CREDENTIAL_KEY).(transportauth.Credential)
+		user := credential.User
+
 		domainCron, cronErr := r.app.Services.Cron.GetByUUID(ctx, id)
 		if cronErr != nil {
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, cronErr.Error())
+			if errors.Is(cronErr, domain.ErrNotFound) {
+				rc = gqlapi.ReturnCodeNotFound
+				err = fmt.Errorf("错误代码: %s, 错误信息: 预约(uuid=%s)不存在。", rc, id)
+			} else {
+				rc = gqlapi.ReturnCodeUnknowError
+				err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, cronErr.Error())
+			}
 			break
 		}
 		cron := bridge.CronFromDomain(domainCron)
 
 		domainTicket, tkErr := r.app.Services.Ticket.GetByCronID(ctx, cron.CronID)
 		if tkErr != nil {
-			rc = gqlapi.ReturnCodeUnknowError
-			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, tkErr.Error())
+			if errors.Is(tkErr, domain.ErrNotFound) {
+				rc = gqlapi.ReturnCodeNotFound
+				err = fmt.Errorf("错误代码: %s, 错误信息: 预约(uuid=%s)没有关联的工单。", rc, id)
+			} else {
+				rc = gqlapi.ReturnCodeUnknowError
+				err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, tkErr.Error())
+			}
 			break
 		}
 		ticket := bridge.TicketFromDomain(domainTicket)
+
+		if ticket.Status != gqlapi.TicketStatusEnumMap[gqlapi.TicketStatusEnumLgtm] {
+			rc = gqlapi.ReturnCodeInvalidParams
+			err = fmt.Errorf("错误代码: %s, 错误信息: 工单(uuid=%s)当前不可取消预约。", rc, ticket.UUID)
+			break
+		}
+
+		// 取消权与执行权同口径：审核人与预约人本人，管理员可代为处理
+		if ticket.ReviewerID != user.UserID && cron.UserID != user.UserID && !authz.IsAdmin(credential.Roles) {
+			rc = gqlapi.ReturnCodeForbidden
+			err = fmt.Errorf("错误代码: %s, 错误信息: 用户(uuid=%s)无权取消工单(uuid=%s)的预约。", rc, user.UUID, ticket.UUID)
+			break
+		}
+
+		// 重启后调度可能已不在内存中，此时直接把库里的预约置为已取消，
+		// 否则调度器下一次装载会把它重新捡起来。
+		if cancelErr := worker.NewScheduler().Cancel(id); cancelErr != nil {
+			domainCron.Status = domain.CronStatusCancelled
+			if updErr := r.app.Services.Cron.Update(ctx, domainCron, user.UserID); updErr != nil {
+				rc = gqlapi.ReturnCodeUnknowError
+				err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, updErr.Error())
+				break
+			}
+		}
+		worker.Reload()
+
+		// 工单保持 LGTM，只摘掉预约，取消后可以重新预约或立即执行
+		if clearErr := r.app.Services.Ticket.ClearCron(ctx, ticket.UUID); clearErr != nil {
+			rc = gqlapi.ReturnCodeUnknowError
+			err = fmt.Errorf("错误代码: %s, 错误信息: %s", rc, clearErr.Error())
+			break
+		}
 
 		event.Fire(event.EventCronCancelled, &event.CronCancelled{
 			User:   *credential.User,

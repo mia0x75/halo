@@ -393,6 +393,7 @@ type ComplexityRoot struct {
 		Crons                func(childComplexity int, after *string, before *string, first *int, last *int) int
 		Databases            func(childComplexity int, clusterUUID string) int
 		Environments         func(childComplexity int) int
+		ExecutionTickets     func(childComplexity int, after *string, before *string, first *int, last *int, scheduled *bool) int
 		Glossaries           func(childComplexity int, groups []string) int
 		Groups               func(childComplexity int) int
 		Logs                 func(childComplexity int, after *string, before *string, first *int, last *int) int
@@ -696,6 +697,7 @@ type QueryRootResolver interface {
 	Templates(ctx context.Context) ([]*models.Template, error)
 	Ticket(ctx context.Context, id string) (*models.Ticket, error)
 	Tickets(ctx context.Context, after *string, before *string, first *int, last *int, status *uint8, keyword *string) (*TicketConnection, error)
+	ExecutionTickets(ctx context.Context, after *string, before *string, first *int, last *int, scheduled *bool) (*TicketConnection, error)
 	TicketSearch(ctx context.Context, search string, after *string, before *string, first *int, last *int) (*TicketConnection, error)
 	User(ctx context.Context, id string) (*models.User, error)
 	Users(ctx context.Context, after *string, before *string, first *int, last *int) (*UserConnection, error)
@@ -2457,6 +2459,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.QueryRoot.Environments(childComplexity), true
+	case "QueryRoot.executionTickets":
+		if e.ComplexityRoot.QueryRoot.ExecutionTickets == nil {
+			break
+		}
+
+		args, err := ec.field_QueryRoot_executionTickets_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.QueryRoot.ExecutionTickets(childComplexity, args["after"].(*string), args["before"].(*string), args["first"].(*int), args["last"].(*int), args["scheduled"].(*bool)), true
 	case "QueryRoot.glossaries":
 		if e.ComplexityRoot.QueryRoot.Glossaries == nil {
 			break
@@ -5838,6 +5851,52 @@ func (ec *executionContext) field_QueryRoot_databases_args(ctx context.Context, 
 		return nil, err
 	}
 	args["ClusterUUID"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_QueryRoot_executionTickets_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["after"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "before",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["before"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg2
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "last",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["last"] = arg3
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "scheduled",
+		func(ctx context.Context, v any) (*bool, error) {
+			return ec.unmarshalOBoolean2ᚖbool(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["scheduled"] = arg4
 	return args, nil
 }
 
@@ -12703,7 +12762,7 @@ func (ec *executionContext) _MutationRoot_executeTicket(ctx context.Context, fie
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"REVIEWER"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -12765,7 +12824,7 @@ func (ec *executionContext) _MutationRoot_scheduleTicket(ctx context.Context, fi
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"REVIEWER"})
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"REVIEWER", "ADMIN"})
 				if err != nil {
 					var zeroVal *models.Cron
 					return zeroVal, err
@@ -15367,6 +15426,68 @@ func (ec *executionContext) fieldContext_QueryRoot_tickets(ctx context.Context, 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_QueryRoot_tickets_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _QueryRoot_executionTickets(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_QueryRoot_executionTickets(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.QueryRoot().ExecutionTickets(ctx, fc.Args["after"].(*string), fc.Args["before"].(*string), fc.Args["first"].(*int), fc.Args["last"].(*int), fc.Args["scheduled"].(*bool))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				requires, err := ec.unmarshalNRoleEnum2ᚕgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐRoleEnumᚄ(ctx, []any{"REVIEWER", "ADMIN"})
+				if err != nil {
+					var zeroVal *TicketConnection
+					return zeroVal, err
+				}
+				if ec.Directives.Auth == nil {
+					var zeroVal *TicketConnection
+					return zeroVal, errors.New("directive auth is not implemented")
+				}
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *TicketConnection) graphql.Marshaler {
+			return ec.marshalOTicketConnection2ᚖgithubᚗcomᚋmia0x75ᚋhaloᚋinternalᚋtransportᚋgraphqlᚋgqlapiᚐTicketConnection(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_QueryRoot_executionTickets(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "QueryRoot",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_TicketConnection(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_QueryRoot_executionTickets_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -27760,6 +27881,12 @@ func (ec *executionContext) _QueryRoot(ctx context.Context, sel ast.SelectionSet
 				true, false,
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._QueryRoot_tickets(ctx, field)
+				})
+		case "executionTickets":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._QueryRoot_executionTickets(ctx, field)
 				})
 		case "ticketSearch":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,

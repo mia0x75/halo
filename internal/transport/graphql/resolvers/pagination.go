@@ -12,6 +12,10 @@ import (
 	"github.com/mia0x75/halo/internal/transport/graphql/gqlapi"
 )
 
+// defaultPageSize is the page size used when a list query omits `first`.
+// It matches the size the web UI requests.
+const defaultPageSize = 10
+
 // probeLimit returns the row count to request from the store for a page of
 // `first` rows. One extra row is fetched so the caller can tell whether a next
 // page actually exists instead of guessing from a full page.
