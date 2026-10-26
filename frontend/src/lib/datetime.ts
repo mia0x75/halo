@@ -12,3 +12,13 @@ export function scheduleMinValue(): string {
     `T${pad(date.getHours())}:${pad(date.getMinutes())}`
   )
 }
+
+/** 本地时区的日键 `YYYY-MM-DD`，用于把时间点归入日历格。 */
+export function localDayKey(date: Date): string {
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+}
+
+/** 周一为一周第一天时的前置空位数。 */
+export function leadingBlanks(first: Date): number {
+  return (first.getDay() + 6) % 7
+}
