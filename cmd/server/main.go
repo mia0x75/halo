@@ -117,12 +117,14 @@ func main() {
 	addr := config.Config().Listen
 	certFile := config.Config().Cert
 	keyFile := config.Config().Key
-	for _, path := range []string{certFile, keyFile} {
-		if _, err := os.Stat(path); err != nil {
-			lg.Fatalf("[F] missing TLS certificate %s (relative to working directory); place it there or set cert/key in the config given to -c", path)
-		}
+	// TLS 是可选项：证书缺失（没有 certs 目录或目录为空）时直接跑 HTTP，
+	// 让内网首次部署不必先自签证书才能打开 /welcome。
+	useTLS := fileExists(certFile) && fileExists(keyFile)
+	if useTLS {
+		lg.Infof("[I] https listening %s", addr)
+	} else {
+		lg.Warnf("[W] TLS certificate not found (%s / %s); serving plain http on %s", certFile, keyFile, addr)
 	}
-	lg.Infof("[I] http listening %s", addr)
 
 	srv := &http.Server{
 		Addr:         addr,
@@ -136,7 +138,13 @@ func main() {
 	// csrf + gzip
 	// Run our server in a goroutine so that it doesn't block.
 	go func() {
-		if err := srv.ListenAndServeTLS(certFile, keyFile); err != http.ErrServerClosed {
+		var err error
+		if useTLS {
+			err = srv.ListenAndServeTLS(certFile, keyFile)
+		} else {
+			err = srv.ListenAndServe()
+		}
+		if err != http.ErrServerClosed {
 			lg.Fatalf("code: 1500, message: %s", err.Error())
 		}
 	}()
@@ -217,6 +225,12 @@ func normalRouter(application *app.App) http.Handler {
 		server.ProfilerRoutes(r)
 	}
 	return r
+}
+
+// fileExists reports whether path is a regular file.
+func fileExists(path string) bool {
+	fi, err := os.Stat(path)
+	return err == nil && !fi.IsDir()
 }
 
 // configureAuth applies the JWT settings to the auth package.
