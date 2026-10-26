@@ -555,13 +555,20 @@ export function TicketDetailView({
   )
 }
 
-/** datetime-local 的墙上时间转成后端约定的本地时间串。 */
+/** datetime-local 的墙上时间转成后端约定的本地时间串（空格分隔、补秒）。 */
 function toScheduleParam(value: string): string {
-  return value.length === 16 ? `${value}:00` : value
+  const withSeconds = value.length === 16 ? `${value}:00` : value
+  return withSeconds.replace("T", " ")
 }
 
 function isFutureLocalTime(value: string): boolean {
-  const when = new Date(toScheduleParam(value)).getTime()
+  // datetime-local 是墙上时间，new Date 对空格分隔的串并非所有浏览器都支持，
+  // 按字段拆开后用本地时区构造。
+  const [datePart, timePart] = value.split("T")
+  if (!datePart || !timePart) return false
+  const [y, m, d] = datePart.split("-").map(Number)
+  const [hh, mm, ss = "0"] = timePart.split(":")
+  const when = new Date(y, m - 1, d, Number(hh), Number(mm), Number(ss)).getTime()
   return Number.isFinite(when) && when > Date.now()
 }
 
