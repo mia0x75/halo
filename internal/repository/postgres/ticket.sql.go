@@ -11,6 +11,33 @@ import (
 	"time"
 )
 
+const countExecutionTickets = `-- name: CountExecutionTickets :one
+SELECT COUNT(*) FROM mm_tickets
+WHERE status = $1
+  AND (reviewer_id = $2 OR $3::bigint = 0)
+  AND ($4::int = 0 OR cron_id IS NOT NULL)
+`
+
+type CountExecutionTicketsParams struct {
+	Status     int16
+	ReviewerID int64
+	Column3    int64
+	Column4    int32
+}
+
+// 与 ListExecutionTickets 同一口径；cursor 不参与计数
+func (q *Queries) CountExecutionTickets(ctx context.Context, arg CountExecutionTicketsParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countExecutionTickets,
+		arg.Status,
+		arg.ReviewerID,
+		arg.Column3,
+		arg.Column4,
+	)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const countTicketsByStatus = `-- name: CountTicketsByStatus :many
 SELECT status, COUNT(*) AS count FROM mm_tickets WHERE create_at >= $1 AND create_at < $2 GROUP BY status ORDER BY status
 `
@@ -194,6 +221,69 @@ func (q *Queries) GetTicketByUUID(ctx context.Context, uuid string) (MmTicket, e
 		&i.CreateAt,
 	)
 	return i, err
+}
+
+const listExecutionTickets = `-- name: ListExecutionTickets :many
+SELECT ticket_id, uuid, cluster_id, "database", subject, content, status, user_id, reviewer_id, cron_id, version, update_at, create_at FROM mm_tickets
+WHERE ticket_id < $1
+  AND status = $2
+  AND (reviewer_id = $3 OR $4::bigint = 0)
+  AND ($5::int = 0 OR cron_id IS NOT NULL)
+ORDER BY ticket_id DESC LIMIT $6
+`
+
+type ListExecutionTicketsParams struct {
+	TicketID   int64
+	Status     int16
+	ReviewerID int64
+	Column4    int64
+	Column5    int32
+	Limit      int32
+}
+
+// status 由调用方固定为 LGTM；reviewer_id 传 0 表示不限审核人；scheduled 传 1 只看已预约
+func (q *Queries) ListExecutionTickets(ctx context.Context, arg ListExecutionTicketsParams) ([]MmTicket, error) {
+	rows, err := q.db.QueryContext(ctx, listExecutionTickets,
+		arg.TicketID,
+		arg.Status,
+		arg.ReviewerID,
+		arg.Column4,
+		arg.Column5,
+		arg.Limit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []MmTicket{}
+	for rows.Next() {
+		var i MmTicket
+		if err := rows.Scan(
+			&i.TicketID,
+			&i.Uuid,
+			&i.ClusterID,
+			&i.Database,
+			&i.Subject,
+			&i.Content,
+			&i.Status,
+			&i.UserID,
+			&i.ReviewerID,
+			&i.CronID,
+			&i.Version,
+			&i.UpdateAt,
+			&i.CreateAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listTickets = `-- name: ListTickets :many

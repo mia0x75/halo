@@ -36,6 +36,22 @@ SELECT ticket_id, uuid, cluster_id, `database`, subject, content, status, user_i
 -- name: ListTicketsByReviewer :many
 SELECT ticket_id, uuid, cluster_id, `database`, subject, content, status, user_id, reviewer_id, cron_id, version, update_at, create_at FROM mm_tickets WHERE reviewer_id = ? ORDER BY ticket_id;
 
+-- name: ListExecutionTickets :many
+-- status 由调用方固定为 LGTM；reviewer_id 传 0 表示不限审核人；scheduled 传 1 只看已预约
+SELECT ticket_id, uuid, cluster_id, `database`, subject, content, status, user_id, reviewer_id, cron_id, version, update_at, create_at FROM mm_tickets
+WHERE ticket_id < ?
+  AND status = ?
+  AND (reviewer_id = ? OR CAST(? AS SIGNED) = 0)
+  AND (CAST(? AS SIGNED) = 0 OR cron_id IS NOT NULL)
+ORDER BY ticket_id DESC LIMIT ?;
+
+-- name: CountExecutionTickets :one
+-- 与 ListExecutionTickets 同一口径；cursor 不参与计数
+SELECT COUNT(*) FROM mm_tickets
+WHERE status = ?
+  AND (reviewer_id = ? OR CAST(? AS SIGNED) = 0)
+  AND (CAST(? AS SIGNED) = 0 OR cron_id IS NOT NULL);
+
 -- name: CountTicketsByStatus :many
 SELECT status, COUNT(*) AS count FROM mm_tickets WHERE create_at >= ? AND create_at < ? GROUP BY status ORDER BY status;
 

@@ -167,6 +167,42 @@ func (r *TicketRepo) ListByReviewer(ctx context.Context, userID uint) ([]*domain
 	return out, nil
 }
 
+// ListExecutionTickets lists LGTM tickets newest first. A zero reviewer id
+// means every reviewer; scheduledOnly keeps the rows that already have a cron.
+func (r *TicketRepo) ListExecutionTickets(ctx context.Context, reviewerID uint, scheduledOnly bool, cursor int64, limit int) ([]*domain.Ticket, error) {
+	rows, err := r.q.ListExecutionTickets(ctx, ListExecutionTicketsParams{
+		TicketID:   clampUint32(cursor),
+		Status:     uint8(domain.TicketStatusLgtm),
+		ReviewerID: clampUint(reviewerID),
+		Column4:    int64(reviewerID),
+		Column5:    int64(boolToInt(scheduledOnly)),
+		Limit:      clampInt32(limit),
+	})
+	if err != nil {
+		return nil, wrap("ticket.ListExecutionTickets", err)
+	}
+	out := make([]*domain.Ticket, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, ticketFromRow(row))
+	}
+	return out, nil
+}
+
+// CountExecutionTickets counts the rows ListExecutionTickets would return
+// without applying the page cursor.
+func (r *TicketRepo) CountExecutionTickets(ctx context.Context, reviewerID uint, scheduledOnly bool) (int64, error) {
+	n, err := r.q.CountExecutionTickets(ctx, CountExecutionTicketsParams{
+		Status:     uint8(domain.TicketStatusLgtm),
+		ReviewerID: clampUint(reviewerID),
+		Column3:    int64(reviewerID),
+		Column4:    int64(boolToInt(scheduledOnly)),
+	})
+	if err != nil {
+		return 0, wrap("ticket.CountExecutionTickets", err)
+	}
+	return n, nil
+}
+
 // CountByStatus counts the tickets per status inside a time window.
 func (r *TicketRepo) CountByStatus(ctx context.Context, from, to uint) ([]domain.TicketStatusCount, error) {
 	rows, err := r.q.CountTicketsByStatus(ctx, CountTicketsByStatusParams{

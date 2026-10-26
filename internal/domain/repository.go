@@ -119,6 +119,12 @@ type TicketRepository interface {
 	ListByUser(ctx context.Context, userID uint) ([]*Ticket, error)
 	// ListByReviewer returns every ticket the user reviews, oldest first.
 	ListByReviewer(ctx context.Context, userID uint) ([]*Ticket, error)
+	// ListExecutionTickets lists LGTM tickets newest first. reviewerID 0 means
+	// every reviewer; scheduledOnly keeps the rows that already carry a cron id.
+	ListExecutionTickets(ctx context.Context, reviewerID uint, scheduledOnly bool, cursor int64, limit int) ([]*Ticket, error)
+	// CountExecutionTickets counts the same rows as ListExecutionTickets,
+	// independent of any page cursor.
+	CountExecutionTickets(ctx context.Context, reviewerID uint, scheduledOnly bool) (int64, error)
 	// CountByStatus counts the tickets per status inside a time window.
 	CountByStatus(ctx context.Context, from, to uint) ([]TicketStatusCount, error)
 }

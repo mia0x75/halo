@@ -13,6 +13,8 @@ import (
 type Querier interface {
 	CountClustersByGroup(ctx context.Context, groupID int64) (int64, error)
 	CountCrons(ctx context.Context) (int64, error)
+	// 与 ListExecutionTickets 同一口径；cursor 不参与计数
+	CountExecutionTickets(ctx context.Context, arg CountExecutionTicketsParams) (int64, error)
 	CountMessagesByUser(ctx context.Context, arg CountMessagesByUserParams) (int64, error)
 	CountQueries(ctx context.Context) (int64, error)
 	CountRuleHitsByLevel(ctx context.Context, arg CountRuleHitsByLevelParams) ([]CountRuleHitsByLevelRow, error)
@@ -129,6 +131,8 @@ type Querier interface {
 	ListCommentsByTicket(ctx context.Context, ticketID int64) ([]MmComment, error)
 	ListCrons(ctx context.Context, arg ListCronsParams) ([]MmCron, error)
 	ListEdges(ctx context.Context, arg ListEdgesParams) ([]MmEdge, error)
+	// status 由调用方固定为 LGTM；reviewer_id 传 0 表示不限审核人；scheduled 传 1 只看已预约
+	ListExecutionTickets(ctx context.Context, arg ListExecutionTicketsParams) ([]MmTicket, error)
 	ListGlossaries(ctx context.Context, arg ListGlossariesParams) ([]MmGlossary, error)
 	ListGroups(ctx context.Context, arg ListGroupsParams) ([]MmGroup, error)
 	ListLogs(ctx context.Context, arg ListLogsParams) ([]MmLog, error)

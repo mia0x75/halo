@@ -6,9 +6,10 @@ package domain
 type CronStatus string
 
 const (
-	CronStatusPending CronStatus = "P"
-	CronStatusSuccess CronStatus = "S"
-	CronStatusFailure CronStatus = "F"
+	CronStatusPending   CronStatus = "P"
+	CronStatusSuccess   CronStatus = "S"
+	CronStatusFailure   CronStatus = "F"
+	CronStatusCancelled CronStatus = "C"
 )
 
 // Cron is a row of mm_crons.
