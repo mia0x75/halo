@@ -11,6 +11,8 @@ export interface TicketDetailPageProps {
   onEdit?: () => void
   /** 当前登录用户，用于判断能否审核 */
   viewerUUID?: string
+  /** 当前登录用户是否管理员：管理员可代为执行 */
+  viewerIsAdmin?: boolean
   /** 驳回工单：走独立页面填写原因 */
   onReject?: (uuid: string) => void
 }
@@ -21,6 +23,7 @@ export function TicketDetailPage({
   onBack,
   onEdit,
   viewerUUID,
+  viewerIsAdmin,
   onReject,
 }: TicketDetailPageProps) {
   return (
@@ -35,7 +38,13 @@ export function TicketDetailPage({
           </Button>
         }
       />
-      <TicketDetailView uuid={uuid} onEdit={onEdit} viewerUUID={viewerUUID} onReject={onReject} />
+      <TicketDetailView
+        uuid={uuid}
+        onEdit={onEdit}
+        viewerUUID={viewerUUID}
+        viewerIsAdmin={viewerIsAdmin}
+        onReject={onReject}
+      />
     </>
   )
 }

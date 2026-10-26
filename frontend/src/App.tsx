@@ -7,6 +7,7 @@ import { CronCreatePage } from "@/pages/cron-create-page"
 import { CronsPage } from "@/pages/crons-page"
 import { ClustersPage } from "@/pages/clusters-page"
 import { DashboardPage } from "@/pages/dashboard-page"
+import { ExecutionPlanPage } from "@/pages/execution-plan-page"
 import { LogsPage } from "@/pages/logs-page"
 import { MessagesPage } from "@/pages/messages-page"
 import { SettingsPage, type SettingsTab } from "@/pages/settings-page"
@@ -26,6 +27,7 @@ import { LoginPage } from "@/pages/login-page"
 import { WelcomePage } from "@/pages/welcome-page"
 import { useSession } from "@/hooks/use-session"
 import { clearToken } from "@/lib/api/session"
+import { isAdmin } from "@/lib/api/roles"
 import { fetchSetupStatus } from "@/lib/api/setup"
 
 type View =
@@ -298,6 +300,7 @@ export default function App() {
           onBack={() => setView({ kind: "nav", key: page })}
           onEdit={() => setView({ kind: "ticket-edit", uuid: view.uuid, from: view.from })}
           viewerUUID={session.user.UUID}
+          viewerIsAdmin={isAdmin(session.user.Roles)}
           onReject={(uuid) => setView({ kind: "ticket-reject", uuid, from: view.from })}
         />
       </AppShell>
@@ -351,6 +354,9 @@ export default function App() {
           mode="review"
           onOpenTicket={(uuid) => openTicket(uuid, "pending-review")}
         />
+      ) : null}
+      {page === "execution" ? (
+        <ExecutionPlanPage onOpenTicket={(uuid) => openTicket(uuid, "execution")} />
       ) : null}
       {page === "crons" ? (
         <CronsPage onCreate={() => setView({ kind: "cron-create" })} />

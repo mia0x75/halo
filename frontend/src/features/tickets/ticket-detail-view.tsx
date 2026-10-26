@@ -1,5 +1,11 @@
-import { useMemo, useState } from "react"
-import { IconCheck, IconMessagePlus, IconX } from "@tabler/icons-react"
+import { useEffect, useMemo, useState } from "react"
+import {
+  IconCalendarTime,
+  IconCheck,
+  IconMessagePlus,
+  IconPlayerPlay,
+  IconX,
+} from "@tabler/icons-react"
 
 import {
   AlertDialog,
@@ -13,6 +19,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { StatusBadge } from "@/components/shared/status-badge"
 import { BlockNote, InlineNote } from "@/components/shared/status-note"
 import { isInlineNote } from "@/lib/status-note"
@@ -21,8 +28,11 @@ import { graphqlRequest } from "@/lib/api/client"
 import { notifyDataChanged } from "@/lib/api/data-events"
 import { formatUnix } from "@/lib/api/mappers"
 import {
+  CANCEL_CRON_MUTATION,
   CREATE_COMMENT_MUTATION,
+  EXECUTE_TICKET_MUTATION,
   REVIEW_TICKET_MUTATION,
+  SCHEDULE_TICKET_MUTATION,
   TICKET_DETAIL_QUERY,
   type CommentNode,
   type StatementNode,
@@ -37,6 +47,8 @@ export interface TicketDetailViewProps {
   onEdit?: () => void
   /** 当前登录用户，用于判断能否审核 */
   viewerUUID?: string
+  /** 当前登录用户是否管理员：管理员可代为执行 */
+  viewerIsAdmin?: boolean
   /** 驳回工单：需要填写原因，走独立页面 */
   onReject?: (uuid: string) => void
 }
@@ -68,6 +80,7 @@ interface TicketDetail {
   Cluster: { UUID: string; Alias: string; Host: string; IP: string; Port: number; Type: string; Group: string | null }
   User: { UUID: string; Name: string | null; Email: string }
   Reviewer: { UUID: string; Name: string | null }
+  Cron: { UUID: string; Name: string; NextRun: string | null; Status: string } | null
   Statements: { edges: { node: StatementNode }[] }
   Comments: { edges: { node: CommentNode }[] } | null
 }
@@ -95,6 +108,7 @@ export function TicketDetailView({
   uuid,
   onEdit,
   viewerUUID,
+  viewerIsAdmin,
   onReject,
 }: TicketDetailViewProps) {
   const [tab, setTab] = useState<"statements" | "comments">("statements")
@@ -104,6 +118,14 @@ export function TicketDetailView({
   const [comment, setComment] = useState("")
   const [commentBusy, setCommentBusy] = useState(false)
   const [commentError, setCommentError] = useState<string | null>(null)
+  const [executing, setExecuting] = useState(false)
+  const [scheduling, setScheduling] = useState(false)
+  const [scheduleAt, setScheduleAt] = useState("")
+  const [scheduleMin, setScheduleMin] = useState("")
+  const [cancelling, setCancelling] = useState(false)
+  const [execBusy, setExecBusy] = useState(false)
+  const [execNotice, setExecNotice] = useState<string | null>(null)
+  const [execError, setExecError] = useState<string | null>(null)
 
   const detail = useGraphQL<{ ticket: TicketDetail | null }, { id: string }>(
     TICKET_DETAIL_QUERY,
@@ -124,6 +146,75 @@ export function TicketDetailView({
   const reviewErrorInline = reviewError ? isInlineNote(reviewError) : false
   const isReviewer = Boolean(viewerUUID && ticket && ticket.Reviewer?.UUID === viewerUUID)
   const canReview = ticket?.Status === 4 && isReviewer
+  // 执行权与后端一致：LGTM 工单，审核人本人或管理员
+  const canExecute = ticket?.Status === 6 && (isReviewer || Boolean(viewerIsAdmin))
+
+  const runExecution = async (
+    mutate: () => Promise<unknown>,
+    notice: string,
+    done: () => void,
+  ) => {
+    setExecBusy(true)
+    setExecError(null)
+    setExecNotice(null)
+    try {
+      await mutate()
+      done()
+      setExecNotice(notice)
+      detail.refetch()
+      notifyDataChanged("tickets")
+    } catch (cause) {
+      setExecError(cause instanceof Error ? cause.message : String(cause))
+    } finally {
+      setExecBusy(false)
+    }
+  }
+
+  useEffect(() => {
+    if (scheduling && !scheduleAt) {
+      // 打开弹窗时给一个默认的最早可选时间，避免误选过去的时间。
+      const min = localInputValue(Date.now() + 60_000)
+      setScheduleMin(min)
+      setScheduleAt(min)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scheduling])
+
+  const executeNow = () =>
+    runExecution(
+      () => graphqlRequest(EXECUTE_TICKET_MUTATION, { id: ticket?.UUID ?? "" }, getToken()),
+      "执行已提交，等待调度器执行，稍后刷新查看结果。",
+      () => setExecuting(false),
+    )
+
+  const schedule = () => {
+    if (scheduleAt && !isFutureLocalTime(scheduleAt)) {
+      setScheduleAt("")
+      setScheduling(false)
+      setExecError("预约时间必须晚于当前时间。")
+      return
+    }
+    void runExecution(
+      () =>
+        graphqlRequest(
+          SCHEDULE_TICKET_MUTATION,
+          { input: { TicketUUID: ticket?.UUID ?? "", Schedule: toScheduleParam(scheduleAt) } },
+          getToken(),
+        ),
+      `预约成功，计划执行时间 ${scheduleAt.replace("T", " ")}。`,
+      () => {
+        setScheduling(false)
+        setScheduleAt("")
+      },
+    )
+  }
+
+  const cancelSchedule = () =>
+    runExecution(
+      () => graphqlRequest(CANCEL_CRON_MUTATION, { id: ticket?.Cron?.UUID ?? "" }, getToken()),
+      "已取消预约，工单回到待上线执行。",
+      () => setCancelling(false),
+    )
 
   const approve = async () => {
     if (!ticket) return
@@ -216,12 +307,36 @@ export function TicketDetailView({
               ) : null}
             </>
           ) : null}
+          {canExecute ? (
+            ticket.Cron ? (
+              <>
+                <Badge variant="info">已预约 {formatCronTime(ticket.Cron.NextRun)}</Badge>
+                <Button variant="outline" size="sm" onClick={() => setCancelling(true)}>
+                  取消预约
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button size="sm" onClick={() => setExecuting(true)}>
+                  <IconPlayerPlay size={16} stroke={1.5} />
+                  立即执行
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setScheduling(true)}>
+                  <IconCalendarTime size={16} stroke={1.5} />
+                  预约执行
+                </Button>
+              </>
+            )
+          ) : null}
+          {execNotice ? <InlineNote tone="success">{execNotice}</InlineNote> : null}
+          {execError && isInlineNote(execError) ? <InlineNote>{execError}</InlineNote> : null}
           {reviewError && reviewErrorInline ? (
             <InlineNote className="ml-1">{reviewError}</InlineNote>
           ) : null}
         </div>
       </div>
       {reviewError && !reviewErrorInline ? <BlockNote>{reviewError}</BlockNote> : null}
+      {execError && !isInlineNote(execError) ? <BlockNote>{execError}</BlockNote> : null}
 
       <div className="rounded-lg border border-border bg-card shadow-xs">
         <div className="flex gap-4 border-b border-border px-5 pt-3">
@@ -351,8 +466,121 @@ export function TicketDetailView({
           </div>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={executing} onOpenChange={setExecuting}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-base font-medium text-strong">
+              立即执行
+            </AlertDialogTitle>
+            <AlertDialogDescription className="mt-1 text-sm text-muted-foreground">
+              工单将提交给调度器尽快执行，执行结果稍后刷新查看。确认执行？
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="mt-5 flex justify-end gap-2">
+            <AlertDialogCancel asChild>
+              <Button variant="outline">取消</Button>
+            </AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button disabled={execBusy} onClick={() => void executeNow()}>
+                确认执行
+              </Button>
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={scheduling}
+        onOpenChange={(open) => {
+          setScheduling(open)
+          if (!open) setScheduleAt("")
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-base font-medium text-strong">
+              预约执行
+            </AlertDialogTitle>
+            <AlertDialogDescription className="mt-1 text-sm text-muted-foreground">
+              到点后由调度器自动执行，执行前可以取消预约。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="mt-4 flex flex-col gap-1.5">
+            <Label htmlFor="ticket-schedule-at">执行时间</Label>
+            <Input
+              id="ticket-schedule-at"
+              type="datetime-local"
+              value={scheduleAt}
+              min={scheduleMin}
+              onChange={(event) => setScheduleAt(event.target.value)}
+            />
+          </div>
+          <div className="mt-5 flex justify-end gap-2">
+            <AlertDialogCancel asChild>
+              <Button variant="outline">取消</Button>
+            </AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button disabled={execBusy || !scheduleAt} onClick={() => schedule()}>
+                确认预约
+              </Button>
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={cancelling} onOpenChange={setCancelling}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-base font-medium text-strong">
+              取消预约
+            </AlertDialogTitle>
+            <AlertDialogDescription className="mt-1 text-sm text-muted-foreground">
+              取消后工单回到待上线执行，可以重新预约或立即执行。确认取消？
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="mt-5 flex justify-end gap-2">
+            <AlertDialogCancel asChild>
+              <Button variant="outline">保留</Button>
+            </AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button variant="danger" disabled={execBusy} onClick={() => void cancelSchedule()}>
+                确认取消
+              </Button>
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
+}
+
+/** datetime-local 的墙上时间转成后端约定的本地时间串。 */
+function toScheduleParam(value: string): string {
+  return value.length === 16 ? `${value}:00` : value
+}
+
+function isFutureLocalTime(value: string): boolean {
+  const when = new Date(toScheduleParam(value)).getTime()
+  return Number.isFinite(when) && when > Date.now()
+}
+
+/** datetime-local 输入框的本地时间值（不带时区偏移）。 */
+function localInputValue(ms: number): string {
+  const date = new Date(ms)
+  const pad = (input: number) => input.toString().padStart(2, "0")
+  return (
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+    `T${pad(date.getHours())}:${pad(date.getMinutes())}`
+  )
+}
+
+/** 预约时间展示：接口给的是 RFC3339 串，按本地时区格式化。 */
+function formatCronTime(nextRun: string | null): string {
+  if (!nextRun) return "-"
+  const ms = Date.parse(nextRun)
+  if (!Number.isFinite(ms)) return nextRun
+  return formatUnix(ms / 1000)
 }
 
 /** 接口的语句节点转成页面视图。 */

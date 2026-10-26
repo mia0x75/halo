@@ -233,6 +233,51 @@ export interface TicketConnectionNode {
   }
 }
 
+/** 执行计划列表的工单节点：比通用节点多一个预约信息。 */
+export interface ExecutionTicketNode extends TicketNode {
+  Cron: { UUID: string; NextRun: string | null } | null
+}
+
+export interface ExecutionTicketConnectionNode {
+  totalCount: number
+  edges: { cursor: string; node: ExecutionTicketNode }[]
+  pageInfo: {
+    hasNextPage: boolean
+    hasPreviousPage: boolean
+    startCursor: string
+    endCursor: string
+  }
+}
+
+export const EXECUTION_TICKETS_QUERY = `
+  query ExecutionTickets($first: Int, $after: String, $scheduled: Boolean) {
+    executionTickets(first: $first, after: $after, scheduled: $scheduled) {
+      totalCount
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      edges {
+        cursor
+        node {
+          UUID
+          TicketID
+          Database
+          Subject
+          Status
+          CreateAt
+          User { UUID Name }
+          Reviewer { UUID Name }
+          Cluster { UUID Alias Host IP Port Type Group }
+          Cron { UUID NextRun }
+        }
+      }
+    }
+  }
+`
+
 export const TICKETS_QUERY = `
   query Tickets($first: Int, $after: String, $status: UInt8, $keyword: String) {
     tickets(first: $first, after: $after, status: $status, keyword: $keyword) {
@@ -488,6 +533,7 @@ export const TICKET_DETAIL_QUERY = `
       Cluster { UUID Alias Host IP Port Type Group }
       User { UUID Name Email }
       Reviewer { UUID Name }
+      Cron { UUID Name NextRun Status }
       Statements(first: 20) {
         edges { node { UUID Sequence Content TypeDesc Status Report } }
       }
@@ -495,6 +541,29 @@ export const TICKET_DETAIL_QUERY = `
         edges { node { UUID Content CreateAt User { UUID Name } } }
       }
     }
+  }
+`
+
+export const EXECUTE_TICKET_MUTATION = `
+  mutation ExecuteTicket($id: ID!) {
+    executeTicket(id: $id)
+  }
+`
+
+export const SCHEDULE_TICKET_MUTATION = `
+  mutation ScheduleTicket($input: ScheduleTicketInput!) {
+    scheduleTicket(input: $input) {
+      UUID
+      Name
+      NextRun
+      Status
+    }
+  }
+`
+
+export const CANCEL_CRON_MUTATION = `
+  mutation CancelCron($id: ID!) {
+    cancelCron(id: $id)
   }
 `
 

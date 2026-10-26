@@ -8,6 +8,7 @@ import {
   IconInbox,
   IconLayoutDashboard,
   IconListCheck,
+  IconRocket,
   IconServer,
   IconShieldLock,
   IconShieldCheck,
@@ -22,6 +23,7 @@ export type NavKey =
   | "my-tickets"
   | "pending-review"
   | "tickets"
+  | "execution"
   | "crons"
   | "clusters"
   | "databases"
@@ -60,6 +62,7 @@ export const navSections: NavSection[] = [
     title: "变更管理",
     items: [
       { key: "tickets", label: "工单列表", icon: IconFileText },
+      { key: "execution", label: "执行计划", icon: IconRocket },
       { key: "crons", label: "定时任务", icon: IconCalendarTime },
     ],
   },
