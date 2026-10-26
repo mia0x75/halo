@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { DateTimePicker } from "@/components/ui/date-time-picker"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { StatusBadge } from "@/components/shared/status-badge"
@@ -38,6 +39,7 @@ import {
   type StatementNode,
 } from "@/lib/api/queries"
 import { getToken } from "@/lib/api/session"
+import { scheduleMinValue } from "@/lib/datetime"
 import { parseReport, reportLevelLabel } from "@/features/tickets/ticket-report"
 import type { TicketStatus } from "@/lib/model"
 
@@ -172,8 +174,8 @@ export function TicketDetailView({
 
   useEffect(() => {
     if (scheduling && !scheduleAt) {
-      // 打开弹窗时给一个默认的最早可选时间，避免误选过去的时间。
-      const min = localInputValue(Date.now() + 60_000)
+      // 打开弹窗时默认选中最早可选时间（now+1 分钟）：预约只允许未来。
+      const min = scheduleMinValue()
       setScheduleMin(min)
       setScheduleAt(min)
     }
@@ -507,14 +509,8 @@ export function TicketDetailView({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="mt-4 flex flex-col gap-1.5">
-            <Label htmlFor="ticket-schedule-at">执行时间</Label>
-            <Input
-              id="ticket-schedule-at"
-              type="datetime-local"
-              value={scheduleAt}
-              min={scheduleMin}
-              onChange={(event) => setScheduleAt(event.target.value)}
-            />
+            <Label>执行时间</Label>
+            <DateTimePicker value={scheduleAt} min={scheduleMin} onChange={setScheduleAt} />
           </div>
           <div className="mt-5 flex justify-end gap-2">
             <AlertDialogCancel asChild>
@@ -570,16 +566,6 @@ function isFutureLocalTime(value: string): boolean {
   const [hh, mm, ss = "0"] = timePart.split(":")
   const when = new Date(y, m - 1, d, Number(hh), Number(mm), Number(ss)).getTime()
   return Number.isFinite(when) && when > Date.now()
-}
-
-/** datetime-local 输入框的本地时间值（不带时区偏移）。 */
-function localInputValue(ms: number): string {
-  const date = new Date(ms)
-  const pad = (input: number) => input.toString().padStart(2, "0")
-  return (
-    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
-    `T${pad(date.getHours())}:${pad(date.getMinutes())}`
-  )
 }
 
 /** 预约时间展示：接口给的是 RFC3339 串，按本地时区格式化。 */
