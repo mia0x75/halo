@@ -104,6 +104,29 @@ func (f *fakeTicketRepo) ListByReviewer(_ context.Context, _ uint) ([]*domain.Ti
 	return f.reviewer, nil
 }
 
+func (f *fakeTicketRepo) ListExecutionTickets(_ context.Context, reviewerID uint, scheduledOnly bool, _ int64, _ int) ([]*domain.Ticket, error) {
+	out := make([]*domain.Ticket, 0, len(f.byID))
+	for _, t := range f.byID {
+		if t.Status != domain.TicketStatusLgtm {
+			continue
+		}
+		if reviewerID != 0 && t.ReviewerID != reviewerID {
+			continue
+		}
+		if scheduledOnly && t.CronID == nil {
+			continue
+		}
+		cp := *t
+		out = append(out, &cp)
+	}
+	return out, nil
+}
+
+func (f *fakeTicketRepo) CountExecutionTickets(ctx context.Context, reviewerID uint, scheduledOnly bool) (int64, error) {
+	list, err := f.ListExecutionTickets(ctx, reviewerID, scheduledOnly, 0, 0)
+	return int64(len(list)), err
+}
+
 func (f *fakeTicketRepo) GetByCronID(_ context.Context, _ uint) (*domain.Ticket, error) {
 	return nil, domain.ErrNotFound
 }

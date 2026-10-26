@@ -146,6 +146,19 @@ func (s *TicketService) CountFiltered(ctx context.Context, filter TicketFilter) 
 	return s.tickets.CountFiltered(ctx, filter.Status, pattern)
 }
 
+// ListExecutionTickets returns the LGTM tickets the user may execute. A zero
+// reviewerID means every reviewer (the admin view); scheduledOnly keeps the
+// tickets that already have a scheduled cron.
+func (s *TicketService) ListExecutionTickets(ctx context.Context, reviewerID uint, scheduledOnly bool, cursor int64, limit int) ([]*domain.Ticket, error) {
+	return s.tickets.ListExecutionTickets(ctx, reviewerID, scheduledOnly, cursor, limit)
+}
+
+// CountExecutionTickets counts the LGTM tickets matching the same filter as
+// ListExecutionTickets, independent of the page cursor.
+func (s *TicketService) CountExecutionTickets(ctx context.Context, reviewerID uint, scheduledOnly bool) (int64, error) {
+	return s.tickets.CountExecutionTickets(ctx, reviewerID, scheduledOnly)
+}
+
 // ListPendingReviews returns the tickets waiting for the user's manual
 // review. Only the tickets that already passed the automated review are in
 // the queue.
@@ -388,6 +401,20 @@ func (s *TicketService) UpdateCron(ctx context.Context, ticketUUID string, cronI
 			return err
 		}
 		tk.CronID = &cronID
+		tk.Version++
+		return repos.Ticket.Update(ctx, tk)
+	})
+}
+
+// ClearCron detaches a cancelled schedule from its ticket. The status is left
+// untouched so the ticket returns to the executable LGTM queue.
+func (s *TicketService) ClearCron(ctx context.Context, ticketUUID string) error {
+	return s.tx.WithTx(ctx, func(ctx context.Context, repos Repos) error {
+		tk, err := repos.Ticket.GetByUUID(ctx, ticketUUID)
+		if err != nil {
+			return err
+		}
+		tk.CronID = nil
 		tk.Version++
 		return repos.Ticket.Update(ctx, tk)
 	})

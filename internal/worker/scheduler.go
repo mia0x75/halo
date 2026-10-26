@@ -146,6 +146,12 @@ func (s *Scheduler) Cancel(uuid string) error {
 		return fmt.Errorf("Task not found")
 	}
 
+	// The stored row has to leave the schedulable set, otherwise the periodic
+	// reload picks the cancelled schedule up again after a restart.
+	task.Lock()
+	task.Status = statusCancelled
+	task.Unlock()
+
 	s.persist(task)
 	s.Lock()
 	defer s.Unlock()
